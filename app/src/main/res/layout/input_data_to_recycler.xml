@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+<androidx.cardview.widget.CardView
+
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardElevation="50dp"
+    app:cardCornerRadius="4dp"
+    app:cardBackgroundColor="#D6DADF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/purple_700">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:text="LONG PRESS TO DEPOSIT"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:paddingTop="2dp"
+                android:textColor="@color/black"
+                android:layout_gravity="end"
+
+                android:background="@drawable/green_color_bg"
+                android:id="@+id/to_deposit_tv"/>
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:weightSum="4"
+        android:background="#D6DADF"
+        android:id="@+id/hardcode_layout">
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+
+            android:textColor="@color/black"
+            android:textStyle="bold"
+
+            android:textSize="14dp"
+            android:id="@+id/hardcoded_p1_tv"/>
+
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="14dp"
+            android:id="@+id/hardcoded_p2_tv"/>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="14dp"
+            android:id="@+id/hardcoded_p3_tv"/>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="14dp"
+            android:id="@+id/hardcoded_p4_tv"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp"
+        android:id="@+id/input_layout"
+        android:weightSum="4"
+        android:background="#D6DADF">
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/white_detailsbg"
+            android:textStyle="bold"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="2dp"
+            android:singleLine="true"
+            android:maxLength="3"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:inputType="numberDecimal"
+            android:id="@+id/input_p1_et">
+            <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
+        </EditText>
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/white_detailsbg"
+            android:textStyle="bold"
+            android:maxLength="3"
+            android:singleLine="true"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="2dp"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:inputType="numberDecimal"
+            android:id="@+id/input_p2_et"/>
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/white_detailsbg"
+            android:textStyle="bold"
+            android:maxLength="3"
+            android:singleLine="true"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="2dp"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:inputType="numberDecimal"
+            android:id="@+id/input_p3_et"/>
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/white_detailsbg"
+            android:textStyle="bold"
+            android:maxLength="3"
+            android:layout_marginRight="2dp"
+            android:layout_marginLeft="2dp"
+            android:singleLine="true"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:inputType="numberDecimal"
+            android:id="@+id/input_p4_et"/>
+    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/suggestion_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_outline_while_bg"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="20">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                android:text="DAYS REQUIRED TO WORK ="
+                android:textColor="@color/purple_700"
+                android:layout_gravity="center_vertical"
+                android:textSize="11sp"
+                android:id="@+id/only_used_while_updating"
+                />
+
+            <TextView
+                android:id="@+id/no_of_days"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:layout_gravity="center_vertical"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/advance_or_balance_amount_warring_tv"
+                android:layout_width="0dp"
+                android:background="@drawable/border_outline_while_bg"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/this_week_work_amount_layout"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/border_outline_while_bg"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="15">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:text="THIS WEEK WORK AMOUNT ="
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/purple_700"
+                android:textSize="11sp"
+
+                />
+
+            <TextView
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="#0DAF07"
+                android:textStyle="bold"
+                android:textSize="20dp"
+                android:id="@+id/work_amount_tv"/>
+            <EditText
+                android:layout_weight="5"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="1dp"
+                android:background="@drawable/white_detailsbg"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:textAlignment="center"
+                android:maxLength="9"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                android:inputType="numberDecimal"
+                android:id="@+id/wages_et"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/date_mic_chronometer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="21"
+            android:background="@drawable/border_outline_while_bg">
+
+            <TextView
+
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+
+
+                android:background="@drawable/ic_round_edit_calendar_20"/>
+
+            <TextView
+                android:id="@+id/input_time_tv"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0"
+                android:textSize="0dp" />
+            <TextView
+                android:layout_weight="10"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:background="@drawable/white_detailsbg"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:paddingTop="8dp"
+                android:text="20-12-2022"
+                android:singleLine="true"
+                android:layout_marginLeft="10dp"
+                android:textColor="@color/black"
+                android:textSize="18dp"
+                android:id="@+id/input_date_tv"/>
+
+            <Chronometer
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="10sp"
+                android:textColor="@color/black"
+                android:id="@+id/chronometer"
+                 android:layout_marginLeft="40dp"/>
+
+            <TextView
+                android:id="@+id/mic_tv"
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/black_sharp_mic_24"/>
+            <TextView
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+               android:layout_marginRight="2dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_black_sharp_tick_done_20"
+                android:id="@+id/save_audio_tv"/>
+
+        </LinearLayout>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="WRITE REMARKS"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/enter_description_et"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="4dp"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="4">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+
+                android:text="X"
+                android:textSize="15dp"
+                android:textColor="#FF0000"
+                android:textAlignment="center"
+                android:background="@drawable/graycolor_bg"
+                android:id="@+id/cancel_btn"/>
+            <Button
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:text="SAVE"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:background="@drawable/green_color_bg"
+                android:id="@+id/save_btn"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+</ScrollView>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.ActiveMFragment"
+    android:orientation="vertical"
+
+    android:background="#D6DADF">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        android:background="#FFFFFF">
+        <TextView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="#FF0000"
+            android:textSize="13sp"
+
+            android:id="@+id/active_m_advance"
+            />
+        <TextView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/green"
+            android:textSize="13sp"
+
+            android:id="@+id/active_m_balance"
+            />
+    </LinearLayout>
+
+   <ScrollView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginBottom="55dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:orientation="vertical">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle_active_mestre"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            tools:listitem="@layout/single_person_profile">
+        </androidx.recyclerview.widget.RecyclerView>
+        <ProgressBar
+            android:id="@+id/progress_bar_active_m"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_gravity="center"
+            android:indeterminate="true"/>
+    </LinearLayout>
+   </ScrollView>
+
+</LinearLayout>
+<!--android:background="#121212" -->
+<!--bad performance after adding swipetorefresh-->
+<!--<androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:id="@+id/pull_to_refresh"-->
+<!--android:layout_marginBottom="55dp">-->
+<!--<ScrollView-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content">-->
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:padding="4dp"-->
+<!--        android:orientation="vertical">-->
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:id="@+id/recycle_active_mestre"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_marginLeft="2dp"-->
+<!--            android:layout_marginRight="2dp"-->
+<!--            tools:listitem="@layout/single_person_profile">-->
+<!--        </androidx.recyclerview.widget.RecyclerView>-->
+<!--        <ProgressBar-->
+<!--            android:id="@+id/progress_bar_active_m"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:indeterminate="true"/>-->
+<!--    </LinearLayout>-->
+<!--</ScrollView>-->
+<!--</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->

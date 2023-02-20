@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".activity.CustomizeLayoutOrDepositAmount"
+    android:background="#D6DADF"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DEPOSIT"
+        android:layout_gravity="center_horizontal"
+        android:textColor="#1AA30A"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"
+        android:textSize="15sp"
+        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="15"
+            android:background="@drawable/border_outline_while_bg">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="8"
+                android:text="ENTER DEPOSIT AMOUNT ="
+                android:textColor="#1AA30A"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:textSize="12dp"
+                android:id="@+id/custom_deposit_amount_tv"/>
+
+
+            <EditText
+                android:layout_weight="7"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="1dp"
+                android:background="@drawable/white_detailsbg"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:textAlignment="center"
+                android:textColor="#0DAF07"
+                android:maxLength="9"
+                android:textSize="20dp"
+                android:inputType="number"
+                android:id="@+id/custom_deposit_et">
+                <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
+            </EditText>
+        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/date_mic_chronometer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        android:weightSum="21"
+        android:background="@drawable/border_outline_while_bg">
+
+        <TextView
+
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+
+            android:background="@drawable/ic_round_edit_calendar_20"/>
+        <TextView
+            android:id="@+id/custom_time_tv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:textSize="0dp" />
+        <TextView
+            android:layout_weight="10"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:background="@drawable/white_detailsbg"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:paddingTop="5dp"
+            android:text="20-12-2022"
+            android:singleLine="true"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:id="@+id/custom_date_tv"/>
+        <Chronometer
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="10dp"
+            android:textColor="@color/black"
+            android:id="@+id/custom_chronometer"
+            android:layout_marginLeft="40dp"/>
+        <TextView
+            android:id="@+id/custom_mic_icon_tv"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@drawable/black_sharp_mic_24" />
+        <TextView
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="2dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_black_sharp_tick_done_20"
+            android:id="@+id/custom_save_audio_icon_tv"/>
+
+
+    </LinearLayout>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="WRITE REMARKS"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/custom_description_et"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="4dp"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:weightSum="4">
+            <Button
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+
+                android:text="X"
+                android:textSize="15dp"
+                android:textColor="#FF0000"
+                android:textAlignment="center"
+                android:background="@drawable/graycolor_bg"
+                android:id="@+id/custom_cancel_btn"/>
+            <Button
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:text="SAVE"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:background="@drawable/green_color_bg"
+                android:id="@+id/custom_save_btn"/>
+        </LinearLayout>
+</LinearLayout>
+</ScrollView>

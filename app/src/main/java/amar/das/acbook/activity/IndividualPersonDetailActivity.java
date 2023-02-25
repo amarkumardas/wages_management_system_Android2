@@ -1238,8 +1238,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         }
 
                         String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
-                        String data[][]= {{"amar","kumar","amar","kumar das"},{"amar","kumar","amar","kumar"},{"amar","kumar","amar","kumar"},{"amar","kumar","amar","kumar"},
-                                         {"amar","kumar","amar","kumar"},{"amar","kumar","amar","kumar"},{"amar","kumar","amar","kumar"},{"amar","kumar","amar","kumar"}};
+                        String data[][]= {{"25-02-2023","999999999","9999","TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
+                                {"25-02-2023","150000","6","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
+                                {"25-02-2023","1500","6","TAKEN fifteen hundred only and sis days work"},
+                                {"25-02-2023","999999999","6"," EN fifteen hundred only and sis days work "},
+                                {"25-02-2023","1000","6","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
+                                {"25-02-2023","5000","6","TAKEN one lakh fifty thousand only "},
+                                {"25-02-2023","500","6","five hundred"}};
                         makePdf.makeTable(header,data,new float[]{13f,15f,5f,67f} ,10 );
 
 

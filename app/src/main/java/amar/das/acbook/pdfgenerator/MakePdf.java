@@ -111,57 +111,87 @@ public class MakePdf{
             // draw headers
             myPaint.setColor(Color.rgb(53, 77, 203));//blue
             canvas.drawRect(4,y,myPageInfo.getPageWidth() - 4,y+rowHeight,myPaint); //headerHeight=rowHeight; is equal to header height
-
-             for (int i = 0; i < numColumns; i++) {
+            for (int i = 0; i < numColumns; i++) {
                 myPaint.setColor(Color.WHITE);
-                canvas.drawText(headers[i], x + adjustedWidthsOfEachColumn[i] / 2, y + rowHeight / 2+2, myPaint);
+                canvas.drawText(headers[i], x + adjustedWidthsOfEachColumn[i] / 2, y + rowHeight / 2+2, myPaint);//data
 
                  myPaint.setColor(Color.BLACK);
                  canvas.drawLine(x,y,x,y+rowHeight,myPaint);//verticle line
 
-                x += adjustedWidthsOfEachColumn[i] + myPaint.getStrokeWidth();
+                x += adjustedWidthsOfEachColumn[i] + myPaint.getStrokeWidth();//updating x to write
             }
-            y += rowHeight;
+
+            y += rowHeight;//updating y
 
             // draw data rows
-//            for (int i = 0; i < numRows; i++) {
-//                x = startX;
-//                float maxHeight = calculateMaxHeight(data[i], adjustedWidthsOfEachColumn, rowHeight, availableWidth);
-//                for (String cell : data[i]) {
-//                    String[] lines = breakTextIntoLines(cell, myPaint, adjustedWidthsOfEachColumn[i]);
-//                    float lineHeight = calculateLineHeight(lines, myPaint);
-//                    if (lineHeight > rowHeight) {
-//                        rowHeight = lineHeight;
-//                        maxHeight = Math.max(maxHeight, rowHeight);
+            for (int i = 0; i < numRows; i++) {
+                myPaint.setTextAlign(Paint.Align.CENTER);
+                x = startX;
+                float maxHeighColumnOfRow = calculateMaxHeight(data[i], adjustedWidthsOfEachColumn, rowHeight,myPaint);//for each row max height
+                System.out.println("--------------max height of first row: "+maxHeighColumnOfRow);
+                rowHeight=maxHeighColumnOfRow;//updating row height to print in middle
+                int j=0;
+                for (String columnData : data[i]) {//column data of row
+                    // canvas.drawLine(startX,y,x,y+maxHeighColumnOfRow,myPaint);//verticle line
+
+                    String[] totalLinesOfStringArray = breakTextIntoLines(columnData, myPaint, adjustedWidthsOfEachColumn[j]);//convert text: amar kumar das to [amar ku],[mar das]
+                    for (String s:totalLinesOfStringArray) {
+                       // System.out.println("*****"+s);
+                    }
+                    float totalLineHeight = calculateLineHeight(totalLinesOfStringArray, myPaint);
+                    System.out.println("***line height:"+totalLineHeight);
+
+//                    if (totalLineHeight > rowHeight) {//this is only to update rowheight so that in middle we can print text
+//                        System.out.println("-------executed is only to update rowheight");
+//                        rowHeight = totalLineHeight;
+//                        maxHeighColumnOfRow = Math.max(maxHeighColumnOfRow, rowHeight);//this will be same and not required i guess
 //                    }
-//                    for (String line : lines) {
-//                        if (y + maxHeight > pageHeight) {
-//                            // if the table goes beyond the bottom of the page, start a new page
-//
-//                            System.out.println("new page___________________________________________");
-//                            //canvas.finishPage(page);
-//                            myPdfDocument.finishPage(mypage);
-//
-//                            myPageInfo = new PdfDocument.PageInfo.Builder(defaultPageWidth, defaultPageHeight, 1).create();
-//
-//                            // page = pdfDocument.startPage(pageInfo);
-//                            mypage =  myPdfDocument.startPage(myPageInfo);
-//
-//                            //canvas = page.getCanvas();
-//                            canvas =  mypage.getCanvas();
-//                            y = startY;
-//                        }
-//                        if (x + adjustedWidthsOfEachColumn[i] > pageWidth) {
-//                            // if the cell goes beyond the right edge of the page, wrap the text to the next line
-//                            x = startX;
-//                            y += maxHeight;
-//                        }
-//                        canvas.drawText(line, x + adjustedWidthsOfEachColumn[i] / 2, y + rowHeight / 2, myPaint);
-//                        x += adjustedWidthsOfEachColumn[i] + myPaint.getStrokeWidth();
-//                    }
-//                }
-//                y += maxHeight;
-//              }
+
+                    if(adjustedWidthsOfEachColumn.length-1==j){//when column is last ie.description the start from left
+                        myPaint.setTextAlign(Paint.Align.LEFT);
+                    }
+
+                     Boolean allowYtoIncrement=false;
+                    for (String columnlines : totalLinesOfStringArray) {
+                        System.out.println("*****"+columnlines);
+                        if (y + maxHeighColumnOfRow > pageHeight) {
+                            // if the table goes beyond the bottom of the page, start a new page
+
+                            System.out.println("new page___________________________________________");
+                            //canvas.finishPage(page);
+                            myPdfDocument.finishPage(mypage);
+
+                            myPageInfo = new PdfDocument.PageInfo.Builder(defaultPageWidth, defaultPageHeight, 1).create();
+
+                            // page = pdfDocument.startPage(pageInfo);
+                            mypage =  myPdfDocument.startPage(myPageInfo);
+
+                            //canvas = page.getCanvas();
+                            canvas =  mypage.getCanvas();
+                            y = startY;
+                        }
+                        System.out.println("check: x:"+x+" weidth:"+adjustedWidthsOfEachColumn[j]+" x+width:"+(x + adjustedWidthsOfEachColumn[j])+" y:"+y+ " pagewidth:"+pageWidth);
+
+                        if (x + adjustedWidthsOfEachColumn[j] > pageWidth) {
+                            System.out.println("----greater then page weight");
+                            // if the columnData goes beyond the right edge of the page, wrap the text to the next columnlines
+                            x = startX;
+
+                            if (allowYtoIncrement) {
+                                y += calculateLineHeight(new String[]{"single line height"}, myPaint);
+                            }else{
+                                allowYtoIncrement=true;
+                            }
+                        }
+                        System.out.println("check: x:"+x+" weidth:"+adjustedWidthsOfEachColumn[j]+" x+width:"+(x + adjustedWidthsOfEachColumn[j])+" y:"+y+ " pagewidth:"+pageWidth);
+                        System.out.println("*****printed:"+columnlines);
+                        canvas.drawText(columnlines, x + adjustedWidthsOfEachColumn[j] / 2, y + rowHeight / 2, myPaint);
+                        x += adjustedWidthsOfEachColumn[j] + myPaint.getStrokeWidth();
+                    }
+                    j++;
+                }
+                y += maxHeighColumnOfRow;
+              }
 
             return true;
         } catch (Exception ex) {
@@ -201,11 +231,12 @@ public class MakePdf{
          So the adjusted widths for the columns would be approximately 111 pixels, 167 pixels, and 222 pixels, respectively, which should fit within the
          available width of 500 pixels.*/
     }
-    private float calculateMaxHeight(String[] cells, float[] adjustedWidths, float rowHeight, float availableWidth) {
+    private float calculateMaxHeight(String[] data, float[] adjustedWidths, float rowHeight, Paint myPaint) {
         float maxHeight = rowHeight;
-        for (int i = 0; i < cells.length; i++) {
-            String[] lines = breakTextIntoLines(cells[i], myPaint, adjustedWidths[i]);
-            float lineHeight = calculateLineHeight(lines, myPaint);
+        for (int i = 0; i < data.length; i++) {
+
+            String[] lines = breakTextIntoLines(data[i],  myPaint, adjustedWidths[i]);
+            float lineHeight = calculateLineHeight(lines,  myPaint);
             if (lineHeight > rowHeight) {
                 // If the height of the current cell is greater than the current row height,
                 // update the row height to match the height of the current cell.
@@ -214,9 +245,7 @@ public class MakePdf{
         }
         return maxHeight;
     }
-
-    // Helper method to break text into multiple lines to fit within the given width
-    private String[] breakTextIntoLines(String text, Paint paint, float maxWidth) {
+    private String[] breakTextIntoLines(String text, Paint paint, float maxWidth) {// Helper method to break text into multiple lines to fit within the given width
         if (text == null || text.isEmpty()) {
             return new String[]{""};
         }
@@ -225,16 +254,50 @@ public class MakePdf{
         int end = text.length();
         while (start < end) {
             int count = paint.breakText(text, start, end, true, maxWidth, null);
-            lines.add(text.substring(start, start + count));
+            lines.add(text.substring(start, start + count));//adding break sentence
             start += count;
         }
-        return lines.toArray(new String[0]);
+        return lines.toArray(new String[0]);//In this example, we create a new ArrayList called lines and add three strings to it using the add method. Then, we use the toArray method to convert the ArrayList to an array of strings. The argument new String[0] is passed to the toArray method to indicate the type of the resulting array. The size of the array is determined automatically based on the size of the ArrayList.
+
+        /**Paint.breakText() is used to determine where to break a text string into multiple lines in order to fit it within a specified width. This method takes a few parameters:
+
+         text: The text to measure.
+         start: The index of the first character to measure.
+         end: The index of the last character to measure.
+         measureForwards:If true, the method measures the text from the start of the string to the end. If false, it measures the text from the end of the string to the start.
+         maxWidth: The maximum width of the text.
+
+         The method returns the number of characters that fit within the specified width. This can be used to break the text into multiple lines, if necessary*/
     }
 
     // Helper method to calculate the height of a line of text
     private float calculateLineHeight(String[] lines, Paint paint) {
         Paint.FontMetrics metrics = paint.getFontMetrics();
         return (metrics.descent - metrics.ascent) * lines.length + metrics.leading * (lines.length - 1);
+        /**metrics.descent: This refers to the distance from the baseline to the bottom of the lowest descender in the font. In other words, it represents
+         * how far below the baseline the lowest point of a character can extend.
+
+         metrics.ascent: This refers to the distance from the baseline to the top of the highest ascender in the font. In other words, it represents
+         how far above the baseline the highest point of a character can extend.
+
+         (metrics.descent - metrics.ascent): This calculates the total height of a single line of text, by subtracting the ascent from the descent.
+
+         lines.length: This is the number of lines in the block of text.
+
+         (metrics.descent - metrics.ascent) * lines.length: This calculates the total height of all the lines in the block of text, by multiplying the
+         height of a single line by the number of lines.
+
+         metrics.leading: This refers to the distance between the baselines of consecutive lines of text. It's basically the extra space between lines that
+         makes text more readable.
+
+         (lines.length - 1): This calculates the number of gaps between lines (i.e., the number of times the leading distance is needed) by subtracting
+         1 from the number of lines.
+
+         metrics.leading * (lines.length - 1): This calculates the total height of all the gaps between lines, by multiplying the leading distance by the
+         number of gaps.
+
+         (metrics.descent - metrics.ascent) * lines.length + metrics.leading * (lines.length - 1): This adds together the total height of all the lines and
+         the total height of all the gaps to get the total height of the block of text.*/
     }
 
     public  String createFileToSavePdfDocumentAndReturnFilePath3(String externalFileDir,String fileName){

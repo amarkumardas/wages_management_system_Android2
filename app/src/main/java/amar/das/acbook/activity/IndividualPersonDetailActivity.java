@@ -1192,7 +1192,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         MakePdf makePdf = new MakePdf();
 
                         makePdf.createNewPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1);//created page 1 height weight
-                        makePdf.makeTopHeader1("RRD Construction Work", "9436018408", "7005422684", "rrdconstructionbench@gmail.com");//adding data to header
+                        makePdf.makeTopHeader1OrganizatioContact("RRD Construction Work", "9436018408", "7005422684", "rrdconstructionbench@gmail.com");//adding data to header
 
                         Cursor cursor = db.getData("SELECT "+db.COL_2_NAME+" , "+db.COL_3_BANKAC+" , "+db.COL_6_AADHAAR+" , "+db.COL_10_IMAGE+" FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
                         if (cursor != null) {
@@ -1229,7 +1229,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             }else {
                                 pdfSequenceNo=0;
                             }
-                            makePdf.makeSubHeader2ImageDetails(name, id,bankaccount, aadhaar, image, String.valueOf(pdfSequenceNo));//
+                            makePdf.makeSubHeader2ImageDetails(name, id,bankaccount, aadhaar, image, String.valueOf(pdfSequenceNo));
                             cursor.close();
 
                         } else {
@@ -1238,15 +1238,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         }
 
                         String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
-                        String data[][]= {{"25-02-2023","999999999","9999","TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
-                                {"25-02-2023","150000","6","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
+                        String data[][]= {{"25-02-2023","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
+                                {"25-02-202345678910","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
                                 {"25-02-2023","1500","6","TAKEN fifteen hundred only and sis days work"},
                                 {"25-02-2023","999999999","6"," EN fifteen hundred only and sis days work "},
-                                {"25-02-2023","1000","6","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
+                                {"25-02-2023","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
                                 {"25-02-2023","5000","6","TAKEN one lakh fifty thousand only "},
-                                {"25-02-2023","500","6","five hundred"}};
-                        makePdf.makeTable(header,data,new float[]{13f,15f,5f,67f} ,10 );
-
+                                {"25-02-2023","500","6","five hundred"},
+                                {"25-02-2023","50000","66","five hundred"},{"25-02-2023","1500","6","five hundred"},
+                                {"25-02-2023","500","6","five hundred"},{"25-02-2023","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
+                                };
+                        makePdf.makeTable(header,data,new float[]{12f,12f,5f,71} ,10 );//for 1 perfect value
+                       // makePdf.makeSubHeader2ImageDetails("amar", id,"asdfada", "wetrwert", null, String.valueOf(2666));//
 
                         makePdf.createdPageFinish2();
                         fileName = makePdf.createFileToSavePdfDocumentAndReturnFilePath3(getExternalFilesDir(null).toString(), generateFileName(id));//we have to update filename which is global static variable to view pdf using file path

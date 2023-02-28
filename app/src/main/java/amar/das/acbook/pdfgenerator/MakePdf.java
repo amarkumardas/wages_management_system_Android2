@@ -21,26 +21,40 @@ public class MakePdf{
     private PdfDocument.PageInfo myPageInfo;
     private Canvas canvas;
     private PdfDocument.Page mypage;
-    public static Integer defaultPageWidth=290,defaultPageHeight=500;
-    public static Integer keepTrackOfPageDataHeight=2;//IT KEEP TRACK TILL HOW MUCH height data is written SO THAT WE CAN MOVE TO NEXT PAGE IF PAGE IS FULL
+
+    private static final int sideGab=4;//gab between data and page
+    public static int defaultPageWidth=350,defaultPageHeight=600;
+    private static final int gabBetweenComponents=3;//gabBetweenComponents ensure gab between components
+    public static float currentHeightOfDataOfPage;//IT KEEP TRACK TILL HOW MUCH height data is written SO THAT WE CAN MOVE TO NEXT PAGE IF PAGE IS FULL.it is updated when all content is written
     public MakePdf(){
        myPdfDocument= new PdfDocument();
         myPaint= new Paint();
     }
-    public boolean makeTopHeader1(String headerOrgName, String contact, String whatsappNumber,String email){
+    public boolean makeTopHeader1OrganizatioContact(String headerOrgName, String contact, String whatsappNumber, String email){
         try {//automatically adjustable
+//            top=(int)currentHeightOfDataOfPage;//updating top for use of next component
+//            bottom=25;//updating bottom for use of next component
+//            float right = myPageInfo.getPageWidth() - sideGab; // Define the right margin of the rectangle.
+//            myPaint.setColor(Color.rgb(53, 77, 203));//blue
+//            canvas.drawRect(sideGab, top, right, bottom, myPaint); // Draw the rectangle on the canvas.
+//            below is improved version
+
+            float top=currentHeightOfDataOfPage;//updating top for use of next component
+            currentHeightOfDataOfPage=currentHeightOfDataOfPage+25;//it is height of rectangle so from top+25
             myPaint.setColor(Color.rgb(53, 77, 203));//blue
-            keepTrackOfPageDataHeight =myPageInfo.getPageHeight() - Math.abs(25-myPageInfo.getPageHeight());//height end value
-                                                                                                                  //make negative to positive number
-            canvas.drawRect(4, myPageInfo.getPageHeight()-Math.abs(2-myPageInfo.getPageHeight()), myPageInfo.getPageWidth() - 4,keepTrackOfPageDataHeight , myPaint);
+            canvas.drawRect(sideGab, top, myPageInfo.getPageWidth() - sideGab, currentHeightOfDataOfPage, myPaint); // Draw the rectangle on the canvas.
 
             myPaint.setTextAlign(Paint.Align.LEFT);//text will be in middle
             myPaint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));
-            myPaint.setTextSize(11.0f);
             myPaint.setColor(Color.WHITE);
-            canvas.drawText(headerOrgName,  8, myPageInfo.getPageHeight()-Math.abs(13-myPageInfo.getPageHeight()), myPaint);
+
+            myPaint.setTextSize(11.0f);
+            canvas.drawText(headerOrgName,  8,  top+12 , myPaint);
+
             myPaint.setTextSize(6.0f);
-            canvas.drawText("Contact: " + contact + ", Whatsapp: " + whatsappNumber + ", Email: " + email, 8, myPageInfo.getPageHeight()-Math.abs(21-myPageInfo.getPageHeight()), myPaint);
+            canvas.drawText("Contact: " + contact + ", Whatsapp: " + whatsappNumber + ", Email: " + email, 8,  top+20 , myPaint);//top+20 to dynamically get change
+
+            currentHeightOfDataOfPage=currentHeightOfDataOfPage+gabBetweenComponents;//Update the data height variable with the height of the rectangle that was just drawn.to use for next component
             return true;
         }catch (Exception ex){
             System.out.println("makeTopHeader1 method error****************************");
@@ -51,35 +65,42 @@ public class MakePdf{
     public boolean makeSubHeader2ImageDetails(String name, String id, String accountNo, String aadhaarNo, byte [] image, String invoiceNo ){
         try {//automatically adjustable
             myPaint.setTextAlign(Paint.Align.LEFT);
+            myPaint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));
             myPaint.setStyle(Paint.Style.STROKE);//myPaint.setStrokeWidth(2); another propertiees
             myPaint.setColor(Color.BLACK);
-            keepTrackOfPageDataHeight =myPageInfo.getPageHeight() - Math.abs(90-myPageInfo.getPageHeight());//top value is updated because all data will be store in this rectangla
-                                                                          //28 is value of top
-            canvas.drawRect(4, myPageInfo.getPageHeight()-Math.abs(28-myPageInfo.getPageHeight()), myPageInfo.getPageWidth() - 4,keepTrackOfPageDataHeight , myPaint);
+
+             float top=currentHeightOfDataOfPage;
+            currentHeightOfDataOfPage=currentHeightOfDataOfPage+64;//64 is height of rectangle it is from top+65
+            canvas.drawRect(sideGab, top, myPageInfo.getPageWidth() - sideGab, currentHeightOfDataOfPage, myPaint); // Draw the rectangle on the canvas.
 
             myPaint.setColor(Color.BLACK);
             myPaint.setStrokeWidth(0);
             myPaint.setStyle(Paint.Style.FILL);
+
             myPaint.setTextSize(7.0f);
-            canvas.drawText("NAME: " + name,80, myPageInfo.getPageHeight()-Math.abs(39-myPageInfo.getPageHeight()), myPaint);
+            canvas.drawText("NAME: " + name,80,  top+11 , myPaint);
 
-            //myPaint.setStrokeWidth(2); another propertiees
-            myPaint.setColor(Color.YELLOW);
-            canvas.drawRect(myPageInfo.getPageWidth() -Math.abs(80-myPageInfo.getPageWidth()),48, myPageInfo.getPageWidth() -Math.abs(150-myPageInfo.getPageWidth()) ,myPageInfo.getPageHeight() - Math.abs(55-myPageInfo.getPageHeight()) , myPaint);
-
+            //to add rectangle color
+            myPaint.setColor(Color.YELLOW);                        //5 is height of color rectamgle
+            canvas.drawRect(80,top+21,  80+30  , top+21+5 , myPaint);
             myPaint.setColor(Color.BLACK);
-            canvas.drawText("ID: " + id,80, myPageInfo.getPageHeight()-Math.abs(54-myPageInfo.getPageHeight()), myPaint);
-            canvas.drawText("A/C: " + accountNo+", AADHAAR: "+aadhaarNo,80, myPageInfo.getPageHeight()-Math.abs(69-myPageInfo.getPageHeight()), myPaint);
+
+            canvas.drawText("ID: " + id,80,  top+26 , myPaint);
+            canvas.drawText("A/C: " + accountNo+", AADHAAR: "+aadhaarNo,80,  top+41 , myPaint);
+
             myPaint.setTextSize(6.0f);
-            canvas.drawText( "CREATED ON: "+ ProjectUtility.get12hrCurrentTimeAndDate(),80, myPageInfo.getPageHeight()-Math.abs(84-myPageInfo.getPageHeight()), myPaint);
+            canvas.drawText( "CREATED ON: "+ ProjectUtility.get12hrCurrentTimeAndDate(),80,  top+56 , myPaint);
 
             myPaint.setTextAlign(Paint.Align.RIGHT);
-            canvas.drawText("INVOICE No. "+invoiceNo,  myPageInfo.getPageWidth()-7, myPageInfo.getPageHeight()-Math.abs(84-myPageInfo.getPageHeight()), myPaint);
+            myPaint.setTextSize(7.0f);
+            canvas.drawText("INVOICE No. "+invoiceNo,  myPageInfo.getPageWidth()-7,  top+56 , myPaint);
 
             myPaint.setTextAlign(Paint.Align.LEFT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            Bitmap scaledBitmap=Bitmap.createScaledBitmap(bitmap,65,60,false);//image size
-            canvas.drawBitmap(scaledBitmap,5,myPageInfo.getPageHeight()-Math.abs(29-myPageInfo.getPageHeight()),myPaint);
+            Bitmap scaledBitmap=Bitmap.createScaledBitmap(bitmap,65,62,false);//image size
+            canvas.drawBitmap(scaledBitmap,5, top+1 ,myPaint);
+
+            currentHeightOfDataOfPage= currentHeightOfDataOfPage+gabBetweenComponents;// Update the data height variable with the height of the rectangle that was just drawn.
             return true;
         }catch (Exception ex){
             System.out.println("makeImageDetails2 method error****************************");
@@ -89,108 +110,78 @@ public class MakePdf{
     }
     public boolean makeTable(String[] headers, String[][] data, float[] columnWidths,float rowHeight) {
         try {
+            myPaint.setTextAlign(Paint.Align.CENTER);
+            myPaint.setStyle(Paint.Style.FILL);
+            myPaint.setColor(Color.BLACK);
+            myPaint.setTextSize(7f);
+
             int numColumns = headers.length;
             int numRows = data.length;
             float pageWidth=defaultPageWidth;
             float pageHeight=defaultPageHeight;
 
-            myPaint.setTextAlign(Paint.Align.CENTER);
-            myPaint.setStyle(Paint.Style.FILL);
+            final float startX=sideGab;
+            final float startY= currentHeightOfDataOfPage ;//it is top value to start write
 
-            //not changeable variable startX and startY
-            float startX=4;
-            float startY=keepTrackOfPageDataHeight+5;//90+5
-
-            //changeable variable x and y
-            float x = startX;
+            float x = startX;//changeable variable x and y
             float y = startY;
-                                 //defaultPageWidth is equal to table width
-            float availableWidth = defaultPageWidth - ((numColumns + 1) * myPaint.getStrokeWidth());/*I can show an example of how availableWidth is calculated with some example values. Let's assume we have a table with 3 columns and a total width of 300 units. Let's also assume that the stroke width used for the column separators is 2 units.Using the formula from the code snippet, we can calculate the availableWidth as follows: availableWidth = tableWidth - (numColumns + 1) * myPaint.getStrokeWidth() = 300 - (3 + 1) * 2 = 300 - 8 = 292.Therefore, the availableWidth in this example is 292 units. This means that each column's width will need to be adjusted to fit within this available width, accounting for the space taken up by the column separators.*/
+
+            float availableWidth = defaultPageWidth - ((numColumns + 1) * myPaint.getStrokeWidth())-8;/*8 is the number of left and right side gab 4 from left and 4 from right.I can show an example of how availableWidth is calculated with some example values. Let's assume we have a table with 3 columns and a total width of 300 units. Let's also assume that the stroke width used for the column separators is 2 units.Using the formula from the code snippet, we can calculate the availableWidth as follows: availableWidth = tableWidth - (numColumns + 1) * myPaint.getStrokeWidth() = 300 - (3 + 1) * 2 = 300 - 8 = 292.Therefore, the availableWidth in this example is 292 units. This means that each column's width will need to be adjusted to fit within this available width, accounting for the space taken up by the column separators.*/
             float[] adjustedWidthsOfEachColumn = adjustColumnWidths(columnWidths, availableWidth);
 
             // draw headers
             myPaint.setColor(Color.rgb(53, 77, 203));//blue
-            canvas.drawRect(4,y,myPageInfo.getPageWidth() - 4,y+rowHeight,myPaint); //headerHeight=rowHeight; is equal to header height
+            canvas.drawRect(sideGab,y,myPageInfo.getPageWidth() - sideGab,y+rowHeight,myPaint); //headerHeight=rowHeight; is equal to header height
+            myPaint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));
             for (int i = 0; i < numColumns; i++) {
                 myPaint.setColor(Color.WHITE);
                 canvas.drawText(headers[i], x + adjustedWidthsOfEachColumn[i] / 2, y + rowHeight / 2+2, myPaint);//data
 
-                 myPaint.setColor(Color.BLACK);
-                 canvas.drawLine(x,y,x,y+rowHeight,myPaint);//verticle line
-
+                myPaint.setColor(Color.rgb(214, 218, 223));//light grey
+                canvas.drawLine(x,y,x,y+rowHeight,myPaint);//verticle line
+                myPaint.setColor(Color.BLACK);
                 x += adjustedWidthsOfEachColumn[i] + myPaint.getStrokeWidth();//updating x to write
             }
+             y +=rowHeight+8;//updating y 8 is the value of distance to print rows FROM HEADERS
 
-            y += rowHeight;//updating y
+            for (int row = 0; row < numRows; row++) {  // draw data rows
+                myPaint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.NORMAL));
 
-            // draw data rows
-            for (int i = 0; i < numRows; i++) {
-                myPaint.setTextAlign(Paint.Align.CENTER);
-                x = startX;
-                float maxHeighColumnOfRow = calculateMaxHeight(data[i], adjustedWidthsOfEachColumn, rowHeight,myPaint);//for each row max height
-                System.out.println("--------------max height of first row: "+maxHeighColumnOfRow);
-                rowHeight=maxHeighColumnOfRow;//updating row height to print in middle
-                int j=0;
-                for (String columnData : data[i]) {//column data of row
-                    // canvas.drawLine(startX,y,x,y+maxHeighColumnOfRow,myPaint);//verticle line
+                 x =startX;//startX is not changeable x is changeable.for new row always setting x value to initial value because x value will be same for all row initially
+                float maxHeighColumnOfRow = maxHeighColumnOfRow(data[row], adjustedWidthsOfEachColumn,myPaint);//for each row max height
 
-                    String[] totalLinesOfStringArray = breakTextIntoLines(columnData, myPaint, adjustedWidthsOfEachColumn[j]);//convert text: amar kumar das to [amar ku],[mar das]
-                    for (String s:totalLinesOfStringArray) {
-                       // System.out.println("*****"+s);
-                    }
-                    float totalLineHeight = calculateLineHeight(totalLinesOfStringArray, myPaint);
-                    System.out.println("***line height:"+totalLineHeight);
+                for (int j=0;j<data[row].length;j++) {//single column data of row
+                    float changeableY=y;//changeableY is for going to next line to print multiple line so whenever new row initializing
+                    myPaint.setColor(Color.rgb(135, 137, 138));//grey
+                    canvas.drawLine(x,y-10 ,x,y+maxHeighColumnOfRow-2,myPaint);//vertical line here x is acting as startColumn position to write text.y-10 since only y is low so taking from up -10
+                    myPaint.setColor(Color.BLACK);
 
-//                    if (totalLineHeight > rowHeight) {//this is only to update rowheight so that in middle we can print text
-//                        System.out.println("-------executed is only to update rowheight");
-//                        rowHeight = totalLineHeight;
-//                        maxHeighColumnOfRow = Math.max(maxHeighColumnOfRow, rowHeight);//this will be same and not required i guess
-//                    }
+                String[] totalLinesOfStringArray = breakTextIntoLines(data[row][j], myPaint, adjustedWidthsOfEachColumn[j]);//convert text: amar kumar das to [amar ku],[mar das]
 
-                    if(adjustedWidthsOfEachColumn.length-1==j){//when column is last ie.description the start from left
-                        myPaint.setTextAlign(Paint.Align.LEFT);
-                    }
+//                    float totalLineHeight = calculateLineHeight(totalLinesOfStringArray, myPaint);
+//                    System.out.println("***current line height:"+totalLineHeight);
 
-                     Boolean allowYtoIncrement=false;
-                    for (String columnlines : totalLinesOfStringArray) {
-                        System.out.println("*****"+columnlines);
-                        if (y + maxHeighColumnOfRow > pageHeight) {
-                            // if the table goes beyond the bottom of the page, start a new page
+                    boolean incrementForSecondTime=false;
+                    for (String columnlines : totalLinesOfStringArray) {//iterate column lines
 
-                            System.out.println("new page___________________________________________");
-                            //canvas.finishPage(page);
-                            myPdfDocument.finishPage(mypage);
-
-                            myPageInfo = new PdfDocument.PageInfo.Builder(defaultPageWidth, defaultPageHeight, 1).create();
-
-                            // page = pdfDocument.startPage(pageInfo);
-                            mypage =  myPdfDocument.startPage(myPageInfo);
-
-                            //canvas = page.getCanvas();
-                            canvas =  mypage.getCanvas();
-                            y = startY;
+                        if (incrementForSecondTime){
+                            changeableY += calculateLineHeight(new String[]{"SINGLE LINE HEIGHT"}, myPaint);
+                        }else{
+                            incrementForSecondTime=true;//if there is multiple lines then initially if statement will execute and second always else will execute
                         }
-                        System.out.println("check: x:"+x+" weidth:"+adjustedWidthsOfEachColumn[j]+" x+width:"+(x + adjustedWidthsOfEachColumn[j])+" y:"+y+ " pagewidth:"+pageWidth);
-
-                        if (x + adjustedWidthsOfEachColumn[j] > pageWidth) {
-                            System.out.println("----greater then page weight");
-                            // if the columnData goes beyond the right edge of the page, wrap the text to the next columnlines
-                            x = startX;
-
-                            if (allowYtoIncrement) {
-                                y += calculateLineHeight(new String[]{"single line height"}, myPaint);
-                            }else{
-                                allowYtoIncrement=true;
-                            }
-                        }
-                        System.out.println("check: x:"+x+" weidth:"+adjustedWidthsOfEachColumn[j]+" x+width:"+(x + adjustedWidthsOfEachColumn[j])+" y:"+y+ " pagewidth:"+pageWidth);
-                        System.out.println("*****printed:"+columnlines);
-                        canvas.drawText(columnlines, x + adjustedWidthsOfEachColumn[j] / 2, y + rowHeight / 2, myPaint);
-                        x += adjustedWidthsOfEachColumn[j] + myPaint.getStrokeWidth();
-                    }
-                    j++;
+                        canvas.drawText(columnlines, x + adjustedWidthsOfEachColumn[j] / 2, changeableY  , myPaint);
+                        myPaint.setColor(Color.BLACK);
                 }
-                y += maxHeighColumnOfRow;
+                x= x+adjustedWidthsOfEachColumn[j] + myPaint.getStrokeWidth();//updating x it is changing according to column width
+
+            }
+                myPaint.setColor(Color.rgb(135, 137, 138));//grey
+                canvas.drawLine(startX,y+maxHeighColumnOfRow-2,pageWidth-sideGab,y+maxHeighColumnOfRow-2,myPaint);//horizontal line
+                canvas.drawLine(pageWidth-sideGab,y-10 ,pageWidth-sideGab,y+maxHeighColumnOfRow-2,myPaint);//last vertical line placing here is good
+                myPaint.setColor(Color.BLACK);
+
+                currentHeightOfDataOfPage=y+maxHeighColumnOfRow-2+gabBetweenComponents;//updating to keep track of page how muck data row filled.it should be before y gets updated/to use next component
+                y += maxHeighColumnOfRow+8;//updating y. 8 is gab between row and should be fixed
               }
 
             return true;
@@ -231,15 +222,12 @@ public class MakePdf{
          So the adjusted widths for the columns would be approximately 111 pixels, 167 pixels, and 222 pixels, respectively, which should fit within the
          available width of 500 pixels.*/
     }
-    private float calculateMaxHeight(String[] data, float[] adjustedWidths, float rowHeight, Paint myPaint) {
-        float maxHeight = rowHeight;
-        for (int i = 0; i < data.length; i++) {
-
+    private float maxHeighColumnOfRow(String[] data, float[] adjustedWidths, Paint myPaint) {
+        float maxHeight = 0;
+        for (int i = 0; i < data.length; i++) {//all column height getting of row
             String[] lines = breakTextIntoLines(data[i],  myPaint, adjustedWidths[i]);
             float lineHeight = calculateLineHeight(lines,  myPaint);
-            if (lineHeight > rowHeight) {
-                // If the height of the current cell is greater than the current row height,
-                // update the row height to match the height of the current cell.
+            if (lineHeight > maxHeight) {
                 maxHeight = lineHeight;
             }
         }
@@ -254,7 +242,9 @@ public class MakePdf{
         int end = text.length();
         while (start < end) {
             int count = paint.breakText(text, start, end, true, maxWidth, null);
+           // System.out.println("count_______"+count);
             lines.add(text.substring(start, start + count));//adding break sentence
+           // System.out.println("........"+text.substring(start, start + count));
             start += count;
         }
         return lines.toArray(new String[0]);//In this example, we create a new ArrayList called lines and add three strings to it using the add method. Then, we use the toArray method to convert the ArrayList to an array of strings. The argument new String[0] is passed to the toArray method to indicate the type of the resulting array. The size of the array is determined automatically based on the size of the ArrayList.
@@ -355,25 +345,4 @@ public class MakePdf{
       }
         return true;
     }
-
-    public PdfDocument getMyPdfDocument() {
-        return myPdfDocument;
-    }
-
-    public Paint getMyPaint() {
-        return myPaint;
-    }
-
-    public PdfDocument.PageInfo getMyPageInfo() {
-        return myPageInfo;
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
-    public PdfDocument.Page getMypage() {
-        return mypage;
-    }
-
 }

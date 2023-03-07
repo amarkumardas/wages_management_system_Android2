@@ -926,7 +926,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         if (savePdfToDatabase(fileName)) {//fileName is global variable actually its pdf Absolute path ie.pdf created in device so absolute path of pdf which is in device.First store pdf to database so that if deleteWagesFromDBorRecyclerView failed then this pdf can be used to see previous data
                                             if (viewPDFFromDb((byte) 2,fromIntentPersonId)) {//column name should be correct Viewing pdf2
 
-                                                if (modifyToDB()) {
+                                                if (deleteDataFromDB()) {
                                                     Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
@@ -956,7 +956,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     dialog.show();
                     return false;
                 }
-                private boolean modifyToDB() {
+                private boolean deleteDataFromDB() {
                     try(PersonRecordDatabase personDb=new PersonRecordDatabase(getApplicationContext())) {//so that object close automatically
                          boolean success;
                             //this function will be written when existing from pdf viewer
@@ -968,8 +968,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                            // if (deleteAudios(fromIntentPersonId)) {
                                 if (deleteWagesFromDBorRecyclerView(fromIntentPersonId)) {//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
 
-                                    if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE AFTER FINAL CALCULATION IN RECYCLER VIEW.\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
+                                    if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db.this code is not in else block because if data is not deleted from db then this code should not be executed
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE IN RECYCLER VIEW AFTER FINAL CALCULATION .\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
                                         success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "UPDATE RECYCLERVIEW \nCHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION", Toast.LENGTH_LONG).show();
@@ -999,12 +999,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                                            return false;
 //                                        }
 //                                    }
-                                    else{//if again it fail then return false and add this message to recycle view
+                                    else{//add this message to recycle view
+
+                                    if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1 CANT REVERSE
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        if (!success)
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
+                                    }
+                                    if (!deleteAudios(fromIntentPersonId)){//deleting audio
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        if (!success)
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
+                                    }
+
                                         String  message=  "FAILED TO DELETE RECORD FROM DATABASE. CURRENT DATA IS SAVED TO PREVIOUS INVOICE2. ACTION TO PERFORM BY YOURSELF SEQUENTIALLY \n\n " +
-                                                "1.SO MANUALLY EDIT ALL WAGES DATA TO 0 ie.set all wages and work days to 0 IN RECYCLER VIEW (IF NOT DONE THEN PREVIOUS DATA WILL BE THERE AND GIVE INCORRECT CALCULATION ITS MANDATORY) AFTER THAT\n\n " +
-                                                "2.CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION\n\n" +
-                                                "3.DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)\n\n" +
-                                                "*JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID:"+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE";
+                                                "1.MANUALLY EDIT ALL WAGES DATA TO 0 ie.set all wages and work days to 0 IN RECYCLER VIEW (IF NOT DONE THEN PREVIOUS DATA WILL BE THERE AND GIVE INCORRECT CALCULATION ITS MANDATORY) AFTER THAT\n\n " +
+                                                "2.CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION";
+                                                //"3.DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)\n\n" +
+                                                //"*JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID:"+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE";
 
                                         Toast.makeText(IndividualPersonDetailActivity.this, message, Toast.LENGTH_LONG).show();
 
@@ -1012,7 +1026,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         if (success) {
                                             Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLERVIEW DESCRIPTION/REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
                                         }else{
-                                            Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nNOTE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nWRITE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
                                         }
                                             return false;
                                     }
@@ -1077,10 +1091,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                 }
                 private boolean addMessageAfterFinalCalculationToRecyclerview(String fromIntentPersonId) {
-                    PersonRecordDatabase db=null;
-                    Cursor cursor=null;
-                    try {
-                          db = new PersonRecordDatabase(getApplicationContext());//so db close automatically
+                    //PersonRecordDatabase db=null;
+                   // Cursor cursor=null;
+                    try( PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
+                            Cursor cursor=db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'"))
+                    {
+                       // db = new PersonRecordDatabase(getApplicationContext());//so db close automatically
                         int amount=0;
                         boolean success;
                         final Calendar current = Calendar.getInstance();//to get current date
@@ -1089,7 +1105,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         Date d = Calendar.getInstance().getTime(); //To get exact time so write code in save button
                         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
                         String time = sdf.format(d);
-                        cursor = db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'");
+                       // cursor = db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'");
                         cursor.moveToFirst();//means only one row is returned
                         if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
                             amount = cursor.getInt(0);
@@ -1109,28 +1125,30 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             if (!success)
                                 return false;
                         }
-                        else
-                            return false;
-
                         return true;
-                    }finally {
-                        try {
-                            if (cursor != null) {
-                                cursor.close();
-                            }
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            return false;
-                        }
-                        try {
-                            if (db != null) {
-                                db.close();
-                            }
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            return false;
-                        }
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                        return false;
                     }
+//                    finally {
+//                        try {
+//                            if (cursor != null) {
+//                                cursor.close();
+//                            }
+//                        }catch (Exception e){
+//                            e.printStackTrace();
+//                            return false;
+//                        }
+//                        try {
+//                            if (db != null) {
+//                                db.close();
+//                            }
+//                        }catch (Exception e){
+//                            e.printStackTrace();
+//                            return false;
+//                        }
+//                    }
 
                 }
                 private boolean dontPassNullPathDeletePdfOrRecordingsFromDevice(String pdfPath) {
@@ -1238,18 +1256,38 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         }
 
                         String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
-                        String data[][]= {{"25-02-2023","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
-                                {"25-02-202345678910","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
-                                {"25-02-2023","1500","6","TAKEN fifteen hundred only and sis days work"},
-                                {"25-02-2023","999999999","6"," EN fifteen hundred only and sis days work "},
-                                {"25-02-2023","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
-                                {"25-02-2023","5000","6","TAKEN one lakh fifty thousand only "},
-                                {"25-02-2023","500","6","five hundred"},
-                                {"25-02-2023","50000","66","five hundred"},{"25-02-2023","1500","6","five hundred"},
-                                {"25-02-2023","500","6","five hundred"},{"25-02-2023","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
+                        String data[][]= {{"1","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
+                                {"2","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
+                                {"3","1500","6","TAKEN fifteen hundred only and sis days work"},
+                                {"4","999999999","6"," EN fifteen hundred only and sis days work "},
+                                {"5","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
+                                {"6","5000","6","TAKEN one lakh fifty thousand only "},
+                                {"7","500","6","five hundred"},
+                                {"8","50000","66","five hundred"},
+                                {"9","1500","6","five hundred"},{"10","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"},
+                                {"11","500","6","five hundred"},{"12","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
+//                                {"13","50000","66","five hundred"},{"14","1500","6","five hundred"},
+//                                {"15","50000","66","five hundred"},{"16","1500","6","five hundred"},
+//                                {"17","50000","66","five hundred"},{"18","1500","6","five hundred"},
+//                                {"19","50000","66","five hundred"},{"20","1500","6","five hundred"},
+//                                {"21","50000","66","five hundred"}
+
                                 };
                         makePdf.makeTable(header,data,new float[]{12f,12f,5f,71} ,10 );//for 1 perfect value
-                       // makePdf.makeSubHeader2ImageDetails("amar", id,"asdfada", "wetrwert", null, String.valueOf(2666));//
+                      //  makePdf.makeTopHeader1OrganizatioContact("RRD Construction Work", "9436018408", "7005422684", "rrdconstructionbench@gmail.com");//adding data to header
+
+                        String datas[]=new String[]{"DATE"," WAGES","M","REMARKS"};
+                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 0, (byte) 0);
+                        String datass[]=new String[]{"DATE"," WAGsdfsdfsdfsES","Masdf","REMARKassssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxsssfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaS"};
+                        makePdf.singleCustomRow(datass,new float[]{12f,12f,5f,71},0,0,0,0,false, (byte) 0, (byte) 0);
+                        String datasss[]=new String[]{"DATE"," WAGsdfsdfsdfsES","Masdf","REMARKassssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxsssfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaS"};
+                        makePdf.singleCustomRow(datasss,new float[]{12f,12f,5f,71},0,0,0,0,false, (byte) 100, (byte) 100);
+                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+                        makePdf.singleCustomRow(new String[]{"ajdhgajhdsga sakjdhski"},new float[]{12f},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+
 
                         makePdf.createdPageFinish2();
                         fileName = makePdf.createFileToSavePdfDocumentAndReturnFilePath3(getExternalFilesDir(null).toString(), generateFileName(id));//we have to update filename which is global static variable to view pdf using file path

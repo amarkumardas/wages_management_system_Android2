@@ -21,7 +21,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
     public final static String COL_5_BANKNAME ="BANKNAME";
     public final static String COL_6_AADHAAR ="AADHARCARD";
     public final static String COL_7_PHONE ="PHONE";
-    public final static String COL_8_SKILL ="TYPE";
+    public final static String COL_8_SKILL ="TYPE";//skill1
     public final static String COL_9_FATHERNAME ="FATHERNAME";
     public final static String COL_10_IMAGE ="IMAGE";
     public final static String COL_11_ACHOLDER ="ACHOLDER";
@@ -172,8 +172,9 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             //0 is returned if no record updated and it return number of rows updated
             int rowid = db.update(TABLE_NAME1, cv, "ID=?", new String[]{Id});
             //db.close();//closing db after operation performed
-            if(rowid!=1)//if update return 1 then data is updated else not updated
+            if(rowid!=1) {//if update return 1 then data is updated else not updated
                 return false;
+            }
 
                 return true;
         } catch (Exception e) {

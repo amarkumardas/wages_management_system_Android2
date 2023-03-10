@@ -1,6 +1,5 @@
 package amar.das.acbook.activity;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -124,7 +123,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.totalP1AmountTv.setText("= "+skillNRateCursor.getInt(3)*sumCursor.getInt(1));//default skill
                 }else {
                     binding.totalP1AmountTv.setText("= NEW PERSON PROVIDE RATE");//default skill
-                    //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                 }
                                //total wages
                 if(sumCursor.getString(0) !=null) {//if total wages is not null then set total wages
@@ -165,8 +163,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         binding.totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
                     }else {
                         binding.totalP2AmountTv.setText("= NEW PERSON PROVIDE RATE");
-                        //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
-                    }
+                     }
 
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
@@ -921,7 +918,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                             if(checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
 
-                                if(updateTotalAdvanceOrBalanceToDatabase()) {
+                                if(updateRateTotalAdvanceOrBalanceToDatabase()) {
                                     if(generatePDFAndUpdateGlobalVariableFileName(fromIntentPersonId)){
                                         if (savePdfToDatabase(fileName)) {//fileName is global variable actually its pdf Absolute path ie.pdf created in device so absolute path of pdf which is in device.First store pdf to database so that if deleteWagesFromDBorRecyclerView failed then this pdf can be used to see previous data
                                             if (viewPDFFromDb((byte) 2,fromIntentPersonId)) {//column name should be correct Viewing pdf2
@@ -966,25 +963,25 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                                }
                        // if(updateInvoiceNumberBy1ToDb(fromIntentPersonId)){//updating invoice number by 1
                            // if (deleteAudios(fromIntentPersonId)) {
-                                if (deleteWagesFromDBorRecyclerView(fromIntentPersonId)) {//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
+                                if (deleteWagesFromDBorRecyclerView(fromIntentPersonId)){//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
 
                                     if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db.this code is not in else block because if data is not deleted from db then this code should not be executed
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE IN RECYCLER VIEW AFTER FINAL CALCULATION .\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "UPDATE RECYCLERVIEW \nCHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION", Toast.LENGTH_LONG).show();
                                     }
 
                                     if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
 
                                     if (!deleteAudios(fromIntentPersonId)){//deleting audio
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
@@ -1003,29 +1000,28 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                     if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1 CANT REVERSE
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
                                     if (!deleteAudios(fromIntentPersonId)){//deleting audio
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
 
-                                        String  message=  "FAILED TO DELETE RECORD FROM DATABASE. CURRENT DATA IS SAVED TO PREVIOUS INVOICE2. ACTION TO PERFORM BY YOURSELF SEQUENTIALLY \n\n " +
+                                        String  message=  "[AUTOMATIC ENTERED-FAILED TO DELETE RECORD FROM DATABASE. CURRENT DATA IS SAVED TO PREVIOUS INVOICE2. ACTION TO PERFORM BY YOURSELF SEQUENTIALLY(strictly) \n\n " +
                                                 "1.MANUALLY EDIT ALL WAGES DATA TO 0 ie.set all wages and work days to 0 IN RECYCLER VIEW (IF NOT DONE THEN PREVIOUS DATA WILL BE THERE AND GIVE INCORRECT CALCULATION ITS MANDATORY) AFTER THAT\n\n " +
-                                                "2.CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION";
+                                                "2.CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE SO ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]";
                                                 //"3.DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)\n\n" +
                                                 //"*JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID:"+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE";
 
                                         Toast.makeText(IndividualPersonDetailActivity.this, message, Toast.LENGTH_LONG).show();
-
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "["+message+"]", 0, 0, "0");
+                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, message, 0, 0, "0");
                                         if (success) {
                                             Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLERVIEW DESCRIPTION/REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
-                                        }else{
+                                        }else{//it will execute when message is not set
                                             Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nWRITE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
                                         }
                                             return false;
@@ -1064,8 +1060,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                 private boolean deleteAudios(String fromIntentPersonId) {
                     try(PersonRecordDatabase personDb=new PersonRecordDatabase(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT MICPATH FROM " + db.TABLE_NAME2 + " WHERE ID= '" + fromIntentPersonId + "'");
-                    ){//so that object close automatically
+                        Cursor cursor = personDb.getData("SELECT MICPATH FROM " + db.TABLE_NAME2 + " WHERE ID= '" + fromIntentPersonId + "'");){//so that object close automatically
                          while(cursor.moveToNext()){
                              if(cursor.getString(0) != null) {//checking path may be null
                                  if (!dontPassNullPathDeletePdfOrRecordingsFromDevice(cursor.getString(0))) {
@@ -1110,18 +1105,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
                             amount = cursor.getInt(0);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-ENTERED]\n\n" + "[Advance after calculation Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[Advance after calculation Rs. " + amount+" ]", amount, 0, "0");
                             if (!success)
                                 return false;
                         }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
                             amount = cursor.getInt(1);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_Deposit_Table2(fromIntentPersonId, date, time, null, "[" + time + "-ENTERED]\n\n" + "[Balance after calculation Rs. " + amount+" ]", amount, "1");
+                            success = db.insert_Deposit_Table2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[Balance after calculation Rs. " + amount+" ]", amount, "1");
                             if (!success)
                                 return false;
                         }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-ENTERED]\n\n" + "[All cleared after calculation Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[All cleared after calculation Rs. " + amount+" ]", amount, 0, "0");
                             if (!success)
                                 return false;
                         }
@@ -1131,25 +1126,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         ex.printStackTrace();
                         return false;
                     }
-//                    finally {
-//                        try {
-//                            if (cursor != null) {
-//                                cursor.close();
-//                            }
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                            return false;
-//                        }
-//                        try {
-//                            if (db != null) {
-//                                db.close();
-//                            }
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                            return false;
-//                        }
-//                    }
-
                 }
                 private boolean dontPassNullPathDeletePdfOrRecordingsFromDevice(String pdfPath) {
                     try {
@@ -1208,85 +1184,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //create PDF
                     try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext())) {
                         MakePdf makePdf = new MakePdf();
+                        makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1);//created page 1 height weight
 
-                        makePdf.createNewPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1);//created page 1 height weight
-                        makePdf.makeTopHeader1OrganizatioContact("RRD Construction Work", "9436018408", "7005422684", "rrdconstructionbench@gmail.com");//adding data to header
+                        fetchOrganizationDetailsForPDF(id,makePdf);//org details
+                       if(!fetchPersonDetailsForPDF(id,makePdf)){//if failed
+                           return false;
+                       }
 
-                        Cursor cursor = db.getData("SELECT "+db.COL_2_NAME+" , "+db.COL_3_BANKAC+" , "+db.COL_6_AADHAAR+" , "+db.COL_10_IMAGE+" FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
-                        if (cursor != null) {
-                            cursor.moveToFirst();
-                            String bankaccount,aadhaar,name;
-                            Integer pdfSequenceNo=null;
-                            byte[] image=null;
-                            if(cursor.getBlob(3)!= null){
-                                  image=cursor.getBlob(3);
-                            }else {
-                                image=null;
-                            }
-                            if(cursor.getString(0).length()>0){
-                                name=cursor.getString(0);
-                            } else{
-                               name="null";
-                            }
-                            if(cursor.getString(1).length()>4) {
-                               bankaccount=cursor.getString(1).substring(cursor.getString(1).length() - 4);
-                            }else{
-                                bankaccount="null";
-                            }
+                       fetchWorkDetailsForPDF(id,makePdf);
 
-                            if(cursor.getString(2).length()>5) {
-                                aadhaar=cursor.getString(2).substring(cursor.getString(2).length() - 5);
-                            }
-                            else{
-                                aadhaar="null";
-                            }
-                            cursor=db.getData("SELECT "+db.COL_396_PDFSEQUENCE+" FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'");
-                            if(cursor!=null){
-                                cursor.moveToFirst();
-                                pdfSequenceNo=(cursor.getInt(0)+1); /**pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
-                            }else {
-                                pdfSequenceNo=0;
-                            }
-                            makePdf.makeSubHeader2ImageDetails(name, id,bankaccount, aadhaar, image, String.valueOf(pdfSequenceNo));
-                            cursor.close();
 
-                        } else {
-                            Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
-                            makePdf.makeSubHeader2ImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]");
-                        }
+                       // makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},false, (byte) 0, (byte) 0);
+                        //makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},false, (byte) 0, (byte) 0);
 
-                        String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
-                        String data[][]= {{"1","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
-                                {"2","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
-                                {"3","1500","6","TAKEN fifteen hundred only and sis days work"},
-                                {"4","999999999","6"," EN fifteen hundred only and sis days work "},
-                                {"5","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
-                                {"6","5000","6","TAKEN one lakh fifty thousand only "},
-                                {"7","500","6","five hundred"},
-                                {"8","50000","66","five hundred"},
-                                {"9","1500","6","five hundred"},{"10","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"},
-                                {"11","500","6","five hundred"},{"12","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
-//                                {"13","50000","66","five hundred"},{"14","1500","6","five hundred"},
-//                                {"15","50000","66","five hundred"},{"16","1500","6","five hundred"},
-//                                {"17","50000","66","five hundred"},{"18","1500","6","five hundred"},
-//                                {"19","50000","66","five hundred"},{"20","1500","6","five hundred"},
-//                                {"21","50000","66","five hundred"}
-
-                                };
-                        makePdf.makeTable(header,data,new float[]{12f,12f,5f,71} ,10 );//for 1 perfect value
-                      //  makePdf.makeTopHeader1OrganizatioContact("RRD Construction Work", "9436018408", "7005422684", "rrdconstructionbench@gmail.com");//adding data to header
-
-                        String datas[]=new String[]{"DATE"," WAGES","M","REMARKS"};
-                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 0, (byte) 0);
-                        String datass[]=new String[]{"DATE"," WAGsdfsdfsdfsES","Masdf","REMARKassssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxsssfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaS"};
-                        makePdf.singleCustomRow(datass,new float[]{12f,12f,5f,71},0,0,0,0,false, (byte) 0, (byte) 0);
-                        String datasss[]=new String[]{"DATE"," WAGsdfsdfsdfsES","Masdf","REMARKassssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxsssfaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaS"};
-                        makePdf.singleCustomRow(datasss,new float[]{12f,12f,5f,71},0,0,0,0,false, (byte) 100, (byte) 100);
-                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
-                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
-                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
-                        makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
-                        makePdf.singleCustomRow(new String[]{"ajdhgajhdsga sakjdhski"},new float[]{12f},Color.YELLOW,Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+                        //makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},false, (byte) 0, (byte) 0);
 
 
                         makePdf.createdPageFinish2();
@@ -1309,85 +1220,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             Canvas canvas2=mypage2.getCanvas();
                             canvas2.drawText("WELCOME  AMAR KUMAR DAS 2 love you ................",10,50,myPaint);
                             myPdfDocument.finishPage(mypage2);*/
-//                  try {
-//                      PdfDocument myPdfDocument = new PdfDocument();//pdf instance
-//                      Paint myPaint = new Paint();//it is responsible for text color
-//
-//                      PdfDocument.PageInfo myPageInfo = new PdfDocument.PageInfo.Builder(250, 400, 1).create();//meta data of pdf
-//                      PdfDocument.Page mypage = myPdfDocument.startPage(myPageInfo);
-//
-//                      //to write in pdf page 1
-//                      Canvas canvas = mypage.getCanvas();
-//                      myPaint.setTextAlign(Paint.Align.CENTER);//so that it will be in middle
-//                      myPaint.setTextSize(12.0f);
-//                      canvas.drawText("HR Enterprises", myPageInfo.getPageWidth() / 2, 30, myPaint);
-//                      myPaint.setTextSize(6.0f);
-//                      //myPaint.setColor(Color.rgb(122,199,199));// myPaint.setColor(getResources().getColor(R.color.green)); or
-//                      myPaint.setColor(ContextCompat.getColor(IndividualPersonDetailActivity.this, R.color.background));
-//                      canvas.drawText("Street No. 15,Bharat Nagar,Haryana", myPageInfo.getPageWidth() / 2, 40, myPaint);
-//
-//                      myPaint.setTextAlign(Paint.Align.LEFT);
-//                      myPaint.setTextSize(9.0f);
-//                      myPaint.setColor(Color.rgb(122, 199, 199));//this is here because if in future upper color is changed then this link color will not change
-//                      canvas.drawText("Customer Information", 10, 70, myPaint);
-//
-//                      myPaint.setTextAlign(Paint.Align.LEFT);
-//                      myPaint.setTextSize(8.0f);
-//                      myPaint.setColor(Color.BLACK);
-//
-//                      String information[] = new String[]{"Name", "Company Name", "Address", "Phone", "Email"};
-//                      int startXPosition = 10;
-//                      int endXPosition = myPageInfo.getPageWidth() - 10;
-//                      int startYPosition = 100;
-//
-//                      for (int i = 0; i < 5; i++) {
-//                          canvas.drawText(information[i], startXPosition, startYPosition, myPaint);
-//                          canvas.drawLine(startXPosition, startYPosition + 3, endXPosition, startYPosition + 3, myPaint);
-//                          startYPosition = startYPosition + 20;
-//                      }
-//                      canvas.drawLine(80, 92, 80, 190, myPaint);
-//
-//                      myPaint.setStyle(Paint.Style.STROKE);
-//                      myPaint.setStrokeWidth(2);
-//                      canvas.drawRect(10, 200, myPageInfo.getPageWidth() - 10, 300, myPaint);
-//                      canvas.drawLine(85, 200, 85, 300, myPaint);
-//                      canvas.drawLine(163, 200, 163, 300, myPaint);
-//                      myPaint.setStrokeWidth(0);
-//                      myPaint.setStyle(Paint.Style.FILL);//Geometry and text drawn with this style will be filled, ignoring all stroke-related settings in the paint.
-//
-//                      canvas.drawText("Photo", 35, 250, myPaint);
-//                      canvas.drawText("Photo", 110, 250, myPaint);
-//                      canvas.drawText("Photo", 190, 250, myPaint);
-//
-//                      canvas.drawText("Note", 10, 320, myPaint);
-//                      canvas.drawLine(35, 325, myPageInfo.getPageWidth() - 10, 325, myPaint);
-//                      canvas.drawLine(10, 345, myPageInfo.getPageWidth() - 10, 345, myPaint);
-//                      canvas.drawLine(10, 365, myPageInfo.getPageWidth() - 10, 365, myPaint);
-//                      myPdfDocument.finishPage(mypage);
-////----------------------------------------------------------------------------------------------------------------------//
-//                      File folder = new File(getExternalFilesDir(null) + "/acBookPDF");
-//                      if (!folder.exists()) {//of folder not exist then create folder
-//                          folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
-//                          Toast.makeText(IndividualPersonDetailActivity.this, "Creating acBookPDF folder to store PDF", Toast.LENGTH_LONG).show();
-//                      }
-//
-//                      File filees = new File(getExternalFilesDir(null) + "/acBookPDF/" +generateFileName(fromIntentPersonId) + ".pdf");//path of pdf where it is saved in device
-//
-//                      try {
-//                          myPdfDocument.writeTo(new FileOutputStream(filees.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
-//                      } catch (IOException e) {
-//                          Toast.makeText(IndividualPersonDetailActivity.this, "CREATED PDF NOT COPIED TO DEVICE PDF FILE", Toast.LENGTH_LONG).show();
-//                          e.printStackTrace();
-//                          return false;
-//                      }
-//                      myPdfDocument.close();
-//                      Toast.makeText(IndividualPersonDetailActivity.this, "created", Toast.LENGTH_SHORT).show();
-//                      fileName = filees.getAbsolutePath();//fileName is global variable
-//                  }catch (Exception i){
-//                      Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
-//                      i.printStackTrace();
-//                      return false;
-//                  }
+
                     }catch (Exception ex){
                         Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
                         ex.printStackTrace();
@@ -1436,7 +1269,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }else
                         return false;
                 }
-                private boolean updateTotalAdvanceOrBalanceToDatabase( ) {
+                private boolean updateRateTotalAdvanceOrBalanceToDatabase( ) {
                     //updating rate
                     boolean success = db.updateTable("UPDATE " + db.TABLE_NAME3 + " SET R1='"+r1+"' , R2='"+r2+"' , R3='"+r3+"' , R4='"+r4+"'"+ " WHERE ID='" + fromIntentPersonId + "'");
                     if(success){//if rate is updated then proceed
@@ -1532,7 +1365,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
 
                 }
-                private void indicator1234CalculateButDontUpdateToDBFinal(@NonNull Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
+                private void indicator1234CalculateButDontUpdateToDBFinal(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
                     int  totalDeposit,totalWages;
                     int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
                     totalWages=sumCursor.getInt(0);
@@ -1629,6 +1462,235 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              insertDataToRecyclerView_ALertDialogBox(get_indicator(fromIntentPersonId));
         });
     }
+
+    public boolean fetchWorkDetailsForPDF(String id, MakePdf makePdf) {
+        try{
+            byte indicator=(byte) get_indicator(fromIntentPersonId);
+
+           switch(indicator){
+               case 1:{
+                      fetchRecycleViewWagesAndDepositForPDF(id,makePdf,indicator);
+               }break;
+               case 2:{}break;
+               case 3:{}break;
+               case 4:{}break;
+           }
+
+//            String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
+//            String data[][]= {{"1","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
+//                    {"2","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
+//                    {"3","1500","6","TAKEN fifteen hundred only and sis days work"},
+//                    {"4","999999999","6"," EN fifteen hundred only and sis days work "},
+//                    {"5","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
+//                    {"6","5000","6","TAKEN one lakh fifty thousand only "},
+//                    {"7","500","6","five hundred"},
+//                    {"8","50000","66","five hundred"},
+//                    {"9","1500","6","five hundred"},{"10","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"},
+//                    {"11","500","6","five hundred"},{"12","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
+//            };
+//
+//            makePdf.makeTable(header,data,new float[]{12f,12f,5f,71f} ,10 ,false);//for 1 perfect value
+//
+//            String datas[]=new String[]{"DATE"," WAGES","M","REMARKS"};
+//            makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.rgb(221,133,3),Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
+
+
+//            String dz[]=new String[]{"NUMBER OF ENTRIES 100 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",""};
+//            makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},true, (byte) 100, (byte) 100);
+//            makePdf.singleCustomRow(datasss,new float[]{12f,12f,5f,71},0,0,0,0,true, (byte) 100, (byte) 100);
+            return true;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean fetchRecycleViewWagesAndDepositForPDF(String id, MakePdf makePdf, byte indicator) {
+        try{
+            switch (indicator){
+                case 1:{
+
+
+                    String recyclerViewWagesdata[][]= getAllWagesDataFromDb(id,indicator);
+                    if(recyclerViewWagesdata != null) {
+                        makePdf.makeTable(getWagesHeadersFromDb(id,indicator), recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 10, false);
+                    }
+
+
+
+                    String recyclerViewDepositdata[][]=getAllDepositFromDb(id);
+                    if(recyclerViewDepositdata!=null) {
+                        makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 10, false);
+                    }
+
+
+
+                }break;
+                case 2:{}break;
+                case 3:{}break;
+                case 4:{}break;
+            }
+           return true;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public String[][] getAllDepositFromDb(String id) {
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
+             Cursor depositCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_27_DEPOSIT+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='1'"))
+           {
+               String recyclerViewDepositdata[][]=null;
+            if(depositCursor.getCount()!=0) {
+                recyclerViewDepositdata= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
+               int row = 0;
+               while (depositCursor.moveToNext()) {
+                   for (int col = 0; col < depositCursor.getColumnCount(); col++) {
+                       recyclerViewDepositdata[row][col] = depositCursor.getString(col);//storing all data in 2d string
+                   }
+                   row++;
+               }
+           }
+            return recyclerViewDepositdata;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in getAllDepositFromDb method**************************");
+            return new String[][]{{"error occurred","error occurred"}};
+        }
+    }
+
+    public String[] getWagesHeadersFromDb(String id, byte indicator) {
+        Cursor cursor = null;
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
+            switch(indicator){
+                case 1:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" FROM " +db.TABLE_NAME1+ " WHERE ID= '" + id +"'");
+                        cursor.moveToFirst();
+                        return new String[]{"DATE","WAGES",cursor.getString(0),"REMARKS"};
+                       }
+
+                case 2:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" FROM " + db.TABLE_NAME3+ " WHERE ID='" + id + "'");
+                        cursor.moveToFirst();
+                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),"REMARKS"};
+                        }
+
+                case 3:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" ,"+db.COL_37_SKILL2+" FROM " + db.TABLE_NAME3+ " WHERE ID='" + id + "'");
+                        cursor.moveToFirst();
+                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),cursor.getString(2),"REMARKS"};
+                       }
+
+                case 4:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" ,"+db.COL_37_SKILL2+" ,"+db.COL_38_SKILL3+" FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                        cursor.moveToFirst();
+                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),"REMARKS"};
+                       }
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in getHeadersFromDb method**************************");
+            return new String[]{"error occurred"};
+        }finally {
+            cursor.close();//since there is return statement so finally needed
+        }
+        return new String[]{"error occurred"};//this code will never execute due to return statement in try and catch block just using to avoid error
+    }
+
+    public String[][] getAllWagesDataFromDb(String id, byte indicator) {
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
+            Cursor wagesCursor = null;
+            switch(indicator){
+                case 1:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
+                case 2:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
+                case 3:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_291_P3+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
+                case 4:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_291_P3+" ,"+db.COL_292_P4+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
+            }
+            String recyclerViewWagesdata[][]=null;
+            if(wagesCursor.getCount()!= 0) {
+                 recyclerViewWagesdata = new String[wagesCursor.getCount()][wagesCursor.getColumnCount()];
+                int row = 0;
+                while (wagesCursor.moveToNext()) {
+                    for (int col = 0; col < wagesCursor.getColumnCount(); col++) {
+                        recyclerViewWagesdata[row][col] = wagesCursor.getString(col);//storing all data in 2d string
+                    }
+                    row++;
+                }
+            }
+            wagesCursor.close();
+            return recyclerViewWagesdata;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in getAllWagesData method**************************");
+            return new String[][]{{"error occurred","error occurred"}};
+        }
+    }
+
+//    public int getCountDepositRecord(String id) {//only deposit count
+//        try(Cursor cursor = db.getData("SELECT COUNT(*) FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='1'")) {
+//            cursor.moveToFirst();
+//            return cursor.getInt(0);
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//            System.out.println("error occurred in getCountDepositRecord method**************************");
+//            return 0;
+//        }
+//    }
+//
+//    public  int getCountWagesRecord(String id) {//only wages count
+//        try(Cursor cursor = db.getData("SELECT COUNT(*) FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'")) {
+//               cursor.moveToFirst();
+//               return cursor.getInt(0);
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//            System.out.println("error occurred in getCountWagesRecord method**************************");
+//            return 0;
+//        }
+//    }
+
+    public boolean fetchOrganizationDetailsForPDF(String id, MakePdf makePdf) {
+        try{
+            makePdf.makeTopHeaderrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
+
+            return true;
+        }catch(Exception ex){
+           return false;
+        }
+    }
+    public boolean fetchPersonDetailsForPDF(String id, MakePdf makePdf) {
+        try (PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
+             Cursor cursor1 = db.getData("SELECT " + db.COL_2_NAME + " , " + db.COL_3_BANKAC + " , " + db.COL_6_AADHAAR + " , " + db.COL_10_IMAGE + " FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
+             Cursor cursor2 = db.getData("SELECT " + db.COL_396_PDFSEQUENCE + " FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'")){
+            if (cursor1 != null){
+                cursor1.moveToFirst();
+                String bankaccount, aadhaar;
+                Integer pdfSequenceNo;
+
+                if (cursor1.getString(1).length() > 4) {
+                    bankaccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
+                } else {
+                    bankaccount = "";
+                }
+                if (cursor1.getString(2).length() > 5) {
+                    aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
+                } else {
+                    aadhaar = "";
+                }
+
+                if (cursor2 != null) {
+                    cursor2.moveToFirst();
+                    pdfSequenceNo = (cursor2.getInt(0) + 1); /**pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
+                } else {
+                    pdfSequenceNo = 0;
+                }
+                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankaccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo), false);
+            }else{
+                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
+                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]", false);
+            }
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
     public String generateFileName(String id) {
         try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext())){
             StringBuilder fileName = new StringBuilder();
@@ -1707,15 +1769,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
     }
     private int get_indicator(String PersonId) {
-         Cursor cursor=db.getData("SELECT INDICATOR FROM " + db.TABLE_NAME3 + " WHERE ID= '" + PersonId +"'");//for sure it will return type or skill
-         if(cursor != null){
-             cursor.moveToFirst();
-                if(cursor.getString(0) == null) {
-                     return 1;
+        try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
+            Cursor cursor = db.getData("SELECT INDICATOR FROM " + db.TABLE_NAME3 + " WHERE ID= '" + PersonId + "'")) {//for sure it will return type or skill
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getString(0) == null) {
+                    return 1;
                 } else
-                     return Integer.parseInt(cursor.getString(0));
-         }else
-             Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                    return Integer.parseInt(cursor.getString(0));
+            } else
+                Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+        }catch(Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in get_indicator method********************");
+            return 1;
+        }
 
         return 1;//by default 1
     }
@@ -1814,18 +1882,15 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
        // int cMonth=current.get(Calendar.MONTH);
        // int cDayOfMonth=current.get(Calendar.DAY_OF_MONTH);
         inputDate.setText(current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR));
-        inputDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //To show calendar dialog
-                DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
-                        inputDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
-                    }
-                },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
-                datePickerDialog.show();
-            }
+        inputDate.setOnClickListener(view -> {
+            //To show calendar dialog
+            DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
+                    inputDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
+                }
+            },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
+            datePickerDialog.show();
         });
 
         //initially every field will be invisible based on indicator others fields will be visible
@@ -1998,103 +2063,94 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
             }
         });
-        micIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //checking for permission
-                if(checkPermissionForAudio()){
-                    if (mStartRecording) {//initially false
-                        //while recording user should not perform other task like entering date while recording because app will crash so set all field to setEnabled(false);
-                        inputP1.setEnabled(false);
-                        inputP2.setEnabled(false);
-                        inputP3.setEnabled(false);
-                        inputP4.setEnabled(false);
-                        toGive_Amount.setEnabled(false);
-                        description.setEnabled(false);
-                        inputDate.setEnabled(false);
-                        save.setVisibility(View.GONE);
-                        cancel.setEnabled(false);
-                        deposit_btn_tv.setEnabled(false);
+        micIcon.setOnClickListener(view -> {
+            //checking for permission
+            if(checkPermissionForAudio()){
+                if (mStartRecording) {//initially false
+                    //while recording user should not perform other task like entering date while recording because app will crash so set all field to setEnabled(false);
+                    inputP1.setEnabled(false);
+                    inputP2.setEnabled(false);
+                    inputP3.setEnabled(false);
+                    inputP4.setEnabled(false);
+                    toGive_Amount.setEnabled(false);
+                    description.setEnabled(false);
+                    inputDate.setEnabled(false);
+                    save.setVisibility(View.GONE);
+                    cancel.setEnabled(false);
+                    deposit_btn_tv.setEnabled(false);
 
-                        playAudioChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
-                        playAudioChronometer.start();
-                        playAudioChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
-                        saveAudio.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
-                        micIcon.setEnabled(false);
-                        micIcon.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
+                    playAudioChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
+                    playAudioChronometer.start();
+                    playAudioChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
+                    saveAudio.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
+                    micIcon.setEnabled(false);
+                    micIcon.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
 
-                        Toast.makeText(IndividualPersonDetailActivity.this, "RECORDING STARTED", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IndividualPersonDetailActivity.this, "RECORDING STARTED", Toast.LENGTH_SHORT).show();
 
-                        //be carefull take only getExternalFilesDir( null ) https://stackoverflow.com/questions/59017202/mediarecorder-stop-failed
-                        File folder = new File(getExternalFilesDir(null) + "/acBookMicRecording");//Creating File directory in phone
+                    //be carefull take only getExternalFilesDir( null ) https://stackoverflow.com/questions/59017202/mediarecorder-stop-failed
+                    File folder = new File(getExternalFilesDir(null) + "/acBookMicRecording");//Creating File directory in phone
 
-                        if (!folder.exists()) {//if folder not exist
-                            Toast.makeText(IndividualPersonDetailActivity.this, "Creating acBookMicRecording folder to store audios", Toast.LENGTH_LONG).show();
-                            folder.mkdir();//create folder
-                        }
-
-                        startRecordingVoice();
-                        IndividualPersonDetailActivity.this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //while the user is recording screen should be on. it should not close
-
-                    } else {//if recording is not started then stop
-                        Toast.makeText(IndividualPersonDetailActivity.this, "AGAIN TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
+                    if (!folder.exists()) {//if folder not exist
+                        Toast.makeText(IndividualPersonDetailActivity.this, "Creating acBookMicRecording folder to store audios", Toast.LENGTH_LONG).show();
+                        folder.mkdir();//create folder
                     }
-                    mStartRecording = !mStartRecording;//so that user should click 2 times to start recording
 
-                }else {//request for permission
-                    Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PERMISSION REQUIRED", Toast.LENGTH_SHORT).show();
-                    ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
+                    startRecordingVoice();
+                    IndividualPersonDetailActivity.this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //while the user is recording screen should be on. it should not close
+
+                } else {//if recording is not started then stop
+                    Toast.makeText(IndividualPersonDetailActivity.this, "AGAIN TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
                 }
+                mStartRecording = !mStartRecording;//so that user should click 2 times to start recording
+
+            }else {//request for permission
+                Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PERMISSION REQUIRED", Toast.LENGTH_SHORT).show();
+                ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
             }
         });
-        playAudioChronometer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(file != null) {//checking for null pointer Exception
-                    Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_SHORT).show();
-                    mediaPlayer = new MediaPlayer();
-                    try {
-                        mediaPlayer.setDataSource(file.getAbsolutePath());//passing the path where this audio is saved
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                        Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }else
-                    Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
-            }
+        playAudioChronometer.setOnClickListener(view -> {
+            if(file != null) {//checking for null pointer Exception
+                Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_SHORT).show();
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(file.getAbsolutePath());//passing the path where this audio is saved
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else
+                Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
         });
-        saveAudio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mediaRecorder !=null){
-                    //after clicking save audion then setEnabled to true so that user can enter data to fields
-                    inputP1.setEnabled(true);
-                    inputP2.setEnabled(true);
-                    inputP3.setEnabled(true);
-                    inputP4.setEnabled(true);
-                    toGive_Amount.setEnabled(true);
-                    description.setEnabled(true);
-                    inputDate.setEnabled(true);
+        saveAudio.setOnClickListener(view -> {
+            if(mediaRecorder !=null){
+                //after clicking save audion then setEnabled to true so that user can enter data to fields
+                inputP1.setEnabled(true);
+                inputP2.setEnabled(true);
+                inputP3.setEnabled(true);
+                inputP4.setEnabled(true);
+                toGive_Amount.setEnabled(true);
+                description.setEnabled(true);
+                inputDate.setEnabled(true);
 
-                    if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
-                        save.setVisibility(View.VISIBLE);
-                     }
+                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    save.setVisibility(View.VISIBLE);
+                 }
 
-                    cancel.setEnabled(true);
-                    deposit_btn_tv.setEnabled(true);
+                cancel.setEnabled(true);
+                deposit_btn_tv.setEnabled(true);
 
-                    playAudioChronometer.setTextColor(getColor(R.color.green));//changind text color to green to give feel that is saved
-                    micIcon.setBackgroundResource(R.drawable.ic_green_sharp_mic_20);//set background image to cancel
-                    stopAndSaveRecordingPathToDB();
-                    playAudioChronometer.stop();//stopping chronometer
-                    micIcon.setEnabled(false);//so that user cannot press again this button
-                    saveAudio.setEnabled(false);//even this button user should not click again
-                    playAudioChronometer.setEnabled(true);//when audio is save then user will be able to play
-                }else
-                    Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
-            }
+                playAudioChronometer.setTextColor(getColor(R.color.green));//changind text color to green to give feel that is saved
+                micIcon.setBackgroundResource(R.drawable.ic_green_sharp_mic_20);//set background image to cancel
+                stopAndSaveRecordingPathToDB();
+                playAudioChronometer.stop();//stopping chronometer
+                micIcon.setEnabled(false);//so that user cannot press again this button
+                saveAudio.setEnabled(false);//even this button user should not click again
+                playAudioChronometer.setEnabled(true);//when audio is save then user will be able to play
+            }else
+                Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
         });
         cancel.setOnClickListener(view -> dialog.dismiss());
         dialog.show();
@@ -2175,6 +2231,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 result.moveToFirst();
                 p1_p2_p3_p4_Change_Tracker(result,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
+                //close result cursor
+                //close db
             }
         });
         inputP3.addTextChangedListener(new TextWatcher() {
@@ -2341,7 +2399,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return bool;
     }
     private boolean isDataPresent(int[] arr){
-        Boolean bool=true;
+        boolean bool=true;
         int sum,one;
         sum=one=0;
 

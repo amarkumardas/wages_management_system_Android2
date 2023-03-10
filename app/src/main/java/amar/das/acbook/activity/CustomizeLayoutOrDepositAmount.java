@@ -213,7 +213,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     arr[2]=1;
                 }
                 else{
-                    remarks="["+binding.customTimeTv.getText().toString()+"-ENTERED]\n\n"+"[DEPOSITED]";//adding default deposit message so that when user dont enter remarks this remarks will be added
+                    remarks="["+binding.customTimeTv.getText().toString()+"-AUTOMATIC ENTERED]\n\n"+"[DEPOSITED]";//adding default deposit message so that when user dont enter remarks this remarks will be added
                     arr[2]=1;
                 }
 

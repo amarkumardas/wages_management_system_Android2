@@ -74,7 +74,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
     PersonRecordDatabase db;
     private String fromIntentPersonId;
-    int arr[]=new int[7];
+    int []arr=new int[7];
     String active ="0";
 
     ArrayList<WagesDetailsModel> dataList;
@@ -918,7 +918,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                             if(checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
 
-                                if(updateRateTotalAdvanceOrBalanceToDatabase()) {
+                                if(updateRateTotalAdvanceOrBalanceToDatabase()){
                                     if(generatePDFAndUpdateGlobalVariableFileName(fromIntentPersonId)){
                                         if (savePdfToDatabase(fileName)) {//fileName is global variable actually its pdf Absolute path ie.pdf created in device so absolute path of pdf which is in device.First store pdf to database so that if deleteWagesFromDBorRecyclerView failed then this pdf can be used to see previous data
                                             if (viewPDFFromDb((byte) 2,fromIntentPersonId)) {//column name should be correct Viewing pdf2
@@ -1020,8 +1020,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         Toast.makeText(IndividualPersonDetailActivity.this, message, Toast.LENGTH_LONG).show();
                                         success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, message, 0, 0, "0");
                                         if (success) {
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLERVIEW DESCRIPTION/REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
-                                        }else{//it will execute when message is not set
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLER VIEW REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
+                                        }else{//it will execute when message is not set//data is save to pdf ie.invoice2
                                             Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nWRITE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
                                         }
                                             return false;
@@ -1186,12 +1186,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         MakePdf makePdf = new MakePdf();
                         makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1);//created page 1 height weight
 
-                        fetchOrganizationDetailsForPDF(id,makePdf);//org details
-                       if(!fetchPersonDetailsForPDF(id,makePdf)){//if failed
+                        fetchOrganizationDetailsAndWriteToPDF(makePdf);//org details no need of if statement
+                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf)){//if failed
                            return false;
                        }
 
-                       fetchWorkDetailsForPDF(id,makePdf);
+                       fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf);
 
 
                        // makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},false, (byte) 0, (byte) 0);
@@ -1361,9 +1361,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }else{
                         advanceOrBalanceTv.setText("= 0");
                         advanceOrBalanceTv.setTextColor(getColor(R.color.green));
+
                         workTotalAmountTv.setText(" - 0");
                     }
-
                 }
                 private void indicator1234CalculateButDontUpdateToDBFinal(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
                     int  totalDeposit,totalWages;
@@ -1463,40 +1463,88 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
     }
 
-    public boolean fetchWorkDetailsForPDF(String id, MakePdf makePdf) {
+    public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
         try{
-            byte indicator=(byte) get_indicator(fromIntentPersonId);
-
-           switch(indicator){
+            byte indicator=(byte) get_indicator(id);
+            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occured or not
+            String[] headerAccordingToIndicator = new String[0];
+            switch(indicator){
                case 1:{
-                      fetchRecycleViewWagesAndDepositForPDF(id,makePdf,indicator);
+                   int[] sumArrayAccordingToIndicator=getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
+                   headerAccordingToIndicator=getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection);//THIS SHOULD BE TOP TO AVOID INDEX EXCEPTION
+
+                   String recyclerViewWagesdata[][]= getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
+                   if(recyclerViewWagesdata != null) {//null means data not present
+                       makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 9, false);
+
+                      String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
+                      makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,71f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
+                   }
+
+                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
+                   if(recyclerViewDepositdata!=null) {//null means data not present
+                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
+                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
+                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
+                   }
+                   addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(id,indicator,sumArrayAccordingToIndicator,makePdf,headerAccordingToIndicator);
+
+
                }break;
-               case 2:{}break;
-               case 3:{}break;
-               case 4:{}break;
+               case 2:{
+                   String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
+                   if(recyclerViewWagesdata != null) {//null means data not present
+                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f, 66f}, 9, false);
+
+                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
+                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,66f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
+                   }
+
+                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
+                   if(recyclerViewDepositdata!=null) {
+                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
+                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
+                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
+                   }
+                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
+
+               }break;
+               case 3:{
+                   String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
+                   if(recyclerViewWagesdata != null) {//null means data not present
+                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f,5f,61f}, 9, false);
+
+                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
+                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,5f,61f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
+                   }
+
+                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
+                   if(recyclerViewDepositdata!=null) {
+                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
+                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
+                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
+                   }
+                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
+
+               }break;
+               case 4:{String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
+                   if(recyclerViewWagesdata != null) {//null means data not present
+                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f,5f,5f,56f}, 9, false);
+
+                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
+                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,5f,5f,56f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
+                   }
+
+                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
+                   if(recyclerViewDepositdata!=null) {
+                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
+                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
+                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
+                   }
+                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
+
+               }break;
            }
-
-//            String header[]=new String[]{"DATE","WAGES","M","REMARKS"};
-//            String data[][]= {{"1","999999999","9999","TAKEN fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAK fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred ONLY and sis days work"},
-//                    {"2","15000012345678910","12345678910","TAKEN one lakh fifty thousand only {\"25-02-2023\",\"500\",\"6\",\"five hundred\"} "},
-//                    {"3","1500","6","TAKEN fifteen hundred only and sis days work"},
-//                    {"4","999999999","6"," EN fifteen hundred only and sis days work "},
-//                    {"5","1000","123456","TAKEN one lakh fifty housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work ndred only and sis days work TAKEN fiftee housand only TAKEN fifteen hundred only and sis days work TAKEN fiftee thousand only TAKEN fifteen hundred only and sis days work TAKEN fifteen hundred only and sis days work"},
-//                    {"6","5000","6","TAKEN one lakh fifty thousand only "},
-//                    {"7","500","6","five hundred"},
-//                    {"8","50000","66","five hundred"},
-//                    {"9","1500","6","five hundred"},{"10","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"},
-//                    {"11","500","6","five hundred"},{"12","500","6","five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred 25-02-2023\",\"1500\",\"6\",\"five hundred"}
-//            };
-//
-//            makePdf.makeTable(header,data,new float[]{12f,12f,5f,71f} ,10 ,false);//for 1 perfect value
-//
-//            String datas[]=new String[]{"DATE"," WAGES","M","REMARKS"};
-//            makePdf.singleCustomRow(datas,new float[]{12f,12f,5f,71},Color.rgb(221,133,3),Color.BLUE,Color.GREEN,0,true, (byte) 50, (byte) 50);
-
-
-//            String dz[]=new String[]{"NUMBER OF ENTRIES 100 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv",""};
-//            makePdf.writeSentenceWithoutLines(dz,new float[]{20F,80},true, (byte) 100, (byte) 100);
 //            makePdf.singleCustomRow(datasss,new float[]{12f,12f,5f,71},0,0,0,0,true, (byte) 100, (byte) 100);
             return true;
         }catch(Exception ex){
@@ -1504,45 +1552,133 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return false;
         }
     }
-
-    public boolean fetchRecycleViewWagesAndDepositForPDF(String id, MakePdf makePdf, byte indicator) {
-        try{
-            switch (indicator){
-                case 1:{
-
-
-                    String recyclerViewWagesdata[][]= getAllWagesDataFromDb(id,indicator);
-                    if(recyclerViewWagesdata != null) {
-                        makePdf.makeTable(getWagesHeadersFromDb(id,indicator), recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 10, false);
-                    }
-
-
-
-                    String recyclerViewDepositdata[][]=getAllDepositFromDb(id);
-                    if(recyclerViewDepositdata!=null) {
-                        makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 10, false);
-                    }
-
-
-
-                }break;
-                case 2:{}break;
-                case 3:{}break;
-                case 4:{}break;
+    public int[] getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(String id, byte indicator, boolean[] errorDetection) {//return arr with value but if error return arr with 0 value and errorDetection set to true;
+        Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
+            switch(indicator){
+                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
+                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+" FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id +"'");
+                       }break;
+                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
+                        rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
+                        }break;
+                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
+                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+", "+db.COL_34_R3+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
+                       }break;
+                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"),SUM("+db.COL_292_P4+"), SUM("+db.COL_27_DEPOSIT+")  FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
+                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+", "+db.COL_34_R3+", "+db.COL_35_R4+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
+                       }break;
             }
-           return true;
-        }catch(Exception ex){
+            int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size
+            int col=0;
+            if (sumDepositWagesCursor !=null && sumDepositWagesCursor.getCount()!=0) {
+                sumDepositWagesCursor.moveToFirst();
+                for (int i = 0; i < sumDepositWagesCursor.getColumnCount(); i++) {//retrieving data from cursor
+                    arr[col++]=sumDepositWagesCursor.getInt(i);
+                }
+            }
+            if (rateCursor !=null && rateCursor.getCount()!=0){
+                rateCursor.moveToFirst();
+                for (int i = 0; i < rateCursor.getColumnCount(); i++){//retrieving data from cursor
+                    arr[col++]=rateCursor.getInt(i);
+                }
+            }
+//            for (int i:arr){
+//                System.out.println(i+"......................");
+//
+//            }
+            return arr;
+        }catch (Exception ex){
             ex.printStackTrace();
-            return false;
+            System.out.println("error occurred in getArrayDataOfTotalWagesDepositRateDaysWorked method**************************");
+            errorDetection[0]=true;//indicate error has occur
+            return new int[2*(indicator+1)];//if exception occur 0 value will be return
+        }finally {//since there is return statement in try and catch block so finally needed
+            if(sumDepositWagesCursor!=null&& rateCursor !=null) {
+                sumDepositWagesCursor.close();
+                rateCursor.close();
+            }
+        }
+    }
+    public void addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(String id,byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
+        if(indicator==1){                                 //  P1*R1
+             int totalOfP1IntoR1=sumArrayAccordingToIndicator[1]*sumArrayAccordingToIndicator[3];
+            if(sumArrayAccordingToIndicator[2]!=0) {//DEPOSIT AMOUNT checking there or not
+                makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2]+" =", sumArrayAccordingToIndicator[1]+"","X","RATE", totalOfP1IntoR1 + ""}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 100, (byte) 100);
+                makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",sumArrayAccordingToIndicator[2]+""},new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 100, (byte) 100);
+                makePdf.singleCustomRow(new String[]{"SUB TOTAL =",(totalOfP1IntoR1+sumArrayAccordingToIndicator[2])+""}, new float[]{67f,33f}, 0, Color.rgb(45,179,16), 0, 0, true, (byte) 100, (byte) 100);
+            }else{
+                makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2]+" =", sumArrayAccordingToIndicator[1] +"","X","RATE", totalOfP1IntoR1 + ""}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 100, (byte) 100);
+                makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",totalOfP1IntoR1+""}, new float[]{67f,33f}, 0, Color.rgb(45,179,16), 0, 0, true, (byte) 100, (byte) 100);
+            }
+        }
+        if(indicator==2){
+
+        }
+        if(indicator==3){
+
+        }
+        if(indicator==4){
+
         }
     }
 
-    public String[][] getAllDepositFromDb(String id) {
+    public String[] getTotalSumOfDepositFromDb(String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
+            Cursor depositSumCursor=db.getData("SELECT SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");)
+        {
+          if (depositSumCursor!=null && depositSumCursor.getCount()!=0){
+              depositSumCursor.moveToFirst();
+              return new String[]{"",depositSumCursor.getString(0),"****SUBTOTAL****"};
+          }
+          return null;//when no data return null
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in getTotalSumOfDepositFromDb method**************************");
+            errorDetection[0]=true;
+            return new String[]{"error occurred"};//to avoid error
+        }
+    }
+    public String[] getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
+        Cursor sumCursor = null;
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
+            switch(indicator){
+                case 1:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
+                case 2:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
+                case 3:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
+                case 4:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"),SUM("+db.COL_292_P4+")  FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
+            }
+            if (sumCursor !=null && sumCursor.getCount()!=0) {
+                sumCursor.moveToFirst();
+                switch (indicator) {
+                    case 1:
+                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1),"****SUBTOTAL****"};
+                    case 2:
+                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2),"****SUBTOTAL****"};
+                    case 3:
+                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2), sumCursor.getString(3),"****SUBTOTAL****"};
+                    case 4:
+                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2), sumCursor.getString(3), sumCursor.getString(4),"****SUBTOTAL****"};
+                }
+            }
+            return null;//when  no data
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in getTotalSumOfWagesAndWorkingDays method**************************");
+            errorDetection[0]=true;//indicate error has occur
+            return new String[]{"error occurred"};//to avoid error
+        }finally {//since there is return statement in try and catch block so finally needed
+            if(sumCursor!=null) {
+                sumCursor.close();
+            }
+        }
+    }
+    public String[][] getAllDepositFromDb(String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
         try(PersonRecordDatabase db = new PersonRecordDatabase(this);
              Cursor depositCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_27_DEPOSIT+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='1'"))
            {
                String recyclerViewDepositdata[][]=null;
-            if(depositCursor.getCount()!=0) {
+            if(depositCursor!= null&&depositCursor.getCount()!=0){
                 recyclerViewDepositdata= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
                int row = 0;
                while (depositCursor.moveToNext()) {
@@ -1552,49 +1688,69 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                    row++;
                }
            }
-            return recyclerViewDepositdata;
+            return recyclerViewDepositdata;//when no data return null
         }catch (Exception ex){
             ex.printStackTrace();
             System.out.println("error occurred in getAllDepositFromDb method**************************");
-            return new String[][]{{"error occurred","error occurred"}};
+            errorDetection[0]=true;
+            return new String[][]{{"error occurred"}};//to avoid error
         }
     }
-
-    public String[] getWagesHeadersFromDb(String id, byte indicator) {
-        Cursor cursor = null;
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
-            switch(indicator){
-                case 1:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" FROM " +db.TABLE_NAME1+ " WHERE ID= '" + id +"'");
-                        cursor.moveToFirst();
-                        return new String[]{"DATE","WAGES",cursor.getString(0),"REMARKS"};
+    public String[] getWagesHeadersFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection ) {//return null when no data and if error errorDetection will be set to true
+        Cursor cursor2=null;//returnOnlySkill will return only string of array
+        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
+            Cursor cursor1=db.getData("SELECT "+db.COL_8_SKILL+" FROM " +db.TABLE_NAME1+ " WHERE ID= '" + id +"'"))
+        {
+            cursor1.moveToFirst();
+               switch (indicator) {
+                   case 1: {
+//                       if(returnOnlySkill==false) {
+                           return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};
+//                       }else{
+//                           return new String[]{cursor1.getString(0)};
+//                       }
+                          }
+                          case 2: {
+                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                       cursor2.moveToFirst();
+                      // if(returnOnlySkill==false) {
+                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
+//                       }else{
+//                           return new String[]{ cursor1.getString(0),cursor2.getString(0)};
+//                       }
+                   }
+                   case 3: {
+                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                       cursor2.moveToFirst();
+                      // if(returnOnlySkill==false){
+                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
+//                       }else{
+//                           return new String[]{cursor1.getString(0), cursor2.getString(0), cursor2.getString(1)};
+//                       }
+                   }
+                   case 4: {
+                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " ," + db.COL_38_SKILL3 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                       cursor2.moveToFirst();
+                       //if(returnOnlySkill==false) {
+                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
+//                       }else{
+//                           return new String[]{cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2)};
+//                       }
                        }
-
-                case 2:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" FROM " + db.TABLE_NAME3+ " WHERE ID='" + id + "'");
-                        cursor.moveToFirst();
-                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),"REMARKS"};
-                        }
-
-                case 3:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" ,"+db.COL_37_SKILL2+" FROM " + db.TABLE_NAME3+ " WHERE ID='" + id + "'");
-                        cursor.moveToFirst();
-                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),cursor.getString(2),"REMARKS"};
-                       }
-
-                case 4:{cursor=db.getData("SELECT "+db.COL_8_SKILL+" ,"+db.COL_36_SKILL1+" ,"+db.COL_37_SKILL2+" ,"+db.COL_38_SKILL3+" FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                        cursor.moveToFirst();
-                        return  new String[]{"DATE","WAGES",cursor.getString(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),"REMARKS"};
-                       }
-            }
+               }
+               return null;
         }catch (Exception ex){
             ex.printStackTrace();
             System.out.println("error occurred in getHeadersFromDb method**************************");
-            return new String[]{"error occurred"};
-        }finally {
-            cursor.close();//since there is return statement so finally needed
+            errorDetection[0]=true;
+            return new String[]{"error occurred"};//to avoid error
+        }finally {//since there is return statement in try and catch block so finally needed
+            if(cursor2!=null) {
+                cursor2.close();
+            }
         }
-        return new String[]{"error occurred"};//this code will never execute due to return statement in try and catch block just using to avoid error
-    }
-
-    public String[][] getAllWagesDataFromDb(String id, byte indicator) {
+     }
+    public String[][] getAllWagesDetailsFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
         try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
             Cursor wagesCursor = null;
             switch(indicator){
@@ -1604,7 +1760,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 case 4:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_291_P3+" ,"+db.COL_292_P4+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
             }
             String recyclerViewWagesdata[][]=null;
-            if(wagesCursor.getCount()!= 0) {
+            if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
                  recyclerViewWagesdata = new String[wagesCursor.getCount()][wagesCursor.getColumnCount()];
                 int row = 0;
                 while (wagesCursor.moveToNext()) {
@@ -1614,12 +1770,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     row++;
                 }
             }
-            wagesCursor.close();
-            return recyclerViewWagesdata;
+            if(wagesCursor!=null) wagesCursor.close();
+
+            return recyclerViewWagesdata;//when no data return null
         }catch (Exception ex){
             ex.printStackTrace();
             System.out.println("error occurred in getAllWagesData method**************************");
-            return new String[][]{{"error occurred","error occurred"}};
+            errorDetection[0]=true;
+            return new String[][]{{"error occurred"}};//to avoid error
         }
     }
 
@@ -1645,16 +1803,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //        }
 //    }
 
-    public boolean fetchOrganizationDetailsForPDF(String id, MakePdf makePdf) {
+    public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
         try{
             makePdf.makeTopHeaderrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
 
             return true;
         }catch(Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in fetchOrganizationDetailsAndWriteToPDF method**************************");
            return false;
         }
     }
-    public boolean fetchPersonDetailsForPDF(String id, MakePdf makePdf) {
+    public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
         try (PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
              Cursor cursor1 = db.getData("SELECT " + db.COL_2_NAME + " , " + db.COL_3_BANKAC + " , " + db.COL_6_AADHAAR + " , " + db.COL_10_IMAGE + " FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
              Cursor cursor2 = db.getData("SELECT " + db.COL_396_PDFSEQUENCE + " FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'")){
@@ -1688,6 +1848,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return true;
         }catch (Exception ex){
             ex.printStackTrace();
+            System.out.println("error occurred in fetchPersonDetailAndWriteToPDF method**************************");
             return false;
         }
     }
@@ -1718,7 +1879,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return fileName.toString();
         }catch (Exception ex){
             ex.printStackTrace();
-            Toast.makeText(IndividualPersonDetailActivity.this, "error occurred pdf name not generated", Toast.LENGTH_LONG).show();
+            Toast.makeText(IndividualPersonDetailActivity.this, "error occurred pdf name not generated************", Toast.LENGTH_LONG).show();
             return "errorOccurredInvoiceNameNull";
         }
     }
@@ -1784,7 +1945,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             System.out.println("error occurred in get_indicator method********************");
             return 1;
         }
-
         return 1;//by default 1
     }
     private void insertDataToRecyclerView_ALertDialogBox(int indicator) {
@@ -1978,8 +2138,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 remarks="["+time+"-ENTERED]\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
                 arr[6]=1;
             }
-            else
-                arr[6]=0;
+            else {//if user dont enter anything then time will set automatically
+                remarks="["+time+"-AUTOMATIC ENTERED]";
+                arr[6] = 0;
+            }
             boolean success, isWrongData, isDataPresent;
               isWrongData= isEnterDataIsWrong(arr);
               isDataPresent= isDataPresent(arr);

@@ -12,12 +12,12 @@ import java.util.List;
 
 import amar.das.acbook.model.MestreLaberGModel;
 
-public class ProjectUtility {
+public class MyUtility {
     public static int get24hrCurrentTimeRemoveColon() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");//capital HH stands for 24hr time format
        return  Integer.parseInt(sdf.format(new Date()).replaceAll("[:]", ""));//convert 01:30:55 to 13055 by parsing to INTEGER initial 0 is removed
     }
-    public static String convertLongIntegerToCommaSeparatedString(Long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
+    public static String convertToIndianNumberSystem(Long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
         String inputString = String.valueOf(number);//converting integer to string
         StringBuilder result = new StringBuilder();
         //when length is odd then place , after 2 digit and when length is even then place , after 1 digit

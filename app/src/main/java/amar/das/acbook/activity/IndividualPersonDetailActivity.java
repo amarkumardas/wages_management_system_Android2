@@ -59,6 +59,7 @@ import amar.das.acbook.adapters.WagesDetailsAdapter;
 import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
      ActivityIndividualPersonDetailBinding binding;
@@ -918,7 +919,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                             if(checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
 
-                                if(updateRateTotalAdvanceOrBalanceToDatabase()){
+                                if(updateRateTotalAdvanceOrBalanceToDatabase()){//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
                                     if(generatePDFAndUpdateGlobalVariableFileName(fromIntentPersonId)){
                                         if (savePdfToDatabase(fileName)) {//fileName is global variable actually its pdf Absolute path ie.pdf created in device so absolute path of pdf which is in device.First store pdf to database so that if deleteWagesFromDBorRecyclerView failed then this pdf can be used to see previous data
                                             if (viewPDFFromDb((byte) 2,fromIntentPersonId)) {//column name should be correct Viewing pdf2
@@ -1467,92 +1468,186 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         try{
             byte indicator=(byte) get_indicator(id);
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occured or not
-            String[] headerAccordingToIndicator = new String[0];
-            switch(indicator){
-               case 1:{
-                   int[] sumArrayAccordingToIndicator=getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
-                   headerAccordingToIndicator=getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection);//THIS SHOULD BE TOP TO AVOID INDEX EXCEPTION
+            String[] headerAccordingToIndicator = getWagesHeadersFromDbBasedOnIndicator(id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
+            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(id,indicator,errorDetection);//if error cause errorDetection will be set true
+            String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id, indicator, errorDetection);//it amy return null   when no data
+            String[][] recyclerViewDepositdata = getAllDepositFromDb(id, errorDetection);//it amy return null   when no data
+            if(errorDetection[0]==false){
+                if(!makeSummaryAndWriteToPDFBasedOnIndicator(indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;
+                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50));//just for 1 space
 
-                   String recyclerViewWagesdata[][]= getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
-                   if(recyclerViewWagesdata != null) {//null means data not present
-                       makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 9, false);
+                switch (indicator) {
+                    case 1: {
+                           if (recyclerViewWagesdata != null) {//null means data not present
+                                if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 9, false)){
+                                                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
+                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 71f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
+                                        return false;
+                                    }
+                                }else return false;
+                             }
+                            if (recyclerViewDepositdata != null) {//null means data not present
+                               if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)){
+                                    if(!makePdf.singleCustomRow(new String[]{"+",MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0) ){//Color.rgb(45,179,16) green
+                                        return false;
+                                    }
+                                }else return false;
+                            }
+                    }
+                    break;
+                    case 2: {
+                             if (recyclerViewWagesdata != null){//null means data not present
+                                if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 66f}, 9, false)) {
+                                    //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
+                                   if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 66f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
+                                      return false;
+                                   }
+                                }else return false;
+                            }
+                            if (recyclerViewDepositdata != null){
+                               if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
+                                  if(!makePdf.singleCustomRow(new String[]{"+",MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)){
+                                      return false;
+                                   }
+                               }else return false;
+                            }
+                    }
+                    break;
+                    case 3: {
+                        if (recyclerViewWagesdata != null) {//null means data not present
+                           if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 5f, 61f}, 9, false)) {
+                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
+                               if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 5f, 61f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)) {
+                                   return false;
+                               }
+                           }else return false;
+                        }
+                        if (recyclerViewDepositdata != null) {
+                            if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
+                               if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {//Color.rgb(45,179,16) green
+                                return false;
+                               }
+                               }else return false;
+                            }
+                    }
+                    break;
+                    case 4:{
+                         if (recyclerViewWagesdata != null) {//null means data not present
+                            if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f}, 9, false)) {
+                                //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
+                                if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)) {
+                                  return false;
+                                }
+                            }else return false;
+                        }
+                        if (recyclerViewDepositdata != null) {
+                            if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
+                               if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+                                  return false;
+                                }
+                            }else return false;
+                        }
+                    }
+                    break;
+                }//switch
+                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, headerAccordingToIndicator)) {return false;}
+            }else return false;//means error has occurred
 
-                      String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
-                      makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,71f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
-                   }
-
-                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
-                   if(recyclerViewDepositdata!=null) {//null means data not present
-                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
-                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
-                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
-                   }
-                   addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(id,indicator,sumArrayAccordingToIndicator,makePdf,headerAccordingToIndicator);
-
-
-               }break;
-               case 2:{
-                   String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
-                   if(recyclerViewWagesdata != null) {//null means data not present
-                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f, 66f}, 9, false);
-
-                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
-                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,66f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
-                   }
-
-                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
-                   if(recyclerViewDepositdata!=null) {
-                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
-                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
-                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
-                   }
-                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
-
-               }break;
-               case 3:{
-                   String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
-                   if(recyclerViewWagesdata != null) {//null means data not present
-                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f,5f,61f}, 9, false);
-
-                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
-                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,5f,61f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
-                   }
-
-                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
-                   if(recyclerViewDepositdata!=null) {
-                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
-                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
-                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
-                   }
-                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
-
-               }break;
-               case 4:{String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id,indicator,errorDetection);
-                   if(recyclerViewWagesdata != null) {//null means data not present
-                       makePdf.makeTable(getWagesHeadersFromDbBasedOnIndicator(id,indicator,errorDetection), recyclerViewWagesdata, new float[]{12f, 12f, 5f,5f,5f,5f,56f}, 9, false);
-
-                       String[] totalSum= getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(id,indicator,errorDetection);
-                       makePdf.singleCustomRow(totalSum,new float[]{12f,12f,5f,5f,5f,5f,56f},0,Color.rgb(221,133,3),0,0,true,(byte)0,(byte)0);
-                   }
-
-                   String[][] recyclerViewDepositdata = getAllDepositFromDb(id,errorDetection);
-                   if(recyclerViewDepositdata!=null) {
-                       makePdf.makeTable(new String[]{"DATE","DEPOSIT","REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false);
-                       String[] totalDepositSum= getTotalSumOfDepositFromDb(id,errorDetection);
-                       makePdf.singleCustomRow(totalDepositSum,new float[]{12f,12f,76f},0,Color.rgb(45,179,16) ,0,0,true,(byte)0,(byte)0);
-                   }
-                   getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(id,indicator,errorDetection);
-
-               }break;
-           }
-//            makePdf.singleCustomRow(datasss,new float[]{12f,12f,5f,71},0,0,0,0,true, (byte) 100, (byte) 100);
             return true;
         }catch(Exception ex){
             ex.printStackTrace();
+            System.out.println("error occurred in fetchWorkDetailsCalculationAndWriteToPDF method**************************");
             return false;
         }
     }
-    public int[] getSumOfTotalWagesDepositRateDaysWorkedAccordingToIndicator(String id, byte indicator, boolean[] errorDetection) {//return arr with value but if error return arr with 0 value and errorDetection set to true;
+
+    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(byte indicator,String id,MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
+        try(PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
+             Cursor cursor=db.getData("SELECT "+db.COL_13_ADVANCE+" ,"+db.COL_14_BALANCE+" FROM " + db.TABLE_NAME1 + " WHERE ID= '" + id + "'"))
+         {
+             if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY"},new float[]{100f},false,(byte)50,(byte)50)) return false;
+
+
+            cursor.moveToFirst();//means only one row is returned
+            if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
+
+               if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
+                                                                                                                                                                                                      //yellow                               green
+                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(45,179,16) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
+                if(!makePdf.singleCustomRow(new String[]{ " *Advance after calculation Rs. " + MyUtility.convertToIndianNumberSystem((long) cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
+
+            }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
+
+                if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                //                                                                                                                                                                                                                      yellow                               green                                    green
+                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(45,179,16) ,Color.rgb(45,179,16),0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(new String[]{ " *Balance after calculation Rs. " +MyUtility.convertToIndianNumberSystem((long) cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
+
+            }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
+                if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                                                                                                                                                                                                                                            // yellow                               green                                green
+                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(45,179,16) ,Color.rgb(45,179,16),0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(new String[]{ " *All cleared after calculation Rs. 0"},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
+
+            }
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("error occurred in makeSummaryAndWriteToPDFBasedOnIndicator method**************************");
+            return false;
+        }
+    }
+
+    public String[] totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(byte indicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, int advanceOrBalanceAmount){
+        try{
+            switch(indicator){
+                case 1: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0) {//if no deposit
+//                                                                                                        wages                                                                                                                            p1*r1
+                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[3])), MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
+                         }else{//if deposit then add deposit
+                    //                                                    wages                                                                                             deposit                                                                                                                   p1*r1
+                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[2]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[3]))), MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
+                         }
+                        }
+                case 2: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
+                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long) ((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[4])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[5]))),MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
+                        }else{//if deposit then add deposit
+                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[3]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[4])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[5]))),MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
+                        }
+                        }
+                case 3: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
+                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[5])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[7]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
+                        }else{//if deposit then add deposit
+                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)(arrayOfTotalWagesDepositRateAccordingToIndicator[4]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[5])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[7]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
+                        }
+                        }
+                case 4: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
+                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[7])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[8])+(arrayOfTotalWagesDepositRateAccordingToIndicator[4] * arrayOfTotalWagesDepositRateAccordingToIndicator[9]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
+                        }else{//if deposit then add deposit
+                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)(arrayOfTotalWagesDepositRateAccordingToIndicator[5]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[7])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[8])+(arrayOfTotalWagesDepositRateAccordingToIndicator[4] * arrayOfTotalWagesDepositRateAccordingToIndicator[9]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
+                        }
+                        }
+            }
+            return new String[]{"no indicator","no indicator","no indicator"};
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return new String[]{"error occurred","error occurred","error occurred"};
+        }
+    }
+
+    public String[] headersForSummaryBasedOnIndicator(byte indicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, String advanceOrBalanceString) {
+        try{
+            if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//indicator+1 is index of deposit in array of arrayOfTotalWagesDepositRateAccordingToIndicator
+                return new String[]{"TOTAL WAGES","TOTAL WORK AMOUNT",advanceOrBalanceString};
+            }else{//when deposit present
+                return new String[]{"TOTAL WAGES","TOTAL DEPOSIT + WORK AMOUNT",advanceOrBalanceString};
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return new String[]{"error occurred","error occurred","error occurred"};//when exception occur it will set as header
+        }
+    }
+    public int[] getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//important method return arr with value but if error return arr with 0 value and errorDetection set to true;.it index value is sensitive.according to indicator it store date in particular index
         Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
         try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
             switch(indicator){
@@ -1569,7 +1664,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                        rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+", "+db.COL_34_R3+", "+db.COL_35_R4+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
                        }break;
             }
-            int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size
+            int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size.like indicator 1 need 4 space in array so formula is [2*(indicator+1)]
             int col=0;
             if (sumDepositWagesCursor !=null && sumDepositWagesCursor.getCount()!=0) {
                 sumDepositWagesCursor.moveToFirst();
@@ -1583,10 +1678,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     arr[col++]=rateCursor.getInt(i);
                 }
             }
-//            for (int i:arr){
-//                System.out.println(i+"......................");
-//
-//            }
+
             return arr;
         }catch (Exception ex){
             ex.printStackTrace();
@@ -1600,77 +1692,82 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         }
     }
-    public void addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(String id,byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
-        if(indicator==1){                                 //  P1*R1
-             int totalOfP1IntoR1=sumArrayAccordingToIndicator[1]*sumArrayAccordingToIndicator[3];
-            if(sumArrayAccordingToIndicator[2]!=0) {//DEPOSIT AMOUNT checking there or not
-                makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2]+" =", sumArrayAccordingToIndicator[1]+"","X","RATE", totalOfP1IntoR1 + ""}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 100, (byte) 100);
-                makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",sumArrayAccordingToIndicator[2]+""},new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 100, (byte) 100);
-                makePdf.singleCustomRow(new String[]{"SUB TOTAL =",(totalOfP1IntoR1+sumArrayAccordingToIndicator[2])+""}, new float[]{67f,33f}, 0, Color.rgb(45,179,16), 0, 0, true, (byte) 100, (byte) 100);
-            }else{
-                makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2]+" =", sumArrayAccordingToIndicator[1] +"","X","RATE", totalOfP1IntoR1 + ""}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 100, (byte) 100);
-                makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",totalOfP1IntoR1+""}, new float[]{67f,33f}, 0, Color.rgb(45,179,16), 0, 0, true, (byte) 100, (byte) 100);
-            }
-        }
-        if(indicator==2){
-
-        }
-        if(indicator==3){
-
-        }
-        if(indicator==4){
-
-        }
-    }
-
-    public String[] getTotalSumOfDepositFromDb(String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
-            Cursor depositSumCursor=db.getData("SELECT SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");)
-        {
-          if (depositSumCursor!=null && depositSumCursor.getCount()!=0){
-              depositSumCursor.moveToFirst();
-              return new String[]{"",depositSumCursor.getString(0),"****SUBTOTAL****"};
-          }
-          return null;//when no data return null
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getTotalSumOfDepositFromDb method**************************");
-            errorDetection[0]=true;
-            return new String[]{"error occurred"};//to avoid error
-        }
-    }
-    public String[] getTotalSumOfWagesAndWorkingDaysFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        Cursor sumCursor = null;
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
+    public boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
+        try{
             switch(indicator){
-                case 1:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
-                case 2:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
-                case 3:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
-                case 4:sumCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"),SUM("+db.COL_292_P4+")  FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");break;
+                case 1: {
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 92, (byte) 92);
+                    if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    } else {//when there is deposit then add deposit
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2]))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }
+                }break;
+                case 2: {
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 92, (byte) 92);//common for all
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                    if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
+                        //                                                                                                                                      P1*R1                              +                             P2*R2
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }else{//when there is deposit then add deposit
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                        //                       P1*R1                             +                             P2*R2                             +  DEPOSIT
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long) ((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3]))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }
+                }break;
+                case 3:{
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 92, (byte) 92);//common for all
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+
+                    if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((long) ((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }else{ //when there is deposit then add deposit
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                              +  DEPOSIT
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4]) )}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }
+                }break;
+                case 4:{
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 92, (byte) 92);//common for all
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92);
+
+                    if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }else{//when there is deposit then add deposit
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 92, (byte) 92 );
+                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                                                           P4*R4                                  +  DEPOSIT
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0, Color.rgb(45, 179, 16), 0, 0, true, (byte) 92, (byte) 92);
+                    }
+                }break;
             }
-            if (sumCursor !=null && sumCursor.getCount()!=0) {
-                sumCursor.moveToFirst();
+            return true;
+    }catch(Exception ex){
+        ex.printStackTrace();
+        System.out.println("error occurred in addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF method**************************");
+        return false;
+    }
+    }
+    public String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
+        try{
                 switch (indicator) {
-                    case 1:
-                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1),"****SUBTOTAL****"};
-                    case 2:
-                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2),"****SUBTOTAL****"};
-                    case 3:
-                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2), sumCursor.getString(3),"****SUBTOTAL****"};
-                    case 4:
-                        return new String[]{"", sumCursor.getString(0), sumCursor.getString(1), sumCursor.getString(2), sumCursor.getString(3), sumCursor.getString(4),"****SUBTOTAL****"};
+                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
+
+                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
+
+                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
+
+                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
                 }
-            }
-            return null;//when  no data
+                return new String[]{"no indicator"};//this code will not execute due to return in switch block just using to avoid error
         }catch (Exception ex){
             ex.printStackTrace();
-            System.out.println("error occurred in getTotalSumOfWagesAndWorkingDays method**************************");
+            System.out.println("error occurred in getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator method**************************");
             errorDetection[0]=true;//indicate error has occur
             return new String[]{"error occurred"};//to avoid error
-        }finally {//since there is return statement in try and catch block so finally needed
-            if(sumCursor!=null) {
-                sumCursor.close();
-            }
         }
     }
     public String[][] getAllDepositFromDb(String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
@@ -1683,7 +1780,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                int row = 0;
                while (depositCursor.moveToNext()) {
                    for (int col = 0; col < depositCursor.getColumnCount(); col++) {
-                       recyclerViewDepositdata[row][col] = depositCursor.getString(col);//storing all data in 2d string
+                       if(col!=1) {
+                           recyclerViewDepositdata[row][col] = depositCursor.getString(col);//storing all data in 2d string
+                       }else{
+                           recyclerViewDepositdata[row][col] = MyUtility.convertToIndianNumberSystem(depositCursor.getLong(col));//if column is 1 then convert to indian number system
+                       }
                    }
                    row++;
                }
@@ -1696,49 +1797,29 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return new String[][]{{"error occurred"}};//to avoid error
         }
     }
-    public String[] getWagesHeadersFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection ) {//return null when no data and if error errorDetection will be set to true
+    public String[] getWagesHeadersFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection ) {//  if error errorDetection will be set to true
         Cursor cursor2=null;//returnOnlySkill will return only string of array
         try(PersonRecordDatabase db = new PersonRecordDatabase(this);
             Cursor cursor1=db.getData("SELECT "+db.COL_8_SKILL+" FROM " +db.TABLE_NAME1+ " WHERE ID= '" + id +"'"))
         {
             cursor1.moveToFirst();
                switch (indicator) {
-                   case 1: {
-//                       if(returnOnlySkill==false) {
-                           return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};
-//                       }else{
-//                           return new String[]{cursor1.getString(0)};
-//                       }
-                          }
-                          case 2: {
+                   case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
+                   case 2: {
                        cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
                        cursor2.moveToFirst();
-                      // if(returnOnlySkill==false) {
-                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
-//                       }else{
-//                           return new String[]{ cursor1.getString(0),cursor2.getString(0)};
-//                       }
+                       return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
                    }
-                   case 3: {
-                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                       cursor2.moveToFirst();
-                      // if(returnOnlySkill==false){
-                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
-//                       }else{
-//                           return new String[]{cursor1.getString(0), cursor2.getString(0), cursor2.getString(1)};
-//                       }
+                   case 3: { cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                             cursor2.moveToFirst();
+                             return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
                    }
-                   case 4: {
-                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " ," + db.COL_38_SKILL3 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                       cursor2.moveToFirst();
-                       //if(returnOnlySkill==false) {
-                           return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
-//                       }else{
-//                           return new String[]{cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2)};
-//                       }
+                   case 4: { cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " ," + db.COL_38_SKILL3 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
+                             cursor2.moveToFirst();
+                             return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
                        }
                }
-               return null;
+               return new String[]{"no indicator", "no indicator", "no indicator", "no indicator"};//this statement will not execute due to retrun statement in switch just to remove error used
         }catch (Exception ex){
             ex.printStackTrace();
             System.out.println("error occurred in getHeadersFromDb method**************************");
@@ -1765,7 +1846,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 int row = 0;
                 while (wagesCursor.moveToNext()) {
                     for (int col = 0; col < wagesCursor.getColumnCount(); col++) {
-                        recyclerViewWagesdata[row][col] = wagesCursor.getString(col);//storing all data in 2d string
+                        if(col !=1) {
+                            recyclerViewWagesdata[row][col] = wagesCursor.getString(col);//storing all data in 2d string
+                        }else{//when col is 1 then convert wages to number system
+                            recyclerViewWagesdata[row][col]= MyUtility.convertToIndianNumberSystem(wagesCursor.getLong(col));
+                        }
                     }
                     row++;
                 }

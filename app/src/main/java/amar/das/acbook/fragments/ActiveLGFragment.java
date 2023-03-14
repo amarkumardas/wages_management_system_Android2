@@ -23,7 +23,7 @@ import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.PersonRecordDatabase;
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.FragmentActiveLGBinding;
-import amar.das.acbook.utility.ProjectUtility;
+import amar.das.acbook.utility.MyUtility;
 
 
 public class ActiveLGFragment extends Fragment {
@@ -103,7 +103,7 @@ public class ActiveLGFragment extends Fragment {
 //            }
 //        }
         lGArrayList.trimToSize();
-        ProjectUtility.sortArrayList(lGArrayList);
+        MyUtility.sortArrayList(lGArrayList);
         cursorGL.close();//closing cursor after finish
         db.close();//closing database to prevent dataleak
         mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), lGArrayList);
@@ -198,7 +198,7 @@ public class ActiveLGFragment extends Fragment {
 
 
         arraylist.trimToSize();//to free space
-        ProjectUtility.sortArrayList(arraylist);
+        MyUtility.sortArrayList(arraylist);
         cursormestre.close();
         db.close();//closing database
     }

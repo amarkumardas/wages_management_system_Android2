@@ -13,7 +13,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import amar.das.acbook.utility.ProjectUtility;
+import amar.das.acbook.utility.MyUtility;
 
 public class MakePdf{
     private PdfDocument myPdfDocument;
@@ -141,7 +141,7 @@ public class MakePdf{
             canvas.drawText("A/C: " + accountNo+", AADHAAR: "+aadhaarNo,80,  top+41 , myPaint);
 
             myPaint.setTextSize(6.0f);
-            canvas.drawText( "CREATED ON: "+ ProjectUtility.get12hrCurrentTimeAndDate(),80,  top+56 , myPaint);
+            canvas.drawText( "CREATED ON: "+ MyUtility.get12hrCurrentTimeAndDate(),80,  top+56 , myPaint);
 
             myPaint.setTextAlign(Paint.Align.RIGHT);
             myPaint.setTextSize(8.0f);

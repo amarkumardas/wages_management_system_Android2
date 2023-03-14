@@ -26,7 +26,7 @@ import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.PersonRecordDatabase;
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.FragmentActiveMBinding;
-import amar.das.acbook.utility.ProjectUtility;
+import amar.das.acbook.utility.MyUtility;
 
 
 public class ActiveMFragment extends Fragment {
@@ -105,7 +105,7 @@ public class ActiveMFragment extends Fragment {
         }
 
         mestreactiveArrayList.trimToSize();//to release free space
-        ProjectUtility.sortArrayList(mestreactiveArrayList);//if list latestdate is null then at index 0 ,1..should contain null object then non null object thaty two while loop is taken
+        MyUtility.sortArrayList(mestreactiveArrayList);//if list latestdate is null then at index 0 ,1..should contain null object then non null object thaty two while loop is taken
         cursormestre.close();//closing cursor after finish
         db.close();//closing database to prevent dataleak
         mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), mestreactiveArrayList);
@@ -213,7 +213,7 @@ public class ActiveMFragment extends Fragment {
         mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() when the list is updated,or inserted or deleted
 
         arraylist.trimToSize();//to release free space
-        ProjectUtility.sortArrayList(arraylist);
+        MyUtility.sortArrayList(arraylist);
         cursormestre.close();
         db.close();//closing database
     }

@@ -24,7 +24,7 @@
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- to unable service -->
         <activity
-            android:name=".activity.Final_Pdf_Viewer"
+            android:name=".activity.FinalPdfViewer"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- to unable service -->
         <activity
@@ -54,7 +54,7 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-
+<!--provider is compulsory when targetSdk version 24 or greater-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

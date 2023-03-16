@@ -516,7 +516,7 @@ public class MakePdf{
          the total height of all the gaps to get the total height of the block of text.*/
     }
 
-    public  String createFileToSavePdfDocumentAndReturnFilePath3(String externalFileDir,String fileName){
+    public  String createFileToSavePdfDocumentAndReturnFileAbsolutePath3(String externalFileDir, String fileName){//return null when exception
         try {
             File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
             if (!folder.exists()) {//of folder not exist then create folder

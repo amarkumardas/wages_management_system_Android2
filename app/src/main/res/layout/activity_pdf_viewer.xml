@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#D6DADF"
     android:orientation="vertical"
-    tools:context=".activity.Final_Pdf_Viewer">
+    tools:context=".activity.FinalPdfViewer">
 
     <LinearLayout
         android:layout_width="match_parent"

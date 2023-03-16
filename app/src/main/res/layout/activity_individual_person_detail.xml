@@ -190,7 +190,7 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/dark_blue_buttonbg"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="5dp"
                 android:textAlignment="center"
@@ -204,7 +204,7 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/dark_blue_buttonbg"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:textAlignment="center"
@@ -217,7 +217,7 @@
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/dark_blue_buttonbg"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:textAlignment="center"
@@ -234,7 +234,7 @@
                 android:textAlignment="center"
                 android:text="A/C"
                 android:textColor="#FFFFFF"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -254,7 +254,7 @@
             android:text="DATE"
             android:textColor="@color/black"
             android:textAlignment="center"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/rating"
@@ -270,7 +270,7 @@
             android:textAlignment="center"
             android:text="WAGES"
             android:textColor="@color/black"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/default_hardcoded_tv"
@@ -345,10 +345,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="6"
-                    android:text="SUB TOTAL ="
+                    android:text="TOTAL ="
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
-                    android:textSize="12dp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/blue_total_wages_tv"
@@ -358,7 +358,7 @@
                     android:paddingTop="1dp"
 
                     android:textAlignment="center"
-                    android:textColor="#DD8503"
+                    android:textColor="#EF9005"
                     android:textSize="14dp"
                     android:textStyle="bold" />
 

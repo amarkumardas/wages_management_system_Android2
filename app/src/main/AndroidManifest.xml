@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="amar.das.acbook">
+
+    <queries><!-- Specific apps you interact with-->
+    <package android:name="com.whatsapp"/><!--  we have to mention here otherwise it will not show package name from android 11 downwards:this is use to share on whatsapp -->
+    </queries>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/><!--TO USE connectivity manager this permission required-->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> <!-- geting permission to read external storage ilke sd card -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> <!-- getting permission to read external storage ilke sd card -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
      <!-- Allows an application a broad access to external storage in scoped storage. Intended to be used by few apps that need to manage files on behalf of the users.-->
 
@@ -24,7 +31,7 @@
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- to unable service -->
         <activity
-            android:name=".activity.FinalPdfViewer"
+            android:name=".activity.PdfViewerOperation"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- to unable service -->
         <activity

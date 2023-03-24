@@ -6,7 +6,6 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -21,8 +20,6 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 
 import android.widget.Toast;
@@ -38,7 +35,7 @@ import amar.das.acbook.R;
 import amar.das.acbook.databinding.ActivityCustomizeLayoutOrDepositAmountBinding;
 
 public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
-    ActivityCustomizeLayoutOrDepositAmountBinding binding;
+     ActivityCustomizeLayoutOrDepositAmountBinding binding;
     PersonRecordDatabase db;
     private  String fromIntentPersonId;
     //for recording variable declaration
@@ -61,14 +58,17 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         setContentView(binding.getRoot());
         fromIntentPersonId = getIntent().getStringExtra("ID");//getting id from intent IT IS important because we have to pass while cancelling
 
-        binding.customCancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();//destroy current activity
-                Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
-                intent.putExtra("ID",fromIntentPersonId);
-                startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
-            }
+        binding.customCancelBtn.setOnClickListener(view -> {
+            finish();//destroy current activity
+            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+            intent.putExtra("ID",fromIntentPersonId);
+            startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
+        });
+        binding.gobackDeposit.setOnClickListener(view -> {
+            finish();//destroy current activity
+            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+            intent.putExtra("ID",fromIntentPersonId);
+            startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail
         });
         binding.customDepositEt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -236,23 +236,20 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 }else
                     Toast.makeText(CustomizeLayoutOrDepositAmount.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
             });
-            binding.customChronometer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(file != null) {//checking for null pointer Exception
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "AUDIO PLAYING", Toast.LENGTH_SHORT).show();
-                        mediaPlayer = new MediaPlayer();
-                        try {
-                            mediaPlayer.setDataSource(file.getAbsolutePath());//passing the path where this audio is saved
-                            mediaPlayer.prepare();
-                            mediaPlayer.start();
-                            Toast.makeText(CustomizeLayoutOrDepositAmount.this, "AUDIO PLAYING", Toast.LENGTH_LONG).show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }else
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
-                }
+            binding.customChronometer.setOnClickListener(view -> {
+                if(file != null) {//checking for null pointer Exception
+                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, "AUDIO PLAYING", Toast.LENGTH_SHORT).show();
+                    mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(file.getAbsolutePath());//passing the path where this audio is saved
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "AUDIO PLAYING", Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else
+                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
             });
 
             //while updating this will execute
@@ -293,27 +290,24 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 binding.customChronometer.setTypeface(null, Typeface.BOLD);//changing text to bold
             }
 
-            binding.customChronometer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (cmicpath != null || file != null) {//checking audio is present or not
-                        MediaPlayer mediaPlayer = new MediaPlayer();
-                        try {
+            binding.customChronometer.setOnClickListener(view -> {
+                if (cmicpath != null || file != null) {//checking audio is present or not
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    try {
 
-                            if(file != null){//if new audio is set then file will contain audio and data.getMicPath() will contain null
-                                mediaPlayer.setDataSource(file.getAbsolutePath());
-                            }else
-                                mediaPlayer.setDataSource(cmicpath);//passing the path where this audio is saved
+                        if(file != null){//if new audio is set then file will contain audio and data.getMicPath() will contain null
+                            mediaPlayer.setDataSource(file.getAbsolutePath());
+                        }else
+                            mediaPlayer.setDataSource(cmicpath);//passing the path where this audio is saved
 
-                            mediaPlayer.prepare();
-                            mediaPlayer.start();
-                            Toast.makeText(view.getContext(), "AUDIO PLAYING", Toast.LENGTH_LONG).show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }else
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
-                }
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        Toast.makeText(view.getContext(), "AUDIO PLAYING", Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else
+                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
             });
             binding.customSaveBtn.setOnLongClickListener(view -> {
                 int depositAmount=0;
@@ -437,16 +431,13 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         showDataFromDataBase.setCancelable(false);
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
-        showDataFromDataBase.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-                //after data entered successfully
-                finish();//destroy current activity
-                Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
-                intent.putExtra("ID",fromIntentPersonId);
-                startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
-            }
+        showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {
+            dialogInterface.dismiss();
+            //after data entered successfully
+            finish();//destroy current activity
+            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+            intent.putExtra("ID",fromIntentPersonId);
+            startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
         });
         showDataFromDataBase.create().show();
     }
@@ -475,5 +466,13 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         }else {
             return false;
         }
+    }
+    @Override
+    public void onBackPressed() {//on back press button
+        super.onBackPressed();
+        finish();//destroy current activity
+        Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+        intent.putExtra("ID",fromIntentPersonId);
+        startActivity(intent);
     }
 }

@@ -462,7 +462,8 @@
                 android:textColor="#FF0000"
                 android:textAlignment="center"
                 android:background="@drawable/graycolor_bg"
-                android:id="@+id/cancel_btn_metadata"/>
+                android:id="@+id/cancel_btn_metadata"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <Button
                 android:layout_weight="3"
                 android:layout_width="0dp"
@@ -473,7 +474,8 @@
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:background="@drawable/dark_blue_buttonbg"
-                android:id="@+id/save_btn_metadata"/>
+                android:id="@+id/save_btn_metadata"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
     </LinearLayout>
 

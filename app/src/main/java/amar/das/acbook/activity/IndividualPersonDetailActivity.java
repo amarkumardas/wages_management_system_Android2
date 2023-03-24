@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -33,7 +34,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -69,7 +69,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     long mstartingTimeMillis=0;
     long mElapsedMillis=0;
     File file;
-    public static String fileNameAbsolutePath;
     MediaPlayer mediaPlayer;
     boolean mStartRecording =false;
 
@@ -77,7 +76,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     private String fromIntentPersonId;
     int []arr=new int[7];
     String active ="0";
-
     ArrayList<WagesDetailsModel> dataList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -587,23 +585,34 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 });
                 dialog.show();
             });
+            binding.pdfShareTv.setOnClickListener(view -> {
+                try {//to view pdf
+                    finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
+                    Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
+                    intent.putExtra("PDF1OR2OR3",(byte)3);
+                    intent.putExtra("ID",fromIntentPersonId);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplication().startActivity(intent);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            });
             binding.finalCalculationBtn.setOnLongClickListener(new View.OnLongClickListener() {
                 TextView defaultSkillTextTv,totalP1CountTv,workTotalAmountTv,totalP1AmountTv,advanceOrBalanceTv,totalDepositAmountTv,wagesTotalAmountTv,skill1TextTv,totalP2CountTv,totalP2AmountTv,skill2TextTv,totalP3CountTv,totalP3AmountTv,skill3TextTv,totalP4CountTv,totalP4AmountTv;
                 LinearLayout p2Layout,p3Layout,p4Layout,totalDepositAmountLayout;
                 EditText p1RateTv,p2RateTv,p3RateTv,p4RateTv;
-                Button saveAndCreatePdf,cancel;
+                Button longPressToSaveAndCreatePdf,cancel;
                 int innerArray[]=new int[4],totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0,indicate=0;//while saving this variable required
-
                 @Override
-                public boolean onLongClick(View view) {
+                public boolean onLongClick(View view){
                     AlertDialog.Builder mycustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                     LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
                     View myView=inflater.inflate(R.layout.final_calculation_layout,null);//myView contain all layout view ids
                     mycustomDialog.setView(myView);//set custom layout to alert dialog
                     mycustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
-                    final AlertDialog dialog=mycustomDialog.create();//mycustomDialog varialble cannot be use in inner class so creating another final varialbe  to use in inner class
+                    final AlertDialog finalDialog=mycustomDialog.create();//mycustomDialog varialble cannot be use in inner class so creating another final varialbe  to use in inner class
                     initialiseIDs(myView);//ids
-                    cancel.setOnClickListener(view15 -> dialog.dismiss());
+                    cancel.setOnClickListener(view15 -> finalDialog.dismiss());
 
                     Cursor defaultSkillCursor=db.getData("SELECT TYPE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                     defaultSkillCursor.moveToFirst();
@@ -639,11 +648,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if both wages and totalwork amount is less then 0 then both message have to show so if statement two times
                         if(sumCursor.getInt(0) < 0 ) {//if total wages amount cross the  range of int the this message will be shown.its important
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
-                            saveAndCreatePdf.setVisibility(View.GONE);
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
-                            saveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
                         }
 
                          indicate = get_indicator(fromIntentPersonId);
@@ -654,7 +663,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             //    R1 * p1
                             totalP1AmountTv.setText("= " + skillNRateCursor.getInt(3) * sumCursor.getInt(1));//default skill
                         } else {
-                            saveAndCreatePdf.setVisibility(View.GONE);
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                             totalP1AmountTv.setText("= PROVIDE RATE");//default skill
                         }
                         //total wages
@@ -677,7 +686,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R2 * p2
                                 totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText("= PROVIDE RATE");
                             }
 
@@ -691,7 +700,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R2 * p2
                                  totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText("= PROVIDE RATE");
                             }
                             if(skillNRateCursor.getInt(5) != 0) {
@@ -699,7 +708,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R3 * p3
                                 totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP3AmountTv.setText("= PROVIDE RATE");
                             }
                              totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
@@ -716,7 +725,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R2 * p2
                                  totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText("= PROVIDE RATE");
                             }
 
@@ -725,7 +734,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R3 * p3
                                  totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP3AmountTv.setText("= PROVIDE RATE");
                             }
 
@@ -734,7 +743,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //    R4 * p4
                                  totalP4AmountTv.setText("= "+skillNRateCursor.getInt(6)*sumCursor.getInt(4));
                             }else {
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP4AmountTv.setText("= PROVIDE RATE");
                             }
                              totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
@@ -761,11 +770,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             innerArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
                             if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
-                                saveAndCreatePdf.setVisibility(View.VISIBLE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                                 p1RateTv.setTextColor(Color.RED);
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 innerArray[0]=2;//means data is inserted wrong
                               //  Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                             }
@@ -778,7 +787,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
-                                    saveAndCreatePdf.setVisibility(View.GONE);
+                                    longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
                                 }
@@ -803,12 +812,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             innerArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
                             if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
-                                saveAndCreatePdf.setVisibility(View.VISIBLE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
 
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                                 p2RateTv.setTextColor(Color.RED);
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 innerArray[1]=2;//means data is inserted wrong
                                // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                             }
@@ -821,7 +830,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
-                                    saveAndCreatePdf.setVisibility(View.GONE);
+                                    longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
                                 }
@@ -845,11 +854,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             innerArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
                             if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
-                                saveAndCreatePdf.setVisibility(View.VISIBLE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                                 p3RateTv.setTextColor(Color.RED);
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 innerArray[2]=2;//means data is inserted wrong
                                 //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                             }
@@ -862,7 +871,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
-                                    saveAndCreatePdf.setVisibility(View.GONE);
+                                    longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
                                 }
@@ -885,11 +894,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             innerArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
                             if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
-                                saveAndCreatePdf.setVisibility(View.VISIBLE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                                 p4RateTv.setTextColor(Color.RED);
-                                saveAndCreatePdf.setVisibility(View.GONE);
+                                longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 innerArray[3]=2;//means data is inserted wrong
                                // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                             }
@@ -902,7 +911,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
-                                    saveAndCreatePdf.setVisibility(View.GONE);
+                                    longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
                                 }
@@ -915,41 +924,36 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     });
                     skillNRateCursor.close();
                     sumCursor.close();
-                    saveAndCreatePdf.setOnClickListener(view14 -> {//Avoiding to check internal storage of device
+                    longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-                            if(checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
-
-                                if(updateRateTotalAdvanceOrBalanceToDatabase()){//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
-                                    if(generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(fromIntentPersonId)){
-                                        if (savePdfToDatabase(fileNameAbsolutePath)) {//fileName is global variable actually its pdf Absolute path ie.pdf created in device so absolute path of pdf which is in device.First store pdf to database using absolute path so that if deleteWagesFromDBorRecyclerView failed then this pdf can be used to see previous data
-                                            if (viewPDFFromDb((byte) 2,fromIntentPersonId)) {//column name should be correct Viewing pdf2
-
-                                                if (deleteDataFromDB()) {
-                                                    Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
-                                                }
-
-                                            } else {
-                                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-                                            }
-                                        }else{
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-                                        }
-                                    }else{
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO GENERATE PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                        if (checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
+                            if (updateRateTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
+                                 if (savePdfToDatabase(generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
+                                    if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialogbox before going to pdfviewer activity
+                                        finalDialog.dismiss();
                                     }
-
-                                }else {
-                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                    if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
+                                        if (deleteDataFromDB()) {
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
+                                        }
+                                    } else {
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                    }
+                                } else {
+                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
                                 }
-
-                            }else {//request for permission
-                                Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                                ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                            } else {
+                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
                             }
-                     });
-                    dialog.show();
+                        }else {//request for permission
+                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                            ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                        }
+                        return false;
+                    });
+                    finalDialog.show();
                     return false;
                 }
                 private boolean deleteDataFromDB() {
@@ -1118,37 +1122,38 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     return true;//if user deleted file from device then also code will work so passing true
                 }
                 private boolean savePdfToDatabase(String pdfAbsolutePath) {
-                    try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
-                        Cursor cursor= db.getData("SELECT PDF2 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'"))
-                    {//so that object close automatically
-                        cursor.moveToFirst();
-                        byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
+                    if(pdfAbsolutePath != null) {
+                        try (PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
+                             Cursor cursor = db.getData("SELECT PDF2 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId + "'")) {//so that object close automatically
+                            cursor.moveToFirst();
+                            byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
 
-                        if(cursor.getBlob(0)==null){//if pdf2 is null then store in pdf2
-                           // Toast.makeText(IndividualPersonDetailActivity.this, "pdf not there", Toast.LENGTH_LONG).show();
-                            return db.insertPdf(fromIntentPersonId, newPDF,2);
+                            if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
+                                // Toast.makeText(IndividualPersonDetailActivity.this, "pdf not there", Toast.LENGTH_LONG).show();
+                                return db.insertPdf(fromIntentPersonId, newPDF, 2);
+                            }
+                            //if pdf1 is not null then store in pdf 2
+                            // Toast.makeText(IndividualPersonDetailActivity.this, "pdf there", Toast.LENGTH_LONG).show();
+                            if (db.insertPdf(fromIntentPersonId, cursor.getBlob(0), 1)) {//store pdf2 in pdf1
+                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store newpdf in pdf2
+                            }
+                            return false;
+                        } catch (IOException ex) {
+                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found IOException", Toast.LENGTH_LONG).show();
+                            ex.printStackTrace();
+                            return false;
+                        } catch (Exception ex) {
+                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
+                            ex.printStackTrace();
+                            return false;
                         }
-                        //if pdf1 is not null then store in pdf 2
-                       // Toast.makeText(IndividualPersonDetailActivity.this, "pdf there", Toast.LENGTH_LONG).show();
-                        if(db.insertPdf(fromIntentPersonId, cursor.getBlob(0),1)) {//store pdf2 in pdf1
-                            return db.insertPdf(fromIntentPersonId, newPDF, 2);//store newpdf in pdf2
-                        }
-                        return false;
-                    }catch (IOException ex) {
-                        Toast.makeText(IndividualPersonDetailActivity.this, "File not Found IOException", Toast.LENGTH_LONG).show();
-                        ex.printStackTrace();
-                        return false;
-                    }
-                    catch (Exception ex){
-                        Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
-                        ex.printStackTrace();
-                        return false;
-                    }
+                    }else return false;
                 }
                 private boolean viewPDFFromDb(byte whichPdf,String fromIntentPersonId) {
                     try {//to view pdf
-                        Intent intent=new Intent(IndividualPersonDetailActivity.this, FinalPdfViewer.class);
-                        intent.putExtra("pdf1orpdf2",whichPdf);
+                        finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
+                        Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
+                        intent.putExtra("PDF1OR2OR3",whichPdf);
                         intent.putExtra("ID",fromIntentPersonId);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getApplication().startActivity(intent);
@@ -1158,31 +1163,35 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return false;
                     }
                 }
-                private boolean generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(String id) {
-                    //create PDF
+                public String generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(String id) {//if error return null otherwise file path
+
                     try{
-                        MakePdf makePdf = new MakePdf();
-                       if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return false;//created page 1
+                        String fileAbsolutePath=null;
+                        MakePdf makePdf = new MakePdf(); //create PDF
+                       if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
 
-                        fetchOrganizationDetailsAndWriteToPDF(makePdf);//org details no need of if statement
+                       if(!fetchOrganizationDetailsAndWriteToPDF(makePdf)) return null;//org details
 
-                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf)){return false;}//personal detail
+                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf))return null;//personal detail
 
-                      if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return false;//calculation
+                      if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return null;//calculation
 
-                        if(!makePdf.createdPageFinish2())return false;
-                        //fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
-                        fileNameAbsolutePath = makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), generateFileName(id));//we have to update filename which is global static variable to view pdf using file path
-                       if(!makePdf.closeDocumentLastOperation4())return false;
+                        if(!makePdf.createdPageFinish2()) return null;
+
+                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), generateFileName(id));
+
+                        if(!makePdf.closeDocumentLastOperation4())return null;
+
+                       if(fileAbsolutePath !=null){
+                           return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
+                       }else return null;
 
                     }catch (Exception ex){
                         Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
                         ex.printStackTrace();
-                        return false;
+                        return null;
                     }
-                    return true;
                 }
-
                 private void displFinalResult(String title,String message) {
                     AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                     showDataFromDataBase.setCancelable(false);
@@ -1295,11 +1304,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if both wages and total work amount is less then 0 then both message have to show so if statement two times
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
-                            saveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
                         }
                         if(totalWages < 0){//its important otherwise save option will be unable when user enter rate
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
-                            saveAndCreatePdf.setVisibility(View.GONE);
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
 
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
@@ -1373,7 +1382,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       p4Layout=myView.findViewById(R.id.p4_layout_final);
                       totalDepositAmountLayout=myView.findViewById(R.id.total_deposit_amount_layout_final);
 
-                      saveAndCreatePdf=myView.findViewById(R.id.save_btn_final);
+                      longPressToSaveAndCreatePdf =myView.findViewById(R.id.save_btn_final);
                       cancel=myView.findViewById(R.id.cancel_btn_final);
                 }
             });
@@ -1416,94 +1425,36 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              insertDataToRecyclerView_ALertDialogBox(get_indicator(fromIntentPersonId));
         });
     }
-
     public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
         try{
             byte indicator=(byte) get_indicator(id);
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occured or not
-            String[] headerAccordingToIndicator = getWagesHeadersFromDbBasedOnIndicator(id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
+            String[] header = getWagesHeadersFromDbBasedOnIndicator(id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
+            float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
             int[] arrayOfTotalWagesDepositRateAccordingToIndicator= getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(id,indicator,errorDetection);//if error cause errorDetection will be set true
             String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id, indicator, errorDetection);//it amy return null   when no data
             String[][] recyclerViewDepositdata = getAllDepositFromDb(id, errorDetection);//it amy return null   when no data
             if(errorDetection[0]==false){
                 if(!makeSummaryAndWriteToPDFBasedOnIndicator(indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
-                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50));//just for 1 space
+                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
 
-                switch (indicator) {
-                    case 1: {
                            if (recyclerViewWagesdata != null) {//null means data not present
-                                if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 71f}, 9, false)){
+                                if(makePdf.makeTable(header, recyclerViewWagesdata,columnWidth, 9, false)){
                                                                //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
-                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 71f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
+                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
                                         return false;
                                     }
                                 }else return false;
                              }
-                            if (recyclerViewDepositdata != null) {//null means data not present
-                               if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)){
-                                    if(!makePdf.singleCustomRow(new String[]{"+",MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0) ){//Color.rgb(45,179,16) green
-                                        return false;
-                                    }
-                                }else return false;
-                            }
-                    }
-                    break;
-                    case 2: {
-                             if (recyclerViewWagesdata != null){//null means data not present
-                                if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 66f}, 9, false)) {
-                                    //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
-                                   if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 66f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
-                                      return false;
-                                   }
-                                }else return false;
-                            }
-                            if (recyclerViewDepositdata != null){
-                               if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
-                                  if(!makePdf.singleCustomRow(new String[]{"+",MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)){
-                                      return false;
-                                   }
-                               }else return false;
-                            }
-                    }
-                    break;
-                    case 3: {
-                        if (recyclerViewWagesdata != null) {//null means data not present
-                           if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 5f, 61f}, 9, false)) {
-                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
-                               if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 5f, 61f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)) {
-                                   return false;
-                               }
-                           }else return false;
+
+                if (recyclerViewDepositdata != null) {//if deposit there then draw in pdf
+                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
+                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+                            return false;
                         }
-                        if (recyclerViewDepositdata != null) {
-                            if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
-                               if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {//Color.rgb(45,179,16) green
-                                return false;
-                               }
-                               }else return false;
-                            }
-                    }
-                    break;
-                    case 4:{
-                         if (recyclerViewWagesdata != null) {//null means data not present
-                            if(makePdf.makeTable(headerAccordingToIndicator, recyclerViewWagesdata, new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f}, 9, false)) {
-                                //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all deposit displayed
-                                if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f}, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)) {
-                                  return false;
-                                }
-                            }else return false;
-                        }
-                        if (recyclerViewDepositdata != null) {
-                            if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
-                               if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
-                                  return false;
-                                }
-                            }else return false;
-                        }
-                    }
-                    break;
-                }//switch
-                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, headerAccordingToIndicator)) {return false;}
+                    }else return false;
+                }
+                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, header)) {return false;}
             }else return false;//means error has occurred
 
             return true;
@@ -1511,6 +1462,25 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             ex.printStackTrace();
             System.out.println("error occurred in fetchWorkDetailsCalculationAndWriteToPDF method**************************");
             return false;
+        }
+    }
+    public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
+        try{
+            switch (indicator) {
+                case 1: return new float[]{12f, 12f, 5f, 71f};
+
+                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
+
+                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
+
+                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
+            }
+            return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
+        }catch (Exception ex){
+            ex.printStackTrace();
+            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
+            errorDetection[0]=true;//indicate error has occur
+            return new float[]{1f,1f,1f};//to avoid error
         }
     }
     public boolean makeSummaryAndWriteToPDFBasedOnIndicator(byte indicator,String id,MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
@@ -1819,7 +1789,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
         try{
             makePdf.makeTopHeaderrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
-
             return true;
         }catch(Exception ex){
             ex.printStackTrace();
@@ -1887,7 +1856,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             else{
                 fileName.append("aadhaarnull");
             }
-
             cursor.close();
             return fileName.toString();
         }catch (Exception ex){
@@ -2057,11 +2025,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         inputDate.setText(current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR));
         inputDate.setOnClickListener(view -> {
             //To show calendar dialog
-            DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
-                    inputDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
-                }
+            DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, (datePicker, year, month, dayOfMonth) -> {
+                inputDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
             },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
             datePickerDialog.show();
         });
@@ -2136,9 +2101,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
            // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
             //db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" +" WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date not user entered date
             db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'"+" , LATESTDATE='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' , TIME='"+onlyTime+"' WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
-
-
-
 
             if(file !=null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=file.getAbsolutePath();
@@ -2599,10 +2561,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return false;
     }
     private void startRecordingVoice() {
-        Long  tsLong=System.currentTimeMillis()/1000;//folder name should be unique so taking time as name of mic record so every record name will be different other wise error
-        String ts=tsLong.toString();
-        fileNameAbsolutePath ="audio_"+ts;//file name
-        file=new File(getExternalFilesDir( null )+"/acBookMicRecording/"+ fileNameAbsolutePath +".mp3");//path of audio where it is saved in device
+//        Long  tsLong=System.currentTimeMillis()/1000;//folder name should be unique so taking time as name of mic record so every record name will be different other wise error
+//        String ts=tsLong.toString();
+//        fileNameAbsolutePath ="audio_"+ts;//file name
+        file=new File(getExternalFilesDir( null )+"/acBookMicRecording/"+ "audio_"+(System.currentTimeMillis()/1000) +".mp3");//path of audio where it is saved in device
 
         //https://developer.android.com/reference/android/media/MediaRecorder
         mediaRecorder=new MediaRecorder();
@@ -2635,21 +2597,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             displResult(elsetitle, elsemessage);
         }
     }
-    private void displResult(String title,String message) {
+    private void displResult(String title,String message)  {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
         showDataFromDataBase.setCancelable(false);
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
-        showDataFromDataBase.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();//close current dialog
-                Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
-                intent.putExtra("ID",fromIntentPersonId);
-                finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
-                startActivity(intent);
-            }
+        showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {
+            dialogInterface.dismiss();//close current dialog
+            Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
+            intent.putExtra("ID",fromIntentPersonId);
+            finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
+            startActivity(intent);
         });
         showDataFromDataBase.create().show();
     }
+
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        if(finalDialog!=null && finalDialog.isShowing()){
+//            finalDialog.dismiss();
+//        }
+//    }
 }

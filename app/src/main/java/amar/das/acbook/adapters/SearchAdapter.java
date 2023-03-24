@@ -62,14 +62,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             holder.aadhar.setText("AADHAAR:    -");
          }
 
-       holder.singleRowCartView.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               Intent intent=new Intent(contex, IndividualPersonDetailActivity.class);
-               intent.putExtra("ID",data.getId());
-               contex.startActivity(intent);
-               //((Activity)contex).finish();//syntax to destroy activity from adapter
-           }
+       holder.singleRowCartView.setOnClickListener(view -> {
+           Intent intent=new Intent(contex, IndividualPersonDetailActivity.class);
+           intent.putExtra("ID",data.getId());
+           contex.startActivity(intent);
+           //((Activity)contex).finish();//syntax to destroy activity from adapter
        });
     }
 

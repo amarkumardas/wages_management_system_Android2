@@ -108,9 +108,9 @@ Boolean aboolean=false;
 
     public void mestre_btn(View view) {
         //setting back ground color
-        view.setBackgroundColor(getColor(R.color.background));
-        btn2.setBackgroundColor(Color.WHITE);
-        btn3.setBackgroundColor(Color.WHITE);
+//        view.setBackgroundColor(getColor(R.color.background));
+//        btn2.setBackgroundColor(Color.WHITE);
+//        btn3.setBackgroundColor(Color.WHITE);
 
         //setting background custom image of theres button
         btn1.setBackgroundResource(R.drawable.graycolor_bg);
@@ -121,9 +121,9 @@ Boolean aboolean=false;
 
     public void laber_btn(View view) {
         //setting back ground color
-        view.setBackgroundColor(getColor(R.color.background));
-        btn1.setBackgroundColor(Color.WHITE);
-        btn3.setBackgroundColor(Color.WHITE);
+//        view.setBackgroundColor(getColor(R.color.background));
+//        btn1.setBackgroundColor(Color.WHITE);
+//        btn3.setBackgroundColor(Color.WHITE);
 
         //setting background custom image of theres button
         btn2.setBackgroundResource(R.drawable.graycolor_bg);
@@ -134,9 +134,9 @@ Boolean aboolean=false;
 
     public void g_btn(View view) {
         //setting back ground color
-        view.setBackgroundColor(getColor(R.color.background));
-        btn1.setBackgroundColor(Color.WHITE);
-        btn2.setBackgroundColor(Color.WHITE);
+//        view.setBackgroundColor(getColor(R.color.background));
+//        btn1.setBackgroundColor(Color.WHITE);
+//        btn2.setBackgroundColor(Color.WHITE);
 
         //setting background custom image of theres button
         btn3.setBackgroundResource(R.drawable.graycolor_bg);

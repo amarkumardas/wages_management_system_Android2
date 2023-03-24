@@ -11,6 +11,17 @@
     tools:context=".activity.CustomizeLayoutOrDepositAmount"
     android:background="#D6DADF"
     android:orientation="vertical">
+
+    <TextView
+        android:layout_marginStart="6dp"
+        android:layout_marginBottom="6dp"
+        android:layout_width="30dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/ic_baseline_arrow_back_24"
+        android:id="@+id/goback_deposit"
+
+        />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,7 +29,7 @@
         android:layout_gravity="center_horizontal"
         android:textColor="#1AA30A"
         android:textStyle="bold"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="5dp"
         android:textSize="15sp"
         />
         <LinearLayout
@@ -38,7 +49,7 @@
                 android:textColor="#1AA30A"
                 android:layout_gravity="center_vertical"
                 android:paddingLeft="15dp"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:id="@+id/custom_deposit_amount_tv"/>
 
 
@@ -102,16 +113,18 @@
             android:layout_weight="3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="10dp"
+            android:textSize="10sp"
             android:textColor="@color/black"
             android:id="@+id/custom_chronometer"
-            android:layout_marginLeft="40dp"/>
+            android:layout_marginLeft="40dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
             android:id="@+id/custom_mic_icon_tv"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
-            android:background="@drawable/black_sharp_mic_24" />
+            android:background="@drawable/black_sharp_mic_24"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
             android:layout_weight="2"
             android:layout_width="0dp"
@@ -119,7 +132,8 @@
             android:layout_marginRight="2dp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/ic_black_sharp_tick_done_20"
-            android:id="@+id/custom_save_audio_icon_tv"/>
+            android:id="@+id/custom_save_audio_icon_tv"
+            android:foreground="?android:attr/selectableItemBackground"/>
 
 
     </LinearLayout>
@@ -151,11 +165,12 @@
                 android:layout_marginRight="10dp"
 
                 android:text="X"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 android:textColor="#FF0000"
                 android:textAlignment="center"
                 android:background="@drawable/graycolor_bg"
-                android:id="@+id/custom_cancel_btn"/>
+                android:id="@+id/custom_cancel_btn"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <Button
                 android:layout_weight="3"
                 android:layout_width="0dp"
@@ -166,7 +181,8 @@
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:background="@drawable/green_color_bg"
-                android:id="@+id/custom_save_btn"/>
+                android:id="@+id/custom_save_btn"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
 </LinearLayout>
 </ScrollView>

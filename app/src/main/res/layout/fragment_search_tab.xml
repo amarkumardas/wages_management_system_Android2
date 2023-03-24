@@ -37,6 +37,7 @@
             android:layout_weight="1"
             android:background="@drawable/ic_baseline_more_verticledots_24"
             android:id="@+id/verticledotsmenu_Click"
+
             />
     </LinearLayout>
     <com.google.android.material.tabs.TabLayout

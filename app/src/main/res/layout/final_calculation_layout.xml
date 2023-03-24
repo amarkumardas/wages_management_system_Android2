@@ -420,7 +420,8 @@
             android:textColor="#FF0000"
             android:textAlignment="center"
             android:background="@drawable/graycolor_bg"
-            android:id="@+id/cancel_btn_final"/>
+            android:id="@+id/cancel_btn_final"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <Button
             android:layout_weight="3"
             android:layout_width="0dp"
@@ -431,7 +432,8 @@
             android:text="LONG PRESS TO SAVE"
             android:textStyle="bold"
             android:background="@drawable/green_color_bg"
-            android:id="@+id/save_btn_final"/>
+            android:id="@+id/save_btn_final"
+            android:foreground="?android:attr/selectableItemBackground"/>
     </LinearLayout>
 
 </LinearLayout>

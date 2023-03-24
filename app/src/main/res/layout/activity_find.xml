@@ -2,97 +2,109 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/find_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.FindActivity"
-    android:orientation="vertical"
     android:background="@color/purple_700"
-    android:id="@+id/find_layout">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:weightSum="10">
+    android:orientation="vertical"
+    tools:context=".activity.FindActivity">
 
-    <Button
-        android:layout_weight="1"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="2dp"
-        android:background="@drawable/ic_baseline_arrow_back_24"
-        android:layout_gravity="center_vertical"
-        android:onClick="goto_back"/>
-
-    <androidx.appcompat.widget.SearchView
-        android:layout_weight="9"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_margin="8dp"
-        android:id="@+id/serach_view"
-        android:background="@drawable/white_detailsbg"
-        app:defaultQueryHint="Enter Last 4,5 digits of A/C,Aadhar Card"
-        android:inputType="textCapCharacters|textAutoCorrect"
-        app:iconifiedByDefault="false"
-        app:searchIcon="@null">
-        <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
-    </androidx.appcompat.widget.SearchView>
-<!-- app:iconifiedByDefault="false" so that user enter anywhere to write and show icon by default.means to make searchview
-expanded automatically
- app:searchIcon="@null" to remove default icon-->
-
-</LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/purple_700"
-        android:weightSum="3"
-        android:padding="4dp">
+        android:weightSum="10">
 
         <Button
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="6dp"
+
+            android:layout_marginBottom="6dp"
             android:layout_weight="1"
+            android:background="@drawable/ic_baseline_arrow_back_24"
+            android:onClick="goto_back"
+            />
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/serach_view"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:layout_weight="9"
+            android:background="@drawable/white_detailsbg"
+            android:inputType="textCapCharacters|textAutoCorrect"
+            app:defaultQueryHint="Enter Last 4,5 digits of A/C,Aadhar Card"
+            app:iconifiedByDefault="false"
+            app:searchIcon="@null">
+
+            <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
+        </androidx.appcompat.widget.SearchView>
+        <!-- app:iconifiedByDefault="false" so that user enter anywhere to write and show icon by default.means to make searchview
+expanded automatically
+ app:searchIcon="@null" to remove default icon-->
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/purple_700"
+        android:orientation="horizontal"
+        android:padding="4dp"
+        android:weightSum="3">
+
+        <Button
+            android:id="@+id/mestre_btn"
             android:layout_width="0dp"
             android:layout_height="35dp"
-            android:text="M"
-            android:layout_marginRight="5dp"
             android:layout_marginLeft="5dp"
-            android:textStyle="bold"
-            android:textSize="17dp"
-            android:textColor="@color/black"
-            android:textAlignment="center"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/white_detailsbg"
             android:onClick="mestre_btn"
-            android:background="@drawable/white_detailsbg"
-            android:id="@+id/mestre_btn"/>
-        <Button
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="35dp"
-            android:text="L"
-            android:textSize="17dp"
-            android:textStyle="bold"
-            android:layout_marginRight="5dp"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
+            android:text="M"
             android:textAlignment="center"
-            android:onClick="laber_btn"
-            android:background="@drawable/white_detailsbg"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:foreground="?android:attr/selectableItemBackground"/>
+
+        <Button
             android:id="@+id/laber_btn"
-             />
-        <Button
-            android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="35dp"
-            android:text="G"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/white_detailsbg"
+            android:onClick="laber_btn"
+            android:text="L"
+            android:textAlignment="center"
+            android:textColor="@color/black"
             android:textSize="17dp"
             android:textStyle="bold"
-            android:layout_marginRight="5dp"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/black"
-            android:textAlignment="center"
-            android:onClick="g_btn"
-            android:background="@drawable/white_detailsbg"
+            android:foreground="?android:attr/selectableItemBackground"/>
+
+        <Button
             android:id="@+id/g_btn"
-           />
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/white_detailsbg"
+            android:onClick="g_btn"
+            android:text="G"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="17dp"
+            android:textStyle="bold"
+            android:foreground="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>
 

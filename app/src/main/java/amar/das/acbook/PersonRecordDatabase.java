@@ -24,7 +24,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
     public final static String COL_8_SKILL ="TYPE";//skill1
     public final static String COL_9_FATHERNAME ="FATHERNAME";
     public final static String COL_10_IMAGE ="IMAGE";
-    public final static String COL_11_ACHOLDER ="ACHOLDER";
+    public final static String COL_11_ACHOLDER_PHONE ="ACHOLDER";
     public final static String COL_12_ACTIVE ="ACTIVE";
     public final static String COL_13_ADVANCE ="ADVANCE";
     public final static String COL_14_BALANCE ="BALANCE";
@@ -59,7 +59,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
     public final static String COL_39_INDICATOR ="INDICATOR";
     public final static String COL_391_RATING ="RATING";
     public final static String COL_392_LEAVINGDATE ="LEAVINGDATE";
-    public final static String COL_393_REFFERAL ="REFFERAL";
+    public final static String COL_393_REFFERAL_REMARKS ="REFFERAL";
     public final static String COL_394_INVOICE1 ="PDF1";//or invoice
     public final static String COL_395_INVOICE2 ="PDF2";
     public final static String COL_396_PDFSEQUENCE ="PDFSEQUENCE";
@@ -123,7 +123,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             cv.put(COL_8_SKILL, skill);
             cv.put(COL_9_FATHERNAME, fathername);
             cv.put(COL_10_IMAGE, image);
-            cv.put(COL_11_ACHOLDER, acholder);
+            cv.put(COL_11_ACHOLDER_PHONE, acholder);
             cv.put(COL_12_ACTIVE,"1");//when new user added then it will be active
             //-1 is returned if error occurred. .insert(...) returns the row id of the new inserted record
             long rowid = db.insert(TABLE_NAME1, null, cv);
@@ -167,7 +167,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             cv.put(COL_8_SKILL, skill);
             cv.put(COL_9_FATHERNAME, fathername);
             cv.put(COL_10_IMAGE, image);
-            cv.put(COL_11_ACHOLDER, acholder);
+            cv.put(COL_11_ACHOLDER_PHONE, acholder);
            // cv.put(COL_12, "1");//when ever user update that usere will become active
             //0 is returned if no record updated and it return number of rows updated
             int rowid = db.update(TABLE_NAME1, cv, "ID=?", new String[]{Id});
@@ -502,7 +502,7 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             db = this.getWritableDatabase();//getting permission
             ContentValues cv = new ContentValues();//to enter data at once it is like hash map
             cv.put(COL_391_RATING, rate);
-            cv.put(COL_393_REFFERAL, referal);
+            cv.put(COL_393_REFFERAL_REMARKS, referal);
             cv.put(COL_392_LEAVINGDATE, leavingDate);
             //100 % it will update
             int rowid = db.update(TABLE_NAME3,cv,"ID= '"+id+"'",null);

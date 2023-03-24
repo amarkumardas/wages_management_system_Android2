@@ -33,7 +33,8 @@
                 android:layout_gravity="end"
 
                 android:background="@drawable/green_color_bg"
-                android:id="@+id/to_deposit_tv"/>
+                android:id="@+id/to_deposit_tv"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
 
     <LinearLayout
@@ -298,14 +299,16 @@
                 android:textSize="10sp"
                 android:textColor="@color/black"
                 android:id="@+id/chronometer"
-                 android:layout_marginLeft="40dp"/>
+                 android:layout_marginLeft="40dp"
+                android:foreground="?android:attr/selectableItemBackground"/>
 
             <TextView
                 android:id="@+id/mic_tv"
                 android:layout_weight="3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/black_sharp_mic_24"/>
+                android:background="@drawable/black_sharp_mic_24"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <TextView
                 android:layout_weight="2"
                 android:layout_width="0dp"
@@ -313,7 +316,8 @@
                android:layout_marginRight="2dp"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/ic_black_sharp_tick_done_20"
-                android:id="@+id/save_audio_tv"/>
+                android:id="@+id/save_audio_tv"
+                android:foreground="?android:attr/selectableItemBackground"/>
 
         </LinearLayout>
         <EditText
@@ -348,7 +352,8 @@
                 android:textColor="#FF0000"
                 android:textAlignment="center"
                 android:background="@drawable/graycolor_bg"
-                android:id="@+id/cancel_btn"/>
+                android:id="@+id/cancel_btn"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <Button
                 android:layout_weight="3"
                 android:layout_width="0dp"
@@ -359,7 +364,8 @@
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:background="@drawable/green_color_bg"
-                android:id="@+id/save_btn"/>
+                android:id="@+id/save_btn"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
     </LinearLayout>
 

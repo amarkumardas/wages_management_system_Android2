@@ -269,8 +269,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.ifscCodeTv.setText("IFSC-  " + cursor.getString(2));
                 binding.bankNameTv.setText("BANK- " + cursor.getString(3));
                 binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD-  " + "<b>" + cursor.getString(4) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.phoneTv.setText("PHONE-  " + cursor.getString(5));
-                binding.fatherNameTv.setText("FATHER- " + cursor.getString(6));
+                binding.phoneTv.setText("ACTIVE PHONE1-  " + cursor.getString(5));
+                binding.acHolderNameTv.setText("A/C HOLDER NAME- " + cursor.getString(6));
 
                 if (cursor.getString(5).length() == 10) {//if there is no phone number then show default icon color black else green icon
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
@@ -281,7 +281,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
                 binding.imageImg.setImageBitmap(bitmap);
 
-                binding.acHolderTv.setText("A/C HOLDER PHONE- " + cursor.getString(8));
+                binding.acHolderTv.setText("ACTIVE PHONE2- " + cursor.getString(8));
                 binding.idTv.setText("ID- " + cursor.getString(9));
             } else {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
@@ -523,8 +523,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if(editOrNot[1]==true) {
                             dialog.dismiss();//closing dialog to prevent window leak.whenever user select any option then editOrNot[1]=true; will be set.so if it is true then dismiss dialog before going to IndividualPersonDetailActivity.java from displayResult method
                         }
-                        // db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'"+" , LATESTDATE='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' WHERE ID='" + fromIntentPersonId + "'");//when ever user change setting then that person will become active and latest date also.No idea why on top it is showing error
-                    }
+                     }
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) { }
                 });
@@ -589,7 +588,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 try {//to view pdf
                     finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
                     Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
-                    intent.putExtra("PDF1OR2OR3",(byte)3);
+                    intent.putExtra("pdf1_or_2_or_3_for_blank_4",(byte)4);
                     intent.putExtra("ID",fromIntentPersonId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplication().startActivity(intent);
@@ -928,7 +927,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                         if (checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
                             if (updateRateTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
-                                 if (savePdfToDatabase(generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
+                                 if (savePdfToDatabase(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
                                     if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialogbox before going to pdfviewer activity
                                         finalDialog.dismiss();
                                     }
@@ -1153,7 +1152,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     try {//to view pdf
                         finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
                         Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
-                        intent.putExtra("PDF1OR2OR3",whichPdf);
+                        intent.putExtra("pdf1_or_2_or_3_for_blank_4",whichPdf);
                         intent.putExtra("ID",fromIntentPersonId);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getApplication().startActivity(intent);
@@ -1163,7 +1162,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return false;
                     }
                 }
-                public String generatePDFAndUpdateGlobalVariableFileNameAbsolutePath(String id) {//if error return null otherwise file path
+                public String generatePDFAndReturnFileAbsolutePath(String id) {//if error return null otherwise file path
 
                     try{
                         String fileAbsolutePath=null;
@@ -1178,7 +1177,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         if(!makePdf.createdPageFinish2()) return null;
 
-                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), generateFileName(id));
+                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), generateUniqueFileName(id));
 
                         if(!makePdf.closeDocumentLastOperation4())return null;
 
@@ -1448,7 +1447,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                              }
 
                 if (recyclerViewDepositdata != null) {//if deposit there then draw in pdf
-                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {
+                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of depost
                         if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
                             return false;
                         }
@@ -1798,7 +1797,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     }
     public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
         try (PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
-             Cursor cursor1 = db.getData("SELECT " + db.COL_2_NAME + " , " + db.COL_3_BANKAC + " , " + db.COL_6_AADHAAR + " , " + db.COL_10_IMAGE + " FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
+             Cursor cursor1 = db.getData("SELECT " + db.COL_2_NAME + " , " + db.COL_3_BANKAC + " , " + db.COL_6_AADHAAR_NUMBER + " , " + db.COL_10_IMAGE + " FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
              Cursor cursor2 = db.getData("SELECT " + db.COL_396_PDFSEQUENCE + " FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
@@ -1816,7 +1815,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     aadhaar = "";
                 }
 
-                if (cursor2 != null) {
+                if (cursor2 != null) {//this make filename unique
                     cursor2.moveToFirst();
                     pdfSequenceNo = (cursor2.getInt(0) + 1); /**pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
                 } else {
@@ -1834,7 +1833,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return false;
         }
     }
-    public String generateFileName(String id) {
+    public String generateUniqueFileName(String id) {
         try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext())){
             StringBuilder fileName = new StringBuilder();
             fileName.append("id"+id);

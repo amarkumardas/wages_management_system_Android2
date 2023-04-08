@@ -19,12 +19,12 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
     public final static String COL_3_BANKAC ="BANKACCOUNT";
     public final static String COL_4_IFSCCODE ="IFSCCODE";
     public final static String COL_5_BANKNAME ="BANKNAME";
-    public final static String COL_6_AADHAAR ="AADHARCARD";
-    public final static String COL_7_PHONE ="PHONE";
+    public final static String COL_6_AADHAAR_NUMBER ="AADHARCARD";
+    public final static String COL_7_ACTIVE_PHONE1 ="PHONE";
     public final static String COL_8_SKILL ="TYPE";//skill1
-    public final static String COL_9_FATHERNAME ="FATHERNAME";
+    public final static String COL_9_ACCOUNT_HOLDER_NAME ="FATHERNAME";
     public final static String COL_10_IMAGE ="IMAGE";
-    public final static String COL_11_ACHOLDER_PHONE ="ACHOLDER";
+    public final static String COL_11_ACTIVE_PHONE2 ="ACHOLDER";
     public final static String COL_12_ACTIVE ="ACTIVE";
     public final static String COL_13_ADVANCE ="ADVANCE";
     public final static String COL_14_BALANCE ="BALANCE";
@@ -118,12 +118,12 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             cv.put(COL_3_BANKAC, bankaccount);
             cv.put(COL_4_IFSCCODE, ifsccode);
             cv.put(COL_5_BANKNAME, bankname);
-            cv.put(COL_6_AADHAAR, aadharcard);
-            cv.put(COL_7_PHONE, phonenumber);
+            cv.put(COL_6_AADHAAR_NUMBER, aadharcard);
+            cv.put(COL_7_ACTIVE_PHONE1, phonenumber);
             cv.put(COL_8_SKILL, skill);
-            cv.put(COL_9_FATHERNAME, fathername);
+            cv.put(COL_9_ACCOUNT_HOLDER_NAME, fathername);
             cv.put(COL_10_IMAGE, image);
-            cv.put(COL_11_ACHOLDER_PHONE, acholder);
+            cv.put(COL_11_ACTIVE_PHONE2, acholder);
             cv.put(COL_12_ACTIVE,"1");//when new user added then it will be active
             //-1 is returned if error occurred. .insert(...) returns the row id of the new inserted record
             long rowid = db.insert(TABLE_NAME1, null, cv);
@@ -162,12 +162,12 @@ public class PersonRecordDatabase extends SQLiteOpenHelper {
             cv.put(COL_3_BANKAC, bankaccount);
             cv.put(COL_4_IFSCCODE, ifsccode);
             cv.put(COL_5_BANKNAME, bankname);
-            cv.put(COL_6_AADHAAR, aadharcard);
-            cv.put(COL_7_PHONE, phonenumber);
+            cv.put(COL_6_AADHAAR_NUMBER, aadharcard);
+            cv.put(COL_7_ACTIVE_PHONE1, phonenumber);
             cv.put(COL_8_SKILL, skill);
-            cv.put(COL_9_FATHERNAME, fathername);
+            cv.put(COL_9_ACCOUNT_HOLDER_NAME, fathername);
             cv.put(COL_10_IMAGE, image);
-            cv.put(COL_11_ACHOLDER_PHONE, acholder);
+            cv.put(COL_11_ACTIVE_PHONE2, acholder);
            // cv.put(COL_12, "1");//when ever user update that usere will become active
             //0 is returned if no record updated and it return number of rows updated
             int rowid = db.update(TABLE_NAME1, cv, "ID=?", new String[]{Id});

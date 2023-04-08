@@ -112,7 +112,8 @@
             android:textColor="@color/black"
             android:textSize="20dp"
             android:inputType="numberDecimal"
-            android:id="@+id/input_p1_et">
+            android:id="@+id/input_p1_et"
+            android:foreground="?android:attr/selectableItemBackground">
             <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
         </EditText>
         <EditText
@@ -130,7 +131,8 @@
             android:textColor="@color/black"
             android:textSize="20dp"
             android:inputType="numberDecimal"
-            android:id="@+id/input_p2_et"/>
+            android:id="@+id/input_p2_et"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <EditText
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -146,7 +148,8 @@
             android:textColor="@color/black"
             android:textSize="20dp"
             android:inputType="numberDecimal"
-            android:id="@+id/input_p3_et"/>
+            android:id="@+id/input_p3_et"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <EditText
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -162,7 +165,8 @@
             android:textColor="@color/black"
             android:textSize="20dp"
             android:inputType="numberDecimal"
-            android:id="@+id/input_p4_et"/>
+            android:id="@+id/input_p4_et"
+            android:foreground="?android:attr/selectableItemBackground"/>
     </LinearLayout>
         <LinearLayout
             android:id="@+id/suggestion_layout"
@@ -246,7 +250,8 @@
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
-                android:id="@+id/wages_et"/>
+                android:id="@+id/wages_et"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
 
         <LinearLayout
@@ -289,7 +294,9 @@
                 android:layout_marginLeft="10dp"
                 android:textColor="@color/black"
                 android:textSize="18dp"
-                android:id="@+id/input_date_tv"/>
+                android:id="@+id/input_date_tv"
+                android:foreground="?android:attr/selectableItemBackground"
+                 />
 
             <Chronometer
                 android:layout_weight="3"
@@ -328,6 +335,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:id="@+id/enter_description_et"
+            android:foreground="?android:attr/selectableItemBackground"
             />
 
         <LinearLayout
@@ -338,7 +346,6 @@
             android:layout_marginBottom="10dp"
             android:layout_marginRight="4dp"
             android:orientation="horizontal"
-            android:padding="4dp"
             android:weightSum="4">
             <Button
                 android:layout_weight="1"

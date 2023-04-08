@@ -19,11 +19,12 @@
         android:orientation="vertical">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="PERSON INFO"
-                android:layout_gravity="center_horizontal"
-                android:textColor="#415EFB"
+                android:background="@color/purple_700"
+                android:textAlignment="center"
+                android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 />
@@ -139,7 +140,8 @@
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
-                android:id="@+id/input_p1_et_meta">
+                android:id="@+id/input_p1_et_meta"
+                android:foreground="?android:attr/selectableItemBackground">
             </EditText>
             <EditText
                 android:layout_weight="2"
@@ -156,7 +158,8 @@
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
-                android:id="@+id/input_p2_et_meta"/>
+                android:id="@+id/input_p2_et_meta"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <EditText
                 android:layout_weight="2"
                 android:layout_width="0dp"
@@ -188,7 +191,9 @@
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
-                android:id="@+id/input_p4_et_meta"/>
+                android:id="@+id/input_p4_et_meta"
+                android:foreground="?android:attr/selectableItemBackground"
+                />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -248,7 +253,8 @@
                 android:layout_marginRight="2dp"
                 android:textColor="@color/black"
                 android:textSize="18dp"
-                android:id="@+id/leaving_dateTv_metadata"/>
+                android:id="@+id/leaving_dateTv_metadata"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <TextView
                 android:layout_weight="1"
                 android:layout_width="0dp"
@@ -262,7 +268,8 @@
                 android:layout_marginRight="2dp"
                 android:textColor="@color/black"
                 android:textSize="18dp"
-                android:id="@+id/returning_dateTv_metadata"/>
+                android:id="@+id/returning_dateTv_metadata"
+                android:foreground="?android:attr/selectableItemBackground"/>
 
         </LinearLayout>
         <LinearLayout
@@ -330,7 +337,8 @@
                 android:layout_marginRight="2dp"
                 android:layout_marginLeft="2dp"
                 android:layout_gravity="center_horizontal"
-                android:id="@+id/custom_spinner_remove_or_add_mlg"/>
+                android:id="@+id/custom_spinner_remove_or_add_mlg"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <TextView
                 android:layout_weight="2"
                 android:layout_width="0dp"
@@ -350,10 +358,10 @@
                 android:background="@drawable/white_detailsbg"
                 android:textColor="@color/black"
                 android:textStyle="bold"
-
                 android:layout_marginRight="2dp"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/starSpinner_metadata"
+                android:foreground="?android:attr/selectableItemBackground"
                 />
         </LinearLayout>
         <LinearLayout
@@ -440,6 +448,7 @@
             android:layout_marginLeft="4dp"
             android:fadingEdgeLength="233dp"
             android:id="@+id/refferal_metadata"
+            android:foreground="?android:attr/selectableItemBackground"
             />
         <LinearLayout
             android:layout_width="match_parent"
@@ -449,7 +458,6 @@
             android:layout_marginBottom="10dp"
             android:layout_marginRight="4dp"
             android:orientation="horizontal"
-            android:padding="4dp"
             android:weightSum="4">
             <Button
                 android:layout_weight="1"

@@ -10,8 +10,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> <!-- getting permission to read external storage ilke sd card -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> <!--  permission to read external storage ilke sd card -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/> <!--it will be used to send messages also this permission need to request form user at run time because it is dangerous permission-->
      <!-- Allows an application a broad access to external storage in scoped storage. Intended to be used by few apps that need to manage files on behalf of the users.-->
 
  <application
@@ -33,7 +34,8 @@
         <activity
             android:name=".activity.PdfViewerOperation"
             android:exported="false"
-            android:screenOrientation="portrait" /> <!-- to unable service -->
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustResize"/>  <!-- when activity start keyboard will open -->
         <activity
             android:name=".activity.FindActivity"
             android:exported="false"

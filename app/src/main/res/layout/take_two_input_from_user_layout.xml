@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D6DADF"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="22dp"
+        android:text="@string/message"
+        android:textAlignment="center"
+        android:background="@color/purple_700"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/message_of_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center"
+        android:textSize="13sp"
+        android:background="@drawable/white_detailsbg"
+        android:textColor="@color/black"
+        android:padding="4dp"
+        android:foreground="?android:attr/selectableItemBackground"/>
+    <TextView
+        android:id="@+id/input1_header_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+
+        android:textColor="@color/purple_700"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="19dp" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="1dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/white_detailsbg"
+        android:paddingLeft="10dp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        android:inputType="number"
+        android:textColor="@color/black"
+        android:textSize="17dp"
+        android:maxLength="9"
+        android:id="@+id/input1_edit_text_dialog">
+    <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open and also written code to open keyboard programmatically in java file -->
+    </EditText>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="WRITE REMARKS"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/remarks_dialog"
+        android:foreground="?android:attr/selectableItemBackground"
+        />
+<!--    android:background="@color/white" if we add this line then edit textview will not expand-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="2dp"
+        android:orientation="horizontal"
+        android:weightSum="4">
+        <Button
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+
+            android:text="X"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:textAlignment="center"
+            android:background="@drawable/graycolor_bg"
+            android:id="@+id/cancel_btn_dialog"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <Button
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/share"
+            android:textColor="@color/white"
+            android:background="@drawable/green_color_bg"
+            android:id="@+id/share_button_dialog"
+            android:foreground="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
+
+</LinearLayout>
+</ScrollView>

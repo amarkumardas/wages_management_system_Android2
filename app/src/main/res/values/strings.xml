@@ -2,13 +2,13 @@
     <string name="app_name">AC Book</string>
     <string name="update">UPDATE</string>
     <string name="all_records">All Records</string>
-    <string name="search_by_name_or_id_or_last_4_digit_of_a_c">Search by Name  or  ID  or  A/C  or  Aadhar</string>
+    <string name="search_by_name_or_id_or_last_4_digit_of_a_c">Search by Name  or  ID  or  A/C  or  Aadhaar</string>
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name">NAME</string>
     <string name="enter_a_c_number">A/C number</string>
-    <string name="account_holder_name">A/C Holder Name</string>
+    <string name="active_phone_number_2">ACTIVE PHONE NUMBER 2</string>
     <string name="enter_aadhar_card_number">AADHAAR CARD NUMBER</string>
-    <string name="enter_phone_number">PHONE NUMBER</string>
+    <string name="enter_phone_number">ACTIVE PHONE NUMBER 1</string>
     <string name="skilled_in">TYPE</string>
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
     <string name="enter_bank_name">Bank Name</string>
@@ -16,7 +16,18 @@
     <string name="menu_insert_new_">NEW PERSON</string>
     <string name="menu_update">UPDATE</string>
     <string name="insert_data">ADD</string>
-    <string name="father_name">FATHER NAME</string>
+    <string name="account_holder_name">A/C HOLDER NAME</string>
+
+   <!-- PdfViewerOperation Activity-->
+    <string name="enter_amount">ENTER AMOUNT</string>
+    <string name="amount_rs">AMOUNT Rs.</string>
+    <string name="remarks">REMARKS</string>
+    <string name="message_copied">MESSAGE COPIED</string>
+    <string name="share">SHARE</string>
+    <string name="send_to_contact">SEND TO CONTACT</string>
+    <string name="share_to_whatsapp">SEND TO WHATSAPP</string>
+    <string name="message">MESSAGE</string>
+
 
 
     <string-array name="addOrRemoveMlG">
@@ -28,20 +39,22 @@
         <item>REMOVE L</item>
         <item>REMOVE G</item>
     </string-array>
-
+    <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="audioAndDescription">
         <item>SELECT</item>
         <item>AUDIO</item>
         <item>REMARKS</item>
     </string-array>
-
+<!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="sharingOptions">
-        <item>SELECT</item>
-        <item>A/C DETAILS</item>
-        <item>ALL WAGES</item>
+        <item>TEXT</item>
+        <item>A/C</item>
+        <item>PHONE NUMBER</item>
+        <item>CURRENT INVOICE</item>
         <item>IMAGE</item>
+        <item>SHARE ALL</item>
     </string-array>
-
+    <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="star">
         <item>SELECT</item>
         <item>1</item>
@@ -111,5 +124,6 @@
     <string name="mestre">M</string>
     <string name="laber">L</string>
     <string name="women_laber">G</string>
+
 
 </resources>

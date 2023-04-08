@@ -45,7 +45,7 @@
                 android:id="@+id/search_father_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="FATHER:RAJARAMDAS"
+                android:text="A/C HOLDER NAME:"
                 android:textSize="15sp"
                 android:padding="2dp"
                 android:layout_marginTop="2dp"

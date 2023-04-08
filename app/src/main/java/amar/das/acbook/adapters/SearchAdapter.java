@@ -1,6 +1,5 @@
 package amar.das.acbook.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -47,7 +46,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
        holder.id.setText("ID- "+data.getId());
        holder.name.setText(HtmlCompat.fromHtml("NAME-"+"<b>"+data.getName()+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-       holder.father.setText("FATHER-"+data.getFather());
+       holder.acHolderName.setText("A/C HOLDER NAME-"+data.getFather());
+
        //user may enter only account no or aadhar so if else is use separately
        //account and aadhar length should be greater than 4 or 5 otherwise stringoutofboundexception because we r using this method (data.getAccount().length() - 4 or 5)so checking in if statement.we are viewing last 4 and 5 letters to user
         if(data.getAccount().length()>4  ) {
@@ -152,7 +152,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     };//it is like statement so ; is necessary
 
     public class ViewHolder extends  RecyclerView.ViewHolder{
-        TextView name,id,aadhar,account,father;
+        TextView name,id,aadhar,account, acHolderName;
         CardView singleRowCartView;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -160,7 +160,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
            id=itemView.findViewById(R.id.search_id_tv);
            aadhar=itemView.findViewById(R.id.search_aadhar_tv);
            account=itemView.findViewById(R.id.search_ac_tv);
-           father=itemView.findViewById(R.id.search_father_tv);
+           acHolderName =itemView.findViewById(R.id.search_father_tv);
            singleRowCartView=itemView.findViewById(R.id.single_row_cartview);
 
         }

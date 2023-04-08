@@ -517,15 +517,15 @@ public class MakePdf{
     }
 
     public  String createFileToSavePdfDocumentAndReturnFileAbsolutePath3(String externalFileDir, String fileName){//return null when exception
-        try {
+        try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
             File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
             if (!folder.exists()) {//of folder not exist then create folder
                 folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
                 System.out.println("Creating acBookPDF folder to store PDF***********************************************");
             }
-            File filees = new File( externalFileDir + "/acBookPDF/" + fileName + ".pdf");//path of pdf where it is saved in device
-            myPdfDocument.writeTo(new FileOutputStream(filees.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
-            return filees.getAbsolutePath();//returning created file absolute path
+            File filePath = new File( externalFileDir + "/acBookPDF/" + fileName + ".pdf");//path of pdf where it is saved in device
+            myPdfDocument.writeTo(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
+            return filePath.getAbsolutePath();//returning created file absolute path
 
         }catch (Exception e){
         System.out.println("CREATED PDF NOT COPIED TO DEVICE PDF FILE********************************************");

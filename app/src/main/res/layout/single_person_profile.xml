@@ -34,7 +34,8 @@
                 android:layout_gravity="center"
                 android:padding="1dp"
                 android:src="@drawable/defaultprofileimage"
-                android:id="@+id/profile_img"/>
+                android:id="@+id/profile_img"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

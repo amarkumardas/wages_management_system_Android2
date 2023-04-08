@@ -19,11 +19,20 @@ import amar.das.acbook.PersonRecordDatabase;
 import amar.das.acbook.model.MestreLaberGModel;
 
 public class MyUtility {
-    public static int get24hrCurrentTimeRemoveColon() {
+    public static int get24hrCurrentTimeRemoveColon() {//unique time
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");//capital HH stands for 24hr time format
        return  Integer.parseInt(sdf.format(new Date()).replaceAll("[:]", ""));//convert 01:30:55 to 13055 by parsing to INTEGER initial 0 is removed
     }
-    public static String convertToIndianNumberSystem(Long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
+    public static String get12hrCurrentTimeAndDate(){
+//        final Calendar current = Calendar.getInstance();//to get current date and time
+//        Date d = Calendar.getInstance().getTime();//To get time
+//        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:a");//a stands for am or pm here mm is lowercase to represent minute
+//        return current.get(Calendar.DAY_OF_MONTH) + "-" + (current.get(Calendar.MONTH) + 1) + "-" + current.get(Calendar.YEAR) + "at" + sdf.format(d);
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
+        return formatter.format(new Date());
+    }
+    public static String convertToIndianNumberSystem(long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
         String inputString = String.valueOf(number);//converting integer to string
         StringBuilder result = new StringBuilder();
         //when length is odd then place , after 2 digit and when length is even then place , after 1 digit
@@ -51,15 +60,6 @@ public class MyUtility {
             }
         }
         return result.toString();
-    }
-    public static String get12hrCurrentTimeAndDate(){
-//        final Calendar current = Calendar.getInstance();//to get current date and time
-//        Date d = Calendar.getInstance().getTime();//To get time
-//        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:a");//a stands for am or pm here mm is lowercase to represent minute
-//        return current.get(Calendar.DAY_OF_MONTH) + "-" + (current.get(Calendar.MONTH) + 1) + "-" + current.get(Calendar.YEAR) + "at" + sdf.format(d);
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
-        return formatter.format(new Date());
     }
 
     public static void sortArrayList(ArrayList<MestreLaberGModel> arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull) {

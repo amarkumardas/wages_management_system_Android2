@@ -321,12 +321,9 @@ public class InsertDataActivity extends AppCompatActivity {
                     "Aadhaar No- " +"<b>"+ personAadhar+"</b>"  +"<br>"+"<br>"+
                     "Person Skill- " +"<b>"+ personType+"</b>"  +"<br>",HtmlCompat.FROM_HTML_MODE_LEGACY));
 
-            detailsReview.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                    add.setVisibility(View.VISIBLE);
-                }
+            detailsReview.setNegativeButton("CANCEL", (dialogInterface, i) -> {
+                dialogInterface.dismiss();
+                add.setVisibility(View.VISIBLE);
             });
             detailsReview.setPositiveButton("YES CORRECT", new DialogInterface.OnClickListener() {
                 @Override

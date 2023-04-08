@@ -13,7 +13,7 @@
     android:weightSum="22">
 
     <TextView
-        android:layout_weight="6"
+        android:layout_weight="5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
 
@@ -39,10 +39,11 @@
         android:textStyle="bold"
         android:layout_gravity="center_vertical"
         android:id="@+id/spinner_in_recycler_tv"
+        android:foreground="?android:attr/selectableItemBackground"
         />
 
     <TextView
-        android:layout_weight="6"
+        android:layout_weight="7"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAlignment="center"

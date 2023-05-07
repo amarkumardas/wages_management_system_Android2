@@ -5,14 +5,14 @@
     <string name="search_by_name_or_id_or_last_4_digit_of_a_c">Search by Name  or  ID  or  A/C  or  Aadhaar</string>
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name">NAME</string>
-    <string name="enter_a_c_number">A/C number</string>
-    <string name="active_phone_number_2">ACTIVE PHONE NUMBER 2</string>
-    <string name="enter_aadhar_card_number">AADHAAR CARD NUMBER</string>
+<!--    <string name="enter_a_c_number">A/C number</string>-->
+<!--    <string name="active_phone_number_2">ACTIVE PHONE NUMBER 2</string>-->
+    <string name="enter_aadhaar_card_number">AADHAAR CARD NUMBER</string>
     <string name="enter_phone_number">ACTIVE PHONE NUMBER 1</string>
     <string name="skilled_in">TYPE</string>
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
     <string name="enter_bank_name">Bank Name</string>
-    <string name="enter_ifsc_code">IFSC Code</string>
+<!--    <string name="enter_ifsc_code">IFSC Code</string>-->
     <string name="menu_insert_new_">NEW PERSON</string>
     <string name="menu_update">UPDATE</string>
     <string name="insert_data">ADD</string>
@@ -24,23 +24,67 @@
     <string name="remarks">REMARKS</string>
     <string name="message_copied">MESSAGE COPIED</string>
     <string name="share">SHARE</string>
-    <string name="send_to_contact">SEND TO CONTACT</string>
-    <string name="share_to_whatsapp">SEND TO WHATSAPP</string>
+    <string name="send_only_total_to_contact">SEND ONLY TOTAL TO CONTACT</string>
+    <string name="total_no_of_deposit_entries">*TOTAL N0. OF DEPOSIT ENTRIES:</string>
+    <string name="total_no_of_wages_entries">*TOTAL N0. OF WAGES ENTRIES:</string>
     <string name="message">MESSAGE</string>
+    <string name="total_sum">TOTAL SUM</string>
 
+   <!--CustomizeLayoutOrDepositAmount-->
+    <string name="update_deposit_amount">UPDATE DEPOSIT AMOUNT=</string>
+    <string name="long_press_to_update">LONG PRESS TO UPDATE</string>
+    <string name="play">PLAY</string>
+    <string name="recording_started">RECORDING STARTED</string>
+    <string name="again_tab_on_mic_to_start_recording">AGAIN TAB ON MIC TO START RECORDING</string>
+    <string name="audio_permission_required">AUDIO PERMISSION REQUIRED</string>
+    <string name="tab_on_mic_to_start_recording">TAB ON MIC TO START RECORDING</string>
+    <string name="hyphen_entered">-ENTERED]</string>
+    <string name="deposited_with_hyphen">[DEPOSITED]-</string>
+    <string name="hyphen_automatic_entered">-AUTOMATIC ENTERED]</string>
+    <string name="deposited">[DEPOSITED]</string>
+    <string name="audio_playing">AUDIO PLAYING</string>
+    <string name="hyphen_edited">-EDITED]</string>
+    <string name="previous_details_were_hyphen">PREVIOUS DETAILS WERE-</string>
+<!--    <string name="recording">RECORDING</string>-->
+    <!--<string name="ok">OK</string>-->
 
+    <!--InsertDataActivity-->
+    <string name="updated_successfully">UPDATED SUCCESSFULLY</string>
+    <string name="save">SAVE</string>
+
+    <!--WagesDetailsAdapter-->
+    <string name="no_audio">NO AUDIO</string>
+    <string name="ok">OK</string>
+    <string name="no_remarks">NO REMARKS</string>
+    <string name="you_are_updating">YOU ARE UPDATING</string>
+    <string name="click_to_update_deposit">CLICK TO UPDATE DEPOSIT</string>
+    <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND\nMAY BE DELETED</string>
+
+    <!--IndividualPersonDetailActivity-->
+    <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
+    <string name="equal_provide_rate">= PROVIDE RATE</string>
+    <string name="days_left">DAYS LEFT</string>
+    <string name="failed_to_play_audio">FAILED TO PLAY AUDIO</string>
+    <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
+    <string name="no_phone_number">NO PHONE NUMBER</string>
+
+    <!--InactiveFragment-->
+    <string name="please_wait_loading">PLEASE WAIT LOADING</string>
+
+    <!--Common view text-->
+    <string name="cancel">CANCEL</string>
 
     <string-array name="addOrRemoveMlG">
         <item>SELECT</item>
         <item>ADD M</item>
         <item>ADD L</item>
         <item>ADD G</item>
-        <item>REMOVE M</item>
-        <item>REMOVE L</item>
-        <item>REMOVE G</item>
+        <item>REMOVE M/L/G</item>
+<!--        <item>REMOVE L</item>-->
+<!--        <item>REMOVE G</item>-->
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
-    <string-array name="audioAndDescription">
+    <string-array name="audioAndRemarks">
         <item>SELECT</item>
         <item>AUDIO</item>
         <item>REMARKS</item>
@@ -124,6 +168,11 @@
     <string name="mestre">M</string>
     <string name="laber">L</string>
     <string name="women_laber">G</string>
+    <string name="deposit_amount">DEPOSIT AMOUNT</string>
+    <string name="total_equal">TOTAL =</string>
+    <string name="final_calculation">FINAL CALCULATION</string>
+    <string name="long_press_to_save">LONG PRESS TO SAVE</string>
+    <string name="long_press_to_deposit">LONG PRESS TO DEPOSIT</string>
 
 
 </resources>

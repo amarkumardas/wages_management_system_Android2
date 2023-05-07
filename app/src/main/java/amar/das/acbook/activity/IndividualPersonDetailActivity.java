@@ -1,21 +1,16 @@
 package amar.das.acbook.activity;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.Manifest;
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +18,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -43,37 +39,30 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
-import amar.das.acbook.PersonRecordDatabase;
+import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.WagesDetailsAdapter;
 import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-      ActivityIndividualPersonDetailBinding binding;
-
-//for recording variable declaration
+    ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
-    long mstartingTimeMillis=0;
-    long mElapsedMillis=0;
-    File file;
-    MediaPlayer mediaPlayer;
-    boolean mStartRecording =false;
-
-    PersonRecordDatabase db;
+    String audioPath;
+    boolean toggleToStartRecording=false;
     private String fromIntentPersonId;
+    Database db;
     int []arr=new int[7];
     String active ="0";
     ArrayList<WagesDetailsModel> dataList;
@@ -85,65 +74,66 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (getIntent().hasExtra("ID")) {//every operation will be perform based on id
-            db = new PersonRecordDatabase(this);//on start only database should be create
+            db = new Database(this);//on start only database should be create
             fromIntentPersonId = getIntent().getStringExtra("ID");//getting data from intent
 
             //***********setting skill top of layout**********************************************
-            Cursor defaultSkillCursor=db.getData("SELECT TYPE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                defaultSkillCursor.moveToFirst();
                binding.defaultHardcodedTv.setText(defaultSkillCursor.getString(0));
-               binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) + "  =");//default calculation skill
+               binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) +"  =");//default calculation skill
                defaultSkillCursor.close();
 
-             Cursor sumCursor=db.getData("SELECT SUM(WAGES),SUM(P1),SUM(P2),SUM(P3),SUM(P4),SUM(DEPOSIT) FROM "+db.TABLE_NAME2+" WHERE ID= '"+fromIntentPersonId +"'");
+             Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
              sumCursor.moveToFirst();
 
              if( sumCursor.getInt(0) < 0 )//if total wages amount cross the  range of int the this message will be shown
                  Toast.makeText(this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
 
-             binding.blueTotalWagesTv.setText(sumCursor.getString(0));
+             binding.blueTotalWagesTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));
              binding.blueTotalp1Tv.setText(sumCursor.getString(1));
              binding.totalP1CountTv.setText(sumCursor.getString(1));
                     //sum deposit
              if(sumCursor.getString(5) != null) {//if there is deposit then set visibility visible or else layout visibility GONE
-                 binding.totalDepositAmountTv.setText("= " + sumCursor.getString(5));
+                 binding.totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumCursor.getLong(5)));
              }else
                  binding.totalDepositAmountLayout.setVisibility(View.GONE);
 
-            Cursor skillNRateCursor=db.getData("SELECT SKILL1,SKILL2,SKILL3,R1,R2,R3,R4 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             if(skillNRateCursor != null) {
                 skillNRateCursor.moveToFirst();
-                int indicate = get_indicator(fromIntentPersonId);
+                //int indicate = get_indicator(fromIntentPersonId);
+                int indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                                 //R1
                 if(skillNRateCursor.getInt(3) != 0) {
                                                     //R1
                     binding.p1RateTv.setText(skillNRateCursor.getString(3));//default skill
                                                                        //    R1 * p1
-                    binding.totalP1AmountTv.setText("= "+skillNRateCursor.getInt(3)*sumCursor.getInt(1));//default skill
+                    binding.totalP1AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3)*sumCursor.getInt(1)));//default skill
                 }else {
-                    binding.totalP1AmountTv.setText("= NEW PERSON PROVIDE RATE");//default skill
+                    binding.totalP1AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));//default skill
                 }
                                //total wages
-                if(sumCursor.getString(0) !=null) {//if total wages is not null then set total wages
-                    binding.wagesTotalAmountTv.setText(sumCursor.getString(0));//total wages set
+                if(sumCursor.getString(0) !=null){//if total wages is not null then set total wages
+                    binding.wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));//total wages set
                 }
                    //by default= deposit,totalP2CountTv,defaultHardcodedTv,defaultSkillTextTv,p1RateTv,totalP1AmountTv is set automatically
                      if(indicate==1) {
                          indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),0,0,0);
                      }
 
-                binding.p2Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
-                binding.p3Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
-                binding.p4Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
+                binding.p2Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
+                binding.p3Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
+                binding.p4Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
 
                 if(indicate == 2) {
                     if(skillNRateCursor.getInt(4) != 0) {
                         //R1
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                         //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                     }else {
-                        binding.totalP2AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                         //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
@@ -159,17 +149,17 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(skillNRateCursor.getInt(4) != 0) {
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                                                                                 //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                     }else {
-                        binding.totalP2AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                      }
 
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
                                                                                  //    R3 * p3
-                        binding.totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
+                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
                     }else {
-                        binding.totalP3AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP3AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                         //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
                     binding.totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
@@ -189,27 +179,27 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(skillNRateCursor.getInt(4) != 0) {
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                         //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                     }else {
-                        binding.totalP2AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                        // Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
                         //    R3 * p3
-                        binding.totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
+                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
                     }else {
-                        binding.totalP3AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP3AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                        // Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
                     if(skillNRateCursor.getInt(6) != 0) {
                         binding.p4RateTv.setText(skillNRateCursor.getString(6));
                         //    R4 * p4
-                        binding.totalP4AmountTv.setText("= "+skillNRateCursor.getInt(6)*sumCursor.getInt(4));
+                        binding.totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumCursor.getInt(4)));
                     }else {
-                        binding.totalP4AmountTv.setText("= NEW PERSON PROVIDE RATE");
+                        binding.totalP4AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                         //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
@@ -231,11 +221,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),skillNRateCursor.getInt(6) * sumCursor.getInt(4));
                 }
             }
-            skillNRateCursor.close();
+            if (skillNRateCursor != null) {
+                skillNRateCursor.close();
+            }
             sumCursor.close();
+
             //***********Done setting skill***********************************************
             //*******************Recycler view********************************************
-              Cursor allDataCursor=db.getData("SELECT DATE,MICPATH,DESCRIPTION,WAGES,DEPOSIT,P1,P2,P3,P4,ID,TIME,ISDEPOSITED FROM "+db.TABLE_NAME2+" WHERE ID='"+fromIntentPersonId+"'");
+              Cursor allDataCursor=db.getData("SELECT "+Database.COL_22_DATE+","+Database.COL_24_MICPATH+","+Database.COL_25_DESCRIPTION+","+Database.COL_26_WAGES+","+Database.COL_27_DEPOSIT+","+Database.COL_28_P1+","+Database.COL_29_P2+","+Database.COL_291_P3+","+Database.COL_292_P4+","+Database.COL_21_ID+","+Database.COL_23_TIME+","+Database.COL_293_ISDEPOSITED+" FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"='"+fromIntentPersonId+"'");
               dataList=new ArrayList<>();
             while(allDataCursor.moveToNext()){
                 WagesDetailsModel model=new WagesDetailsModel();
@@ -261,7 +254,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             binding.singleRecordRecy.scrollToPosition(dataList.size()-1);//this will scroll recycler view to last position automatically
             //*******************done Recycler view********************************************
             //retrieving data from db
-            Cursor cursor = db.getData("SELECT NAME,BANKACCOUNT,IFSCCODE,BANKNAME,AADHARCARD,PHONE,FATHERNAME,IMAGE,ACHOLDER,ID FROM " + db.TABLE_NAME1 + " WHERE ID='" + fromIntentPersonId + "'");
+            Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_4_IFSCCODE+","+Database.COL_5_BANKNAME+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
             if (cursor != null) {
                 cursor.moveToFirst();
                 binding.nameTv.setText(cursor.getString(0));
@@ -270,7 +263,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.bankNameTv.setText("BANK- " + cursor.getString(3));
                 binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD-  " + "<b>" + cursor.getString(4) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
                 binding.phoneTv.setText("ACTIVE PHONE1-  " + cursor.getString(5));
-                binding.acHolderNameTv.setText("A/C HOLDER NAME- " + cursor.getString(6));
+                binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
 
                 if (cursor.getString(5).length() == 10) {//if there is no phone number then show default icon color black else green icon
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
@@ -281,27 +274,27 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
                 binding.imageImg.setImageBitmap(bitmap);
 
-                binding.acHolderTv.setText("ACTIVE PHONE2- " + cursor.getString(8));
+                binding.acHolderTv.setText("PHONE2- " + cursor.getString(8));
                 binding.idTv.setText("ID- " + cursor.getString(9));
             } else {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
             }
           //setting star rating
-            Cursor cursor2 = db.getData("SELECT RATING,LEAVINGDATE FROM " + db.TABLE_NAME3 + " WHERE ID='" + fromIntentPersonId + "'");
+            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_RATING+","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
             cursor2.moveToFirst();
             if(cursor2.getString(0) != null || cursor2.getString(1) != null) {
 
                 if(cursor2.getString(1) != null){//https://www.youtube.com/watch?v=VmhcvoenUl0
                     LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
-                    String  dateArray []= cursor2.getString(1).split("-");
+                    String[] dateArray = cursor2.getString(1).split("-");
 //                    d = Integer.parseInt(dateArray[0]);
 //                    m = Integer.parseInt(dateArray[1]);
 //                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
                     dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
                     //between (2022-05-01,2022-05-01) like
-                   // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method chronounit todayDate is written first and second dbDate to get right days
+                   // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
                                                      //between (2022-05-01,2022-05-01) like
-                    binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT");//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method chronounit todayDate is written first and second dbDate to get right days
+                    binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate,dbDate)+" "+getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
 
                     if(ChronoUnit.DAYS.between(todayDate,dbDate) <= 21 ) {
                        binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
@@ -318,20 +311,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             //Meta data
             binding.infoTv.setOnClickListener(view -> {
                 final boolean[] editOrNot = {false,false};
-                AlertDialog.Builder mycustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
+                AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                 LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
 
                 View myView=inflater.inflate(R.layout.meta_data,null);//myView contain all layout view ids
-                mycustomDialog.setView(myView);//set custom layout to alert dialog
-                mycustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
+                myCustomDialog.setView(myView);//set custom layout to alert dialog
+                myCustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
 
-                final AlertDialog dialog=mycustomDialog.create();//mycustomDialog varialble cannot be use in inner class so creating another final varialbe  to use in inner class
+                final AlertDialog dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
 
                 //ids
                 RadioButton activeRadio=myView.findViewById(R.id.active_metadata);
                 RadioGroup radioGroup=myView.findViewById(R.id.skill_radiogp_metadata);
 
-                TextView hardcodedP1Tv=myView.findViewById(R.id.hardcoded_p1_tv_meta);//dont remove
+                TextView hardcodedP1Tv=myView.findViewById(R.id.hardcoded_p1_tv_meta);//don't remove
                 EditText inputP1Et=myView.findViewById(R.id.input_p1_et_meta);
                 TextView hardcodedP2Tv=myView.findViewById(R.id.hardcoded_p2_tv_meta);
                 EditText inputP2Et=myView.findViewById(R.id.input_p2_et_meta);
@@ -340,16 +333,16 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 TextView hardcodedP4Tv=myView.findViewById(R.id.hardcoded_p4_tv_meta);
                 EditText inputP4Et=myView.findViewById(R.id.input_p4_et_meta);
                 TextView returningDate=myView.findViewById(R.id.returning_dateTv_metadata);
-                Spinner customSpinnerRemoveorAddmlg=myView.findViewById(R.id.custom_spinner_remove_or_add_mlg);
+                Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.custom_spinner_remove_or_add_mlg);
                 TextView totalWorkDaysMetadata=myView.findViewById(R.id.total_work_days_metadata);
                 Spinner locationSpinner=myView.findViewById(R.id.location_spinner_meta);
                 Spinner religionSpinner=myView.findViewById(R.id.religion_spinner_meta);
                 Spinner autofillRemarksSpinner=myView.findViewById(R.id.autofill_remarks_spinner_setting);
 
                 Spinner starSpinner= myView.findViewById(R.id.starSpinner_metadata);
-                TextView dateTv=myView.findViewById(R.id.leaving_dateTv_metadata);
+                TextView leavingDateTv=myView.findViewById(R.id.leaving_dateTv_metadata);
                 EditText remarksMetaData=myView.findViewById(R.id.refferal_metadata);
-                Button edit=myView.findViewById(R.id.save_btn_metadata);
+                Button info=myView.findViewById(R.id.save_btn_info);
                 Button  cancel=myView.findViewById(R.id.cancel_btn_metadata);
                 cancel.setOnClickListener(view12 -> dialog.dismiss());
 
@@ -359,32 +352,29 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 inputP3Et.setEnabled(false);
                 inputP4Et.setEnabled(false);
                 returningDate.setEnabled(false);
-                customSpinnerRemoveorAddmlg.setEnabled(false);
+                customSpinnerRemoveOrAddMlg.setEnabled(false);
                 locationSpinner.setEnabled(false);
                 religionSpinner.setEnabled(false);
                 autofillRemarksSpinner.setEnabled(false);
                 starSpinner.setEnabled(false);
-                dateTv.setEnabled(false);
+                leavingDateTv.setEnabled(false);
                 remarksMetaData.setEnabled(false);
 
-                Cursor cursor1 = db.getData("SELECT ACTIVE FROM " + db.TABLE_NAME1 + " WHERE ID='" + fromIntentPersonId + "'");
+                Cursor cursor1 = db.getData("SELECT "+Database.COL_12_ACTIVE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 cursor1.moveToFirst();
                 if(cursor1.getString(0).equals("1"))
-                    activeRadio.setVisibility(View.GONE);//when it is active then dont show to activate
+                    activeRadio.setVisibility(View.GONE);//when it is active then don't show to activate
                 else if(cursor1.getString(0).equals("0"))
                     activeRadio.setChecked(false);
                 cursor1.close();
                 //this should not be use in other class   other wise it will not be called when user change radio button
-                radioGroup.setOnCheckedChangeListener((radioGroup1, checkedidOfRadioBtn) -> {
-                    switch(checkedidOfRadioBtn){
-                        case R.id.active_metadata:{
-                            active ="1";//updating active variable
-                              break;
-                        }
+                radioGroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
+                    if (checkedIdOfRadioBtn == R.id.active_metadata) {
+                        active = "1";//updating active variable
                     }
                 });
 
-                Cursor cursor21 = db.getData("SELECT RATING,LEAVINGDATE,REFFERAL FROM " + db.TABLE_NAME3 + " WHERE ID='" + fromIntentPersonId + "'");
+                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_RATING+","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
                 cursor21.moveToFirst();
 
                 String[] ratingStar =getResources().getStringArray(R.array.star);
@@ -399,9 +389,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
 
                 if(cursor21.getString(1) != null){//leaving date
-                    dateTv.setText(cursor21.getString(1));
+                    leavingDateTv.setText(cursor21.getString(1));
                 }else if(cursor21.getString(1) == null) {
-                    dateTv.setText("");
+                    leavingDateTv.setText("");
                 }
                 final Calendar current=Calendar.getInstance();//to get current date and time
                 int cYear,cMonth,cDayOfMonth;
@@ -409,10 +399,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 cMonth=current.get(Calendar.MONTH);
                 cDayOfMonth=current.get(Calendar.DAY_OF_MONTH);
 
-                dateTv.setOnClickListener(view13 -> {
+                leavingDateTv.setOnClickListener(view13 -> {
                     //To show calendar dialog
                     DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, (datePicker, year, month, dayOfMonth) -> {
-                        dateTv.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
+                        leavingDateTv.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
                     },cYear,cMonth,cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
                     datePickerDialog.show();
                 });
@@ -424,103 +414,118 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                 //****************************************************setting adapter for addOrRemoveMLG spinner*****************************************
                 String[] addOrRemoveMLG = getResources().getStringArray(R.array.addOrRemoveMlG);
-                ArrayAdapter<String> addOrRemoveMlGAdapter = new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.select_dialog_item, addOrRemoveMLG);
-                customSpinnerRemoveorAddmlg.setAdapter(addOrRemoveMlGAdapter);
-                // when activity is loaded spinner item is selected automatically so to avoid this we are using customSpinnerSetting.setSelection(initialposition, false);
+                ArrayAdapter<String> addOrRemoveMlGAdapter = new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, addOrRemoveMLG);
+                customSpinnerRemoveOrAddMlg.setAdapter(addOrRemoveMlGAdapter);
+                // when activity is loaded spinner item is selected automatically so to avoid this we are using customSpinnerSetting.setSelection(initialPosition, false);
 //            int initialposition = binding.customSpinnerSetting.getSelectedItemPosition();
 //            binding.customSpinnerSetting.setSelection(initialposition, false);//clearing auto selected item
-                customSpinnerRemoveorAddmlg.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {//**Spinner OnItemSelectedListener event will execute twice:1.Spinner initializationUser 2.selected manually Try to differentiate those two by using flag variable.thats the reason boolean array is used
+                customSpinnerRemoveOrAddMlg.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {//**Spinner OnItemSelectedListener event will execute twice:1.Spinner initializationUser 2.selected manually Try to differentiate those two by using flag variable.that's the reason boolean array is used
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                        String a = adapterView.getItemAtPosition(pos).toString();
+                        String data = adapterView.getItemAtPosition(pos).toString();
+                        try(Database db=new Database(getBaseContext());
+                        Cursor cursor1 =db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                            cursor1.moveToFirst();//skill which is null there skill is updated
+                            switch (data) {
+                                case "ADD L": //adding L means p2
+                                {
+                                    editOrNot[1] = true;//indicate user has selected option
 
-                        Cursor cursor1 =db.getData("SELECT SKILL1,SKILL2,SKILL3 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
-                        cursor1.moveToFirst();//skill which is null there skill is updated
-                        if (a.equals("ADD L")) {//adding L means p2
-                            editOrNot[1]=true;//indicate user has selected option
-                            if(cursor1.getString(0) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL1='L' , INDICATOR="+2+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED L","STATUS: SUCCESS","FAILED TO ADD L","STATUS: FAILED");
+                                    if (cursor1.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
 
-                            }else if(cursor1.getString(1) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL2='L' ,INDICATOR="+3+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY ADDED L","STATUS: SUCCESS","FAILED TO ADD L","STATUS: FAILED");
+                                    } else if (cursor1.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
 
+                                    } else if (cursor1.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO  ADD L", "STATUS: FAILED");
 
-                            }else if(cursor1.getString(2) == null) {
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL3='L' ,INDICATOR="+4+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED L","STATUS: SUCCESS","FAILED TO  ADD L","STATUS: FAILED");
+                                    } else
+                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.laber));
+                                }
+                                break;
+                                case "ADD M": //adding M p3
+                                {
+                                    editOrNot[1] = true;//indicate user has selected option
+                                    if (cursor1.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
 
-                            }else
-                                displResult("ONLY 4 PERSON ALLOWED TO ADD","STATUS: CAN'T ADD MORE L");
-                        } else if (a.equals("ADD M")) {//adding M p3
-                            editOrNot[1]=true;//indicate user has selected option
-                            if(cursor1.getString(0) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL1='M' , INDICATOR="+2+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED M","STATUS: SUCCESS","FAILED TO ADD M","STATUS: FAILED");
+                                    } else if (cursor1.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
 
-                            }else if(cursor1.getString(1) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL2='M' ,INDICATOR="+3+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY ADDED M","STATUS: SUCCESS","FAILED TO ADD M","STATUS: FAILED");
+                                    } else if (cursor1.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "SUCCESSFULLY  ADD M", "STATUS: SUCCESS");
 
-                            }else if(cursor1.getString(2) == null) {
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL3='M' ,INDICATOR="+4+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED M","STATUS: SUCCESS","SUCCESSFULLY  ADD M","STATUS: SUCCESS");
+                                    } else
+                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.mestre));
+                                }
+                                break;
+                                case "ADD G": //adding G p4
+                                {
+                                    editOrNot[1] = true;//indicate user has selected option
 
-                            }else
-                                displResult("ONLY 4 PERSON ALLOWED TO ADD","STATUS: CAN'T ADD MORE M");
+                                    if (cursor1.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
 
-                        } else if (a.equals("ADD G")) {//adding G p4
-                            editOrNot[1]=true;//indicate user has selected option
-                            if(cursor1.getString(0) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL1='G' , INDICATOR="+2+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED G","STATUS: SUCCESS","FAILED TO ADD G","STATUS: FAILED");
+                                    } else if (cursor1.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
 
-                            }else if(cursor1.getString(1) == null){
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL2='G' ,INDICATOR="+3+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY ADDED G","STATUS: SUCCESS","FAILED TO ADD G","STATUS: FAILED");
+                                    } else if (cursor1.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO  ADD G", "STATUS: FAILED");
 
-                            }else if(cursor1.getString(2) == null) {
-                                showDialogAsMessage("UPDATE "+db.TABLE_NAME3+" SET SKILL3='G' ,INDICATOR="+4+" WHERE ID= "+fromIntentPersonId,"SUCCESSFULLY  ADDED G","STATUS: SUCCESS","FAILED TO  ADD G","STATUS: FAILED");
+                                    } else
+                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.women_laber));
+                                }
+                                break;
+                                case "REMOVE M/L/G": //removing
+                                {
+                                    editOrNot[1] = true;//indicate user has selected option
+                                    //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
+                                    Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                    if (cursorIndicator != null) {
+                                        cursorIndicator.moveToFirst();
+                                        if (cursorIndicator.getString(0) == null) {//person1
+                                            displayResult("CAN'T REMOVE DEFAULT SKILL", "STATUS: FAILED");//default M or L or G
 
-                            }else
-                                displResult("ONLY 4 PERSON ALLOWED TO ADD","STATUS: CAN'T ADD MORE G");
+                                        } else if (cursorIndicator.getString(0).equals("2")) {//person2
+                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_29_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                            result.moveToFirst();
+                                            if (result.getInt(0) == 0) {//Means no data IN P2
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                            } else if (result.getInt(0) >= 1) {
+                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                            }
 
-                        } else if (a.equals("REMOVE M") || a.equals("REMOVE L") || a.equals("REMOVE G")) {//removing
-                            editOrNot[1]=true;//indicate user has selected option
-                            //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then dont delete else delete
-                            Cursor cursorIndi=db.getData("SELECT INDICATOR FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
-                            if(cursorIndi != null){
-                                cursorIndi.moveToFirst();
-                                if(cursorIndi.getString(0) == null) {//person1
-                                    displResult("CAN'T REMOVE DEFAULT SETTING","STATUS: FAILED");//default M or L or G
-
-                                }else if(cursorIndi.getString(0).equals("2")){//person2
-                                    Cursor result=db.getData("SELECT SUM(P2) FROM "+db.TABLE_NAME2+" WHERE ID= '"+fromIntentPersonId +"'");
-                                    result.moveToFirst();
-                                    if(result.getInt(0) == 0){//Means no data IN P2
-                                        db.updateTable("UPDATE "+db.TABLE_NAME3+" SET SKILL1= "+null+" , INDICATOR="+1+" WHERE ID= "+fromIntentPersonId);
-                                        displResult("NO DATA PRESENT SO REMOVED ","STATUS: SUCCESS");
-                                    }else if(result.getInt(0) >= 1){
-                                        displResult("CAN'T REMOVE","BECAUSE DATA IS PRESENT.SUM = "+result.getInt(0));
-                                    }
-
-                                }else if(cursorIndi.getString(0).equals("3")){//person3
-                                    Cursor result=db.getData("SELECT SUM(P3) FROM "+db.TABLE_NAME2+" WHERE ID= '"+fromIntentPersonId +"'");
-                                    result.moveToFirst();
-                                    if(result.getInt(0) == 0){//Means no data IN P2
-                                        db.updateTable("UPDATE "+db.TABLE_NAME3+" SET SKILL2= "+null+" , INDICATOR="+2+" WHERE ID= "+fromIntentPersonId);
-                                        displResult("NO DATA PRESENT SO REMOVED ","STATUS: SUCCESS");
-                                    }else if(result.getInt(0) >= 1){
-                                        displResult("CAN'T REMOVE","BECAUSE DATA IS PRESENT.SUM= "+result.getInt(0));
-                                    }
-                                }else if(cursorIndi.getString(0).equals("4")){//person4
-                                    Cursor result=db.getData("SELECT SUM(P4) FROM "+db.TABLE_NAME2+" WHERE ID= '"+fromIntentPersonId +"'");
-                                    result.moveToFirst();
-                                    if(result.getInt(0) == 0){//Means no data IN P2
-                                        db.updateTable("UPDATE "+db.TABLE_NAME3+" SET SKILL3= "+null+" , INDICATOR="+3+" WHERE ID= "+fromIntentPersonId);
-                                        displResult("NO DATA PRESENT SO REMOVED ","STATUS: SUCCESS");
-                                    }else if(result.getInt(0) >= 1){
-                                        displResult("CAN'T REMOVE","BECAUSE DATA IS PRESENT.SUM= "+result.getInt(0));
-                                    }
-                                }else
-                                    displResult("CAN'T REMOVE DEFAULT SETTING","STATUS: FAILED");
-                            }else
-                                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                                        } else if (cursorIndicator.getString(0).equals("3")) {//person3
+                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_291_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                            result.moveToFirst();
+                                            if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                            } else if (result.getInt(0) >= 1) {
+                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                            }
+                                        } else if (cursorIndicator.getString(0).equals("4")) {//person4
+                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_292_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                            result.moveToFirst();
+                                            if (result.getInt(0) == 0) {//Means no data IN P2
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                            } else if (result.getInt(0) >= 1) {
+                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                            }
+                                        } else
+                                            displayResult("CAN'T REMOVE DEFAULT SKILL", "STATUS: FAILED");
+                                    } else
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            }
+                        }catch (Exception x){
+                            x.printStackTrace();
                         }
-                        if(editOrNot[1]==true) {
+                        if(editOrNot[1]) {
                             dialog.dismiss();//closing dialog to prevent window leak.whenever user select any option then editOrNot[1]=true; will be set.so if it is true then dismiss dialog before going to IndividualPersonDetailActivity.java from displayResult method
                         }
                      }
@@ -528,8 +533,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onNothingSelected(AdapterView<?> adapterView) { }
                 });
                 //****************************************************DONE setting adapter for addOrRemoveMLG spinner*****************************************
-
-                edit.setOnClickListener(view1 -> {
+                info.setOnClickListener(view1 -> {
                     if(editOrNot[0] ==false) {//while editing this will execute
                         radioGroup.getChildAt(0).setEnabled(true);
                         inputP1Et.setEnabled(true);
@@ -537,46 +541,47 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         inputP3Et.setEnabled(true);
                         inputP4Et.setEnabled(true);
                         returningDate.setEnabled(true);
-                        customSpinnerRemoveorAddmlg.setEnabled(true);
+                        customSpinnerRemoveOrAddMlg.setEnabled(true);
                         locationSpinner.setEnabled(true);
                         religionSpinner.setEnabled(true);
                         autofillRemarksSpinner.setEnabled(true);
                         starSpinner.setEnabled(true);
-                        dateTv.setEnabled(true);
+                        leavingDateTv.setEnabled(true);
                         remarksMetaData.setEnabled(true);
-                        edit.setBackgroundResource(R.drawable.green_color_bg);//changing background
-                        edit.setText("SAVE");
+                        info.setBackgroundResource(R.drawable.green_color_bg);//changing background
+                        info.setText(getResources().getString(R.string.save));
                         editOrNot[0] =true;
                     }else{//while saving this will execute
                         boolean success2;
                         String rate;
                         if (active.equals("1")) {//if user has pressed radio button then only it will execute
                             //to automatically set today date so that it become active
-                            final Calendar current1 = Calendar.getInstance();//to get current date and time
-                            int cYear1 = current1.get(Calendar.YEAR);
-                            int cMonth1 = current1.get(Calendar.MONTH);
-                            int cDayOfMonth1 = current1.get(Calendar.DAY_OF_MONTH);
-                            String date = cDayOfMonth1 + "-" + (cMonth1 + 1) + "-" + cYear1;
-
-                            success2 = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + active + "', LATESTDATE='" + date + "' , TIME='"+new SimpleDateFormat("hh:mm:ss a").format(Calendar.getInstance().getTime())+"' WHERE ID='" + fromIntentPersonId + "'");//setting today date to latestdate TO AVOID PREVIOUS LATESTSDATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latestdate.due to todaydate in  variable latestdate logic in MestreLabeGAdapter will not execute and account will not become inactive it will remain active
+//                            final Calendar current1 = Calendar.getInstance();//to get current date and time
+//                            int cYear1 = current1.get(Calendar.YEAR);
+//                            int cMonth1 = current1.get(Calendar.MONTH);
+//                            int cDayOfMonth1 = current1.get(Calendar.DAY_OF_MONTH);
+//                            String date = cDayOfMonth1 + "-" + (cMonth1 + 1) + "-" + cYear1;
+                           // success2 = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + active + "', "+Database.COL_15_LATESTDATE+"='" + date + "' , "+Database.COL_16_TIME+"='"+new SimpleDateFormat("hh:mm:ss a").format(Calendar.getInstance().getTime())+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//setting today date to latest date TO AVOID PREVIOUS LATEST DATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latestdate.due to todaydate in  variable latestdate logic in MestreLabeGAdapter will not execute and account will not become inactive it will remain active
+                            success2 = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + active + "', "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+MyUtility.getOnlyTime()+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//setting today date to latest date TO AVOID PREVIOUS LATEST DATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latest date.due to today date in  variable latest date logic in MestreLaberGAdapter will not execute and account will not become inactive it will remain active
                             if (!success2)
-                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE LATESTDATE AND ACTIVE=1", Toast.LENGTH_LONG).show();
+                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE LATEST DATE AND ACTIVE=1", Toast.LENGTH_LONG).show();
                         }
 
-                        if (starSpinner.getSelectedItem().toString().equals("SELECT"))//if user bymistake click on SELECT then by default start set to 1
+                        if (starSpinner.getSelectedItem().toString().equals("SELECT"))//if user BY mistake click on SELECT then by default start set to 1
                             rate = "1";//default value
                         else
                             rate = starSpinner.getSelectedItem().toString();
 
-                        if (dateTv.getText().toString() == "") {//by default if user dont enter anything then editText view contain nothing so checking "" it is important otherwise it will  produce error to other code due to nothing.so if nothing then dont update leavingdate
+                        //if (leavingDateTv.getText().toString() == "") {//by default if user don't enter anything then editText view contain nothing so checking "" it is important otherwise it will  produce error to other code due to nothing.so if nothing then don't update leaving date
+                        if (TextUtils.isEmpty(leavingDateTv.getText().toString())) {//by default if user don't enter anything then editText view contain nothing so checking "" it is important otherwise it will  produce error to other code due to nothing.so if nothing then don't update leaving date
                             success2 = db.update_Rating_TABLE_NAME3(rate, remarksMetaData.getText().toString().trim(), null, fromIntentPersonId);
-                        } else { //if user dont enter anything then else will execute
-                            success2 = db.update_Rating_TABLE_NAME3(rate, remarksMetaData.getText().toString().trim(), dateTv.getText().toString().trim(), fromIntentPersonId);
+                        } else { //if user don't enter anything then else will execute
+                            success2 = db.update_Rating_TABLE_NAME3(rate, remarksMetaData.getText().toString().trim(), leavingDateTv.getText().toString().trim(), fromIntentPersonId);
                         }
                         if (success2)
-                            displResult("SAVED SUCCESSFULLY", "RATING- " + rate + "\nLEAVINGDATE- " + dateTv.getText().toString().trim() + "\n\nREMARKS- " + remarksMetaData.getText().toString().trim());
+                            displayResult("SAVED SUCCESSFULLY", "RATING- " + rate + "\nLEAVING DATE- " + leavingDateTv.getText().toString().trim() + "\n\nREMARKS- " + remarksMetaData.getText().toString().trim());
                         else
-                            displResult("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
+                            displayResult("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
 
                         dialog.dismiss();
                     }
@@ -586,7 +591,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             });
             binding.pdfShareTv.setOnClickListener(view -> {
                 try {//to view pdf
-                    finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
+                    finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
                     Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
                     intent.putExtra("pdf1_or_2_or_3_for_blank_4",(byte)4);
                     intent.putExtra("ID",fromIntentPersonId);
@@ -601,24 +606,25 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 LinearLayout p2Layout,p3Layout,p4Layout,totalDepositAmountLayout;
                 EditText p1RateTv,p2RateTv,p3RateTv,p4RateTv;
                 Button longPressToSaveAndCreatePdf,cancel;
-                int innerArray[]=new int[4],totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0,indicate=0;//while saving this variable required
+                int []innerArray=new int[4];
+                int totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0,indicate=0;//while saving this variable required
                 @Override
                 public boolean onLongClick(View view){
-                    AlertDialog.Builder mycustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
+                    AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                     LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
                     View myView=inflater.inflate(R.layout.final_calculation_layout,null);//myView contain all layout view ids
-                    mycustomDialog.setView(myView);//set custom layout to alert dialog
-                    mycustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
-                    final AlertDialog finalDialog=mycustomDialog.create();//mycustomDialog varialble cannot be use in inner class so creating another final varialbe  to use in inner class
+                    myCustomDialog.setView(myView);//set custom layout to alert dialog
+                    myCustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
+                    final AlertDialog finalDialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final varialbe  to use in inner class
                     initialiseIDs(myView);//ids
                     cancel.setOnClickListener(view15 -> finalDialog.dismiss());
 
-                    Cursor defaultSkillCursor=db.getData("SELECT TYPE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                     defaultSkillCursor.moveToFirst();
                     defaultSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
                     defaultSkillCursor.close();
 
-                    Cursor sumCursor=db.getData("SELECT SUM(WAGES),SUM(P1),SUM(P2),SUM(P3),SUM(P4),SUM(DEPOSIT) FROM "+db.TABLE_NAME2+" WHERE ID= '"+fromIntentPersonId +"'");
+                    Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
                     sumCursor.moveToFirst();
                     //initializing this variable to take during saving
                     p1=sumCursor.getInt(1);
@@ -630,12 +636,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     totalP1CountTv.setText(sumCursor.getString(1));//default skill
                     //sum deposit
                     if(sumCursor.getString(5) != null) {//if there is deposit then set visibility visible or else layout visibility GONE
-                         totalDepositAmountTv.setText("= " + sumCursor.getString(5));
+                         totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumCursor.getLong(5)));
                          totalDeposit=sumCursor.getInt(5);//updating totalDeposit to take during save
                     }else
                        totalDepositAmountLayout.setVisibility(View.GONE);
 
-                    Cursor skillNRateCursor=db.getData("SELECT SKILL1,SKILL2,SKILL3,R1,R2,R3,R4 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+                    Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
                     if(skillNRateCursor != null) {
                         skillNRateCursor.moveToFirst();
                        //initializing this variables to take during saving
@@ -644,71 +650,72 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         r3=skillNRateCursor.getInt(5);
                         r4=skillNRateCursor.getInt(6);
 
-                        //if both wages and totalwork amount is less then 0 then both message have to show so if statement two times
+                        //if both wages and total work amount is less then 0 then both message have to show so if statement two times
                         if(sumCursor.getInt(0) < 0 ) {//if total wages amount cross the  range of int the this message will be shown.its important
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
-                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
 
-                         indicate = get_indicator(fromIntentPersonId);
+                         //indicate = get_indicator(fromIntentPersonId);
+                        indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                         //R1
                         if (skillNRateCursor.getInt(3) != 0) {
                             //R1
                              p1RateTv.setText(skillNRateCursor.getString(3));//default skill
                             //    R1 * p1
-                            totalP1AmountTv.setText("= " + skillNRateCursor.getInt(3) * sumCursor.getInt(1));//default skill
+                            totalP1AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3) * sumCursor.getInt(1)));//default skill
                         } else {
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                            totalP1AmountTv.setText("= PROVIDE RATE");//default skill
+                            totalP1AmountTv.setText(getResources().getString(R.string.equal_provide_rate));//default skill
                         }
                         //total wages
                         if (sumCursor.getString(0) != null) {//if total wages is not null then set total wages
-                             wagesTotalAmountTv.setText(sumCursor.getString(0));//total wages set
+                             wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));//total wages set
                         }
                         //by default= deposit,totalP2CountTv,defaultHardcodedTv,defaultSkillTextTv,p1RateTv,totalP1AmountTv is set automatically
                         if (indicate == 1) {
-                            indicator1234CalculateButDontUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),0,0,0);
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),0,0,0);
                         }
 
-                        p2Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
-                        p3Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
-                        p4Layout.setVisibility(View.GONE);//initiall invisible according to indicator it will customize
+                        p2Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
+                        p3Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
+                        p4Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
 
                         if(indicate == 2) {
                             if(skillNRateCursor.getInt(4) != 0) {
                                 //R1
                                 p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                                totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP2AmountTv.setText("= PROVIDE RATE");
+                                totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
 
                              totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
                              skill1TextTv.setText(skillNRateCursor.getString(0)+" =");//setting skill 1
                              p2Layout.setVisibility(View.VISIBLE);
-                             indicator1234CalculateButDontUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),0,0);
+                             indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),0,0);
                         } else if (indicate == 3) {
                             if(skillNRateCursor.getInt(4) != 0) {
                                  p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                 totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP2AmountTv.setText("= PROVIDE RATE");
+                                totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
                             if(skillNRateCursor.getInt(5) != 0) {
                                  p3RateTv.setText(skillNRateCursor.getString(5));
                                 //    R3 * p3
-                                totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
+                                totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP3AmountTv.setText("= PROVIDE RATE");
+                                totalP3AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
                              totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
                              totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
@@ -716,34 +723,34 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                              skill2TextTv.setText(skillNRateCursor.getString(1)+" =");//setting skill 2
                              p2Layout.setVisibility(View.VISIBLE);
                              p3Layout.setVisibility(View.VISIBLE);
-                            indicator1234CalculateButDontUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),0);
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),0);
 
                         } else if (indicate == 4) {
                             if(skillNRateCursor.getInt(4) != 0) {
                                  p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                 totalP2AmountTv.setText("= "+skillNRateCursor.getInt(4)*sumCursor.getInt(2));
+                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP2AmountTv.setText("= PROVIDE RATE");
+                                totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
 
                             if(skillNRateCursor.getInt(5) != 0) {
                                 p3RateTv.setText(skillNRateCursor.getString(5));
                                 //    R3 * p3
-                                 totalP3AmountTv.setText("= "+skillNRateCursor.getInt(5)*sumCursor.getInt(3));
+                                 totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP3AmountTv.setText("= PROVIDE RATE");
+                                totalP3AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
 
                             if(skillNRateCursor.getInt(6) != 0) {
                                  p4RateTv.setText(skillNRateCursor.getString(6));
                                 //    R4 * p4
-                                 totalP4AmountTv.setText("= "+skillNRateCursor.getInt(6)*sumCursor.getInt(4));
+                                 totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumCursor.getInt(4)));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
-                                totalP4AmountTv.setText("= PROVIDE RATE");
+                                totalP4AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
                              totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
                              totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
@@ -754,7 +761,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                              p2Layout.setVisibility(View.VISIBLE);
                              p3Layout.setVisibility(View.VISIBLE);
                              p4Layout.setVisibility(View.VISIBLE);
-                            indicator1234CalculateButDontUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),skillNRateCursor.getInt(6) * sumCursor.getInt(4));
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),skillNRateCursor.getInt(6) * sumCursor.getInt(4));
                         }
                     }
                     //if rate 1 is changed
@@ -768,7 +775,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p1RateTv.setTextColor(getColor(R.color.purple_700));
                             innerArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
-                            if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                            if(!MyUtility.isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                                 longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
@@ -782,7 +789,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         public void afterTextChanged(Editable editable) {
                             try{
                                 r1 = Integer.parseInt(p1RateTv.getText().toString().trim());//updating r1 variable to take during saving
-                                totalP1AmountTv.setText("= " + (r1 * p1));
+                                totalP1AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r1 * p1));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
@@ -810,7 +817,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p2RateTv.setTextColor(getColor(R.color.purple_700));
                             innerArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
-                            if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                            if(!MyUtility.isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                                 longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
 
                             }
@@ -825,7 +832,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         public void afterTextChanged(Editable editable) {
                             try{
                                 r2 = Integer.parseInt(p2RateTv.getText().toString().trim());//updating r1 variable to take during saving
-                                totalP2AmountTv.setText("= " + (r2 * p2));
+                                totalP2AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r2 * p2));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
@@ -852,7 +859,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p3RateTv.setTextColor(getColor(R.color.purple_700));
                             innerArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
-                            if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                            if(!MyUtility.isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                                 longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
@@ -866,7 +873,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         public void afterTextChanged(Editable editable) {
                             try {
                                 r3 = Integer.parseInt(p3RateTv.getText().toString().trim());//updating r1 variable to take during saving
-                                totalP3AmountTv.setText("= " + (r3 * p3));
+                                totalP3AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r3 * p3));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
@@ -892,21 +899,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p4RateTv.setTextColor(getColor(R.color.purple_700));
                             innerArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                             //this will check if other data is right or wrong
-                            if(!isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                            if(!MyUtility.isEnterDataIsWrong(innerArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                                 longPressToSaveAndCreatePdf.setVisibility(View.VISIBLE);
                             }
                             if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                                 p4RateTv.setTextColor(Color.RED);
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 innerArray[3]=2;//means data is inserted wrong
-                               // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                             }
                         }
                         @Override
                         public void afterTextChanged(Editable editable) {
                             try {
                                 r4 = Integer.parseInt(p4RateTv.getText().toString().trim());//updating r1 variable to take during saving
-                                totalP4AmountTv.setText("= " + (r4 * p4));
+                                totalP4AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r4 * p4));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
                                 if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
@@ -921,27 +927,33 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    skillNRateCursor.close();
+                    if (skillNRateCursor != null) {
+                        skillNRateCursor.close();
+                    }
                     sumCursor.close();
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-                        if (checkPermissionForReadAndWriteToExternalStorage()) {//Take permission
+                        if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {//Take permission
                             if (updateRateTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
-                                 if (savePdfToDatabase(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
-                                    if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialogbox before going to pdfviewer activity
-                                        finalDialog.dismiss();
-                                    }
-                                    if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
-                                        if (deleteDataFromDB()) {
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
+                                if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
+                                    if (savePdfToDatabase(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
+                                        if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
+                                            finalDialog.dismiss();
+                                        }
+                                        if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
+                                            if (deleteDataFromDB()) {
+                                                Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
+                                            }
                                         } else {
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
                                         }
                                     } else {
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
                                     }
-                                } else {
-                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                            }else{
+                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE TEXT FILE IN DEVICE\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
                                 }
                             } else {
                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
@@ -956,7 +968,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     return false;
                 }
                 private boolean deleteDataFromDB() {
-                    try(PersonRecordDatabase personDb=new PersonRecordDatabase(getApplicationContext())) {//so that object close automatically
+                    try(Database personDb=new Database(getApplicationContext())) {//so that object close automatically
                          boolean success;
                             //this function will be written when existing from pdf viewer
 //                                boolean deleted = deletePdfFromDevice(pdfPath);
@@ -965,7 +977,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                                }
                        // if(updateInvoiceNumberBy1ToDb(fromIntentPersonId)){//updating invoice number by 1
                            // if (deleteAudios(fromIntentPersonId)) {
-                                if (deleteWagesFromDBorRecyclerView(fromIntentPersonId)){//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
+                                if (deleteWagesAndAudiosFromDBorRecyclerView(fromIntentPersonId)){//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
 
                                     if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db.this code is not in else block because if data is not deleted from db then this code should not be executed
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE IN RECYCLER VIEW AFTER FINAL CALCULATION .\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
@@ -981,12 +993,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
 
-                                    if (!deleteAudios(fromIntentPersonId)){//deleting audio
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-                                    }
+//                                    if (!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio
+//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+//                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+//                                        if (!success)
+//                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
+//                                    }
                                 }else{//add this message to recycle view
 
                                     if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1 CANT REVERSE
@@ -995,12 +1007,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
-                                    if (!deleteAudios(fromIntentPersonId)){//deleting audio
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-                                    }
+//                                    if (!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio
+//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+//                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+//                                        if (!success)
+//                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
+//                                    }
 
                                         String  message=  "[AUTOMATIC ENTERED-FAILED TO DELETE RECORD FROM DATABASE. CURRENT DATA IS SAVED TO PREVIOUS INVOICE2. ACTION TO PERFORM BY YOURSELF SEQUENTIALLY(strictly) \n\n " +
                                                 "1.MANUALLY EDIT ALL WAGES DATA TO 0 ie.set all wages and work days to 0 IN RECYCLER VIEW (IF NOT DONE THEN PREVIOUS DATA WILL BE THERE AND GIVE INCORRECT CALCULATION ITS MANDATORY) AFTER THAT\n\n " +
@@ -1025,10 +1037,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       return true;
                 }
                 private boolean updateInvoiceNumberBy1ToDb(String id) {
-                    try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext())){
-                        Cursor cursor = db.getData("SELECT "+db.COL_396_PDFSEQUENCE +" FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'");
+                    try(Database db=new Database(getApplicationContext())){
+                        Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
                         cursor.moveToFirst();//means only one row is returned
-                       if(!db.updateTable("UPDATE " + db.TABLE_NAME3 + " SET  "+db.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE ID='" + id + "'")){
+                       if(!db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'")){
                           return false;
                        }
                         cursor.close();
@@ -1039,12 +1051,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     return true;
                 }
-                private boolean deleteAudios(String fromIntentPersonId) {
-                    try(PersonRecordDatabase personDb=new PersonRecordDatabase(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT MICPATH FROM " + db.TABLE_NAME2 + " WHERE ID= '" + fromIntentPersonId + "'");){//so that object close automatically
+                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {
+                    try(Database personDb=new Database(getApplicationContext());
+                        Cursor cursor = personDb.getData("SELECT "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + id + "'")){//so that object close automatically
                          while(cursor.moveToNext()){
                              if(cursor.getString(0) != null) {//checking path may be null
-                                 if (!deletePdfOrRecordingsFromDevice(cursor.getString(0))) {
+                                 if (!MyUtility.deletePdfOrRecordingFromDevice(cursor.getString(0))) {
                                       return false;
                                  }
                              }
@@ -1052,52 +1064,62 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return true;
                     }
                 }
-                private boolean deleteWagesFromDBorRecyclerView(String fromIntentPersonId) {
-                    try(PersonRecordDatabase personDb=new PersonRecordDatabase(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT ID FROM " + db.TABLE_NAME2 + " WHERE ID= '" + fromIntentPersonId + "'");
+                private boolean deleteWagesAndAudiosFromDBorRecyclerView(String fromIntentPersonId) {
+                    try(Database personDb=new Database(getApplicationContext());
+                        Cursor cursor = personDb.getData("SELECT "+Database.COL_21_ID+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + fromIntentPersonId + "'")
                        ){//so that object close automatically
                         cursor.moveToFirst();
                         if(cursor.getCount()==0){//if already record not present then return true
                             return true;
                         }
-                        if(personDb.deleteRows(fromIntentPersonId,personDb.TABLE_NAME2))
-                            return true;
 
-                        return false;
+                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
+                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+                                        boolean success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        if (!success)
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
+                          return false;//because audio failed to delete
+                         }//else not required because below statement should be executed
+
+                        if(!personDb.deleteRows(fromIntentPersonId,Database.TABLE_NAME2)) {
+                            return false;//if failed to deleted
+                        }
+                        return true;
                     }
                 }
                 private boolean addMessageAfterFinalCalculationToRecyclerview(String fromIntentPersonId) {
                     //PersonRecordDatabase db=null;
                    // Cursor cursor=null;
-                    try( PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
-                            Cursor cursor=db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'"))
+                    try(Database db = new Database(getApplicationContext());
+                        Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId + "'"))
                     {
                        // db = new PersonRecordDatabase(getApplicationContext());//so db close automatically
                         int amount=0;
                         boolean success;
-                        final Calendar current = Calendar.getInstance();//to get current date
-                        String date = current.get(Calendar.DAY_OF_MONTH) + "-" + (current.get(Calendar.MONTH) + 1) + "-" + current.get(Calendar.YEAR);
-
-                        Date d = Calendar.getInstance().getTime(); //To get exact time so write code in save button
-                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-                        String time = sdf.format(d);
+//                        final Calendar current = Calendar.getInstance();//to get current date
+//                        String date = current.get(Calendar.DAY_OF_MONTH) + "-" + (current.get(Calendar.MONTH) + 1) + "-" + current.get(Calendar.YEAR);
+                         String date=MyUtility.getOnlyCurrentDate();
+//                        Date d = Calendar.getInstance().getTime(); //To get exact onlyTime so write code in save button
+//                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
+//                        String onlyTime = sdf.format(d);
+                        String onlyTime = MyUtility.getOnlyTime();
                        // cursor = db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'");
                         cursor.moveToFirst();//means only one row is returned
                         if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
                             amount = cursor.getInt(0);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[After calculation advance Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]", amount, 0, "0");
                             if (!success)
                                 return false;
                         }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
                             amount = cursor.getInt(1);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_Deposit_Table2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[After calculation balance Rs. " + amount+" ]", amount, "1");
+                            success = db.insert_Deposit_Table2(fromIntentPersonId, date, onlyTime, null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]", amount, "1");
                             if (!success)
                                 return false;
                         }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, time, null, "[" + time + "-AUTOMATIC ENTERED]\n\n" + "[After calculation all cleared  Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]", amount, 0, "0");
                             if (!success)
                                 return false;
                         }
@@ -1108,22 +1130,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return false;
                     }
                 }
-                private boolean deletePdfOrRecordingsFromDevice(String pdfPath) {
-                    try {
-                        File filePath = new File(pdfPath);//file to be delete
-                        if (filePath.exists()) {//checks file is present in device  or not
-                            return filePath.delete();//only this can return false
-                        }
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                        return false;
-                    }
-                    return true;//if user deleted file from device then also code will work so passing true
-                }
                 private boolean savePdfToDatabase(String pdfAbsolutePath) {
                     if(pdfAbsolutePath != null) {
-                        try (PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
-                             Cursor cursor = db.getData("SELECT PDF2 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId + "'")) {//so that object close automatically
+                        try (Database db = new Database(getApplicationContext());
+                             Cursor cursor = db.getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
                             cursor.moveToFirst();
                             byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
 
@@ -1132,25 +1142,22 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 return db.insertPdf(fromIntentPersonId, newPDF, 2);
                             }
                             //if pdf1 is not null then store in pdf 2
-                            // Toast.makeText(IndividualPersonDetailActivity.this, "pdf there", Toast.LENGTH_LONG).show();
                             if (db.insertPdf(fromIntentPersonId, cursor.getBlob(0), 1)) {//store pdf2 in pdf1
-                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store newpdf in pdf2
+                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store new pdf in pdf2
                             }
                             return false;
-                        } catch (IOException ex) {
-                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found IOException", Toast.LENGTH_LONG).show();
-                            ex.printStackTrace();
-                            return false;
-                        } catch (Exception ex) {
+                        }catch (Exception ex){
                             Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
                             ex.printStackTrace();
                             return false;
+                        }finally{
+                            MyUtility.deletePdfOrRecordingFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
                         }
                     }else return false;
                 }
                 private boolean viewPDFFromDb(byte whichPdf,String fromIntentPersonId) {
                     try {//to view pdf
-                        finish();//while going to other activity so destroy this current activity(individualpersonDetailActivity) so that while coming back we will see refresh activity
+                        finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
                         Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
                         intent.putExtra("pdf1_or_2_or_3_for_blank_4",whichPdf);
                         intent.putExtra("ID",fromIntentPersonId);
@@ -1163,9 +1170,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                 }
                 public String generatePDFAndReturnFileAbsolutePath(String id) {//if error return null otherwise file path
-
                     try{
-                        String fileAbsolutePath=null;
+                        String fileAbsolutePath;
                         MakePdf makePdf = new MakePdf(); //create PDF
                        if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
 
@@ -1177,7 +1183,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         if(!makePdf.createdPageFinish2()) return null;
 
-                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), generateUniqueFileName(id));
+                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(getBaseContext(),id));
 
                         if(!makePdf.closeDocumentLastOperation4())return null;
 
@@ -1191,23 +1197,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return null;
                     }
                 }
-                private void displFinalResult(String title,String message) {
-                    AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
-                    showDataFromDataBase.setCancelable(false);
-                    showDataFromDataBase.setTitle(title);
-                    showDataFromDataBase.setMessage(message);
-                    showDataFromDataBase.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {//REFRESHING
-                            dialogInterface.dismiss();//close current dialog
-                            Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
-                            intent.putExtra("ID",fromIntentPersonId);
-                            finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
-                            startActivity(intent);
-                        }
-                    });
-                    showDataFromDataBase.create().show();
-                }
+//                private void displayFinalResult(String title,String message) {
+//                    AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
+//                    showDataFromDataBase.setCancelable(false);
+//                    showDataFromDataBase.setTitle(title);
+//                    showDataFromDataBase.setMessage(message);
+//                    showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {//REFRESHING
+//                        dialogInterface.dismiss();//close current dialog
+//                        Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
+//                        intent.putExtra("ID",fromIntentPersonId);
+//                        finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
+//                        startActivity(intent);
+//                    });
+//                    showDataFromDataBase.create().show();
+//                }
                 private float checkInternalStorageAvailability(){
                     File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
                     StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
@@ -1216,55 +1219,48 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     String format = Formatter.formatFileSize(IndividualPersonDetailActivity.this, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
                     format=format.trim();//for safer side
 
-                    StringBuffer internalStorage=new StringBuffer();
+                    StringBuilder stringBuilder=new StringBuilder();
                     for(int i=0;i<format.length();i++){
                         if(format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
                             break;
-                        internalStorage.append(format.charAt(i));
+                        stringBuilder.append(format.charAt(i));
                     }
-                    return  Float.parseFloat(internalStorage.toString());
-                }
-                private boolean checkPermissionForReadAndWriteToExternalStorage() {
-                    if( (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED) &&
-                            (ActivityCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)) {
-                        return true;
-                    }else
-                        return false;
+                    return  Float.parseFloat(stringBuilder.toString());
                 }
                 private boolean updateRateTotalAdvanceOrBalanceToDatabase( ) {
                     //updating rate
-                    boolean success = db.updateTable("UPDATE " + db.TABLE_NAME3 + " SET R1='"+r1+"' , R2='"+r2+"' , R3='"+r3+"' , R4='"+r4+"'"+ " WHERE ID='" + fromIntentPersonId + "'");
+                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"'"+ " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
                     if(success){//if rate is updated then proceed
-                       if (!isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
+                       if (!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
                            if (!isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
-                               //if both wages and totalwork amount is less then 0 then dont save.This condition already checked but checking again
+                               //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
 
                                if (((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
                                    return false;
                                } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
                                    //updating Advance to db
-                                   success = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ADVANCE='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                                    if (!success) {
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
                                    }
                                    //if there is advance then balance  column should be 0
-                                   success = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET BALANCE='" + 0 + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                                    if (!success) {
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
                                       }
-                               } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and totalwork is same then this condition will be executed to set balance 0
+                               } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
 
                                    //updating balance to db if greater then 0
-                                   success = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET BALANCE='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                                    if (!success) {
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
                                    }
                                    //if there is balance then update advance column should be 0
-                                   success = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ADVANCE='" + 0 + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                                    if (!success) {
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
@@ -1297,13 +1293,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     return false;
                 }
                 private void updateTotalWorkAmountAndAdvanceOrBalanceTv() {
-                    if(!isEnterDataIsWrong(innerArray)) {//if data is right then only change fields
-                        workTotalAmountTv.setText(" - " + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4) + totalDeposit));
+                    if(!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields
+                        workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4) + totalDeposit));
 
                         //if both wages and total work amount is less then 0 then both message have to show so if statement two times
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
-                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unabled when user enter rate
+                            longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
                         if(totalWages < 0){//its important otherwise save option will be unable when user enter rate
                             Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
@@ -1313,12 +1309,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
                             advanceOrBalanceTv.setTextColor(Color.RED);
                             //                                        total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-                            advanceOrBalanceTv.setText("= " + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))));
+                            advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem((totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))))));
                             //       totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
                         } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because of green color
                             advanceOrBalanceTv.setTextColor(getColor(R.color.green));
                             //                                           totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
-                            advanceOrBalanceTv.setText("= " + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages));
+                            advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages)));
                         }
                     }else{
                         advanceOrBalanceTv.setText("= 0");
@@ -1327,7 +1323,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         workTotalAmountTv.setText(" - 0");
                     }
                 }
-                private void indicator1234CalculateButDontUpdateToDBFinal(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
+                private void indicator1234CalculateButDoNotUpdateToDBFinal(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
                     int  totalDeposit,totalWages;
                     int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
                     totalWages=sumCursor.getInt(0);
@@ -1336,18 +1332,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                         Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
 
-                    workTotalAmountTv.setText(" - " + (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
+                    workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
                     //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
                     if ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) < totalWages) {
                         advanceOrBalanceTv.setTextColor(Color.RED);
                         //                                total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-                        advanceOrBalanceTv.setText("= " + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
+                        advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
 
                         //totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
                     }else if((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) >= totalWages) {//>= is given because of green color and when calculation is 0
                         advanceOrBalanceTv.setTextColor(getColor(R.color.green));
                         //                                   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
-                        advanceOrBalanceTv.setText("= " + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages));
+                        advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages));
                     }
                 }
                 private void initialiseIDs(View myView) {
@@ -1385,14 +1381,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       cancel=myView.findViewById(R.id.cancel_btn_final);
                 }
             });
-            //to open dialpaid
-            binding.callTv.setOnClickListener(view -> {
-                if (cursor.getString(5).length() == 10) {
+            binding.callTv.setOnClickListener(view -> {//it will call to first active number if not available then make call to second active number
+                if (MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext()) != null) {
                     Intent callingIntent = new Intent(Intent.ACTION_DIAL);
-                    callingIntent.setData(Uri.parse("tel:+91" + cursor.getString(5)));
+                    callingIntent.setData(Uri.parse("tel:+91" + MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext())));
                     startActivity(callingIntent);
                 } else
-                    Toast.makeText(IndividualPersonDetailActivity.this, "NO PHONE NUMBER ADDED", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_SHORT).show();
             });
             binding.editTv.setOnClickListener(view -> {
                 Intent intent = new Intent(getBaseContext(), InsertDataActivity.class);
@@ -1400,8 +1395,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
             });
-            // cursor.close(); it should not be close because of call action to perform then we need cursor
-
+            if (cursor != null) {
+                cursor.close();
+            }
             binding.gobackIndividualPersonDetails.setOnClickListener(view -> {
 //                        if (getIntent().hasExtra("FromMesterLaberGAdapter")) {
 //                            finish();//first destroy current activity then go back
@@ -1421,24 +1417,24 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //to insert data in recyclerview
         binding.fab.setOnClickListener(view -> {
             arr=new int[7];//so that when again enter data fresh array will be created
-             insertDataToRecyclerView_ALertDialogBox(get_indicator(fromIntentPersonId));
+            insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
     public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
         try{
-            byte indicator=(byte) get_indicator(id);
-            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occured or not
-            String[] header = getWagesHeadersFromDbBasedOnIndicator(id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
+            byte indicator= (byte) MyUtility.get_indicator(getBaseContext(),id);
+            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
+            String[] skillHeader = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
             float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
-            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(id,indicator,errorDetection);//if error cause errorDetection will be set true
-            String[][] recyclerViewWagesdata = getAllWagesDetailsFromDbBasedOnIndicator(id, indicator, errorDetection);//it amy return null   when no data
-            String[][] recyclerViewDepositdata = getAllDepositFromDb(id, errorDetection);//it amy return null   when no data
+            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
+            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
+            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id,errorDetection);//it amy return null   when no data
             if(errorDetection[0]==false){
                 if(!makeSummaryAndWriteToPDFBasedOnIndicator(indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
                 if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
 
-                           if (recyclerViewWagesdata != null) {//null means data not present
-                                if(makePdf.makeTable(header, recyclerViewWagesdata,columnWidth, 9, false)){
+                           if (recyclerViewWagesData != null){//null means data not present
+                                if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
                                                                //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
                                     if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
                                         return false;
@@ -1446,21 +1442,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 }else return false;
                              }
 
-                if (recyclerViewDepositdata != null) {//if deposit there then draw in pdf
-                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositdata, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of depost
-                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+                if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
+                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
+                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
                             return false;
                         }
                     }else return false;
                 }
-                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, header)) {return false;}
+                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, skillHeader)) {return false;}
             }else return false;//means error has occurred
 
             return true;
         }catch(Exception ex){
             ex.printStackTrace();
-            System.out.println("error occurred in fetchWorkDetailsCalculationAndWriteToPDF method**************************");
-            return false;
+             return false;
         }
     }
     public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
@@ -1483,204 +1478,108 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
     }
     public boolean makeSummaryAndWriteToPDFBasedOnIndicator(byte indicator,String id,MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
-        try(PersonRecordDatabase db = new PersonRecordDatabase(getApplicationContext());
-             Cursor cursor=db.getData("SELECT "+db.COL_13_ADVANCE+" ,"+db.COL_14_BALANCE+" FROM " + db.TABLE_NAME1 + " WHERE ID= '" + id + "'"))
+        try(Database db = new Database(getApplicationContext());
+            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
          {
              if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
-
 
             cursor.moveToFirst();//means only one row is returned
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
 
-               if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
+               if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
                                                                                                                                                                                                                                           //yellow                               green
-                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
-                if(!makePdf.singleCustomRow(new String[]{ " *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem((long) cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
+                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
+                if(!makePdf.singleCustomRow(new String[]{ " *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
 
-                if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
                 //                                                                                                                                                                                                                      yellow                               green                                    green
-                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
-                if(!makePdf.singleCustomRow(new String[]{ " *After calculation balance Rs. " +MyUtility.convertToIndianNumberSystem((long) cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(new String[]{ " *After calculation balance Rs. " +MyUtility.convertToIndianNumberSystem(cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-                if(!makePdf.singleCustomRow(headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
                                                                                                                                                                                                                                             // yellow                               green                                green
-                if(!makePdf.singleCustomRow(totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
                 if(!makePdf.singleCustomRow(new String[]{ " * After calculation all cleared Rs. 0"},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
 
             }
             return true;
         }catch (Exception ex){
             ex.printStackTrace();
-            System.out.println("error occurred in makeSummaryAndWriteToPDFBasedOnIndicator method**************************");
-            return false;
-        }
-    }
-    public String[] totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(byte indicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, int advanceOrBalanceAmount){
-        try{
-            switch(indicator){
-                case 1: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0) {//if no deposit
-//                                                                                                        wages                                                                                                                            p1*r1
-                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[3])), MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
-                         }else{//if deposit then add deposit
-                    //                                                    wages                                                                                             deposit                                                                                                                   p1*r1
-                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[2]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[3]))), MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
-                         }
-                        }
-                case 2: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
-                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long) ((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[4])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[5]))),MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
-                        }else{//if deposit then add deposit
-                         return new String[]{MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long) (arrayOfTotalWagesDepositRateAccordingToIndicator[3]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[4])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[5]))),MyUtility.convertToIndianNumberSystem((long) advanceOrBalanceAmount)};
-                        }
-                        }
-                case 3: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
-                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[5])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[7]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
-                        }else{//if deposit then add deposit
-                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)(arrayOfTotalWagesDepositRateAccordingToIndicator[4]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[5])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[7]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
-                        }
-                        }
-                case 4: {if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//if no deposit
-                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)((arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[7])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[8])+(arrayOfTotalWagesDepositRateAccordingToIndicator[4] * arrayOfTotalWagesDepositRateAccordingToIndicator[9]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
-                        }else{//if deposit then add deposit
-                        return new String[]{MyUtility.convertToIndianNumberSystem((long)arrayOfTotalWagesDepositRateAccordingToIndicator[0]),MyUtility.convertToIndianNumberSystem((long)(arrayOfTotalWagesDepositRateAccordingToIndicator[5]+(arrayOfTotalWagesDepositRateAccordingToIndicator[1] * arrayOfTotalWagesDepositRateAccordingToIndicator[6])+(arrayOfTotalWagesDepositRateAccordingToIndicator[2] * arrayOfTotalWagesDepositRateAccordingToIndicator[7])+(arrayOfTotalWagesDepositRateAccordingToIndicator[3] * arrayOfTotalWagesDepositRateAccordingToIndicator[8])+(arrayOfTotalWagesDepositRateAccordingToIndicator[4] * arrayOfTotalWagesDepositRateAccordingToIndicator[9]))),MyUtility.convertToIndianNumberSystem((long)advanceOrBalanceAmount)};
-                        }
-                        }
-            }
-            return new String[]{"no indicator","no indicator","no indicator"};
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return new String[]{"error occurred","error occurred","error occurred"};
-        }
-    }
-    public String[] headersForSummaryBasedOnIndicator(byte indicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, String advanceOrBalanceString) {
-        try{
-            if(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator+1] == 0){//indicator+1 is index of deposit in array of arrayOfTotalWagesDepositRateAccordingToIndicator
-                return new String[]{"TOTAL WAGES","TOTAL WORK AMOUNT",advanceOrBalanceString};
-            }else{//when deposit present
-                return new String[]{"TOTAL WAGES","TOTAL DEPOSIT + WORK AMOUNT",advanceOrBalanceString};
-            }
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return new String[]{"error occurred","error occurred","error occurred"};//when exception occur it will set as header
-        }
-    }
-    public int[] getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//important method return arr with value but if error return arr with 0 value and errorDetection set to true;.it index value is sensitive.according to indicator it store date in particular index
-        Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
-            switch(indicator){
-                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
-                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+" FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id +"'");
-                       }break;
-                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
-                        rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
-                        }break;
-                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"), SUM("+db.COL_27_DEPOSIT+") FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
-                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+", "+db.COL_34_R3+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
-                       }break;
-                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.COL_26_WAGES+"),SUM("+db.COL_28_P1+"),SUM("+db.COL_29_P2+"),SUM("+db.COL_291_P3+"),SUM("+db.COL_292_P4+"), SUM("+db.COL_27_DEPOSIT+")  FROM "+db.TABLE_NAME2+" WHERE ID= '"+id +"'");
-                       rateCursor=db.getData("SELECT  "+db.COL_32_R1+", "+db.COL_33_R2+", "+db.COL_34_R3+", "+db.COL_35_R4+" FROM "+ db.TABLE_NAME3 +" WHERE ID= '" + id +"'");
-                       }break;
-            }
-            int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size.like indicator 1 need 4 space in array so formula is [2*(indicator+1)]
-            int col=0;
-            if (sumDepositWagesCursor !=null && sumDepositWagesCursor.getCount()!=0) {
-                sumDepositWagesCursor.moveToFirst();
-                for (int i = 0; i < sumDepositWagesCursor.getColumnCount(); i++) {//retrieving data from cursor
-                    arr[col++]=sumDepositWagesCursor.getInt(i);
-                }
-            }
-            if (rateCursor !=null && rateCursor.getCount()!=0){
-                rateCursor.moveToFirst();
-                for (int i = 0; i < rateCursor.getColumnCount(); i++){//retrieving data from cursor
-                    arr[col++]=rateCursor.getInt(i);
-                }
-            }
-
-            return arr;
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getArrayDataOfTotalWagesDepositRateDaysWorked method**************************");
-            errorDetection[0]=true;//indicate error has occur
-            return new int[2*(indicator+1)];//if exception occur 0 value will be return
-        }finally {//since there is return statement in try and catch block so finally needed
-            if(sumDepositWagesCursor!=null&& rateCursor !=null) {
-                sumDepositWagesCursor.close();
-                rateCursor.close();
-            }
+             return false;
         }
     }
     public boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
         try{
             switch(indicator){
                 case 1: {
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 88, (byte) 88);
                     if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     } else {//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
                          //                                                                                                                                                                                                                                                                           green color
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }
                 }break;
                 case 2: {
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
                     if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
                         //                                                                                                                                      P1*R1                              +                             P2*R2
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }else{//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
                         //                       P1*R1                             +                             P2*R2                             +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long) ((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }
                 }break;
                 case 3:{
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem((long)(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
 
                     if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((long) ((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }else{ //when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
                         //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                              +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4]) )}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }
                 }break;
                 case 4:{
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem((long) (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
 
                     if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }else{//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem((long)sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88 );
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88 );
                         //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                                                           P4*R4                                  +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((long)((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
                     }
                 }break;
             }
             return true;
     }catch(Exception ex){
         ex.printStackTrace();
-        System.out.println("error occurred in addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF method**************************");
         return false;
     }
     }
     public String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
         try{
                 switch (indicator) {
-                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
+                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
 
-                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
+                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
 
-                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
+                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
 
-                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem((long) arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
+                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
                 }
                 return new String[]{"no indicator"};//this code will not execute due to return in switch block just using to avoid error
         }catch (Exception ex){
@@ -1690,124 +1589,28 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return new String[]{"error occurred"};//to avoid error
         }
     }
-    public String[][] getAllDepositFromDb(String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
-             Cursor depositCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_27_DEPOSIT+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='1'"))
-           {
-               String recyclerViewDepositdata[][]=null;
-            if(depositCursor!= null&&depositCursor.getCount()!=0){
-                recyclerViewDepositdata= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
-               int row = 0;
-               while (depositCursor.moveToNext()) {
-                   for (int col = 0; col < depositCursor.getColumnCount(); col++) {
-                       if(col!=1) {
-                           recyclerViewDepositdata[row][col] = depositCursor.getString(col);//storing all data in 2d string
-                       }else{
-                           recyclerViewDepositdata[row][col] = MyUtility.convertToIndianNumberSystem(depositCursor.getLong(col));//if column is 1 then convert to indian number system
-                       }
-                   }
-                   row++;
-               }
-           }
-            return recyclerViewDepositdata;//when no data return null
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getAllDepositFromDb method**************************");
-            errorDetection[0]=true;
-            return new String[][]{{"error occurred"}};//to avoid error
-        }
-    }
-    public String[] getWagesHeadersFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection ) {//  if error errorDetection will be set to true
-        Cursor cursor2=null;//returnOnlySkill will return only string of array
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this);
-            Cursor cursor1=db.getData("SELECT "+db.COL_8_SKILL+" FROM " +db.TABLE_NAME1+ " WHERE ID= '" + id +"'"))
-        {
-            cursor1.moveToFirst();
-               switch (indicator) {
-                   case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
-                   case 2: {
-                       cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                       cursor2.moveToFirst();
-                       return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
-                   }
-                   case 3: { cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                             cursor2.moveToFirst();
-                             return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
-                   }
-                   case 4: { cursor2 = db.getData("SELECT " + db.COL_36_SKILL1 + " ," + db.COL_37_SKILL2 + " ," + db.COL_38_SKILL3 + " FROM " + db.TABLE_NAME3 + " WHERE ID='" + id + "'");
-                             cursor2.moveToFirst();
-                             return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
-                       }
-               }
-               return new String[]{"no indicator", "no indicator", "no indicator", "no indicator"};//this statement will not execute due to retrun statement in switch just to remove error used
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getHeadersFromDb method**************************");
-            errorDetection[0]=true;
-            return new String[]{"error occurred"};//to avoid error
-        }finally {//since there is return statement in try and catch block so finally needed
-            if(cursor2!=null) {
-                cursor2.close();
-            }
-        }
-     }
-    public String[][] getAllWagesDetailsFromDbBasedOnIndicator(String id, byte indicator, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        try(PersonRecordDatabase db = new PersonRecordDatabase(this)){
-            Cursor wagesCursor = null;
-            switch(indicator){
-                case 1:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
-                case 2:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
-                case 3:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_291_P3+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
-                case 4:wagesCursor=db.getData("SELECT "+db.COL_22_DATE+" ,"+db.COL_26_WAGES+" ,"+db.COL_28_P1+" ,"+db.COL_29_P2+" ,"+db.COL_291_P3+" ,"+db.COL_292_P4+" ,"+db.COL_25_DESCRIPTION+" FROM " + db.TABLE_NAME2 + " WHERE ID='" + id + "'" + " AND "+db.COL_293_ISDEPOSITED+"='0'");break;
-            }
-            String recyclerViewWagesdata[][]=null;
-            if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
-                 recyclerViewWagesdata = new String[wagesCursor.getCount()][wagesCursor.getColumnCount()];
-                int row = 0;
-                while (wagesCursor.moveToNext()) {
-                    for (int col = 0; col < wagesCursor.getColumnCount(); col++) {
-                        if(col !=1) {
-                            recyclerViewWagesdata[row][col] = wagesCursor.getString(col);//storing all data in 2d string
-                        }else{//when col is 1 then convert wages to number system
-                            recyclerViewWagesdata[row][col]= MyUtility.convertToIndianNumberSystem(wagesCursor.getLong(col));
-                        }
-                    }
-                    row++;
-                }
-            }
-            if(wagesCursor!=null) wagesCursor.close();
-
-            return recyclerViewWagesdata;//when no data return null
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getAllWagesData method**************************");
-            errorDetection[0]=true;
-            return new String[][]{{"error occurred"}};//to avoid error
-        }
-    }
     public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
         try{
-            makePdf.makeTopHeaderrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
+            makePdf.makeTopHeaderOrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
             return true;
         }catch(Exception ex){
             ex.printStackTrace();
-            System.out.println("error occurred in fetchOrganizationDetailsAndWriteToPDF method**************************");
            return false;
         }
     }
     public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-        try (PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
-             Cursor cursor1 = db.getData("SELECT " + db.COL_2_NAME + " , " + db.COL_3_BANKAC + " , " + db.COL_6_AADHAAR_NUMBER + " , " + db.COL_10_IMAGE + " FROM " + db.TABLE_NAME1 + " WHERE ID='" + id + "'");
-             Cursor cursor2 = db.getData("SELECT " + db.COL_396_PDFSEQUENCE + " FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'")){
+        try (Database db=new Database(getApplicationContext());
+             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
-                String bankaccount, aadhaar;
+                String bankAccount, aadhaar;
                 int pdfSequenceNo;
 
                 if (cursor1.getString(1).length() > 4) {
-                    bankaccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
+                    bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
                 } else {
-                    bankaccount = "";
+                    bankAccount = "";
                 }
                 if (cursor1.getString(2).length() > 5) {
                     aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
@@ -1817,50 +1620,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                 if (cursor2 != null) {//this make filename unique
                     cursor2.moveToFirst();
-                    pdfSequenceNo = (cursor2.getInt(0) + 1); /**pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
+                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
                 } else {
-                    pdfSequenceNo = 0;
+                    pdfSequenceNo = -1;//if error
                 }
-                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankaccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo), false);
+
+                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
+                if(activePhoneNumber != null){
+                    activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
+                }else{
+                    activePhoneNumber="";
+                }
+                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
             }else{
                 Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
-                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]", false);
+                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]","[NULL NO DATA IN CURSOR]",false);
             }
             return true;
         }catch (Exception ex){
             ex.printStackTrace();
-            System.out.println("error occurred in fetchPersonDetailAndWriteToPDF method**************************");
-            return false;
-        }
-    }
-    public String generateUniqueFileName(String id) {
-        try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext())){
-            StringBuilder fileName = new StringBuilder();
-            fileName.append("id"+id);
-            Cursor cursor = db.getData("SELECT PDFSEQUENCE FROM " + db.TABLE_NAME3 + " WHERE ID= '" + id + "'");
-            cursor.moveToFirst();//means only one row is returned
-            fileName.append("invoice"+(cursor.getInt(0)+1)); /**pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
-
-            cursor =db.getData("SELECT BANKACCOUNT,AADHARCARD FROM " + db.TABLE_NAME1 + " WHERE ID= '" + id + "'");
-            cursor.moveToFirst();
-            if(cursor.getString(0).length()>4) {
-                fileName.append("ac" + cursor.getString(0).substring(cursor.getString(0).length() - 4));
-            }else{
-                fileName.append("acnull");
-            }
-
-            if(cursor.getString(1).length()>5) {
-                fileName.append("aadhaar" + cursor.getString(1).substring(cursor.getString(1).length() - 5));
-            }
-            else{
-                fileName.append("aadhaarnull");
-            }
-            cursor.close();
-            return fileName.toString();
-        }catch (Exception ex){
-            ex.printStackTrace();
-            Toast.makeText(IndividualPersonDetailActivity.this, "error occurred pdf name not generated************", Toast.LENGTH_LONG).show();
-            return "errorOccurredInvoiceNameNull";
+             return false;
         }
     }
     private void indicator1234CalculateAndUpdate(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
@@ -1873,69 +1652,57 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
             Toast.makeText(this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
 
-        binding.workTotalAmountTv.setText(" - " + (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
+        binding.workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
         //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
         if ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) < totalWages) {
             binding.advanceOrBalanceTv.setTextColor(Color.RED);
             //                                        total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-            binding.advanceOrBalanceTv.setText("= " + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
+            binding.advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
 
             //updating Advance to db                                                    total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-            bool = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ADVANCE='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE ID='" + fromIntentPersonId + "'");
-            if(bool==true){
-                /**Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance coulmn will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
-                bool = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET BALANCE='" + 0 + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+            bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+            if(bool){
+                /*Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance column will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
+                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 if (bool == false)
                     Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
             }
-            else if (bool == false)
+            //else if (bool == false)
+            else {
                 Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
-
+            }
             //totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
         }else if((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) >= totalWages) {//>= is given because of green color and when calculation is 0
             binding.advanceOrBalanceTv.setTextColor(getColor(R.color.green));
             //                                           totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
-            binding.advanceOrBalanceTv.setText("= " + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages));
+            binding.advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) - totalWages));
 
             //updating balance to db if greater then or equal to 0
-            bool = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET BALANCE='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE ID='" + fromIntentPersonId + "'");
-            if(bool == true){
+            bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+            if(bool){
                 //if there is balance then update advance column should be 0
-                bool = db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ADVANCE='" + 0 + "'" + "WHERE ID='" + fromIntentPersonId + "'");
+                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 if (bool == false)
                     Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
             }
-            else if(bool == false)
+            //else if(bool == false)
+            else {
                 Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+            }
         }
     }
-    private int get_indicator(String PersonId) {
-        try(PersonRecordDatabase db=new PersonRecordDatabase(getApplicationContext());
-            Cursor cursor = db.getData("SELECT INDICATOR FROM " + db.TABLE_NAME3 + " WHERE ID= '" + PersonId + "'")) {//for sure it will return type or skill
-            if (cursor != null) {
-                cursor.moveToFirst();
-                if (cursor.getString(0) == null) {
-                    return 1;
-                } else
-                    return Integer.parseInt(cursor.getString(0));
-            } else
-                Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
-        }catch(Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in get_indicator method********************");
-            return 1;
-        }
-        return 1;//by default 1
-    }
-    private void insertDataToRecyclerView_ALertDialogBox(int indicator) {
-        AlertDialog.Builder mycustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
+    private void insertDataToRecyclerView_AlertDialogBox(int indicator) {
+        AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
         LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
 
         View myView=inflater.inflate(R.layout.input_data_to_recycler,null);//myView contain all layout view ids
-        mycustomDialog.setView(myView);//set custom layout to alert dialog
-        mycustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
+        myCustomDialog.setView(myView);//set custom layout to alert dialog
+        myCustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
 
-        final AlertDialog dialog=mycustomDialog.create();//mycustomDialog varialble cannot be use in inner class so creating another final varialbe  to use in inner class
+        final AlertDialog customDialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
+
+        mediaRecorder=null;//so that it not take previous VALUE
+        audioPath=null;//so that it not take previous VALUE
 
         TextView deposit_btn_tv=myView.findViewById(R.id.to_deposit_tv);
         TextView hardcodedP1=myView.findViewById(R.id.hardcoded_p1_tv);
@@ -1954,7 +1721,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
         EditText inputP1=myView.findViewById(R.id.input_p1_et);
         //to open keyboard automatically
-        Window window = dialog.getWindow();
+        Window window = customDialog.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
@@ -1968,35 +1735,36 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         save.setVisibility(View.GONE);//initially save button is disabled it is enabled when user enter any data and its important otherwise app crash
         Button cancel=myView.findViewById(R.id.cancel_btn);
 
-        //***********************setting no of days and warningTotaladvanceamount********************************************
-        Cursor  advanceAmountCursor=db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId +"'");
+        //***********************setting no of days and warning Total advance amount********************************************
+        Cursor  advanceAmountCursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" , "+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");
         advanceAmountCursor.moveToFirst();
         if(advanceAmountCursor.getInt(0) > 0) {//advance
             advanceOrBalanceWarring.setTextColor(Color.RED);
             advanceOrBalanceWarring.setText(advanceAmountCursor.getString(0));
 
-            Cursor sum1DayAmountCursor=db.getData("SELECT  R1,R2,R3,R4 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor sum1DayAmountCursor=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
                    sum1DayAmountCursor.moveToFirst();
-            int howManyPerson=get_indicator(fromIntentPersonId) ;
+           // int howManyPerson=get_indicator(fromIntentPersonId);
+            int howManyPerson=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
              if(howManyPerson==1) {
                  if(sum1DayAmountCursor.getInt(0) !=0) {//to avoid arithmetic exception 1/0
                                                                    //total advance / r1
-                     noOfDaysToWork.setText("" + (advanceAmountCursor.getInt(0) / sum1DayAmountCursor.getInt(0)));
+                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / sum1DayAmountCursor.getInt(0)));
                  }
              }else if(howManyPerson==2){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1) != 0) {
                            //                                         total advance/(R1+R1)
-                     noOfDaysToWork.setText("" + (advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1))));
+                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1))));
                  }
              }else if(howManyPerson==3){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2) != 0) {
                      //                                               total advance/(R1+R2+R3)
-                     noOfDaysToWork.setText("" + (advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2))));
+                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2))));
                  }
              }else if(howManyPerson==4){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2)+sum1DayAmountCursor.getInt(3) != 0) {
                      //                                                total advance/(R1+R2+R3+R4)
-                     noOfDaysToWork.setText("" + (advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2) + sum1DayAmountCursor.getInt(3))));
+                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2) + sum1DayAmountCursor.getInt(3))));
                  }
              }
             sum1DayAmountCursor.close();
@@ -2005,12 +1773,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             advanceOrBalanceWarring.setText(advanceAmountCursor.getString(1));
         }
         advanceAmountCursor.close();
-        //***********************done setting no of days and warringTotaladvanceamount********************************************
+        //***********************done setting no of days and warring Total advance amount********************************************
 
         deposit_btn_tv.setOnLongClickListener(view -> {
             Intent intent=new Intent(IndividualPersonDetailActivity.this,CustomizeLayoutOrDepositAmount.class);
             intent.putExtra("ID",fromIntentPersonId);
-            dialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
+            customDialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
             finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
             startActivity(intent);
             return false;
@@ -2041,12 +1809,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //**************************************Setting skills*******************************************
         //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
         //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-        Cursor cursordefault=db.getData("SELECT TYPE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId +"'");//for sure it will return type or skill
-        cursordefault.moveToFirst();//no need to check  cursordefault !=null because for sure TYPE data is present
-        hardcodedP1.setText(cursordefault.getString(0));
-        cursordefault.close();
+        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+        cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
+        hardcodedP1.setText(cursorDefault.getString(0));
+        cursorDefault.close();
 
-        Cursor skillsCursor=db.getData("SELECT SKILL1,SKILL2,SKILL3 FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+        Cursor skillsCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
         if(skillsCursor != null) {
             skillsCursor.moveToFirst();
             if (indicator == 2) {//two person
@@ -2078,53 +1846,61 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 inputP4.setVisibility(View.VISIBLE);
             }
         }
-        skillsCursor.close();
+        if (skillsCursor != null) {
+            skillsCursor.close();
+        }
         //**************************************done setting skills*******************************************
         save.setOnClickListener(view -> {
             //*********************************common to all indicator 1,2,3,4*******************
-            int p1,p2,p3,p4;//this default value is taken when user do enter date to fileds
+            VoiceRecorder.stopAudioPlayer();//if user playing audio and click save button then stop audio
+            VoiceRecorder.stopRecording();//if user don't click tick button to save recording then while saving all data recording will also get saved automatically.so  VoiceRecorder.stopRecording()  method should be called then only file will be saved
+
+            int p1,p2,p3,p4;//this default value is taken when user do enter date to filed
             p1=p2=p3=p4=0;
             int wages=0;
-            String remarks=null;
+            String remarks;
             String micPath=null;
             String date=inputDate.getText().toString();//date will be inserted automatically
 
             //To get exact time so write code in save button
-            Date d=Calendar.getInstance().getTime();
-            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-            String onlyTime = sdf.format(d);
+//            Date d=Calendar.getInstance().getTime();
+//            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
+//            String onlyTime = sdf.format(d);
+            String onlyTime = MyUtility.getOnlyTime();
             inputTime.setText(onlyTime);//setting time to take time and store in db
             String time=inputTime.getText().toString();//time will be inserted automatically
 
            // final Calendar current=Calendar.getInstance();//to get current date
            // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
             //db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" +" WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date not user entered date
-            db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'"+" , LATESTDATE='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' , TIME='"+onlyTime+"' WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
+           // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
 
-            if(file !=null){//if file is not null then only it execute otherwise nothing will be inserted
-                micPath=file.getAbsolutePath();
-                arr[5]=1;
+            db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
+
+            if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
+                micPath=audioPath;
+                arr[5]=1;//1 means data present
              }
             else
-                arr[5]=0;
+                arr[5]=0;// 0 means data not present
 
-            if(description.getText().toString().length() >=1){//to prevent nullpointer exception
-                remarks="["+time+"-ENTERED]\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
-                arr[6]=1;
+            if(description.getText().toString().length() >=1){//to prevent null pointer exception
+                remarks="["+time+getResources().getString(R.string.hyphen_entered)+"\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
+                arr[6]=1;//means data present
             }
-            else {//if user dont enter anything then time will set automatically
-                remarks="["+time+"-AUTOMATIC ENTERED]";
+            else {//if user don't enter anything then time will set automatically
+                remarks="["+time+getResources().getString(R.string.hyphen_automatic_entered);
                 arr[6] = 0;
             }
             boolean success, isWrongData, isDataPresent;
-              isWrongData= isEnterDataIsWrong(arr);
-              isDataPresent= isDataPresent(arr);
+              isWrongData= MyUtility.isEnterDataIsWrong(arr);
+              isDataPresent= MyUtility.isDataPresent(arr);
             if(isDataPresent==true && isWrongData==false ) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
-                if (toGive_Amount.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                if (toGive_Amount.getText().toString().length() >= 1) {//to prevent null pointer exception
                     wages = Integer.parseInt(toGive_Amount.getText().toString().trim());
                 }
                 //>= if user enter only one digit then >= is important otherwise default value will be set
-                if(inputP1.getText().toString().length() >=1) {//to prevent nullpointer exception
+                if(inputP1.getText().toString().length() >=1) {//to prevent null pointer exception
                     p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                 }
             }
@@ -2135,24 +1911,24 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
                     if (success) {
-                        displResult(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks + "\n\nMICPATH- " + micPath);
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+                        displayResult(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks + "\n\nMICPATH- " + micPath);
+                        customDialog.dismiss();//dialog will be dismiss after saved automatically
                     } else
                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
-                } else//once user enter wrong data and left blank then user wound be able to save because array value would not be change it will be 2 so  user have to "Cancel and enter again" if use dont leave blank then it will save successfully
+                } else//once user enter wrong data and left blank then user wound be able to save because array value would not be change it will be 2 so  user have to "Cancel and enter again" if use don't leave blank then it will save successfully
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
             } else if(indicator==2){
                 //p1 is automatically added
                 if(isDataPresent==true && isWrongData==false ) {
-                    if (inputP2.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                    if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
                       success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
                      if (success) {
-                        displResult(wages+"          "+p1+"     "+p2,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+                        displayResult(wages+"          "+p1+"     "+p2,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+                        customDialog.dismiss();//dialog will be dismiss after saved automatically
                     } else
                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 }else
@@ -2160,17 +1936,17 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             }else if(indicator==3){
                 if(isDataPresent==true && isWrongData==false ) {
-                    if (inputP2.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                    if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP3.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                    if (inputP3.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
                       success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
                      if (success) {
-                        displResult(wages+"          "+p1+"     "+p2+"     "+p3,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+                        customDialog.dismiss();//dialog will be dismiss after saved automatically
                     } else
                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 }else
@@ -2179,117 +1955,95 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             }else if(indicator==4) {
                 if (isDataPresent == true && isWrongData == false) {
-                    if (inputP2.getText().toString().length() >= 1) {//to prevent nullpointer exception.If user do not enter any data then that time it will save from crashing app.So due to this condition if field is empty then default value will be taken
+                    if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that time it will save from crashing app.So due to this condition if field is empty then default value will be taken
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP3.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                    if (inputP3.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP4.getText().toString().length() >= 1) {//to prevent nullpointer exception
+                    if (inputP4.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
                       success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, p4, "0");
                     if (success) {
-                        displResult(wages+"          "+p1+"     "+p2+"     "+p3+"     "+p4,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3+"     "+p4,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+                        customDialog.dismiss();//dialog will be dismiss after saved automatically
                     } else
                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 }else
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
             }
+          audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
         });
         micIcon.setOnClickListener(view -> {
-            //checking for permission
-            if(checkPermissionForAudio()){
-                if (mStartRecording) {//initially false
-                    //while recording user should not perform other task like entering date while recording because app will crash so set all field to setEnabled(false);
-                    inputP1.setEnabled(false);
-                    inputP2.setEnabled(false);
-                    inputP3.setEnabled(false);
-                    inputP4.setEnabled(false);
-                    toGive_Amount.setEnabled(false);
-                    description.setEnabled(false);
-                    inputDate.setEnabled(false);
+            if(MyUtility.checkPermissionAudioAndExternal(getBaseContext())){//checking for permission
+                if (toggleToStartRecording) {//initially false
+
                     save.setVisibility(View.GONE);
-                    cancel.setEnabled(false);
                     deposit_btn_tv.setEnabled(false);
 
-                    playAudioChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
-                    playAudioChronometer.start();
                     playAudioChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
                     saveAudio.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
                     micIcon.setEnabled(false);
                     micIcon.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
 
-                    Toast.makeText(IndividualPersonDetailActivity.this, "RECORDING STARTED", Toast.LENGTH_SHORT).show();
+                    VoiceRecorder voiceRecorder=new VoiceRecorder(fromIntentPersonId,getExternalFilesDir(null).toString());
 
-                    //be carefull take only getExternalFilesDir( null ) https://stackoverflow.com/questions/59017202/mediarecorder-stop-failed
-                    File folder = new File(getExternalFilesDir(null) + "/acBookMicRecording");//Creating File directory in phone
-
-                    if (!folder.exists()) {//if folder not exist
-                        Toast.makeText(IndividualPersonDetailActivity.this, "Creating acBookMicRecording folder to store audios", Toast.LENGTH_LONG).show();
-                        folder.mkdir();//create folder
+                    if(voiceRecorder.startRecording()) {
+                        playAudioChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
+                        playAudioChronometer.start();
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.recording_started), Toast.LENGTH_LONG).show();
+                         audioPath=voiceRecorder.getAudioAbsolutePath();//updating audioPath for further use otherwise it will be null
+                        mediaRecorder=voiceRecorder.getMediaRecorder();//updating mediaRecorder for further use  otherwise it will be null
+                    }else{
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_start_recording), Toast.LENGTH_SHORT).show();
                     }
 
-                    startRecordingVoice();
                     IndividualPersonDetailActivity.this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //while the user is recording screen should be on. it should not close
 
-                } else {//if recording is not started then stop
-                    Toast.makeText(IndividualPersonDetailActivity.this, "AGAIN TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
+                }else {//if recording is not started then stop
+                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.again_tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
                 }
-                mStartRecording = !mStartRecording;//so that user should click 2 times to start recording
-
+                toggleToStartRecording = !toggleToStartRecording;//so that user should click 2 times to start recording
             }else {//request for permission
-                Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PERMISSION REQUIRED", Toast.LENGTH_SHORT).show();
+                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.audio_permission_required), Toast.LENGTH_SHORT).show();
                 ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
             }
         });
         playAudioChronometer.setOnClickListener(view -> {
-            if(file != null) {//checking for null pointer Exception
-                Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_SHORT).show();
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(file.getAbsolutePath());//passing the path where this audio is saved
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                    Toast.makeText(IndividualPersonDetailActivity.this, "AUDIO PLAYING", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            if(audioPath != null){//checking for null pointer Exception
+                if(VoiceRecorder.audioPlayer(audioPath)){
+                    Toast.makeText(IndividualPersonDetailActivity.this,getResources().getString(R.string.audio_playing),Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(IndividualPersonDetailActivity.this,getResources().getString(R.string.failed_to_play_audio),Toast.LENGTH_LONG).show();
                 }
             }else
-                Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
+                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.tab_on_mic_to_start_recording),Toast.LENGTH_SHORT).show();
         });
         saveAudio.setOnClickListener(view -> {
-            if(mediaRecorder !=null){
-                //after clicking save audion then setEnabled to true so that user can enter data to fields
-                inputP1.setEnabled(true);
-                inputP2.setEnabled(true);
-                inputP3.setEnabled(true);
-                inputP4.setEnabled(true);
-                toGive_Amount.setEnabled(true);
-                description.setEnabled(true);
-                inputDate.setEnabled(true);
-
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+            if(mediaRecorder !=null ){
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                  }
 
-                cancel.setEnabled(true);
                 deposit_btn_tv.setEnabled(true);
-
-                playAudioChronometer.setTextColor(getColor(R.color.green));//changind text color to green to give feel that is saved
+                playAudioChronometer.setTextColor(getColor(R.color.green));//changing text color to green to give feel that is saved
                 micIcon.setBackgroundResource(R.drawable.ic_green_sharp_mic_20);//set background image to cancel
-                stopAndSaveRecordingPathToDB();
+                VoiceRecorder.stopRecording();//to save correct audio file in device stopRecording() method should be called then only file will ve saved
                 playAudioChronometer.stop();//stopping chronometer
                 micIcon.setEnabled(false);//so that user cannot press again this button
                 saveAudio.setEnabled(false);//even this button user should not click again
                 playAudioChronometer.setEnabled(true);//when audio is save then user will be able to play
             }else
-                Toast.makeText(IndividualPersonDetailActivity.this, "TAB ON MIC TO START RECORDING", Toast.LENGTH_SHORT).show();
+                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
         });
-        cancel.setOnClickListener(view -> dialog.dismiss());
-        dialog.show();
+        cancel.setOnClickListener(view -> {
+            VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
+            MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+            customDialog.dismiss();
+        });
+        customDialog.show();
         toGive_Amount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -2300,7 +2054,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 arr[4]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                  }
 
@@ -2315,7 +2069,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) { }
         });
         inputP1.addTextChangedListener(new TextWatcher() {
-            Cursor result =db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor result =db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2325,7 +2079,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 arr[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
                 if(!p11.matches("[0-9]+")){//"[.]?[0-9]+[.]?[0-9]*" for float
@@ -2336,13 +2090,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
             }
             @Override
-            public void afterTextChanged(Editable editable) {//after text changed for suggestion calculate based on prevoius rate
+            public void afterTextChanged(Editable editable) {//after text changed for suggestion calculate based on previous rate
                 result.moveToFirst();
                 p1_p2_p3_p4_Change_Tracker(result,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
             }
         });
         inputP2.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2352,7 +2106,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 arr[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
 
@@ -2367,12 +2121,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 result.moveToFirst();
                 p1_p2_p3_p4_Change_Tracker(result,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
-                //close result cursor
-                //close db
             }
         });
         inputP3.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2383,7 +2135,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
 
                 //this will check if other data is right or wrong
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
 
@@ -2401,7 +2153,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
         inputP4.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2410,7 +2162,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 inputP4.setTextColor(Color.BLACK);
                 arr[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
-                if(!isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
                 if(!p11.matches("[0-9]+")){//space or , or - is restricted
@@ -2433,87 +2185,87 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //all 15 combination
         //only p1
         if (arr[0] == 1 && arr[1] != 1 && arr[2] != 1 && arr[3] != 1) {
-            runtimeSuggestionAmountToGive.setText("" + (result.getInt(0) * Integer.parseInt(p1)));
+            runtimeSuggestionAmountToGive.setText(String.valueOf(result.getInt(0) * Integer.parseInt(p1)));
         }
         //only p1 p2
         else if (arr[0] == 1 && arr[1] == 1 && arr[2] != 1 && arr[3] != 1) {
             p2 = inputP2.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2))));
         }
         //only p1 p2,p3
         else if (arr[0] == 1 && arr[1] == 1 && arr[2] == 1 && arr[3] != 1) {
             p2 = inputP2.getText().toString().trim();
             p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3))));
         }
         //only p1 p2,p3,p4
         else if (arr[0] == 1 && arr[1] == 1 && arr[2] == 1 && arr[3] == 1) {
             p2 = inputP2.getText().toString().trim();
             p3 = inputP3.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //only p1 p3 p4
         else if (arr[0] == 1 && arr[1] != 1 && arr[2] == 1 && arr[3] == 1) {
             p3 = inputP3.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //only p1 p2 p4
         else if (arr[0] == 1 && arr[1] == 1 && arr[2] != 1 && arr[3] == 1) {
             p2 = inputP2.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //only p2 p3 p4
         else if (arr[0] != 1 && arr[1] == 1 && arr[2] == 1 && arr[3] == 1) {
             p2 = inputP2.getText().toString().trim();
             p3 = inputP3.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //only p1 P4
         else if (arr[0] == 1 && arr[1] != 1 && arr[2] != 1 && arr[3] == 1) {
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //only p1 P3
         else if (arr[0] == 1 && arr[1] != 1 && arr[2] == 1 && arr[3] != 1) {
             p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3))));
         }
         //Only p3,p4
         else if (arr[0] != 1 && arr[1] != 1 && arr[2] == 1 && arr[3] == 1) {
             p3 = inputP3.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //Only p2,p4
         else if (arr[0] != 1 && arr[1] == 1 && arr[2] != 1 && arr[3] == 1) {
             p2 = inputP2.getText().toString().trim();
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4))));
         }
         //Only p2,p3
         else if (arr[0] != 1 && arr[1] == 1 && arr[2] == 1 && arr[3] != 1) {
             p2 = inputP2.getText().toString().trim();
             p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3))));
+            runtimeSuggestionAmountToGive.setText(String.valueOf ((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3))));
         }
         //only p2
         else if (arr[0] != 1 && arr[1] == 1 && arr[2] != 1 && arr[3] != 1) {
             p2 = inputP2.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(1) * Integer.parseInt(p2)) ));
+            runtimeSuggestionAmountToGive.setText(String.valueOf(result.getInt(1) * Integer.parseInt(p2)));
         }
         //only p3
         else if (arr[0] != 1 && arr[1] != 1 && arr[2] == 1 && arr[3] != 1) {
             p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(2) * Integer.parseInt(p3)) ));
+            runtimeSuggestionAmountToGive.setText(String.valueOf(result.getInt(2) * Integer.parseInt(p3)));
         }
         //only p4
         else if (arr[0] != 1 && arr[1] != 1 && arr[2] != 1 && arr[3] == 1) {
             p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText("" + ((result.getInt(3) * Integer.parseInt(p4)) ));
+            runtimeSuggestionAmountToGive.setText(String.valueOf(result.getInt(3) * Integer.parseInt(p4)));
         }
         //if any wrong data then this will execute
         if(arr[0] == 2 || arr[1] == 2 || arr[2] == 2 || arr[3] == 2) {
@@ -2521,87 +2273,19 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
            // Toast.makeText(this, "ENTER 0 DON'T LEFT M L G EMPTY", Toast.LENGTH_SHORT).show();
         }
     }
-    private boolean isEnterDataIsWrong(int[] arr) {
-        boolean bool;
-        int two=0;
-        for(int i=0 ;i <arr.length;i++) {
-            if (arr[i] == 2)
-                two++;
-        }
-            if(two >=1)//data is wrong
-                bool=true;
-            else
-                bool=false;//data is right
-            return bool;
-    }
-    private boolean isDataPresent(int[] arr){
-        boolean bool=true;
-        int sum,one;
-        sum=one=0;
-
-        for(int i=0 ;i <arr.length;i++){
-
-            if(arr[i]== 1)
-                one++;
-
-            sum=sum+arr[i];
-        }
-        if(sum == 0)//data is not present
-            bool= false;
-        else if((one >= 1))//data is present
-            bool= true;
-        return bool;
-    }
-    private boolean checkPermissionForAudio() {//checking for permission of mic and external storage
-        if((ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED) &&
-                (ActivityCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)) {
-            return true;
-        }else
-            return false;
-    }
-    private void startRecordingVoice() {
-//        Long  tsLong=System.currentTimeMillis()/1000;//folder name should be unique so taking time as name of mic record so every record name will be different other wise error
-//        String ts=tsLong.toString();
-//        fileNameAbsolutePath ="audio_"+ts;//file name
-        file=new File(getExternalFilesDir( null )+"/acBookMicRecording/"+ "audio_"+(System.currentTimeMillis()/1000) +".mp3");//path of audio where it is saved in device
-
-        //https://developer.android.com/reference/android/media/MediaRecorder
-        mediaRecorder=new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);//Sets the number of audio channels for recording.
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);//Sets the format of the output file produced during recording
-        mediaRecorder.setOutputFile(file.getAbsolutePath());//giving file path where fill will be stored
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        mediaRecorder.setAudioChannels(1);//Sets the number of audio channels for recording here setting to 1.
-
-        try{//to start mediaRecorder should be in try catch block
-            mediaRecorder.prepare();//first prepare then start
-            mediaRecorder.start();
-            mstartingTimeMillis=System.currentTimeMillis();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        Toast.makeText(IndividualPersonDetailActivity.this, "RECORDING", Toast.LENGTH_SHORT).show();
-    }
-    private  void stopAndSaveRecordingPathToDB(){
-        mediaRecorder.stop();
-        mElapsedMillis=(System.currentTimeMillis()-mstartingTimeMillis);
-        mediaRecorder.release();
-        mediaRecorder=null;
-
-    }
-    public void showDialogAsMessage( String query,String iftitle,String ifmessage,String elsetitle,String elsemessage){
+    public void showDialogAsMessage( String query,String ifTitle,String ifMessage,String elseTitle,String elseMessage){
         if(db.updateTable(query)){
-            displResult(iftitle,ifmessage);
+            displayResult(ifTitle,ifMessage);
         }else{
-            displResult(elsetitle, elsemessage);
+            displayResult(elseTitle, elseMessage);
         }
     }
-    private void displResult(String title,String message)  {
+    private void displayResult(String title, String message)  {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
         showDataFromDataBase.setCancelable(false);
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
-        showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {
+        showDataFromDataBase.setPositiveButton(getResources().getString(R.string.ok),(dialogInterface, i) -> {
             dialogInterface.dismiss();//close current dialog
             Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
             intent.putExtra("ID",fromIntentPersonId);
@@ -2610,12 +2294,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
         showDataFromDataBase.create().show();
     }
-
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        if(finalDialog!=null && finalDialog.isShowing()){
-//            finalDialog.dismiss();
-//        }
-//    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+    }
 }

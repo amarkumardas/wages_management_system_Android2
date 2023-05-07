@@ -21,27 +21,27 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-import amar.das.acbook.PersonRecordDatabase;
+import amar.das.acbook.Database;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.R;
 
 public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapter.ViewHolder> {
 
-    Context contex;
+    Context context;
     ArrayList<MestreLaberGModel> arrayList;//because more operation is retrieving
     //final Calendar current=Calendar.getInstance();//to get current date
     // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
-    String dateArray[];
+    String []dateArray;
     //int d,m,y;
     LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
     String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
-    PersonRecordDatabase db;
+    Database db;
 
     public MestreLaberGAdapter(Context context, ArrayList<MestreLaberGModel> arrayList){
-        this.contex=context;
+        this.context =context;
         this.arrayList=arrayList;
-        db=new PersonRecordDatabase(contex);//we cant give this at class level
+        db=new Database(this.context);//we cant give this at class level
     }
     @NonNull
     @Override
@@ -57,20 +57,20 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
         //getting bytearray image from DB and converting  to bitmap to set in imageview
         Bitmap bitmap= BitmapFactory.decodeByteArray(image,0, image.length);
         holder.name.setText(data.getName());
-        holder.profileimg.setImageBitmap(bitmap);
+        holder.profileImg.setImageBitmap(bitmap);
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
             holder.amountAdvance.setText(""+data.getAdvanceAmount());
             holder.amountAdvance.setTextColor(Color.RED);
         }else if(data.getBalanceAmount() > 0 ){
             holder.amountAdvance.setText(""+data.getBalanceAmount());
-            holder.amountAdvance.setTextColor(contex.getColor(R.color.green));
+            holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }else {
             holder.amountAdvance.setText("0");//if no advance or balance then set to zero
-            holder.amountAdvance.setTextColor(contex.getColor(R.color.green));
+            holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }
         if(data.getLatestDate() !=null) {//for null pointer exception//https://www.youtube.com/watch?v=VmhcvoenUl0
             if (data.getLatestDate().equals(currentDateDBPattern)) //if profile color is yellow that means on current day some data is entered
-                holder.yellowBg.setBackgroundColor(contex.getColor(R.color.yellow));
+                holder.yellowBg.setBackgroundColor(context.getColor(R.color.yellow));
             else
                 holder.yellowBg.setBackgroundColor(Color.WHITE);
 
@@ -82,28 +82,28 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
             // making it active or inactive using latest date (2022-05-01,2022-05-01)
             if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= 1) { //ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
-                db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 0 + "'" + " WHERE ID='" + data.getId() + "'");//user has no permission to make it inactive it is automatically
+                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 0 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//user has no permission to make it inactive it is automatically
 
             }else {
-                db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'" + " WHERE ID='" + data.getId() + "'");
+                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
 
             }
         }else
             holder.yellowBg.setBackgroundColor(Color.WHITE);
 
-        holder.profileimg.setOnClickListener(view -> {
-            Intent intent = new Intent(contex, IndividualPersonDetailActivity.class);
+        holder.profileImg.setOnClickListener(view -> {
+            Intent intent = new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID", data.getId());
             intent.putExtra("FromMesterLaberGAdapter", 1);
-            contex.startActivity(intent);
+            context.startActivity(intent);
 
 
-            Cursor cursor5 = db.getData("SELECT LATESTDATE FROM " + db.TABLE_NAME1 + " WHERE ID='" + data.getId() + "'");
+            Cursor cursor5 = db.getData("SELECT "+Database.COL_15_LATESTDATE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
             cursor5.moveToFirst();
-            Toast.makeText(contex, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
 
-            //************************leaving date updation if days is 0 between two date then update SET LEAVINGDATE="+null+
-            Cursor cursor2 = db.getData("SELECT LEAVINGDATE FROM " + db.TABLE_NAME3 + " WHERE ID='" + data.getId() + "'");
+            //************************leaving date updating if days is 0 between two date then update SET LEAVINGDATE="+null+
+            Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
             cursor2.moveToFirst();
             if (cursor2.getString(0) != null) {
                 dateArray = cursor2.getString(0).split("-");
@@ -113,7 +113,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
                 dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
                 //between (2022-05-01,2022-05-01) like
                 if (ChronoUnit.DAYS.between(dbDate, todayDate) >= 0) {//if days between leaving date and today date is 0 then leaving date will set null automatically
-                    db.updateTable("UPDATE " + db.TABLE_NAME3 + " SET LEAVINGDATE=" + null + " WHERE ID='" + data.getId() + "'");
+                    db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_392_LEAVINGDATE+"=" + null + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
                 }
             }
             cursor2.close();
@@ -124,13 +124,13 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
         return arrayList.size();
     }
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view
-        ImageView profileimg;
+        ImageView profileImg;
         TextView amountAdvance,name;
         LinearLayout yellowBg;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             name=itemView.findViewById(R.id.names_tv);
-            profileimg=itemView.findViewById(R.id.profile_img);
+            profileImg =itemView.findViewById(R.id.profile_img);
             amountAdvance =itemView.findViewById(R.id.advance_amount_tv);
             yellowBg =itemView.findViewById(R.id.yellow_layout);
         }
@@ -141,7 +141,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 
     //***************For setting or showing different layout to recycler view***********************************************************************************
 //    //This adapter will decide which person is active or not.Person will become inactive if its leaving duration is 1 month.if user enter any data in current date then that person become active.
-//    Context contex;
+//    Context context;
 //    ArrayList<MestreLaberGModel> arrayList;//because more operation is retrieving
 //    //final Calendar current=Calendar.getInstance();//to get current date
 //    // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);

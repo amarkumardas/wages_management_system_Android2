@@ -18,7 +18,7 @@ public class ImageResizer {//got it from github https://www.youtube.com/watch?v=
         if (ratioSquare <= 1)
             return bitmap;
         double ratio = Math.sqrt(ratioSquare);
-        Log.d("mylog", "Ratio: " + ratio);
+        Log.d("mylogImageResizer", "Ratio: " + ratio);
         int requiredHeight = (int) Math.round(bitmapHeight / ratio);
         int requiredWidth = (int) Math.round(bitmapWidth / ratio);
         return Bitmap.createScaledBitmap(bitmap, requiredWidth, requiredHeight, true);
@@ -33,7 +33,7 @@ public class ImageResizer {//got it from github https://www.youtube.com/watch?v=
         if (ratioSquare <= 1)
             return bitmap;
         double ratio = Math.sqrt(ratioSquare);
-        Log.d("mylog", "Ratio: " + ratio);
+        Log.d("mylogImageResizer", "Ratio: " + ratio);
         int requiredHeight = (int) Math.round(bitmapHeight / ratio);
         int requiredWidth = (int) Math.round(bitmapWidth / ratio);
         return Bitmap.createScaledBitmap(bitmap, requiredWidth, requiredHeight, true);

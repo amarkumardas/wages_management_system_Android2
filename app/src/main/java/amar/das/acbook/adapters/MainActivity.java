@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setContentView(R.layout.activity_main);
     }
     //https://www.youtube.com/watch?v=s1fW7CpiB9c
-    //popupmenu will appear when we click verticle dots
-    public void verticledots_Click(View view) {
+    //popupmenu will appear when we click vertical dots
+    public void verticleDotsClick(View view) {
         PopupMenu popup =new PopupMenu(this,view);
         popup.setOnMenuItemClickListener(this);
         popup.inflate(R.menu.popuo_menu);

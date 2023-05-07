@@ -18,11 +18,11 @@ import amar.das.acbook.model.MestreLaberGModel;
 
 
 public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHolder> {
-    Context contex;
+    Context context;
     ArrayList<MestreLaberGModel> arrayList;//because more operation is retrieving
 
     public InactiveAdapter(Context context, ArrayList<MestreLaberGModel> arrayList){
-        this.contex=context;
+        this.context =context;
         this.arrayList=arrayList;
     }
     @NonNull
@@ -36,25 +36,25 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull InactiveAdapter.ViewHolder holder, int position) {//to fill data on every view filed
         MestreLaberGModel data=arrayList.get(position);
-        byte[] image=data.getPerson_img();//getting image ffrom db
+        byte[] image=data.getPerson_img();//getting image from db
         //getting bytearray image from DB and converting  to bitmap to set in imageview
         Bitmap bitmap= BitmapFactory.decodeByteArray(image,0, image.length);
-        holder.profileimg.setImageBitmap(bitmap);
+        holder.profileImg.setImageBitmap(bitmap);
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
             holder.amountAdvance.setText(""+data.getAdvanceAmount());
             holder.amountAdvance.setTextColor(Color.RED);
         }else if(data.getBalanceAmount() > 0 ){
             holder.amountAdvance.setText(""+data.getBalanceAmount());
-            holder.amountAdvance.setTextColor(contex.getColor(R.color.green));
+            holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }else {
             holder.amountAdvance.setText("0");//if no advance or balance then set to zero
-            holder.amountAdvance.setTextColor(contex.getColor(R.color.green));
+            holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }
 
-        holder.profileimg.setOnClickListener(view -> {
-            Intent intent=new Intent(contex, IndividualPersonDetailActivity.class);
+        holder.profileImg.setOnClickListener(view -> {
+            Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID",data.getId());
-            contex.startActivity(intent);
+            context.startActivity(intent);
         });
     }
 
@@ -63,12 +63,12 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
         return arrayList.size();
     }
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view
-        ImageView profileimg;
+        ImageView profileImg;
         TextView amountAdvance;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            profileimg=itemView.findViewById(R.id.profile_img_inactive);
+            profileImg =itemView.findViewById(R.id.profile_img_inactive);
             amountAdvance =itemView.findViewById(R.id.advance_amount_tv_inactive);
         }
     }

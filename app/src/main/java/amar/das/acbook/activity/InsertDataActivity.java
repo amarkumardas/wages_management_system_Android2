@@ -18,7 +18,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -32,10 +31,9 @@ import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Calendar;
 
 import amar.das.acbook.ImageResizer;
-import amar.das.acbook.PersonRecordDatabase;
+import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.ui.search.SearchFragment;
 
@@ -44,7 +42,7 @@ public class InsertDataActivity extends AppCompatActivity {
     Button add;
   EditText name,account, acholdername,ifsccode,aadharcard,phone,fathername;
   AutoCompleteTextView bankname_autocomptextview;
-  PersonRecordDatabase personDb;
+  Database personDb;
   RadioGroup radioGroup;
   RadioButton  laberRadio,womenRadio,mestreRadio;
   String skill,fromIntentPersonId;
@@ -69,7 +67,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
 
         //database created
-        personDb=new PersonRecordDatabase(this);
+        personDb=new Database(this);
         //set ids
         add=findViewById(R.id.add_button);
         name=findViewById(R.id.name_et);
@@ -88,36 +86,33 @@ public class InsertDataActivity extends AppCompatActivity {
         mestreRadio=findViewById(R.id.mestre);//required when updating
         laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
         skill="L";//skill default value otherwise null will be set as default so its important
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int checkedidOfRadioBtn) {
-                switch(checkedidOfRadioBtn){
-                    case R.id.mestre:{
-                        skill="M";//updating skill variable
-                        break;
-                    }
-                    case R.id.laber:{
-                        skill="L";
-                        break;
-                    }
-                    case R.id.women_laber:{
-                        skill="G";
-                        break;
-                    }
+        radioGroup.setOnCheckedChangeListener((radioGroup, checkedidOfRadioBtn) -> {
+            switch(checkedidOfRadioBtn){
+                case R.id.mestre:{
+                    skill=getResources().getString(R.string.mestre);//updating skill variable
+                    break;
+                }
+                case R.id.laber:{
+                    skill=getResources().getString(R.string.laber);
+                    break;
+                }
+                case R.id.women_laber:{
+                    skill=getResources().getString(R.string.women_laber);
+                    break;
                 }
             }
         });
-//        int skillid=radioGroup.getCheckedRadioButtonId();
-//        skill_radioBtn=findViewById(skillid);
+//        int skilled=radioGroup.getCheckedRadioButtonId();
+//        skill_radioBtn=findViewById(skilled);
         //spinner=findViewById(R.id.spinner);
 
 //        type_plus =getResources().getStringArray(R.array.skills);//getting array from string values declared there M L G
-//        ArrayAdapte5r<String>adapter=new ArrayAdapter<>(InsertDataActivity.this,android.R.layout.simple_list_item_1, type_plus);
+//        ArrayAdapt5r<String>adapter=new ArrayAdapter<>(InsertDataActivity.this,android.R.layout.simple_list_item_1, type_plus);
 //        spinner.setAdapter(adapter);
 
         indianBank =getResources().getStringArray(R.array.indian_bank_names); //get bank names
-        ArrayAdapter<String> bankadapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, indianBank);
-        bankname_autocomptextview.setAdapter(bankadapter);
+        ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, indianBank);
+        bankname_autocomptextview.setAdapter(bankAdapter);
 
 
         //For camera and galary*********************************************************************************
@@ -130,18 +125,13 @@ public class InsertDataActivity extends AppCompatActivity {
         // After clicking on text we will have
         // to choose whether to
         // select image from camera and gallery
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showImagePicDialog();
-            }
-        });
+        imageView.setOnClickListener(view -> showImagePicDialog());
 
         //after getting all the ids setting all data according to id
         if(getIntent().hasExtra("ID")){
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
             //retrieving data from db
-            Cursor cursor1=personDb.getData("SELECT NAME,BANKACCOUNT,IFSCCODE,BANKNAME,AADHARCARD,PHONE,TYPE,FATHERNAME,IMAGE,ACHOLDER FROM "+personDb.TABLE_NAME1 +" WHERE ID='"+fromIntentPersonId+"'");
+            Cursor cursor1=personDb.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+" , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_8_SKILL+","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
 
             if(cursor1 != null) {
                 cursor1.moveToFirst();
@@ -154,9 +144,9 @@ public class InsertDataActivity extends AppCompatActivity {
                 skill=cursor1.getString(6);//skill is variable
 
                  //radio button should be checked according to data
-                 if(skill.equals("L"))
+                 if(skill.equals(getResources().getString(R.string.laber)))
                     laberRadio.setChecked(true);
-                 else if(skill.equals("M"))
+                 else if(skill.equals(getResources().getString(R.string.mestre)))
                      mestreRadio.setChecked(true);
                  else//skill.equals("G")
                      womenRadio.setChecked(true);
@@ -169,7 +159,7 @@ public class InsertDataActivity extends AppCompatActivity {
                 imageView.setImageBitmap(bitmap);
                 acholdername.setText(cursor1.getString(9));
                 add.setBackgroundResource(R.drawable.green_color_bg);
-                add.setText("SAVE");
+                add.setText(getResources().getString(R.string.save));
                 cursor1.close();
             }else
                 Toast.makeText(this, "cursor is null", Toast.LENGTH_SHORT).show();
@@ -177,31 +167,23 @@ public class InsertDataActivity extends AppCompatActivity {
     }
 
     private void showImagePicDialog() {
-        String options[] = {"Camera", "Gallery"};
+        String []options = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pick Image From");
         builder.setCancelable(true);
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    if (!checkCameraPermission()) {
-                        requestCameraPermission();
-                    } else {
-                        pickFromGallery();
-                    }
-                } else if (which == 1) {
-                    if (!checkStoragePermission()) {
-                        requestStoragePermission();
-                    } else {
-                        pickFromGallery();
-                    }
+        builder.setNegativeButton("CANCEL", (dialogInterface, i) -> dialogInterface.dismiss());
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0) {
+                if (!checkCameraPermission()) {
+                    requestCameraPermission();
+                } else {
+                    pickFromGallery();
+                }
+            } else if (which == 1) {
+                if (!checkStoragePermission()) {
+                    requestStoragePermission();
+                } else {
+                    pickFromGallery();
                 }
             }
         });
@@ -304,9 +286,9 @@ public class InsertDataActivity extends AppCompatActivity {
 
         //to store in db we have to convert imageview to Bitmap and Bitmap to bytearray and to retrieve it from db we have to convert bytearray to Bitmap to set in imageview
         BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();//A Drawable that wraps a bitmap and can be tiled, stretched..
-        Bitmap fullsizebitmapimage = drawable.getBitmap();//converted imageview to bitmap
-        Bitmap reduceSize= ImageResizer.reduceBitmapSize(fullsizebitmapimage,46000);//resizing image to store in db
-        byte[] imagestore= convertBitmapToByteArray(reduceSize);//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+        Bitmap fullSizeBitmapImage = drawable.getBitmap();//converted imageview to bitmap
+        Bitmap reduceSize= ImageResizer.reduceBitmapSize(fullSizeBitmapImage,46000);//resizing image to store in db
+        byte[] imageStore= convertBitmapToByteArray(reduceSize);//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
 
             AlertDialog.Builder detailsReview = new AlertDialog.Builder(this);
             detailsReview.setCancelable(false);
@@ -335,9 +317,9 @@ public class InsertDataActivity extends AppCompatActivity {
                     //update
                     if(getIntent().hasExtra("ID")){//will execute only when updating
                         //get data from db
-                        success=personDb.updateDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imagestore, personAccountHolderName,fromIntentPersonId);
+                        success=personDb.updateDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imageStore, personAccountHolderName,fromIntentPersonId);
                         if(success){//if it is updated then show successfull message
-                            Toast.makeText(InsertDataActivity.this, "ID- "+fromIntentPersonId+" UPDATED SUCCESSFULLY", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(InsertDataActivity.this, "ID- "+fromIntentPersonId+" "+getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
 //                            final Calendar current=Calendar.getInstance();//to get current date
@@ -347,7 +329,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
                             //after success then go to previous activity automatically and destroy current activity so that when pressing back user should not get same activity this is done by finish();
                             Intent in=new Intent(getBaseContext(),IndividualPersonDetailActivity.class);//completed then go back
-                            in.putExtra("ID",fromIntentPersonId);//after going bact to this IndividualPersonDetailActivity then it require ID so putExtra is used
+                            in.putExtra("ID",fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
                             startActivity(in);
                             finish();//destroy current activity
 
@@ -358,13 +340,13 @@ public class InsertDataActivity extends AppCompatActivity {
 
                         //for (int k = 1; k <= 10; k++) {
                             //inserting data to sqlite database
-                             success = personDb.insertDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imagestore, personAccountHolderName);
+                             success = personDb.insertDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imageStore, personAccountHolderName);
                         //}
 
-                        if (success == true) {//checking for duplicate
+                        if (success) {//checking for duplicate
                             Cursor result = personDb.getId(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, personAccountHolderName);
-                            StringBuilder buffer;//because it is not synchronized and efficient then stringbuffer and no need to lock and unlock
-                            String holdlastid="";
+                            StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
+                            String holdLastId="";
 
                             if(result.getCount() == 1 || result.getCount() > 1){//no duplicate
                                 buffer=new StringBuilder( );
@@ -373,46 +355,41 @@ public class InsertDataActivity extends AppCompatActivity {
 
                                     insertDataToTable3(result.getString(0));//update R1,R2,R3,R4 TO 0
 
-                                    buffer.append("\n" + "NEW PERSON ID- " + result.getString(0));
-                                    displResult("CREATED SUCCESSFULLY", buffer.toString());
+                                    buffer.append("\n" + "NEW PERSON ID- ").append(result.getString(0));
+                                    displayResult("CREATED SUCCESSFULLY", buffer.toString());
                                     add.setVisibility(View.VISIBLE);
                                 }
 
                                 if(result.getCount() > 1){//this will be true when user all details is same to others means DUPLICATE
-                                    buffer.append("Matching "+result.getCount()+" Person with same Details-"+"\n");
-                                    result.moveToPrevious();//it help to start from first othervise 1 item is not displayed
+                                    buffer.append("Matching ").append(result.getCount()).append(" Person with same Details-").append("\n");
+                                    result.moveToPrevious();//it help to start from first otherwise 1 item is not displayed
                                     while(result.moveToNext()){
-                                        holdlastid=""+result.getString(0);//to diaplay new added person ids comes at last when loop
-                                        buffer.append("\nPerson ID- "+result.getString(0));
+                                        holdLastId=""+result.getString(0);//to display new added person ids comes at last when loop
+                                        buffer.append("\nPerson ID- ").append(result.getString(0));
                                     }
                                     //update R1,R2,R3,R4 TO 0
-                                    insertDataToTable3(holdlastid);//holdlastid variable has newly added id.If this insertDataToTable3(holdlastid);  method is placed in while loop then all matching duplicate then have to  execute which is useless and produce exception
+                                    insertDataToTable3(holdLastId);//hold last id variable has newly added id.If this insertDataToTable3(hold last id);  method is placed in while loop then all matching duplicate then have to  execute which is useless and produce exception
 
-                                    displResult("Successfully Added New Person ID- "+holdlastid,buffer.toString());
+                                    displayResult("Successfully Added New Person ID- "+holdLastId,buffer.toString());
                                     add.setVisibility(View.VISIBLE);
                                 }
                                 result.close();//closing cursor
                             }
                             else
-                                displResult("Data is Inserted but Query not returned any ID","\n"+"result.getCount()= "+result.getCount());
+                                displayResult("Data is Inserted but Query not returned any ID","\n"+"result.getCount()= "+result.getCount());
 
-                            // eraseAllDataAfterInsertingFromLayout();//should be here because control doent not wait for its execution
+                            // eraseAllDataAfterInsertingFromLayout();//should be here because control does not wait for its execution
                         }
                         else
-                            displResult("Data FAILED to Insert","\n"+"Number of column maybe different in DataBase");
+                            displayResult("Data FAILED to Insert","\n"+"Number of column maybe different in DataBase");
                     }
                 }
-                private void displResult(String title,String message) {
+                private void displayResult(String title, String message) {
                     AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertDataActivity.this);
                     showDataFromDataBase.setCancelable(false);
                     showDataFromDataBase.setTitle(title);
                     showDataFromDataBase.setMessage(message);
-                    showDataFromDataBase.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    });
+                    showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> dialogInterface.dismiss());
                     showDataFromDataBase.create().show();
                 }
                 private void eraseAllDataAfterInsertingFromLayout() {
@@ -431,7 +408,7 @@ public class InsertDataActivity extends AppCompatActivity {
     }
     private void insertDataToTable3(String id) {
         boolean bool=personDb.insertDataTable3( id,0,0,0,0,null,null,null,null);
-        if(bool== false)
+        if(!bool)
             Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
     }
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {

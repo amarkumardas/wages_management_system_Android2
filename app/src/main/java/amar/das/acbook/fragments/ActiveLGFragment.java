@@ -3,6 +3,7 @@ package amar.das.acbook.fragments;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 
 import amar.das.acbook.adapters.MestreLaberGAdapter;
 import amar.das.acbook.model.MestreLaberGModel;
-import amar.das.acbook.PersonRecordDatabase;
+import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.FragmentActiveLGBinding;
 import amar.das.acbook.utility.MyUtility;
@@ -32,7 +33,7 @@ public class ActiveLGFragment extends Fragment {
     ArrayList<MestreLaberGModel> lGArrayList;
     RecyclerView lGRecyclerView;
     MestreLaberGAdapter mestreLaberGAdapter;
-    PersonRecordDatabase db;
+    Database db;
     TextView advance,balance;
 
     Boolean isScrolling1 =false;
@@ -41,11 +42,11 @@ public class ActiveLGFragment extends Fragment {
     ProgressBar progressBar;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
          binding=FragmentActiveLGBinding.inflate(inflater,container,false);
          View root=binding.getRoot();
-         db=new PersonRecordDatabase(getContext());//this should be first statement to load data from db
+         db=new Database(getContext());//this should be first statement to load data from db
         //ids
         lGRecyclerView=root.findViewById(R.id.recycle_active_l_g);
         progressBar=binding.progressBarActiveLG;
@@ -54,7 +55,7 @@ public class ActiveLGFragment extends Fragment {
 
         advance=root.findViewById(R.id.active_l_g_advance);
         balance=root.findViewById(R.id.active_l_g_balance);
-        Cursor advanceBalanceCursor=db.getData("SELECT SUM(ADVANCE),SUM(BALANCE) FROM "+db.TABLE_NAME1+" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')");
+        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')");
         advanceBalanceCursor.moveToFirst();
         advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+advanceBalanceCursor.getLong(0)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
         balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+advanceBalanceCursor.getLong(1)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -63,10 +64,10 @@ public class ActiveLGFragment extends Fragment {
 //        LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01
 //        String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
 //        System.out.println("LG");
-        Cursor cursorGL=null;
+        Cursor cursorGL;
         lGArrayList =new ArrayList<>(100);
 
-        cursorGL=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NULL");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
+        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NULL");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
         while(cursorGL.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorGL.getString(2));
@@ -76,10 +77,10 @@ public class ActiveLGFragment extends Fragment {
             data.setBalanceAmount(cursorGL.getInt(4));
             data.setLatestDate(cursorGL.getString(5));
             data.setTime(cursorGL.getString(6));
-            lGArrayList.add(data);//adding data to mestrearraylist
+            lGArrayList.add(data);//adding data to mestreArraylist
         }
        // cursorGL=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC LIMIT "+ActiveMFragment.initialLoadDataFotActiveMAndL);//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
-        cursorGL=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC ");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
+        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC ");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
 
         while(cursorGL.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
@@ -90,7 +91,7 @@ public class ActiveLGFragment extends Fragment {
             data.setBalanceAmount(cursorGL.getInt(4));
             data.setLatestDate(cursorGL.getString(5));
             data.setTime(cursorGL.getString(6));
-            lGArrayList.add(data);//adding data to mestrearraylist
+            lGArrayList.add(data);//adding data to mestreArrayList
         }
 
 
@@ -105,13 +106,13 @@ public class ActiveLGFragment extends Fragment {
         lGArrayList.trimToSize();
         MyUtility.sortArrayList(lGArrayList);
         cursorGL.close();//closing cursor after finish
-        db.close();//closing database to prevent dataleak
+        db.close();//closing database to prevent data leak
         mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), lGArrayList);
         //activeMestreCount.setText(""+madapter.getItemCount());
         lGRecyclerView.setAdapter(mestreLaberGAdapter);
-        lGRecyclerView.setHasFixedSize(true);//telling to recycler view that dont calculate item size every time when added and remove from recyclerview
+        lGRecyclerView.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
         layoutManager=new GridLayoutManager(getContext(),4);
-        lGRecyclerView.setLayoutManager(layoutManager);//spancount is number of rows
+        lGRecyclerView.setLayoutManager(layoutManager);//span-count is number of rows
 //        lGRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //
 //            @Override
@@ -143,13 +144,13 @@ public class ActiveLGFragment extends Fragment {
         return root;
     }
     public int getCountOfTotalRecordFromDb() {
-        int count=0;
-        PersonRecordDatabase  db=new PersonRecordDatabase(getContext());
-        Cursor cursor=null;
-        cursor=db.getData("SELECT COUNT() FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NULL");
+        int count;
+        Database db=new Database(getContext());
+        Cursor cursor;
+        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NULL");
         cursor.moveToFirst();
         count=cursor.getInt(0);
-        cursor=db.getData("SELECT COUNT() FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1') AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC");
+        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1') AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
         cursor.moveToFirst();
         count=count+cursor.getInt(0);
         db.close();
@@ -163,35 +164,35 @@ public class ActiveLGFragment extends Fragment {
     }
 
     private void dataLoad(String querys,ArrayList<MestreLaberGModel> arraylist){
-        db=new PersonRecordDatabase(getContext());//this should be first statement to load data from db
-        Cursor cursormestre=null;
+        db=new Database(getContext());//this should be first statement to load data from db
+        Cursor cursorMestre;
         arraylist.clear();//clearing the previous object which is there ie.initial data
         arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
 
-        cursormestre=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NULL");
-        while (cursormestre.moveToNext()) {
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        while (cursorMestre.moveToNext()) {
             MestreLaberGModel data = new MestreLaberGModel();
-            data.setName(cursormestre.getString(2));
-            data.setPerson_img(cursormestre.getBlob(0));
-            data.setId(cursormestre.getString(1));
-            data.setAdvanceAmount(cursormestre.getInt(3));
-            data.setBalanceAmount(cursormestre.getInt(4));
-            data.setLatestDate(cursormestre.getString(5));
-            data.setTime(cursormestre.getString(6));
+            data.setName(cursorMestre.getString(2));
+            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setId(cursorMestre.getString(1));
+            data.setAdvanceAmount(cursorMestre.getInt(3));
+            data.setBalanceAmount(cursorMestre.getInt(4));
+            data.setLatestDate(cursorMestre.getString(5));
+            data.setTime(cursorMestre.getString(6));
             arraylist.add(data);
         }
       //  mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() every time the list is updated,or inserted or deleted
 
-        cursormestre = db.getData(querys);//getting image from database
-        while (cursormestre.moveToNext()) {
+        cursorMestre = db.getData(querys);//getting image from database
+        while (cursorMestre.moveToNext()) {
             MestreLaberGModel data = new MestreLaberGModel();
-            data.setName(cursormestre.getString(2));
-            data.setPerson_img(cursormestre.getBlob(0));
-            data.setId(cursormestre.getString(1));
-            data.setAdvanceAmount(cursormestre.getInt(3));
-            data.setBalanceAmount(cursormestre.getInt(4));
-            data.setLatestDate(cursormestre.getString(5));
-            data.setTime(cursormestre.getString(6));
+            data.setName(cursorMestre.getString(2));
+            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setId(cursorMestre.getString(1));
+            data.setAdvanceAmount(cursorMestre.getInt(3));
+            data.setBalanceAmount(cursorMestre.getInt(4));
+            data.setLatestDate(cursorMestre.getString(5));
+            data.setTime(cursorMestre.getString(6));
             arraylist.add(data);
         }
         mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() every time the list is updated,or inserted or deleted
@@ -199,7 +200,7 @@ public class ActiveLGFragment extends Fragment {
 
         arraylist.trimToSize();//to free space
         MyUtility.sortArrayList(arraylist);
-        cursormestre.close();
+        cursorMestre.close();
         db.close();//closing database
     }
 

@@ -74,7 +74,6 @@
         android:textSize="17dp"
         android:inputType="textCapCharacters"
         android:id="@+id/name_et"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -82,6 +81,35 @@
         android:weightSum="2"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="19dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="ACTIVE PHONE NUMBER 1"
+            android:textSize="12dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="4dp"
+            android:textColor="@color/black"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="PHONE NUMBER 2"
+            android:textSize="12dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="25dp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp">
+
         <EditText
             android:layout_weight="1"
             android:layout_width="match_parent"
@@ -92,13 +120,13 @@
             android:paddingLeft="7dp"
             android:textStyle="bold"
             android:singleLine="true"
-            android:hint="@string/enter_a_c_number"
+
             android:textSize="17dp"
             android:maxLength="20"
             android:textColor="@color/purple_700"
             android:inputType="number"
             android:digits="1234567890"
-            android:id="@+id/accountno_et"/>
+            android:id="@+id/phonenumber_et"/>
 
         <EditText
             android:layout_weight="1"
@@ -107,14 +135,14 @@
             android:layout_marginLeft="4dp"
             android:layout_marginRight="25dp"
             android:background="@drawable/white_detailsbg"
-            android:paddingLeft="5dp"
+            android:paddingLeft="7dp"
             android:textStyle="bold"
             android:singleLine="true"
-            android:hint="@string/active_phone_number_2"
             android:textSize="17dp"
-            android:textColor="@color/black"
-            android:inputType="textCapCharacters"
-            android:digits="QWERTYUIOPLKJHGFDSAZXCVBNM"
+            android:maxLength="20"
+            android:textColor="@color/purple_700"
+            android:inputType="number"
+            android:digits="1234567890"
             android:id="@+id/acholder_et"
             />
     </LinearLayout>
@@ -124,8 +152,36 @@
         android:orientation="horizontal"
         android:weightSum="2"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="5dp">
-        <EditText
+        android:layout_marginTop="19dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="RELIGION"
+            android:textSize="12dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="4dp"
+            android:textColor="@color/black"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="LOCATION"
+            android:textSize="12dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="25dp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp">
+        <AutoCompleteTextView
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="43dp"
@@ -136,12 +192,12 @@
             android:paddingLeft="7dp"
             android:textStyle="bold"
             android:singleLine="true"
-            android:hint="@string/enter_ifsc_code"
             android:textSize="17dp"
-            android:maxLength="11"
             android:textColor="@color/black"
             android:inputType="textCapCharacters"
-            android:id="@+id/ifsccode_et"
+            android:id="@+id/religion_autocomplte_tv"
+            android:completionThreshold="1"
+            android:dropDownWidth="300dp"
             />
 
         <AutoCompleteTextView
@@ -155,15 +211,134 @@
             android:paddingLeft="7dp"
             android:textStyle="bold"
             android:singleLine="true"
-            android:hint="@string/enter_bank_name"
             android:textSize="17dp"
             android:textColor="@color/black"
             android:inputType="textCapCharacters"
-            android:id="@+id/bankname_autocomplte_tv"
+            android:id="@+id/location_autocomplte_tv"
             android:completionThreshold="1"
             android:dropDownWidth="300dp"
             />
     </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/enter_aadhaar_card_number"
+        android:textSize="12dp"
+        android:layout_marginLeft="26dp"
+        android:textColor="@color/black"
+        android:layout_marginTop="19dp" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginRight="25dp"
+        android:background="@drawable/white_detailsbg"
+        android:paddingLeft="10dp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        android:inputType="number"
+        android:textColor="@color/black"
+        android:textSize="17dp"
+        android:maxLength="12"
+        android:id="@+id/aadharcard_et"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BANK NAME"
+        android:textSize="12dp"
+        android:layout_marginLeft="26dp"
+        android:textColor="@color/black"
+        android:layout_marginTop="19dp" />
+    <AutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginRight="25dp"
+        android:background="@drawable/white_detailsbg"
+        android:paddingLeft="10dp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        android:textSize="17dp"
+        android:textColor="@color/black"
+        android:inputType="textCapCharacters"
+        android:id="@+id/bankname_autocomplte_tv"
+        android:completionThreshold="1"
+        android:dropDownWidth="300dp"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="19dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="A/C NUMBER"
+            android:textSize="12dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="4dp"
+            android:textColor="@color/black"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="IFSC CODE"
+            android:textSize="12dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="25dp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_gravity="center_horizontal">
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="43dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/white_detailsbg"
+            android:paddingLeft="7dp"
+            android:textStyle="bold"
+            android:singleLine="true"
+
+            android:textSize="17dp"
+            android:maxLength="20"
+            android:textColor="@color/purple_700"
+            android:inputType="number"
+            android:digits="1234567890"
+            android:id="@+id/accountno_et"/>
+
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="43dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="25dp"
+            android:background="@drawable/white_detailsbg"
+            android:paddingLeft="7dp"
+            android:textStyle="bold"
+            android:singleLine="true"
+
+            android:textSize="17dp"
+            android:maxLength="11"
+            android:textColor="@color/black"
+            android:inputType="textCapCharacters"
+            android:id="@+id/ifsccode_et"
+            />
+    </LinearLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -186,55 +361,6 @@
         android:textColor="@color/black"
         android:textSize="17dp"
         android:id="@+id/fathername_et"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/enter_phone_number"
-        android:textSize="12dp"
-        android:layout_marginLeft="26dp"
-        android:textColor="@color/black"
-        android:layout_marginTop="19dp" />
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="43dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginRight="25dp"
-        android:background="@drawable/white_detailsbg"
-        android:paddingLeft="10dp"
-        android:textStyle="bold"
-        android:singleLine="true"
-        android:inputType="number"
-        android:textColor="@color/black"
-        android:textSize="17dp"
-        android:maxLength="10"
-        android:id="@+id/phonenumber_et"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/enter_aadhar_card_number"
-        android:textSize="12dp"
-        android:layout_marginLeft="26dp"
-        android:textColor="@color/black"
-        android:layout_marginTop="19dp" />
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="43dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginRight="25dp"
-        android:background="@drawable/white_detailsbg"
-        android:paddingLeft="10dp"
-        android:textStyle="bold"
-        android:singleLine="true"
-        android:inputType="number"
-        android:textColor="@color/black"
-        android:textSize="17dp"
-        android:maxLength="12"
-        android:id="@+id/aadharcard_et"/>
-
-
-
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

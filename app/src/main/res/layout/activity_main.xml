@@ -44,7 +44,7 @@
             android:layout_height="35dp"
             android:layout_weight="1"
             android:background="@drawable/ic_baseline_more_verticledots_24"
-            android:onClick="verticledots_Click"
+            android:onClick="verticleDotsClick"
             />
     </LinearLayout>
     <TextView

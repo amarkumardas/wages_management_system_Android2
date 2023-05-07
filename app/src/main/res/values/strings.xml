@@ -12,7 +12,7 @@
     <string name="skilled_in">TYPE</string>
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
     <string name="enter_bank_name">Bank Name</string>
-<!--    <string name="enter_ifsc_code">IFSC Code</string>-->
+<!--<string name="enter_ifsc_code">IFSC Code</string>-->
     <string name="menu_insert_new_">NEW PERSON</string>
     <string name="menu_update">UPDATE</string>
     <string name="insert_data">ADD</string>

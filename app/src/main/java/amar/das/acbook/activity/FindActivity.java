@@ -115,7 +115,7 @@ boolean bool=false;
         btn1.setBackgroundResource(R.drawable.graycolor_bg);
         btn3.setBackgroundResource(R.drawable.white_detailsbg);
         btn2.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.mestre)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"'");
     }
 
     public void maleLaberButton(View view) {
@@ -128,7 +128,7 @@ boolean bool=false;
         btn2.setBackgroundResource(R.drawable.graycolor_bg);
         btn3.setBackgroundResource(R.drawable.white_detailsbg);
         btn1.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.laber)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.laber)+"'");
     }
 
     public void femaleLaberButton(View view) {
@@ -141,7 +141,7 @@ boolean bool=false;
         btn3.setBackgroundResource(R.drawable.graycolor_bg);
         btn1.setBackgroundResource(R.drawable.white_detailsbg);
         btn2.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL+"='"+getResources().getString(R.string.women_laber)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.women_laber)+"'");
     }
 
     public void btnData(String query){

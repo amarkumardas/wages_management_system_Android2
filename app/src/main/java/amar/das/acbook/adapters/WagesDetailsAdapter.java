@@ -48,7 +48,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     int indicator;
     boolean bool;
     int []arr=new int[6];
-    String []dateArray=new String[3];
     String []previousDataHold=new String[8];
     String fromIntentPersonId;
     //for recording variable declaration
@@ -94,7 +93,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         }
 
         //if(bool != false) {
-       if(bool) {//means data is present so it will be clickable so we will set adapter otherwise not
+       if(bool){//means data is present so it will be clickable so we will set adapter otherwise not
            String[] audioAndDescription = context.getResources().getStringArray(R.array.audioAndRemarks);
            ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.select_dialog_item, audioAndDescription);
            holder.spinnerDescAudioIcon.setAdapter(adapter);//adapter set
@@ -237,7 +236,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
             //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
             //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
+            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
             previousDataHold[0] = cursorDefault.getString(0) + "- " + cursorData.getString(5);//to write previous record in description
@@ -245,7 +244,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             inputP1.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p1
             cursorDefault.close();
 
-            Cursor skillsCursor = db.getData("SELECT "+Database.COL_36_SKILL1+" , "+Database.COL_37_SKILL2+" , "+Database.COL_38_SKILL3+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
+            Cursor skillsCursor = db.getData("SELECT "+Database.COL_36_SKILL2 +" , "+Database.COL_37_SKILL3 +" , "+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
             if (skillsCursor != null) {
                 skillsCursor.moveToFirst();
                 if (indicator == 2) {//two person
@@ -301,7 +300,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             previousDataHold[6] = "TIME- " + cursorData.getString(2);//time to write previous record in description
             previousDataHold[7] = "REMARKS- " + cursorData.getString(3);//description or remarks
 
-                dateArray =cursorData.getString(1).split("-");
+                String [] dateArray =cursorData.getString(1).split("-");
                 int cDayOfMonth=Integer.parseInt(dateArray[0]);
                 int cMonth=Integer.parseInt(dateArray[1]);
                 int cYear=Integer.parseInt(dateArray[2]);
@@ -318,6 +317,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             dialog.show();
             //*************************************SAVING*****************************************************************************************************
             save.setOnLongClickListener(view12 -> {
+                save.setVisibility(View.GONE);//to avoid when user click multiple times
                 //*********************************common to all indicator 1,2,3,4*******************
                 VoiceRecorder.stopAudioPlayer();//if user playing audio and click save button then stop audio
                 VoiceRecorder.stopRecording();//if user don't click tick button to save recording then while saving all data recording will also get saved automatically.so  VoiceRecorder.stopRecording()  method should be called then only file will be saved
@@ -370,11 +370,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }else
                     Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
-                //*********************************  all the upper code are common to all indicator 1,2,3,4*******************
+                //*********************************all the upper code are common to all indicator 1,2,3,4*******************
                 success=db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + currentDate +"' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date.when ever user update then that person will become active.This will work for all indicators
 
                 if(!success)
-                    Toast.makeText(context, "UPDATE TO SET ACTIVE AND LATESTDATE FAILED", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "UPDATE TO SET ACTIVE AND LATEST DATE FAILED", Toast.LENGTH_LONG).show();
 
                 if (indicator == 1) {
                     if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
@@ -737,7 +737,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             return false;
         });
     }
-    private void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
+    public void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1,p2,p3,p4;
         p1 = inputP1.getText().toString().trim();
         //all 15 combination
@@ -876,38 +876,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         });
         showDataFromDataBase.create().show();
     }
-
-//    private void startRecordingVoice(String  id) {
-////        Long  tsLong=System.currentTimeMillis()/1000;//folder name should be unique so taking time as name of mic record so every record name will be different
-////        String ts=tsLong.toString();
-////        fileName="audio_"+ts;//file name
-//
-////        audioPath =new File(context.getExternalFilesDir( null )+"/acBookMicRecording/"+MyUtility.generateUniqueFileNameByTakingDateTime(id,"audio")+".mp3");//path of audio where it is saved in device
-////
-////        //https://developer.android.com/reference/android/media/MediaRecorder
-////        mediaRecorder=new MediaRecorder();
-////        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);//Sets the number of audio channels for recording.
-////        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);//Sets the format of the output file produced during recording
-////        mediaRecorder.setOutputFile(audioPath.getAbsolutePath());//giving file path where fill will be stored
-////        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-////        mediaRecorder.setAudioChannels(1);//Sets the number of audio channels for recording here setting to 1.
-////
-////        try{//to start mediaRecorder should be in try catch block
-////            mediaRecorder.prepare();//first prepare then start
-////            mediaRecorder.start();
-////            //mStartingTimeMillis =System.currentTimeMillis();
-////        }catch (IOException e){
-////            e.printStackTrace();
-////        }
-////        Toast.makeText(context, "RECORDING", Toast.LENGTH_SHORT).show();
-//    }
-//    private  void stopAndSaveRecordingPathToDB(){
-//        mediaRecorder.stop();
-//       // mElapsedMillis=(System.currentTimeMillis()- mStartingTimeMillis);
-//        mediaRecorder.release();
-//        mediaRecorder=null;
-//        // Toast.makeText(this, "Recording SAVED "+file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-//    }
     public String getPreviousDate(){
         //to get previous date
         Calendar calendar = Calendar.getInstance();

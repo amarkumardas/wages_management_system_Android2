@@ -200,13 +200,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="15dp"
-            android:weightSum="2"
+            android:weightSum="9"
             android:background="#D6DADF">
 
-
-
             <TextView
-                android:layout_weight="1"
+                android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
@@ -217,7 +215,7 @@
                 android:textSize="10dp"
                 />
             <TextView
-                android:layout_weight="1"
+                android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
@@ -227,21 +225,26 @@
                  android:id="@+id/returning_date_hardcoded_text_metadata"
                 android:layout_marginRight="2dp"
                 />
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+               />
 
         </LinearLayout>
         <LinearLayout
             android:id="@+id/date_mic_chronometer_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:orientation="horizontal"
             android:padding="4dp"
-            android:weightSum="2"
+            android:weightSum="9"
             android:background="@drawable/border_outline_while_bg">
 
-
             <TextView
-                android:layout_weight="1"
+                android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/white_detailsbg"
@@ -256,20 +259,29 @@
                 android:id="@+id/leaving_dateTv_metadata"
                 android:foreground="?android:attr/selectableItemBackground"/>
             <TextView
-                android:layout_weight="1"
+                android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/white_detailsbg"
                 android:textStyle="bold"
                 android:textAlignment="center"
                 android:paddingTop="8dp"
-
-
                 android:layout_marginRight="2dp"
                 android:textColor="@color/black"
                 android:textSize="18dp"
                 android:id="@+id/returning_dateTv_metadata"
                 android:foreground="?android:attr/selectableItemBackground"/>
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:text="X"
+                android:textStyle="bold"
+                android:textColor="#FF0000"
+                android:textAlignment="center"
+                android:id="@+id/eraseDate_tv_metadata"/>
 
         </LinearLayout>
         <LinearLayout
@@ -299,7 +311,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:layout_marginRight="2dp"
-                android:text="TOTAL WORK DAYS"
+                android:text="TOTAL WORKED DAYS"
                 android:textSize="10dp"
                 />
             <TextView
@@ -320,12 +332,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/this_week_work_amount_layout"
-
             android:background="@drawable/border_outline_while_bg"
             android:orientation="horizontal"
             android:padding="4dp"
             android:weightSum="5">
-
 
             <Spinner
                 android:layout_weight="2"
@@ -399,51 +409,95 @@
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:orientation="horizontal"
+                   android:padding="4dp"
+                   android:weightSum="2"
+                   android:background="@drawable/border_outline_while_bg">
+                    <AutoCompleteTextView
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="2dp"
 
-            android:orientation="horizontal"
-            android:padding="4dp"
-            android:weightSum="2"
-            android:background="@drawable/border_outline_while_bg">
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/white_detailsbg"
+                        android:paddingLeft="7dp"
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:textSize="17dp"
+                        android:textColor="@color/black"
+                        android:inputType="textCapCharacters"
+                        android:id="@+id/location_autocomplete_tv_meta"
+                        android:completionThreshold="1"
+                        android:dropDownWidth="300dp"
+                        />
 
-            <Spinner
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:background="@drawable/white_detailsbg"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:layout_marginRight="2dp"
-                android:layout_marginLeft="2dp"
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/location_spinner_meta"/>
-            <Spinner
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:background="@drawable/white_detailsbg"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:layout_marginRight="2dp"
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/religion_spinner_meta"/>
+                    <AutoCompleteTextView
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
 
-        </LinearLayout>
+                        android:layout_marginRight="2dp"
+                        android:background="@drawable/white_detailsbg"
+                        android:paddingLeft="7dp"
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:textSize="17dp"
+                        android:textColor="@color/black"
+                        android:inputType="textCapCharacters"
+                        android:id="@+id/religion_autoComplte_tv_meta"
+                        android:completionThreshold="1"
+                        android:dropDownWidth="300dp"
+                        />
+                </LinearLayout>
+        <!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
 
-        <Spinner
-            android:layout_marginTop="20dp"
-            android:layout_width="50dp"
-            android:layout_height="35dp"
-            android:background="@drawable/green_color_bg"
-            android:textColor="@color/black"
-            android:layout_marginLeft="4dp"
-            android:id="@+id/autofill_remarks_spinner_setting"/>
+<!--            android:orientation="horizontal"-->
+<!--            android:padding="4dp"-->
+<!--            android:weightSum="2"-->
+<!--            android:background="@drawable/border_outline_while_bg">-->
+
+<!--            <Spinner-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:background="@drawable/white_detailsbg"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_marginLeft="2dp"-->
+<!--                android:layout_gravity="center_horizontal"-->
+<!--                android:id="@+id/location_spinner_meta"/>-->
+<!--            <Spinner-->
+<!--                android:layout_weight="1"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:background="@drawable/white_detailsbg"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textStyle="bold"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_gravity="center_horizontal"-->
+<!--                android:id="@+id/religion_spinner_meta"/>-->
+
+<!--        </LinearLayout>-->
+
+<!--        <Spinner-->
+<!--            android:layout_marginTop="20dp"-->
+<!--            android:layout_width="50dp"-->
+<!--            android:layout_height="35dp"-->
+<!--            android:background="@drawable/green_color_bg"-->
+<!--            android:textColor="@color/black"-->
+<!--            android:layout_marginLeft="4dp"-->
+<!--            android:id="@+id/autofill_remarks_spinner_setting"/>-->
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="WRITE REMARKS"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="40dp"
             android:layout_marginRight="4dp"
             android:layout_marginLeft="4dp"
             android:fadingEdgeLength="233dp"

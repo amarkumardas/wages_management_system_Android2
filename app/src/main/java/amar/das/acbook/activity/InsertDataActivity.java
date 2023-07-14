@@ -31,23 +31,27 @@ import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
+
 import amar.das.acbook.ui.search.SearchFragment;
+import amar.das.acbook.utility.MyUtility;
 
 
 public class InsertDataActivity extends AppCompatActivity {
     Button add;
-  EditText name,account, acholdername,ifsccode,aadharcard,phone,fathername;
-  AutoCompleteTextView bankname_autocomptextview;
+  EditText name,account, acHolderName, ifscCode, aadhaarCard,phone, fatherName;
+  AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
   Database personDb;
   RadioGroup radioGroup;
   RadioButton  laberRadio,womenRadio,mestreRadio;
   String skill,fromIntentPersonId;
   String[] indianBank;//to store array
-
+    HashSet<String> religionHashSet,locationHashSet;
     //********************for camera and galary***********************
     private static final int GalleryPick = 1;
     private static final int CAMERA_REQUEST = 100;
@@ -72,12 +76,14 @@ public class InsertDataActivity extends AppCompatActivity {
         add=findViewById(R.id.add_button);
         name=findViewById(R.id.name_et);
         account=findViewById(R.id.accountno_et);
-        acholdername =findViewById(R.id.acholder_et);
-        ifsccode=findViewById(R.id.ifsccode_et);
-        bankname_autocomptextview=findViewById(R.id.bankname_autocomplte_tv);
-        aadharcard=findViewById(R.id.aadharcard_et);
+        acHolderName =findViewById(R.id.acholder_et);
+        ifscCode =findViewById(R.id.ifsccode_et);
+        bankName_autoComplete =findViewById(R.id.bankname_autocomplte_tv);
+        location_autoComplete=findViewById(R.id.location_autoComplete_tv);
+        religion_autoComplete=findViewById(R.id.religion_autoComplete_tv);
+        aadhaarCard =findViewById(R.id.aadharcard_et);
         phone=findViewById(R.id.phonenumber_et);
-        fathername =findViewById(R.id.fathername_et);
+        fatherName =findViewById(R.id.fathername_et);
 
         //radio button
         radioGroup=findViewById(R.id.skill_radiogp);
@@ -86,8 +92,8 @@ public class InsertDataActivity extends AppCompatActivity {
         mestreRadio=findViewById(R.id.mestre);//required when updating
         laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
         skill="L";//skill default value otherwise null will be set as default so its important
-        radioGroup.setOnCheckedChangeListener((radioGroup, checkedidOfRadioBtn) -> {
-            switch(checkedidOfRadioBtn){
+        radioGroup.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
+            switch(checkedIdOfRadioBtn){
                 case R.id.mestre:{
                     skill=getResources().getString(R.string.mestre);//updating skill variable
                     break;
@@ -102,18 +108,18 @@ public class InsertDataActivity extends AppCompatActivity {
                 }
             }
         });
-//        int skilled=radioGroup.getCheckedRadioButtonId();
-//        skill_radioBtn=findViewById(skilled);
-        //spinner=findViewById(R.id.spinner);
-
-//        type_plus =getResources().getStringArray(R.array.skills);//getting array from string values declared there M L G
-//        ArrayAdapt5r<String>adapter=new ArrayAdapter<>(InsertDataActivity.this,android.R.layout.simple_list_item_1, type_plus);
-//        spinner.setAdapter(adapter);
 
         indianBank =getResources().getStringArray(R.array.indian_bank_names); //get bank names
         ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, indianBank);
-        bankname_autocomptextview.setAdapter(bankAdapter);
+        bankName_autoComplete.setAdapter(bankAdapter);
 
+        religionHashSet=new HashSet<>(Arrays.asList(MyUtility.getReligionFromDb(getBaseContext()))); //hashset is taken to insert only unique data in table
+        ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
+        religion_autoComplete.setAdapter(religionAdapter);
+
+        locationHashSet=new HashSet<>(Arrays.asList(MyUtility.getLocationFromDb(getBaseContext())));//hashset is taken to insert only unique data in table
+        ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
+        location_autoComplete.setAdapter(locationAdapter);
 
         //For camera and galary*********************************************************************************
         imageView = findViewById(R.id.imageview);
@@ -127,19 +133,21 @@ public class InsertDataActivity extends AppCompatActivity {
         // select image from camera and gallery
         imageView.setOnClickListener(view -> showImagePicDialog());
 
-        //after getting all the ids setting all data according to id
-        if(getIntent().hasExtra("ID")){
+
+        if(getIntent().hasExtra("ID")){//after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
             //retrieving data from db
-            Cursor cursor1=personDb.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+" , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_8_SKILL+","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
+            Cursor cursor1=personDb.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_SKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
 
             if(cursor1 != null) {
                 cursor1.moveToFirst();
                 name.setText(cursor1.getString(0));
                 account.setText(cursor1.getString(1));
-                ifsccode.setText(cursor1.getString(2));
-                bankname_autocomptextview.setText(cursor1.getString(3));
-                aadharcard.setText(cursor1.getString(4));
+                ifscCode.setText(cursor1.getString(2));
+                bankName_autoComplete.setText(cursor1.getString(3));
+                location_autoComplete.setText(cursor1.getString(10));
+                religion_autoComplete.setText(cursor1.getString(11));
+                aadhaarCard.setText(cursor1.getString(4));
                 phone.setText(cursor1.getString(5));
                 skill=cursor1.getString(6);//skill is variable
 
@@ -151,13 +159,13 @@ public class InsertDataActivity extends AppCompatActivity {
                  else//skill.equals("G")
                      womenRadio.setChecked(true);
 
-                fathername.setText(cursor1.getString(7));
+                fatherName.setText(cursor1.getString(7));
 
                 byte[] image=cursor1.getBlob(8);//getting image from db as blob and storing in byte type Blop is large type
                 //getting bytearray image from DB and converting  to bitmap to set in imageview
                 Bitmap bitmap= BitmapFactory.decodeByteArray(image,0, image.length);
                 imageView.setImageBitmap(bitmap);
-                acholdername.setText(cursor1.getString(9));
+                acHolderName.setText(cursor1.getString(9));
                 add.setBackgroundResource(R.drawable.green_color_bg);
                 add.setText(getResources().getString(R.string.save));
                 cursor1.close();
@@ -249,12 +257,10 @@ public class InsertDataActivity extends AppCompatActivity {
             break;
         }
     }
-
     // Here we will pick image from gallery or camera
     private void pickFromGallery() {
         CropImage.activity().start(InsertDataActivity.this);
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -269,20 +275,21 @@ public class InsertDataActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to crop image", Toast.LENGTH_SHORT).show();
         }
     }
-
     //action while clicking insert button
     public void insert_click(View view) {
         add.setVisibility(View.GONE);//so that user do not enter again add buttion while data is  inserting in database beacuse if user do again then it will overload
 
-        String personName=name.getText().toString().toUpperCase();//taking all value in uppercase
-        String personAccount=account.getText().toString();
-        String personAccountHolderName= acholdername.getText().toString().toUpperCase();
-        String personIfsccode=ifsccode.getText().toString().toUpperCase();
-        String personAadhar=aadharcard.getText().toString();
-        String personPhon=phone.getText().toString();
-        String personFathername= fathername.getText().toString().toUpperCase();
-        String personType=skill;
-        String personBankName=bankname_autocomptextview.getText().toString();//autocomplete Text view
+        String personName=name.getText().toString().toUpperCase().trim();//taking all value in uppercase
+        String personAccount=account.getText().toString().trim();
+        String personPhoneNumber2= acHolderName.getText().toString().toUpperCase().trim();
+        String personIfscCode= ifscCode.getText().toString().toUpperCase().trim();
+        String personAadhaar= aadhaarCard.getText().toString().trim();
+        String personActivePhoneNo2=phone.getText().toString().trim();
+        String personAccountHolderName= fatherName.getText().toString().toUpperCase().trim();
+        String personSkill=skill;
+        String personBankName= bankName_autoComplete.getText().toString().trim();//autocomplete Text view
+        String location=location_autoComplete.getText().toString().toUpperCase().trim();//autocomplete Text view
+        String religion=religion_autoComplete.getText().toString().toUpperCase().trim();//autocomplete Text view
 
         //to store in db we have to convert imageview to Bitmap and Bitmap to bytearray and to retrieve it from db we have to convert bytearray to Bitmap to set in imageview
         BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();//A Drawable that wraps a bitmap and can be tiled, stretched..
@@ -294,31 +301,35 @@ public class InsertDataActivity extends AppCompatActivity {
             detailsReview.setCancelable(false);
             detailsReview.setTitle("REVIEW DETAILS");// Html tags video- https://www.youtube.com/watch?v=98BD6IjQQkE
             detailsReview.setMessage(HtmlCompat.fromHtml("Name-" +"<b>"+ personName+"</b>"+"<br>"+"<br>"+
-                    "Father Name-" +"<b>"+ personFathername+"</b>" +"<br>"+"<br>"+
-                    "Account No--" +"<b>"+ personAccount +"</b>" +"<br>"+"<br>"+
-                    "A/C Holder-" +"<b>"+personAccountHolderName+"</b>" +"<br>"+"<br>"+
+                    "Active Phone No.1---  " +"<b>"+ personActivePhoneNo2 +"</b>" +"<br>"+"<br>"+
+                    "Phone No.2------------- " +"<b>"+personPhoneNumber2+"</b>" +"<br>"+"<br>"+
+                    "Location-- " +"<b>"+location+"</b>" +"<br>"+"<br>"+
+                    "Religion-- " +"<b>"+religion+"</b>" +"<br>"+"<br>"+
+                    "Aadhaar Card No.- " +"<b>"+ personAadhaar+"</b>"  +"<br>"+"<br>"+
                     "Bank Name-" +"<b>"+ personBankName+"</b>"+"<br>" +"<br>"+
-                    "IFSC Code---  " +"<b>"+ personIfsccode+"</b>"  +"<br>"+"<br>"+
-                    "Phone No----  " +"<b>"+ personPhon +"</b>" +"<br>"+"<br>"+
-                    "Aadhaar No- " +"<b>"+ personAadhar+"</b>"  +"<br>"+"<br>"+
-                    "Person Skill- " +"<b>"+ personType+"</b>"  +"<br>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+                    "Account No.--" +"<b>"+ personAccount +"</b>" +"<br>"+"<br>"+
+                    "IFSC Code---  " +"<b>"+ personIfscCode+"</b>"  +"<br>"+"<br>"+
+                    "A/C Holder Name-" +"<b>"+ personAccountHolderName+"</b>" +"<br>"+"<br>"+
+                    "Person Skill- " +"<b>"+ personSkill+"</b>"  +"<br>",HtmlCompat.FROM_HTML_MODE_LEGACY));
 
-            detailsReview.setNegativeButton("CANCEL", (dialogInterface, i) -> {
+            detailsReview.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 add.setVisibility(View.VISIBLE);
             });
-            detailsReview.setPositiveButton("YES CORRECT", new DialogInterface.OnClickListener() {
+            detailsReview.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
 
                     boolean  success;
-
                     //update
                     if(getIntent().hasExtra("ID")){//will execute only when updating
-                        //get data from db
-                        success=personDb.updateDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imageStore, personAccountHolderName,fromIntentPersonId);
-                        if(success){//if it is updated then show successfull message
+
+                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
+                            Toast.makeText(InsertDataActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
+                        }
+                        success=personDb.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,fromIntentPersonId,location,religion);
+                        if(success){//if it is updated then show successfully message
                             Toast.makeText(InsertDataActivity.this, "ID- "+fromIntentPersonId+" "+getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
@@ -340,11 +351,14 @@ public class InsertDataActivity extends AppCompatActivity {
 
                         //for (int k = 1; k <= 10; k++) {
                             //inserting data to sqlite database
-                             success = personDb.insertDataTable1(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, imageStore, personAccountHolderName);
+                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
+                            Toast.makeText(InsertDataActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
+                        }
+                        success = personDb.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,location,religion);
                         //}
 
                         if (success) {//checking for duplicate
-                            Cursor result = personDb.getId(personName, personAccount, personIfsccode, personBankName, personAadhar, personPhon, personType, personFathername, personAccountHolderName);
+                            Cursor result = personDb.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2,location,religion);
                             StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
                             String holdLastId="";
 
@@ -395,12 +409,12 @@ public class InsertDataActivity extends AppCompatActivity {
                 private void eraseAllDataAfterInsertingFromLayout() {
                     name.setText("");
                     account.setText("");
-                    acholdername.setText("");
-                    ifsccode.setText("");
-                    bankname_autocomptextview.setText("");
-                    aadharcard.setText("");
+                    acHolderName.setText("");
+                    ifscCode.setText("");
+                    bankName_autoComplete.setText("");
+                    aadhaarCard.setText("");
                     phone.setText("");
-                    fathername.setText("");
+                    fatherName.setText("");
                     imageView.setImageResource(R.drawable.defaultprofileimage);
                 }
             });

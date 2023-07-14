@@ -13,12 +13,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import amar.das.acbook.Database;
@@ -59,6 +61,26 @@ public class MyUtility {
             return "00-00-0000";//error
         }
     }
+
+    public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
+        try(Database db=new Database(context);
+            Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
+            cursor2.moveToFirst();
+
+            if (cursor2.getString(0) != null){
+                String [] dateArray = cursor2.getString(0).split("-");
+                LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
+                //between (2022-05-01,2022-05-01) like
+                if(ChronoUnit.DAYS.between(dbDate, todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
+                    db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
+                }
+            }
+            return true;
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+    }
     public static String generateUniqueFileNameByTakingDateTime(String id,String fileName) {//file name will always be unique
         try {
             final Calendar current = Calendar.getInstance();//to get current date and time
@@ -71,30 +93,23 @@ public class MyUtility {
         }
     }
     public static boolean isEnterDataIsWrong(int[] arr) {
-        // boolean bool;
         int wrongData=0;
         for(int i=0 ;i <arr.length;i++) {
             if (arr[i] == 2)//value 2 represents wrong data
                 wrongData++;
         }
-//        if(wrongData >=1)//data is wrong
-//            bool=true;
-//        else
-//            bool=false;//data is right
-//        return bool;
+
         return wrongData >= 1;
     }
     public static boolean isDataPresent(int[] arr){
         boolean bool=true;
-        int sum,one;
-        sum=one=0;
+        int sum=0,one=0;
 
         for(int i=0 ;i <arr.length;i++){
 
             if(arr[i]== 1){//value 1 represents data is present
                 one++;
             }
-
             sum=sum+arr[i];
         }
         if(sum == 0)//data is not present
@@ -116,6 +131,51 @@ public class MyUtility {
             }
         }
         return true;//if user deleted file from device ie. file not exist in device so return true
+    }
+    public static String[] getReligionFromDb(Context context) {
+        String [] religion=null;
+        try(Database db=new Database(context);
+            Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME5)){
+            religion=new String[religionCursor.getCount()];
+            int i=0;
+            while(religionCursor.moveToNext()){
+                religion[i++]=religionCursor.getString(0);
+            }
+            return religion;
+        }catch (Exception x){
+            x.printStackTrace();
+            return  new String[]{"error"};
+        }
+    }
+    public static String[] getLocationFromDb(Context context) {
+        String [] location=null;
+        try(Database db=new Database(context);
+            Cursor locationCursor=db.getData("SELECT "+Database.COL_41_LOCATION+" FROM "+Database.TABLE_NAME4)){
+            location=new String[locationCursor.getCount()];
+            int i=0;
+            while(locationCursor.moveToNext()){
+                location[i++]=locationCursor.getString(0);
+            }
+            return location;
+        }catch (Exception x){
+            x.printStackTrace();
+            return  new String[]{"error"};
+        }
+    }
+    public static boolean updateLocationReligionToTableIf(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
+        /*The isEmpty() method checks whether a String is empty, meaning it has a length of 0, and returns true if it is empty. It does not consider whitespace characters as part of the string content.On the other hand, the isBlank() method was introduced in Java 11. It checks whether a String is empty or contains only whitespace characters, and returns true in such cases*/
+        try(Database db=new Database(context)){
+            if (!location.trim().isEmpty() && locationHashSet.add(location)) {//if false that means data is duplicate
+                db.updateTable("INSERT INTO "+Database.TABLE_NAME4+" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );");
+            }
+            if (!religion.trim().isEmpty() && religionHashSet.add(religion)) {//if false that means data is duplicate
+                db.updateTable("INSERT INTO "+Database.TABLE_NAME5+" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );");
+            }
+            return true;
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
     }
     public static boolean createTextFileInvoice(String id,Context context,String externalFileDir){
         try{
@@ -406,21 +466,21 @@ public class MyUtility {
 
         Cursor cursor2=null;//returnOnlySkill will return only string of array
         try(Database db = new Database(context);
-            Cursor cursor1=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'"))
+            Cursor cursor1=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'"))
         {
             cursor1.moveToFirst();
             switch (indicator) {
                 case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
                 case 2: {
-                    cursor2 = db.getData("SELECT " + Database.COL_36_SKILL1 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                    cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
                 }
-                case 3: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL1 + " ," + Database.COL_37_SKILL2 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                case 3: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
                 }
-                case 4: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL1 + " ," + Database.COL_37_SKILL2 + " ," + Database.COL_38_SKILL3 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                case 4: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " ," + Database.COL_38_SKILL4 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
                 }
@@ -782,5 +842,4 @@ public class MyUtility {
             end--;
         }
     }
-
 }

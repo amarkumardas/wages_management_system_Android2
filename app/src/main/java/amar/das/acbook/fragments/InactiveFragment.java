@@ -112,7 +112,7 @@ public class InactiveFragment extends Fragment {
                         progressBar.setVisibility(View.VISIBLE);//progressbar
 
                         Toast.makeText(getContext(), getResources().getString(R.string.please_wait_loading), Toast.LENGTH_SHORT).show();
-                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_8_SKILL+"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + 40, inactiveArraylist);
+                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_8_SKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + 40, inactiveArraylist);
 
                         totalNumberOfLoadedData = totalNumberOfLoadedData + 40;//40 data will be loaded and this variable represents total data already loaded
                         if (totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when all record loaded then remove scroll listener
@@ -136,13 +136,13 @@ public class InactiveFragment extends Fragment {
     public ArrayList<MestreLaberGModel> loadInitialDataHavingTotalAdvanceNBalanceOfInactive(TextView advance,TextView balance,String skill,int limit,ArrayList<MestreLaberGModel> arraylist) {
         db=new Database(getContext());//on start only database should be create
 
-        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE +"+Database.COL_8_SKILL+"='"+skill+"' AND ("+Database.COL_12_ACTIVE+"='0')");
+        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE +"+Database.COL_8_SKILL1 +"='"+skill+"' AND ("+Database.COL_12_ACTIVE+"='0')");
         advanceBalanceCursor.moveToFirst();
         advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+advanceBalanceCursor.getLong(0)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
         balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+advanceBalanceCursor.getLong(1)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
         advanceBalanceCursor.close();
 
-        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL+"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
+        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
         arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much
         while(dataCursorMLG.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
@@ -175,7 +175,7 @@ public class InactiveFragment extends Fragment {
 
     public int getCountOfSpecificInactiveTotalRecord(String skill) {
         Database db=new Database(getContext());
-        Cursor  cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL+"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0'");
+        Cursor  cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0'");
         cursor.moveToFirst();
         int count=cursor.getInt(0);
         cursor.close();

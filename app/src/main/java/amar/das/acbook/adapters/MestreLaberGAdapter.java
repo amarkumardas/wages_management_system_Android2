@@ -25,9 +25,9 @@ import amar.das.acbook.Database;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.R;
+import amar.das.acbook.utility.MyUtility;
 
 public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapter.ViewHolder> {
-
     Context context;
     ArrayList<MestreLaberGModel> arrayList;//because more operation is retrieving
     //final Calendar current=Calendar.getInstance();//to get current date
@@ -71,25 +71,44 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
         if(data.getLatestDate() !=null) {//for null pointer exception//https://www.youtube.com/watch?v=VmhcvoenUl0
             if (data.getLatestDate().equals(currentDateDBPattern)) //if profile color is yellow that means on current day some data is entered
                 holder.yellowBg.setBackgroundColor(context.getColor(R.color.yellow));
-            else
+             else
                 holder.yellowBg.setBackgroundColor(Color.WHITE);
 
             //if user is not active for 1 month then it will become inactive based on latest date
             dateArray = data.getLatestDate().split("-");
-//                d = Integer.parseInt(dateArray[0]);
-//                m = Integer.parseInt(dateArray[1]);
-//                y = Integer.parseInt(dateArray[2]);
             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
             // making it active or inactive using latest date (2022-05-01,2022-05-01)
-            if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= 1) { //ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+            if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= 1){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
                 db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 0 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//user has no permission to make it inactive it is automatically
 
-            }else {
+            }else{
                 db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
-
             }
-        }else
+        }else{
             holder.yellowBg.setBackgroundColor(Color.WHITE);
+        }
+
+        //****************leaving date updating if days is 0 between two date then update SET LEAVINGDATE="+null+
+       if(!MyUtility.updateLeavingDate(data.getId(),context,todayDate)){//update leaving date
+           Toast.makeText(context, "LEAVING DATE NOT UPDATED", Toast.LENGTH_LONG).show();
+       }
+
+
+//        Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
+//        cursor2.moveToFirst();
+//        if (cursor2.getString(0) != null) {
+//            dateArray = cursor2.getString(0).split("-");
+////                    d = Integer.parseInt(dateArray[0]);
+////                    m = Integer.parseInt(dateArray[1]);
+////                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
+//            dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
+//            //between (2022-05-01,2022-05-01) like
+//            if (ChronoUnit.DAYS.between(dbDate, todayDate) >= 0) {//if days between leaving date and today date is 0 then leaving date will set null automatically
+//                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_392_LEAVINGDATE+"=" + null + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
+//            }
+//        }
+//        cursor2.close();
+        //**************************************************************************************************************
 
         holder.profileImg.setOnClickListener(view -> {
             Intent intent = new Intent(context, IndividualPersonDetailActivity.class);
@@ -97,26 +116,10 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             intent.putExtra("FromMesterLaberGAdapter", 1);
             context.startActivity(intent);
 
-
+            //optional to know only
             Cursor cursor5 = db.getData("SELECT "+Database.COL_15_LATESTDATE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
             cursor5.moveToFirst();
             Toast.makeText(context, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
-
-            //************************leaving date updating if days is 0 between two date then update SET LEAVINGDATE="+null+
-            Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
-            cursor2.moveToFirst();
-            if (cursor2.getString(0) != null) {
-                dateArray = cursor2.getString(0).split("-");
-//                    d = Integer.parseInt(dateArray[0]);
-//                    m = Integer.parseInt(dateArray[1]);
-//                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
-                dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
-                //between (2022-05-01,2022-05-01) like
-                if (ChronoUnit.DAYS.between(dbDate, todayDate) >= 0) {//if days between leaving date and today date is 0 then leaving date will set null automatically
-                    db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_392_LEAVINGDATE+"=" + null + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
-                }
-            }
-            cursor2.close();
         });
     }
     @Override

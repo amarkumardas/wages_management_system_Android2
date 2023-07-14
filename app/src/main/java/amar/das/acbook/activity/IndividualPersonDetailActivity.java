@@ -28,6 +28,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
@@ -45,7 +46,9 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -65,6 +68,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     Database db;
     int []arr=new int[7];
     String active ="0";
+    int redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
     ArrayList<WagesDetailsModel> dataList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +82,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             fromIntentPersonId = getIntent().getStringExtra("ID");//getting data from intent
 
             //***********setting skill top of layout**********************************************
-            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                defaultSkillCursor.moveToFirst();
                binding.defaultHardcodedTv.setText(defaultSkillCursor.getString(0));
                binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) +"  =");//default calculation skill
@@ -87,7 +91,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
              sumCursor.moveToFirst();
 
-             if( sumCursor.getInt(0) < 0 )//if total wages amount cross the  range of int the this message will be shown
+             if(sumCursor.getInt(0) < 0)//if total wages amount cross the  range of int the this message will be shown
                  Toast.makeText(this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
 
              binding.blueTotalWagesTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));
@@ -99,10 +103,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              }else
                  binding.totalDepositAmountLayout.setVisibility(View.GONE);
 
-            Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             if(skillNRateCursor != null) {
                 skillNRateCursor.moveToFirst();
-                //int indicate = get_indicator(fromIntentPersonId);
                 int indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                                 //R1
                 if(skillNRateCursor.getInt(3) != 0) {
@@ -175,32 +178,29 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                     indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),0);
 
-                } else if (indicate == 4) {
+                }else if(indicate == 4) {
                     if(skillNRateCursor.getInt(4) != 0) {
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                         //    R2 * p2
                         binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
-                    }else {
+                    }else{
                         binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
-                       // Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
-                    }
+                     }
 
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
                         //    R3 * p3
                         binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
-                    }else {
+                    }else{
                         binding.totalP3AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
-                       // Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
                     if(skillNRateCursor.getInt(6) != 0) {
                         binding.p4RateTv.setText(skillNRateCursor.getString(6));
                         //    R4 * p4
                         binding.totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumCursor.getInt(4)));
-                    }else {
+                    }else{
                         binding.totalP4AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
-                        //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
                     binding.totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
@@ -265,7 +265,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.phoneTv.setText("ACTIVE PHONE1-  " + cursor.getString(5));
                 binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
 
-                if (cursor.getString(5).length() == 10) {//if there is no phone number then show default icon color black else green icon
+                if (cursor.getString(5).length() == 10 || MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext()) != null) {//if there is no phone number then show default icon color black else green icon
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
                 }
 
@@ -280,7 +280,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
             }
           //setting star rating
-            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_RATING+","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
             cursor2.moveToFirst();
             if(cursor2.getString(0) != null || cursor2.getString(1) != null) {
 
@@ -296,7 +296,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                                      //between (2022-05-01,2022-05-01) like
                     binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate,dbDate)+" "+getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
 
-                    if(ChronoUnit.DAYS.between(todayDate,dbDate) <= 21 ) {
+                    if(ChronoUnit.DAYS.between(todayDate,dbDate) <= redIndicatorToLeave){
                        binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
                    }
                 }else{
@@ -307,9 +307,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
             }
             cursor2.close();
-
             //Meta data
-            binding.infoTv.setOnClickListener(view -> {
+            binding.infoTv.setOnClickListener(view ->{
                 final boolean[] editOrNot = {false,false};
                 AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                 LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
@@ -319,7 +318,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 myCustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
 
                 final AlertDialog dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
-
+                HashSet<String> locationHashSet,religionHashSet;
                 //ids
                 RadioButton activeRadio=myView.findViewById(R.id.active_metadata);
                 RadioGroup radioGroup=myView.findViewById(R.id.skill_radiogp_metadata);
@@ -333,16 +332,16 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 TextView hardcodedP4Tv=myView.findViewById(R.id.hardcoded_p4_tv_meta);
                 EditText inputP4Et=myView.findViewById(R.id.input_p4_et_meta);
                 TextView returningDate=myView.findViewById(R.id.returning_dateTv_metadata);
+                TextView eraseReturningDate=myView.findViewById(R.id.eraseDate_tv_metadata);
                 Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.custom_spinner_remove_or_add_mlg);
                 TextView totalWorkDaysMetadata=myView.findViewById(R.id.total_work_days_metadata);
-                Spinner locationSpinner=myView.findViewById(R.id.location_spinner_meta);
-                Spinner religionSpinner=myView.findViewById(R.id.religion_spinner_meta);
-                Spinner autofillRemarksSpinner=myView.findViewById(R.id.autofill_remarks_spinner_setting);
+                AutoCompleteTextView locationAutoComplete=myView.findViewById(R.id.location_autocomplete_tv_meta);
+                AutoCompleteTextView religionAutoComplete=myView.findViewById(R.id.religion_autoComplte_tv_meta);
 
                 Spinner starSpinner= myView.findViewById(R.id.starSpinner_metadata);
                 TextView leavingDateTv=myView.findViewById(R.id.leaving_dateTv_metadata);
                 EditText remarksMetaData=myView.findViewById(R.id.refferal_metadata);
-                Button info=myView.findViewById(R.id.save_btn_info);
+                Button infoSave=myView.findViewById(R.id.save_btn_info);
                 Button  cancel=myView.findViewById(R.id.cancel_btn_metadata);
                 cancel.setOnClickListener(view12 -> dialog.dismiss());
 
@@ -353,29 +352,52 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 inputP4Et.setEnabled(false);
                 returningDate.setEnabled(false);
                 customSpinnerRemoveOrAddMlg.setEnabled(false);
-                locationSpinner.setEnabled(false);
-                religionSpinner.setEnabled(false);
-                autofillRemarksSpinner.setEnabled(false);
+                locationAutoComplete.setEnabled(false);
+                religionAutoComplete.setEnabled(false);
                 starSpinner.setEnabled(false);
                 leavingDateTv.setEnabled(false);
+                eraseReturningDate.setEnabled(false);
                 remarksMetaData.setEnabled(false);
-
+                //-------------------------------------------------------------------------------------------------------------------------
+                int indicator=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
+                int []checkCorrectionArray = new int[indicator];
+                int []userInputRateArray=new int[indicator];
+                rateUpdateManually(hardcodedP1Tv,inputP1Et,hardcodedP2Tv,inputP2Et,hardcodedP3Tv,inputP3Et,hardcodedP4Tv,inputP4Et,infoSave,checkCorrectionArray,userInputRateArray,indicator,fromIntentPersonId);
+                //--------------------------------------------------------------------------------------------------------------------------
                 Cursor cursor1 = db.getData("SELECT "+Database.COL_12_ACTIVE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 cursor1.moveToFirst();
                 if(cursor1.getString(0).equals("1"))
                     activeRadio.setVisibility(View.GONE);//when it is active then don't show to activate
                 else if(cursor1.getString(0).equals("0"))
                     activeRadio.setChecked(false);
-                cursor1.close();
+
                 //this should not be use in other class   other wise it will not be called when user change radio button
                 radioGroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
                     if (checkedIdOfRadioBtn == R.id.active_metadata) {
                         active = "1";//updating active variable
                     }
                 });
-
-                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_RATING+","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+                //-----------------------------------------to remove returning date automatically------returning date remove manually by admin so to call the worker untill they come---------------------------------------------------
+                //should be done first before cursor21 query to get right result.updating returning date before to get FRESH result. if days is 0 between two date then update SET returning="+null+
+//                cursor1 = db.getData("SELECT "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+//                cursor1.moveToFirst();
+//                LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
+//                String []dateArray;
+//                if (cursor1.getString(0) != null) {
+//                    dateArray = cursor1.getString(0).split("-");
+//                    dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
+//                    //between (2022-05-01,2022-05-01) like
+//                    if (ChronoUnit.DAYS.between(dbDate, todayDate) >= 0) {//if days between returning date and today date is 0 then returning date will set null automatically
+//                        db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_398_RETURNINGDATE+"=" + null + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+//                    }
+//                }
+//                cursor1.close();
+                //---------------------------------------------------------------------------------------------------------------------------
+                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
                 cursor21.moveToFirst();
+
+                //total worked days
+                totalWorkDaysMetadata.setText(cursor21.getString(3));
 
                 String[] ratingStar =getResources().getStringArray(R.array.star);
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1,ratingStar);
@@ -393,19 +415,46 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }else if(cursor21.getString(1) == null) {
                     leavingDateTv.setText("");
                 }
-                final Calendar current=Calendar.getInstance();//to get current date and time
-                int cYear,cMonth,cDayOfMonth;
-                cYear=current.get(Calendar.YEAR);
-                cMonth=current.get(Calendar.MONTH);
-                cDayOfMonth=current.get(Calendar.DAY_OF_MONTH);
 
-                leavingDateTv.setOnClickListener(view13 -> {
-                    //To show calendar dialog
+                if(cursor21.getString(4) != null){//leaving date
+                    returningDate.setText(cursor21.getString(4));
+                }else if(cursor21.getString(4) == null) {
+                    returningDate.setText("");
+                }
+
+                final Calendar current=Calendar.getInstance();//to get current date and time
+                leavingDateTv.setOnClickListener(view13 -> {//leaving date
                     DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, (datePicker, year, month, dayOfMonth) -> {
                         leavingDateTv.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
-                    },cYear,cMonth,cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
+                    },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
                     datePickerDialog.show();
                 });
+
+                returningDate.setOnClickListener(view16 ->{//returning date
+                    DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, (datePicker, year, month, dayOfMonth) -> {
+                        returningDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
+                    },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
+                    datePickerDialog.show();
+                });
+
+                eraseReturningDate.setOnClickListener(view17 -> {
+                    returningDate.setText("");//set nothing empty
+                });
+                //------------------------------------------------------------------------------------
+                try(Cursor locationAndReligionCursor=db.getData("SELECT "+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'")) {//to close cursor automatically
+                    locationAndReligionCursor.moveToFirst();//because we get only 1 row
+                    locationAutoComplete.setText(locationAndReligionCursor.getString(0));//set data
+                    religionAutoComplete.setText(locationAndReligionCursor.getString(1));//set data
+                }
+                //location
+                locationHashSet=new HashSet<>(Arrays.asList(MyUtility.getLocationFromDb(getBaseContext())));//hashset is taken to insert only unique data in table
+                ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
+                locationAutoComplete.setAdapter(locationAdapter);
+                //religion
+                religionHashSet=new HashSet<>(Arrays.asList(MyUtility.getReligionFromDb(getBaseContext()))); //hashset is taken to insert only unique data in table
+                ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
+                religionAutoComplete.setAdapter(religionAdapter);
+                //-------------------------------------------------------------------------------------
 
                 if(cursor21.getString(2) != null){//remarksMetaData
                     remarksMetaData.setText(cursor21.getString(2));
@@ -424,7 +473,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                         String data = adapterView.getItemAtPosition(pos).toString();
                         try(Database db=new Database(getBaseContext());
-                        Cursor cursor1 =db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                        Cursor cursor1 =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
                             cursor1.moveToFirst();//skill which is null there skill is updated
                             switch (data) {
                                 case "ADD L": //adding L means p2
@@ -432,13 +481,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     editOrNot[1] = true;//indicate user has selected option
 
                                     if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO  ADD L", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO  ADD L", "STATUS: FAILED");
 
                                     } else
                                         displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.laber));
@@ -448,13 +497,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
                                     if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "SUCCESSFULLY  ADD M", "STATUS: SUCCESS");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "SUCCESSFULLY  ADD M", "STATUS: SUCCESS");
 
                                     } else
                                         displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.mestre));
@@ -465,13 +514,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     editOrNot[1] = true;//indicate user has selected option
 
                                     if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
 
                                     } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO  ADD G", "STATUS: FAILED");
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO  ADD G", "STATUS: FAILED");
 
                                     } else
                                         displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.women_laber));
@@ -491,7 +540,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + Database.COL_29_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL1 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
                                                 displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
@@ -501,7 +550,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + Database.COL_291_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL2 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
                                                 displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
@@ -510,7 +559,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + Database.COL_292_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL3 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
                                                 displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
@@ -533,7 +582,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onNothingSelected(AdapterView<?> adapterView) { }
                 });
                 //****************************************************DONE setting adapter for addOrRemoveMLG spinner*****************************************
-                info.setOnClickListener(view1 -> {
+                infoSave.setOnClickListener(view1 ->{
                     if(editOrNot[0] ==false) {//while editing this will execute
                         radioGroup.getChildAt(0).setEnabled(true);
                         inputP1Et.setEnabled(true);
@@ -542,18 +591,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         inputP4Et.setEnabled(true);
                         returningDate.setEnabled(true);
                         customSpinnerRemoveOrAddMlg.setEnabled(true);
-                        locationSpinner.setEnabled(true);
-                        religionSpinner.setEnabled(true);
-                        autofillRemarksSpinner.setEnabled(true);
+                        locationAutoComplete.setEnabled(true);
+                        religionAutoComplete.setEnabled(true);
                         starSpinner.setEnabled(true);
                         leavingDateTv.setEnabled(true);
+                        eraseReturningDate.setEnabled(true);
                         remarksMetaData.setEnabled(true);
-                        info.setBackgroundResource(R.drawable.green_color_bg);//changing background
-                        info.setText(getResources().getString(R.string.save));
+                        infoSave.setBackgroundResource(R.drawable.green_color_bg);//changing background
+                        infoSave.setText(getResources().getString(R.string.save));
                         editOrNot[0] =true;
                     }else{//while saving this will execute
-                        boolean success2;
-                        String rate;
+                        boolean success2,locationReligionSuccess;
+                        String star;
                         if (active.equals("1")) {//if user has pressed radio button then only it will execute
                             //to automatically set today date so that it become active
 //                            final Calendar current1 = Calendar.getInstance();//to get current date and time
@@ -565,27 +614,51 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             success2 = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + active + "', "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+MyUtility.getOnlyTime()+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//setting today date to latest date TO AVOID PREVIOUS LATEST DATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latest date.due to today date in  variable latest date logic in MestreLaberGAdapter will not execute and account will not become inactive it will remain active
                             if (!success2)
                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE LATEST DATE AND ACTIVE=1", Toast.LENGTH_LONG).show();
-                        }
-
+                            }
                         if (starSpinner.getSelectedItem().toString().equals("SELECT"))//if user BY mistake click on SELECT then by default start set to 1
-                            rate = "1";//default value
+                            star = "1";//default value
                         else
-                            rate = starSpinner.getSelectedItem().toString();
+                            star = starSpinner.getSelectedItem().toString();
 
-                        //if (leavingDateTv.getText().toString() == "") {//by default if user don't enter anything then editText view contain nothing so checking "" it is important otherwise it will  produce error to other code due to nothing.so if nothing then don't update leaving date
-                        if (TextUtils.isEmpty(leavingDateTv.getText().toString())) {//by default if user don't enter anything then editText view contain nothing so checking "" it is important otherwise it will  produce error to other code due to nothing.so if nothing then don't update leaving date
-                            success2 = db.update_Rating_TABLE_NAME3(rate, remarksMetaData.getText().toString().trim(), null, fromIntentPersonId);
-                        } else { //if user don't enter anything then else will execute
-                            success2 = db.update_Rating_TABLE_NAME3(rate, remarksMetaData.getText().toString().trim(), leavingDateTv.getText().toString().trim(), fromIntentPersonId);
+                        String leaveDate=null,returnDate=null;//taken this variable so that default value will be stored
+                        int p1Rate=0,p2Rate=0,p3Rate=0,p4Rate=0;//taken this variable so that default value will be stored
+                        if(!TextUtils.isEmpty(leavingDateTv.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            leaveDate=leavingDateTv.getText().toString().trim();
                         }
-                        if (success2)
-                            displayResult("SAVED SUCCESSFULLY", "RATING- " + rate + "\nLEAVING DATE- " + leavingDateTv.getText().toString().trim() + "\n\nREMARKS- " + remarksMetaData.getText().toString().trim());
-                        else
+                        if(!TextUtils.isEmpty(returningDate.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            returnDate=returningDate.getText().toString().trim();
+                        }
+                        //rates--------------------------------
+                        if(!TextUtils.isEmpty(inputP1Et.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            p1Rate= Integer.parseInt(inputP1Et.getText().toString().trim());
+                        }
+                        if(!TextUtils.isEmpty(inputP2Et.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            p2Rate= Integer.parseInt(inputP2Et.getText().toString().trim());
+                        }
+                        if(!TextUtils.isEmpty(inputP3Et.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            p3Rate= Integer.parseInt(inputP3Et.getText().toString().trim());
+                        }
+                        if(!TextUtils.isEmpty(inputP4Et.getText().toString().trim())){//TextUtils.isEmpty() checks for null or ""
+                            p4Rate= Integer.parseInt(inputP4Et.getText().toString().trim());
+                        }
+
+                        success2 =db.update_Rating_TABLE_NAME3(star,remarksMetaData.getText().toString().trim(),leaveDate,returnDate,p1Rate,p2Rate,p3Rate,p4Rate,fromIntentPersonId,indicator);
+
+                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
+                            Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
+                        }
+                        locationReligionSuccess=db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_18_RELIGION+"='" + religionAutoComplete.getText().toString().trim() + "', "+Database.COL_17_LOCATION+"='"+ locationAutoComplete.getText().toString().trim() +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+
+                        dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
+
+                        if(success2 || locationReligionSuccess){
+                            displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
+                                    religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
+                                    p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));
+                        }else{
                             displayResult("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
-
-                        dialog.dismiss();
+                        }
                     }
-
                 });
                 dialog.show();
             });
@@ -619,7 +692,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     initialiseIDs(myView);//ids
                     cancel.setOnClickListener(view15 -> finalDialog.dismiss());
 
-                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                     defaultSkillCursor.moveToFirst();
                     defaultSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
                     defaultSkillCursor.close();
@@ -638,10 +711,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(sumCursor.getString(5) != null) {//if there is deposit then set visibility visible or else layout visibility GONE
                          totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumCursor.getLong(5)));
                          totalDeposit=sumCursor.getInt(5);//updating totalDeposit to take during save
-                    }else
-                       totalDepositAmountLayout.setVisibility(View.GONE);
+                    }else {
+                        totalDepositAmountLayout.setVisibility(View.GONE);
+                    }
 
-                    Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+                    Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
                     if(skillNRateCursor != null) {
                         skillNRateCursor.moveToFirst();
                        //initializing this variables to take during saving
@@ -660,7 +734,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
 
-                         //indicate = get_indicator(fromIntentPersonId);
                         indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                         //R1
                         if (skillNRateCursor.getInt(3) != 0) {
@@ -932,9 +1005,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     sumCursor.close();
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
+                        longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click multiple times
+
                         //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                         if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {//Take permission
-                            if (updateRateTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
+                            if (updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
                                 if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
                                     if (savePdfToDatabase(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
                                         if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
@@ -968,7 +1043,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     return false;
                 }
                 private boolean deleteDataFromDB() {
-                    try(Database personDb=new Database(getApplicationContext())) {//so that object close automatically
+                    try(Database personDb=new Database(getApplicationContext())){//so that object close automatically
                          boolean success;
                             //this function will be written when existing from pdf viewer
 //                                boolean deleted = deletePdfFromDevice(pdfPath);
@@ -1029,7 +1104,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         }
                                             return false;
                                     }
-                    }catch (Exception ex){
+                    }catch(Exception ex){
                         Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
                         ex.printStackTrace();
                         return false;
@@ -1066,8 +1141,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                 private boolean deleteWagesAndAudiosFromDBorRecyclerView(String fromIntentPersonId) {
                     try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+Database.COL_21_ID+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + fromIntentPersonId + "'")
-                       ){//so that object close automatically
+                        Cursor cursor = personDb.getData("SELECT "+Database.COL_21_ID+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
                         cursor.moveToFirst();
                         if(cursor.getCount()==0){//if already record not present then return true
                             return true;
@@ -1081,7 +1155,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                           return false;//because audio failed to delete
                          }//else not required because below statement should be executed
 
-                        if(!personDb.deleteRows(fromIntentPersonId,Database.TABLE_NAME2)) {
+                        if(!personDb.transactionDeleteRows(fromIntentPersonId,Database.TABLE_NAME2)) {
                             return false;//if failed to deleted
                         }
                         return true;
@@ -1134,7 +1208,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(pdfAbsolutePath != null) {
                         try (Database db = new Database(getApplicationContext());
                              Cursor cursor = db.getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
-                            cursor.moveToFirst();
+                             cursor.moveToFirst();
                             byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
 
                             if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
@@ -1227,21 +1301,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     return  Float.parseFloat(stringBuilder.toString());
                 }
-                private boolean updateRateTotalAdvanceOrBalanceToDatabase( ) {
-                    //updating rate
-                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"'"+ " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+                private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(){
+                        Cursor cursor = db.getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'");
+                        cursor.moveToFirst();//means only one row is returned
+
+                    //updating rate and total worked days
+                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"' , "+Database.COL_397_TOTAL_WORKED_DAYS+" ='" +(cursor.getInt(0)+p1)+"' WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+                    cursor.close();
+
                     if(success){//if rate is updated then proceed
                        if (!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
                            if (!isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
                                //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
 
-                               if (((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
+                               if(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)){//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
                                    return false;
-                               } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
+                               }else if((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages){
                                    //updating Advance to db
                                    success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                                   if (!success) {
+                                   if(!success){
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
                                    }
@@ -1251,7 +1330,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
                                        return false;
                                       }
-                               } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
+                               }else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
 
                                    //updating balance to db if greater then 0
                                    success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
@@ -1266,16 +1345,16 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                        return false;
                                    }
                                }
-                           } else {
+                           }else{
                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
                                return false;
                            }
-                       } else {
+                       }else{
                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
                            return false;
                        }
-                   }else {
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE RATE", Toast.LENGTH_LONG).show();
+                   }else{
+                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE RATE AND TOTAL WORKED DAYS", Toast.LENGTH_LONG).show();
                         return false;
                     }
                     return true;
@@ -1309,12 +1388,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
                             advanceOrBalanceTv.setTextColor(Color.RED);
                             //                                        total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-                            advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem((totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))))));
+                            advanceOrBalanceTv.setText("= "+MyUtility.convertToIndianNumberSystem((totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))))));
                             //       totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
                         } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because of green color
                             advanceOrBalanceTv.setTextColor(getColor(R.color.green));
                             //                                           totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
-                            advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages)));
+                            advanceOrBalanceTv.setText("= "+MyUtility.convertToIndianNumberSystem(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages)));
                         }
                     }else{
                         advanceOrBalanceTv.setText("= 0");
@@ -1410,14 +1489,261 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                            super.onBackPressed();// This calls finish() on this activity and pops the back stack.
 //                        }
                         super.onBackPressed();// This calls finish() on this activity and pops the back stack.
-                    }
-            );
+                    });
         } else
             Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_SHORT).show();
         //to insert data in recyclerview
         binding.fab.setOnClickListener(view -> {
             arr=new int[7];//so that when again enter data fresh array will be created
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
+        });
+    }
+
+    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1,String skill2,int p2,String skill3,int p3,String skill4,int p4){
+        StringBuilder sb=new StringBuilder();
+        switch (indicator){
+            case 1:{
+                sb.append(skill1).append(" - "+p1);
+            }break;
+            case 2:{
+                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2);
+            }break;
+            case 3:{
+                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2).append("  "+skill3).append(" - "+p3);
+            }break;
+            case 4:{
+                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2).append("  "+skill3).append(" - "+p3).append("  "+skill4).append(" - "+p4);
+            }break;
+        }
+        sb.append("\n\nSTAR-  " + star)
+                .append("\nLEAVING -     "+leavingDate)
+                .append("\nRETURNING - "+returningDate)
+                .append("\nLOCATION-  "+locationAutoComplete)
+                .append("\nRELIGION-    "+religionAutoComplete)
+                .append( "\n\nREMARKS- "+remarksMetaData);
+        return sb.toString();
+    }
+    private void rateUpdateManually(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
+        try(Database db=new Database(getBaseContext());
+            Cursor skillCursor1=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'")) {
+           if(skillCursor1 != null) skillCursor1.moveToFirst();
+
+            Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_1_ID + "= '" + id + "'");
+            if(rateCursor1 != null) rateCursor1.moveToFirst();
+
+            Cursor skillNRateCursor=null;
+            if(indicator > 1) {//if more than 1 then get all skill and rate
+                  skillNRateCursor = db.getData("SELECT " + Database.COL_36_SKILL2 + "," + Database.COL_37_SKILL3 + "," + Database.COL_38_SKILL4 + " , "+ Database.COL_33_R2 + "," + Database.COL_34_R3 + "," + Database.COL_35_R4 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+                if (skillNRateCursor != null) skillNRateCursor.moveToFirst();
+            }
+            //initially hide
+            hardcodedP2Tv.setVisibility(View.GONE);
+            inputP2Rate.setVisibility(View.GONE);
+            hardcodedP3Tv.setVisibility(View.GONE);
+            inputP3Rate.setVisibility(View.GONE);
+            hardcodedP4Tv.setVisibility(View.GONE);
+            inputP4Rate.setVisibility(View.GONE);
+
+            switch (indicator){
+                case 1: {
+                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    inputP1Rate.setText(rateCursor1.getString(0));
+                    rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+                }
+                break;
+                case 2: {
+                    hardcodedP2Tv.setVisibility(View.VISIBLE);
+                    inputP2Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    inputP1Rate.setText(rateCursor1.getString(0));
+                    rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP2Tv.setText(skillNRateCursor.getString(0));
+                    inputP2Rate.setText(skillNRateCursor.getString(3));
+                    rate2Et(inputP2Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+                }
+                break;
+                case 3: {
+                    hardcodedP2Tv.setVisibility(View.VISIBLE);
+                    inputP2Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP3Tv.setVisibility(View.VISIBLE);
+                    inputP3Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    inputP1Rate.setText(rateCursor1.getString(0));
+                    rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP2Tv.setText(skillNRateCursor.getString(0));
+                    inputP2Rate.setText(skillNRateCursor.getString(3));
+                    rate2Et(inputP2Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP3Tv.setText(skillNRateCursor.getString(1));
+                    inputP3Rate.setText(skillNRateCursor.getString(4));
+                    rate3Et(inputP3Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+                }
+                break;
+                case 4: {
+                    hardcodedP2Tv.setVisibility(View.VISIBLE);
+                    inputP2Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP3Tv.setVisibility(View.VISIBLE);
+                    inputP3Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP4Tv.setVisibility(View.VISIBLE);
+                    inputP4Rate.setVisibility(View.VISIBLE);
+
+                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    inputP1Rate.setText(rateCursor1.getString(0));
+                    rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP2Tv.setText(skillNRateCursor.getString(0));
+                    inputP2Rate.setText(skillNRateCursor.getString(3));
+                    rate2Et(inputP2Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP3Tv.setText(skillNRateCursor.getString(1));
+                    inputP3Rate.setText(skillNRateCursor.getString(4));
+                    rate3Et(inputP3Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+
+                    hardcodedP4Tv.setText(skillNRateCursor.getString(2));
+                    inputP4Rate.setText(skillNRateCursor.getString(5));
+                    rate4Et(inputP4Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
+                }break;
+            }
+            if(skillNRateCursor != null) {
+                skillNRateCursor.close();
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            Toast.makeText(this, "error occurred", Toast.LENGTH_SHORT).show();
+        }
+    }
+    public void rate1Et(EditText inputP1Rate, Button  saveButton, int checkCorrectionArray[], int userInputRateArray[]) {
+        inputP1Rate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String p1 =inputP1Rate.getText().toString().trim();
+                inputP1Rate.setTextColor(getColor(R.color.purple_700));
+                checkCorrectionArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                     saveButton.setVisibility(View.VISIBLE);
+                }
+                if (!p1.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                    inputP1Rate.setTextColor(Color.RED);
+                     saveButton.setVisibility(View.GONE);
+                    checkCorrectionArray[0]=2;//means data is inserted wrong
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                try{
+                    userInputRateArray[0] = Integer.parseInt(inputP1Rate.getText().toString().trim());
+
+                }catch(Exception e){
+                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                }
+            }
+        });
+    }
+    public void rate2Et(EditText inputP2Rate, Button saveButton, int[] checkCorrectionArray, int[] userInputRateArray) {
+        inputP2Rate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String p11 =inputP2Rate.getText().toString().trim();
+                inputP2Rate.setTextColor(getColor(R.color.purple_700));
+                checkCorrectionArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                    saveButton.setVisibility(View.VISIBLE);
+
+                }
+                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                    inputP2Rate.setTextColor(Color.RED);
+                    saveButton.setVisibility(View.GONE);
+                    checkCorrectionArray[1]=2;//means data is inserted wrong
+                    // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                try{
+                    userInputRateArray[1]  = Integer.parseInt(inputP2Rate.getText().toString().trim());
+
+                }catch(Exception x){
+                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                }
+            }
+        });
+    }
+    private void rate3Et(EditText inputP3Rate, Button saveButton, int[] checkCorrectionArray, int[] userInputRateArray) {
+        inputP3Rate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String p11 =inputP3Rate.getText().toString().trim();
+                inputP3Rate.setTextColor(getColor(R.color.purple_700));
+                checkCorrectionArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                    saveButton.setVisibility(View.VISIBLE);
+                }
+                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                    inputP3Rate.setTextColor(Color.RED);
+                    saveButton.setVisibility(View.GONE);
+                    checkCorrectionArray[2]=2;//means data is inserted wrong
+                    //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                try {
+                    userInputRateArray[2]= Integer.parseInt(inputP3Rate.getText().toString().trim());
+                }catch (Exception e){
+                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                }
+            }
+        });
+    }
+    private void rate4Et(EditText inputP4Rate, Button saveButton, int[] checkCorrectionArray, int[] userInputRateArray) {
+        inputP4Rate.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String p11 =inputP4Rate.getText().toString().trim();
+                inputP4Rate.setTextColor(getColor(R.color.purple_700));
+                checkCorrectionArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
+                    saveButton.setVisibility(View.VISIBLE);
+                }
+                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                    inputP4Rate.setTextColor(Color.RED);
+                    saveButton.setVisibility(View.GONE);
+                    checkCorrectionArray[3]=2;//means data is inserted wrong
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                try {
+                    userInputRateArray[3] = Integer.parseInt(inputP4Rate.getText().toString().trim());
+                }catch(Exception e){
+                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                }
+            }
         });
     }
     public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
@@ -1809,12 +2135,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //**************************************Setting skills*******************************************
         //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
         //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_SKILL+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
         cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
         hardcodedP1.setText(cursorDefault.getString(0));
         cursorDefault.close();
 
-        Cursor skillsCursor=db.getData("SELECT "+Database.COL_36_SKILL1+","+Database.COL_37_SKILL2+","+Database.COL_38_SKILL3+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+        Cursor skillsCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
         if(skillsCursor != null) {
             skillsCursor.moveToFirst();
             if (indicator == 2) {//two person
@@ -1851,6 +2177,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
         //**************************************done setting skills*******************************************
         save.setOnClickListener(view -> {
+            save.setVisibility(View.GONE);//to avoid when user click multiple times
             //*********************************common to all indicator 1,2,3,4*******************
             VoiceRecorder.stopAudioPlayer();//if user playing audio and click save button then stop audio
             VoiceRecorder.stopRecording();//if user don't click tick button to save recording then while saving all data recording will also get saved automatically.so  VoiceRecorder.stopRecording()  method should be called then only file will be saved
@@ -1935,7 +2262,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
             }else if(indicator==3){
-                if(isDataPresent==true && isWrongData==false ) {
+                if(isDataPresent==true && isWrongData==false ){
                     if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
@@ -1965,7 +2292,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                      success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, p4, "0");
+                        success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
+
                     if (success) {
                         displayResult(wages+"          "+p1+"     "+p2+"     "+p3+"     "+p4,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
                         customDialog.dismiss();//dialog will be dismiss after saved automatically

@@ -160,6 +160,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             db = new Database(this);//on start only database should be create
             binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);
             binding.customSaveBtn.setOnClickListener(view -> {
+                binding.customSaveBtn.setVisibility(View.GONE);//to avoid when user click multiple times
                 VoiceRecorder.stopAudioPlayer();//if user playing audio and click save button then stop audio
                 VoiceRecorder.stopRecording();//if user don't click tick button to save recording then while saving all data recording will also get saved automatically.so  VoiceRecorder.stopRecording()  method should be called then only file will be saved
 
@@ -280,6 +281,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 }
             });
             binding.customSaveBtn.setOnLongClickListener(view -> {
+                binding.customSaveBtn.setVisibility(View.GONE);//to avoid when user click multiple times
+
                 VoiceRecorder.stopAudioPlayer();//if user playing audio and click save button then stop audio
                 VoiceRecorder.stopRecording();//if user don't click tick button to save recording then while saving all data recording will also get saved automatically.so  VoiceRecorder.stopRecording()  method should be called then only file will be saved
 

@@ -88,13 +88,13 @@
             android:layout_marginLeft="10dp"
 
             android:background="@drawable/ic_round_edit_calendar_20"/>
-        <TextView
-            android:id="@+id/custom_time_tv"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0"
-            android:textSize="0dp" />
+<!--        <TextView-->
+<!--            android:id="@+id/custJHJom_time_tv"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_gravity="center_vertical"-->
+<!--            android:layout_weight="0"-->
+<!--            android:textSize="0dp" />-->
         <TextView
             android:layout_weight="10"
             android:layout_width="0dp"

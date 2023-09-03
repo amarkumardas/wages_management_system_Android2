@@ -59,6 +59,7 @@
     <string name="you_are_updating">YOU ARE UPDATING</string>
     <string name="click_to_update_deposit">CLICK TO UPDATE DEPOSIT</string>
     <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND\nMAY BE DELETED</string>
+    <string name="failed_to_update">FAILED TO UPDATE</string>
 
     <!--IndividualPersonDetailActivity-->
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
@@ -67,6 +68,22 @@
     <string name="failed_to_play_audio">FAILED TO PLAY AUDIO</string>
     <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
     <string name="no_phone_number">NO PHONE NUMBER</string>
+    <string name="failed_to_insert">FAILED TO INSERT</string>
+    <string name="value_out_of_range_please_check_total_work_amount">VALUE OUT OF RANGE PLEASE CHECK TOTAL WORK AMOUNT</string>
+    <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
+    <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
+    <string name="status_cant_add_more">STATUS: CAN\'T ADD MORE-</string>
+    <string name="cant_remove_default_skill">CAN\'T REMOVE DEFAULT SKILL</string>
+    <string name="cant_remove">CAN\'T REMOVE</string>
+    <string name="status_colon_failed">STATUS: FAILED</string>
+    <string name="no_data_present_so_removed">NO DATA PRESENT SO REMOVED</string>
+    <string name="status_colon_success">STATUS: SUCCESS</string>
+    <string name="because_data_is_present_newline_total_sum_equal">BECAUSE DATA IS PRESENT\nTOTAL SUM= </string>
+
+    <!-- Database.java-->
+    <string name="check_last_remarks">CHECK LAST REMARKS</string>
+    <string name="failed_to_make_id_active">FAILED TO MAKE ID ACTIVE</string>
+    <string name="failed_to_make_id_inactive">FAILED TO MAKE ID INACTIVE</string>
 
     <!--InactiveFragment-->
     <string name="please_wait_loading">PLEASE WAIT LOADING</string>
@@ -165,9 +182,11 @@
     <string name="title_notifications">Notifications</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="mestre">M</string>
     <string name="laber">L</string>
     <string name="women_laber">G</string>
+
     <string name="deposit_amount">DEPOSIT AMOUNT</string>
     <string name="total_equal">TOTAL =</string>
     <string name="final_calculation">FINAL CALCULATION</string>

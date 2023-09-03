@@ -52,13 +52,13 @@ public class MyUtility {
             return "00:00:00: pm";//error
         }
     }
-    public static String getOnlyCurrentDate(){ //this will store latest date by taking current date
+    public static String getOnlyCurrentDate(){
         try{
             Calendar currentDate =Calendar.getInstance();//to get current date like 1-2-2021 or 11-22-2023 no zero
             return currentDate.get(Calendar.DAY_OF_MONTH)+"-"+(currentDate.get(Calendar.MONTH)+1)+"-"+ currentDate.get(Calendar.YEAR);
         }catch (Exception x){
             x.printStackTrace();
-            return "00-00-0000";//error
+            return "0-0-0000";//error
         }
     }
 
@@ -72,7 +72,7 @@ public class MyUtility {
                 LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
                 //between (2022-05-01,2022-05-01) like
                 if(ChronoUnit.DAYS.between(dbDate, todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
-                    db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
+                   return db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
                 }
             }
             return true;
@@ -340,7 +340,7 @@ public class MyUtility {
             return new String[][]{{"error"},{"error"},{"error"},{"error"}};
         }
     }
-    public static String getAllDepositAndWagesDetailsAsText(Context context,String id) {
+    public static String getAllDepositAndWagesDetailsAsText(Context context,String id){
         StringBuilder sb=new StringBuilder();
         try{
             byte indicator=(byte)get_indicator(context,id);
@@ -348,7 +348,7 @@ public class MyUtility {
 
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
              String[][] recyclerViewWagesData = getAllWagesDetailsFromDbBasedOnIndicator(context,id, indicator, errorDetection);//it amy return null   when no data
-            String[][] recyclerViewDepositData = getAllDepositFromDb(context,id, errorDetection);//it amy return null   when no data
+             String[][] recyclerViewDepositData = getAllDepositFromDb(context,id, errorDetection);//it amy return null   when no data
 
             if(errorDetection[0]==false){
 
@@ -402,7 +402,7 @@ public class MyUtility {
     }
     public static String[][] getAllDepositFromDb(Context context,String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
         try(Database db = new Database(context);
-            Cursor depositCursor=db.getData("SELECT "+Database.COL_22_DATE+" ,"+Database.COL_27_DEPOSIT+" ,"+Database.COL_25_DESCRIPTION+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"='" + id + "'" + " AND "+Database.COL_293_ISDEPOSITED+"='1'"))
+            Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
         {
             String[][] recyclerViewDepositData =null;
             if(depositCursor!= null&&depositCursor.getCount()!=0){
@@ -431,10 +431,10 @@ public class MyUtility {
         try(Database db = new Database(context)){
             Cursor wagesCursor = null;
             switch(indicator){
-                case 1:wagesCursor=db.getData("SELECT "+Database.COL_22_DATE+" ,"+Database.COL_26_WAGES+" ,"+Database.COL_28_P1+" ,"+Database.COL_25_DESCRIPTION+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"='" + id + "'" + " AND "+Database.COL_293_ISDEPOSITED+"='0'");break;
-                case 2:wagesCursor=db.getData("SELECT "+Database.COL_22_DATE+" ,"+Database.COL_26_WAGES+" ,"+Database.COL_28_P1+" ,"+Database.COL_29_P2+" ,"+Database.COL_25_DESCRIPTION+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"='" + id + "'" + " AND "+Database.COL_293_ISDEPOSITED+"='0'");break;
-                case 3:wagesCursor=db.getData("SELECT "+Database.COL_22_DATE+" ,"+Database.COL_26_WAGES+" ,"+Database.COL_28_P1+" ,"+Database.COL_29_P2+" ,"+Database.COL_291_P3+" ,"+Database.COL_25_DESCRIPTION+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"='" + id + "'" + " AND "+Database.COL_293_ISDEPOSITED+"='0'");break;
-                case 4:wagesCursor=db.getData("SELECT "+Database.COL_22_DATE+" ,"+Database.COL_26_WAGES+" ,"+Database.COL_28_P1+" ,"+Database.COL_29_P2+" ,"+Database.COL_291_P3+" ,"+Database.COL_292_P4+" ,"+Database.COL_25_DESCRIPTION+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"='" + id + "'" + " AND "+Database.COL_293_ISDEPOSITED+"='0'");break;
+                case 1:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+                case 2:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+                case 3:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+                case 4:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_11__P4 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
             }
             String[][] recyclerViewWagesData =null;
             if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
@@ -466,7 +466,7 @@ public class MyUtility {
 
         Cursor cursor2=null;//returnOnlySkill will return only string of array
         try(Database db = new Database(context);
-            Cursor cursor1=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'"))
+            Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'"))
         {
             cursor1.moveToFirst();
             switch (indicator) {
@@ -503,16 +503,16 @@ public class MyUtility {
         Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
         try(Database db = new Database(context)){
             switch(indicator){
-                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"), SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+id +"'");
+                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"), SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+id +"'");
+                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"), SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+id +"'");
+                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"),SUM("+Database.COL_10__P3 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"), SUM("+Database.COL_27_DEPOSIT+")  FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+id +"'");
+                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"),SUM("+Database.COL_10__P3 +"),SUM("+Database.COL_11__P4 +"), SUM("+Database.COL_7__DEPOSIT +")  FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
             }

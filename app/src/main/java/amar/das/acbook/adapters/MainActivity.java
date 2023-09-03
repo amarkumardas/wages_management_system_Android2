@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import amar.das.acbook.activity.InsertDataActivity;
+import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public boolean onMenuItemClick(MenuItem item) {
         switch(item.getItemId()){
             case R.id.insert_new:{
-                        Intent intent = new Intent(MainActivity.this, InsertDataActivity.class);
+                        Intent intent = new Intent(MainActivity.this, InsertPersonDetailsActivity.class);
                         startActivity(intent);
                         break;
                        }

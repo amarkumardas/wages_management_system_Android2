@@ -60,7 +60,7 @@ import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-    ActivityIndividualPersonDetailBinding binding;
+     ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
     String audioPath;
     boolean toggleToStartRecording=false;
@@ -68,7 +68,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     Database db;
     int []arr=new int[7];
     String active ="0";
-    int redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
+    byte redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
     ArrayList<WagesDetailsModel> dataList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,17 +82,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             fromIntentPersonId = getIntent().getStringExtra("ID");//getting data from intent
 
             //***********setting skill top of layout**********************************************
-            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                defaultSkillCursor.moveToFirst();
                binding.defaultHardcodedTv.setText(defaultSkillCursor.getString(0));
                binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) +"  =");//default calculation skill
                defaultSkillCursor.close();
 
-             Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+             //Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+             Cursor sumCursor=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
              sumCursor.moveToFirst();
 
              if(sumCursor.getInt(0) < 0)//if total wages amount cross the  range of int the this message will be shown
-                 Toast.makeText(this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
+                 Toast.makeText(this, getResources().getString(R.string.value_out_of_range_please_check_total_wages), Toast.LENGTH_LONG).show();
 
              binding.blueTotalWagesTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));
              binding.blueTotalp1Tv.setText(sumCursor.getString(1));
@@ -228,30 +229,35 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             //***********Done setting skill***********************************************
             //*******************Recycler view********************************************
-              Cursor allDataCursor=db.getData("SELECT "+Database.COL_22_DATE+","+Database.COL_24_MICPATH+","+Database.COL_25_DESCRIPTION+","+Database.COL_26_WAGES+","+Database.COL_27_DEPOSIT+","+Database.COL_28_P1+","+Database.COL_29_P2+","+Database.COL_291_P3+","+Database.COL_292_P4+","+Database.COL_21_ID+","+Database.COL_23_TIME+","+Database.COL_293_ISDEPOSITED+" FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"='"+fromIntentPersonId+"'");
+             // Cursor allDataCursor=db.getData("SELECT "+Database.COL_22_DATE+","+Database.COL_24_MICPATH+","+Database.COL_25_DESCRIPTION+","+Database.COL_26_WAGES+","+Database.COL_27_DEPOSIT+","+Database.COL_28_P1+","+Database.COL_29_P2+","+Database.COL_291_P3+","+Database.COL_292_P4+","+Database.COL_21_ID+","+Database.COL_23_TIME+","+Database.COL_293_ISDEPOSITED+" FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"='"+fromIntentPersonId+"'");
+             Cursor allDataCursor=db.getWagesDepositDataForRecyclerView(fromIntentPersonId);
               dataList=new ArrayList<>();
-            while(allDataCursor.moveToNext()){
-                WagesDetailsModel model=new WagesDetailsModel();
-                model.setDate(allDataCursor.getString(0));
-                model.setMicPath(allDataCursor.getString(1));
-                model.setDescription(allDataCursor.getString(2));
-                model.setWages(allDataCursor.getInt(3));
-                model.setDeposit(allDataCursor.getInt(4));
-                model.setP1(allDataCursor.getInt(5));
-                model.setP2(allDataCursor.getInt(6));
-                model.setP3(allDataCursor.getInt(7));
-                model.setP4(allDataCursor.getInt(8));
-                model.setId(allDataCursor.getString(9));
-                model.setTime(allDataCursor.getString(10));
-                model.setIsdeposited((allDataCursor.getString(11)));
-                dataList.add(model);
-            }
-            allDataCursor.close();
-            WagesDetailsAdapter wagesDetailsAdapter=new WagesDetailsAdapter(this,dataList);
+              if(allDataCursor!=null) {
+                  while (allDataCursor.moveToNext()) {
+                      WagesDetailsModel model = new WagesDetailsModel();
+                      model.setDate(allDataCursor.getString(0));
+                      model.setMicPath(allDataCursor.getString(1));
+                      model.setDescription(allDataCursor.getString(2));
+                      model.setWages(allDataCursor.getInt(3));
+                      model.setDeposit(allDataCursor.getInt(4));
+                      model.setP1(allDataCursor.getInt(5));
+                      model.setP2(allDataCursor.getInt(6));
+                      model.setP3(allDataCursor.getInt(7));
+                      model.setP4(allDataCursor.getInt(8));
+                      model.setId(allDataCursor.getString(9));
+                      model.setTime(allDataCursor.getString(10));
+                      model.setIsdeposited((allDataCursor.getString(11)));
+                      dataList.add(model);
+                  }
+                  allDataCursor.close();
+                  WagesDetailsAdapter wagesDetailsAdapter = new WagesDetailsAdapter(this, dataList);
 
-            binding.singleRecordRecy.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-            binding.singleRecordRecy.setAdapter(wagesDetailsAdapter);
-            binding.singleRecordRecy.scrollToPosition(dataList.size()-1);//this will scroll recycler view to last position automatically
+                  binding.singleRecordRecy.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                  binding.singleRecordRecy.setAdapter(wagesDetailsAdapter);
+                  binding.singleRecordRecy.scrollToPosition(dataList.size() - 1);//this will scroll recycler view to last position automatically
+              }else {
+                  Toast.makeText(this, "NO DATA IN allDataCursor CURSOR", Toast.LENGTH_LONG).show();
+              }
             //*******************done Recycler view********************************************
             //retrieving data from db
             Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_4_IFSCCODE+","+Database.COL_5_BANKNAME+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
@@ -277,7 +283,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.acHolderTv.setText("PHONE2- " + cursor.getString(8));
                 binding.idTv.setText("ID- " + cursor.getString(9));
             } else {
-                Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
             }
           //setting star rating
             Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
@@ -490,7 +496,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO  ADD L", "STATUS: FAILED");
 
                                     } else
-                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.laber));
+                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
                                 }
                                 break;
                                 case "ADD M": //adding M p3
@@ -506,7 +512,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "SUCCESSFULLY  ADD M", "STATUS: SUCCESS");
 
                                     } else
-                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.mestre));
+                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
                                 }
                                 break;
                                 case "ADD G": //adding G p4
@@ -523,7 +529,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO  ADD G", "STATUS: FAILED");
 
                                     } else
-                                        displayResult("ONLY 4 PERSON ALLOWED TO ADD", "STATUS: CAN'T ADD MORE " + getResources().getString(R.string.women_laber));
+                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
                                 }
                                 break;
                                 case "REMOVE M/L/G": //removing
@@ -534,38 +540,41 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     if (cursorIndicator != null) {
                                         cursorIndicator.moveToFirst();
                                         if (cursorIndicator.getString(0) == null) {//person1
-                                            displayResult("CAN'T REMOVE DEFAULT SKILL", "STATUS: FAILED");//default M or L or G
+                                            displayResult(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
 
                                         } else if (cursorIndicator.getString(0).equals("2")) {//person2
-                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_29_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
-                                            if (result.getInt(0) == 0) {//Means no data IN P2
+                                            if (result.getInt(0) == 0) {//Means no data IN P2 so set null
                                                 db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
 
                                         } else if (cursorIndicator.getString(0).equals("3")) {//person3
-                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_291_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
                                                 db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
                                         } else if (cursorIndicator.getString(0).equals("4")) {//person4
-                                            Cursor result = db.getData("SELECT SUM(" + Database.COL_292_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_21_ID + "= '" + fromIntentPersonId + "'");
+                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 11) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
                                                 db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult("NO DATA PRESENT SO REMOVED ", "STATUS: SUCCESS");
+                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult("CAN'T REMOVE", "BECAUSE DATA IS PRESENT\nTOTAL SUM= " + result.getInt(0));
+                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
                                         } else
-                                            displayResult("CAN'T REMOVE DEFAULT SKILL", "STATUS: FAILED");
+                                            displayResult(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
                                     } else
                                         Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
                                 }
@@ -601,20 +610,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         infoSave.setText(getResources().getString(R.string.save));
                         editOrNot[0] =true;
                     }else{//while saving this will execute
-                        boolean success2,locationReligionSuccess;
+                        boolean updateRaingsuccess,locationReligionSuccess;
                         String star;
                         if (active.equals("1")) {//if user has pressed radio button then only it will execute
-                            //to automatically set today date so that it become active
-//                            final Calendar current1 = Calendar.getInstance();//to get current date and time
-//                            int cYear1 = current1.get(Calendar.YEAR);
-//                            int cMonth1 = current1.get(Calendar.MONTH);
-//                            int cDayOfMonth1 = current1.get(Calendar.DAY_OF_MONTH);
-//                            String date = cDayOfMonth1 + "-" + (cMonth1 + 1) + "-" + cYear1;
-                           // success2 = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + active + "', "+Database.COL_15_LATESTDATE+"='" + date + "' , "+Database.COL_16_TIME+"='"+new SimpleDateFormat("hh:mm:ss a").format(Calendar.getInstance().getTime())+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//setting today date to latest date TO AVOID PREVIOUS LATEST DATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latestdate.due to todaydate in  variable latestdate logic in MestreLabeGAdapter will not execute and account will not become inactive it will remain active
-                            success2 = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + active + "', "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+MyUtility.getOnlyTime()+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//setting today date to latest date TO AVOID PREVIOUS LATEST DATE which is present in db for 1 month. so that when account is inactive then that account will become active due to new latest date.due to today date in  variable latest date logic in MestreLaberGAdapter will not execute and account will not become inactive it will remain active
-                            if (!success2)
-                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE LATEST DATE AND ACTIVE=1", Toast.LENGTH_LONG).show();
+
+                            if(!db.makeIdActive(fromIntentPersonId)){
+                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
                             }
+                        }
                         if (starSpinner.getSelectedItem().toString().equals("SELECT"))//if user BY mistake click on SELECT then by default start set to 1
                             star = "1";//default value
                         else
@@ -642,7 +645,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p4Rate= Integer.parseInt(inputP4Et.getText().toString().trim());
                         }
 
-                        success2 =db.update_Rating_TABLE_NAME3(star,remarksMetaData.getText().toString().trim(),leaveDate,returnDate,p1Rate,p2Rate,p3Rate,p4Rate,fromIntentPersonId,indicator);
+                        updateRaingsuccess =db.update_Rating_TABLE_NAME3(star,remarksMetaData.getText().toString().trim(),leaveDate,returnDate,p1Rate,p2Rate,p3Rate,p4Rate,fromIntentPersonId,indicator);
 
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
@@ -651,7 +654,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
-                        if(success2 || locationReligionSuccess){
+                        if(updateRaingsuccess || locationReligionSuccess){
                             displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
                                     religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
                                     p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));
@@ -692,12 +695,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     initialiseIDs(myView);//ids
                     cancel.setOnClickListener(view15 -> finalDialog.dismiss());
 
-                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                     defaultSkillCursor.moveToFirst();
                     defaultSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
                     defaultSkillCursor.close();
 
-                    Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+                   // Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+                    Cursor sumCursor=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
                     sumCursor.moveToFirst();
                     //initializing this variable to take during saving
                     p1=sumCursor.getInt(1);
@@ -726,11 +730,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         //if both wages and total work amount is less then 0 then both message have to show so if statement two times
                         if(sumCursor.getInt(0) < 0 ) {//if total wages amount cross the  range of int the this message will be shown.its important
-                            Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualPersonDetailActivity.this,getResources().getString(R.string.value_out_of_range_please_check_total_wages), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-                            Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
 
@@ -1056,14 +1060,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                     if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db.this code is not in else block because if data is not deleted from db then this code should not be executed
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE IN RECYCLER VIEW AFTER FINAL CALCULATION .\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
+                                       // success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
+                                       /**change this insertWagesOrDepositOnlyToActiveTableTransaction method*/
+                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]",0,0,0,0,0,0,"0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "UPDATE RECYCLERVIEW \nCHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION", Toast.LENGTH_LONG).show();
                                     }
 
                                     if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        //success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]",0,0,0,0,0,0,"0");
+
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
@@ -1078,7 +1086,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                     if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1 CANT REVERSE
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                       // success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
+                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]",0,0,0,0,0,0,"0");
+
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                                     }
@@ -1096,8 +1106,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                                 //"*JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID:"+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE";
 
                                         Toast.makeText(IndividualPersonDetailActivity.this, message, Toast.LENGTH_LONG).show();
-                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, message, 0, 0, "0");
-                                        if (success) {
+                                    //success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, message, 0, 0, "0");
+                                    success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null, message,0,0,0,0,0,0,"0");
+
+                                    if (success) {
                                             Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLER VIEW REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
                                         }else{//it will execute when message is not set//data is save to pdf ie.invoice2
                                             Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nWRITE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
@@ -1128,7 +1140,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                 private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {
                     try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + id + "'")){//so that object close automatically
+                        Cursor cursor = personDb.getData("SELECT "+Database.COL_4__MICPATH +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"= '" + id + "'")){//so that object close automatically
                          while(cursor.moveToNext()){
                              if(cursor.getString(0) != null) {//checking path may be null
                                  if (!MyUtility.deletePdfOrRecordingFromDevice(cursor.getString(0))) {
@@ -1141,21 +1153,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                 private boolean deleteWagesAndAudiosFromDBorRecyclerView(String fromIntentPersonId) {
                     try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+Database.COL_21_ID+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
+                        Cursor cursor = personDb.getData("SELECT "+Database.COL_1__ID +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"= '" + fromIntentPersonId + "'")){//so that object close automatically
                         cursor.moveToFirst();
                         if(cursor.getCount()==0){//if already record not present then return true
                             return true;
                         }
-
                         if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
                                         Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        boolean success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        //boolean success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
+                                        boolean success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)",0,0,0,0,0,0,"0");
                                         if (!success)
                                             Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
                           return false;//because audio failed to delete
                          }//else not required because below statement should be executed
 
-                        if(!personDb.transactionDeleteRows(fromIntentPersonId,Database.TABLE_NAME2)) {
+                        if(!personDb.deleteAllRowsTransaction(fromIntentPersonId,Database.TABLE_NAME2)) {
                             return false;//if failed to deleted
                         }
                         return true;
@@ -1182,18 +1194,22 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
                             amount = cursor.getInt(0);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]", amount, 0, "0");
+                           // success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]",amount,0,0,0,0,0,"0");
                             if (!success)
                                 return false;
                         }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
                             amount = cursor.getInt(1);
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_Deposit_Table2(fromIntentPersonId, date, onlyTime, null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]", amount, "1");
+                            //success = db.insert_Deposit_Table2(fromIntentPersonId, date, onlyTime, null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]", amount, "1");
+                            success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,onlyTime,null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]",0,0,0,0,0,amount,"1");
+
                             if (!success)
                                 return false;
                         }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
                             //insert to database taking just first person                                                      //remarks
-                            success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]", amount, 0, "0");
+                            //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]", amount, 0, "0");
+                            success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]",amount,0,0,0,0,0,"0");
                             if (!success)
                                 return false;
                         }
@@ -1377,11 +1393,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         //if both wages and total work amount is less then 0 then both message have to show so if statement two times
                         if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-                            Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
                         if(totalWages < 0){//its important otherwise save option will be unable when user enter rate
-                            Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WAGES", Toast.LENGTH_LONG).show();
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_wages), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
 
@@ -1409,7 +1425,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     totalDeposit=sumCursor.getInt(5);
 
                     if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-                        Toast.makeText(IndividualPersonDetailActivity.this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
 
                     workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
                     //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
@@ -1469,7 +1485,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_SHORT).show();
             });
             binding.editTv.setOnClickListener(view -> {
-                Intent intent = new Intent(getBaseContext(), InsertDataActivity.class);
+                Intent intent = new Intent(getBaseContext(), InsertPersonDetailsActivity.class);
                 intent.putExtra("ID", fromIntentPersonId);
                 startActivity(intent);
                 finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
@@ -1525,7 +1541,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     }
     private void rateUpdateManually(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
         try(Database db=new Database(getBaseContext());
-            Cursor skillCursor1=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'")) {
+            Cursor skillCursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'")) {
            if(skillCursor1 != null) skillCursor1.moveToFirst();
 
             Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_1_ID + "= '" + id + "'");
@@ -1976,7 +1992,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         totalDeposit=sumCursor.getInt(5);
 
         if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-            Toast.makeText(this, "INCORRECT CALCULATION PLEASE CHECK TOTAL WORK AMOUNT", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
 
         binding.workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
         //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
@@ -2040,7 +2056,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         TextView advanceOrBalanceWarring=myView.findViewById(R.id.advance_or_balance_amount_warring_tv);
         TextView noOfDaysToWork=myView.findViewById(R.id.no_of_days);
         TextView inputDate=myView.findViewById(R.id.input_date_tv);
-        TextView inputTime=myView.findViewById(R.id.input_time_tv);
+       // TextView inputTime=myView.findViewById(R.id.input_time_tv);
         TextView saveAudio=myView.findViewById(R.id.save_audio_tv);
 
         Chronometer playAudioChronometer =myView.findViewById(R.id.chronometer);
@@ -2135,7 +2151,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //**************************************Setting skills*******************************************
         //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
         //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
         cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
         hardcodedP1.setText(cursorDefault.getString(0));
         cursorDefault.close();
@@ -2185,7 +2201,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             int p1,p2,p3,p4;//this default value is taken when user do enter date to filed
             p1=p2=p3=p4=0;
             int wages=0;
-            String remarks;
+            String remarks=null;
             String micPath=null;
             String date=inputDate.getText().toString();//date will be inserted automatically
 
@@ -2193,16 +2209,24 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //            Date d=Calendar.getInstance().getTime();
 //            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
 //            String onlyTime = sdf.format(d);
-            String onlyTime = MyUtility.getOnlyTime();
-            inputTime.setText(onlyTime);//setting time to take time and store in db
-            String time=inputTime.getText().toString();//time will be inserted automatically
+
+//            String onlyTime = MyUtility.getOnlyTime();
+//            inputTime.setText(onlyTime);//setting time to take time and store in db
+//            String time=inputTime.getText().toString();//time will be inserted automatically
+
+            String time = MyUtility.getOnlyTime();
 
            // final Calendar current=Calendar.getInstance();//to get current date
            // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
             //db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" +" WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date not user entered date
            // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
 
-            db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
+           // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+time+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
+
+
+//            if(!db.activateIdWithLatestDate(fromIntentPersonId,time)){
+//                Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
+//            }
 
             if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
@@ -2219,7 +2243,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 remarks="["+time+getResources().getString(R.string.hyphen_automatic_entered);
                 arr[6] = 0;
             }
-            boolean success, isWrongData, isDataPresent;
+            boolean isWrongData, isDataPresent;
               isWrongData= MyUtility.isEnterDataIsWrong(arr);
               isDataPresent= MyUtility.isDataPresent(arr);
             if(isDataPresent==true && isWrongData==false ) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
@@ -2233,31 +2257,44 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
             //*********************************  all the upper code are common to all indicator 1,2,3,4*******************
            //  db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'" +" WHERE ID='" + fromIntentPersonId + "'");//when ever user insert data then that person will become active.It will work for all
-            if(indicator==1) {
+            if(indicator==1){
                 if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                     //insert to database
-                      success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
-                    if (success) {
-                        displayResult(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks + "\n\nMICPATH- " + micPath);
-                        customDialog.dismiss();//dialog will be dismiss after saved automatically
-                    } else
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                      //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
+                    //success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0");
+                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0")){
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    }
+                    refreshCurrentActivity(fromIntentPersonId);
+                    customDialog.dismiss();
+
+//                    if (success) {
+//                        displayResult(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks + "\n\nMICPATH- " + micPath);
+//                        customDialog.dismiss();//dialog will be dismiss after saved automatically
+//                    }else
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 } else//once user enter wrong data and left blank then user wound be able to save because array value would not be change it will be 2 so  user have to "Cancel and enter again" if use don't leave blank then it will save successfully
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
-            } else if(indicator==2){
+            }else if(indicator==2){
                 //p1 is automatically added
                 if(isDataPresent==true && isWrongData==false ) {
                     if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                      success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
-                     if (success) {
-                        displayResult(wages+"          "+p1+"     "+p2,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        customDialog.dismiss();//dialog will be dismiss after saved automatically
-                    } else
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                     // success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
+                   // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0");
+                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0")){
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    }
+                    refreshCurrentActivity(fromIntentPersonId);
+                    customDialog.dismiss();
+//                    if (success) {
+//                        displayResult(wages+"          "+p1+"     "+p2,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+//                        customDialog.dismiss();//dialog will be dismiss after saved automatically
+//                    } else
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 }else
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
@@ -2270,15 +2307,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                      success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
-                     if (success) {
-                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        customDialog.dismiss();//dialog will be dismiss after saved automatically
-                    } else
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                      //success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
+                   // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0");
+                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0")){
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    }
+                    refreshCurrentActivity(fromIntentPersonId);
+                    customDialog.dismiss();
+//                    if (success) {
+//                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+//                        customDialog.dismiss();//dialog will be dismiss after saved automatically
+//                    } else
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
                 }else
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
-
 
             }else if(indicator==4) {
                 if (isDataPresent == true && isWrongData == false) {
@@ -2292,13 +2334,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                        success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
+                        //success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
 
-                    if (success) {
-                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3+"     "+p4,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                        customDialog.dismiss();//dialog will be dismiss after saved automatically
-                    } else
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                   // success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0");
+
+                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")){
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    }
+                    refreshCurrentActivity(fromIntentPersonId);
+                    customDialog.dismiss();
+//                    if (success) {
+//                        displayResult(wages+"          "+p1+"     "+p2+"     "+p3+"     "+p4,"\nDATE- "+date+"\n\n"+"REMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+//                        customDialog.dismiss();//dialog will be dismiss after saved automatically
+//                    }else {
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+//                    }
                 }else
                     Toast.makeText(IndividualPersonDetailActivity.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
             }
@@ -2507,6 +2557,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void refreshCurrentActivity(String id) {
+        Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
+        intent.putExtra("ID",id);
+        finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
+        startActivity(intent);
+    }
+
     private void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1,p2,p3,p4;
         p1 = inputP1.getText().toString().trim();

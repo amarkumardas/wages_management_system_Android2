@@ -1,8 +1,6 @@
 package amar.das.acbook.ui.search;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -10,24 +8,17 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.Locale;
-
-import amar.das.acbook.activity.CustomizeLayoutOrDepositAmount;
 import amar.das.acbook.activity.FindActivity;
-import amar.das.acbook.activity.InsertDataActivity;
+import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.databinding.FragmentSearchTabBinding;
@@ -100,7 +91,7 @@ public class SearchFragment extends Fragment  {
                 public boolean onMenuItemClick(MenuItem item) {
                     switch(item.getItemId()){
                         case R.id.insert_new:{
-                            Intent intent = new Intent(getContext(),InsertDataActivity.class);
+                            Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
                             startActivity(intent);
                             break;
                         }

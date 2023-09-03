@@ -196,7 +196,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
            // TextView dateIcon = myView.findViewById(R.id.date_icon_tv);
             TextView inputDate = myView.findViewById(R.id.input_date_tv);
-            TextView inputTime = myView.findViewById(R.id.input_time_tv);
+           // TextView inputTime = myView.findViewById(R.id.input_time_tv);
             TextView saveAudio = myView.findViewById(R.id.save_audio_tv);
 
             Chronometer playAudioChronometer = myView.findViewById(R.id.chronometer);
@@ -222,8 +222,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             save.setText(view.getContext().getResources().getString(R.string.long_press_to_update));
 
             db = new Database(holder.wages.getContext());//we can take any field context
-            Cursor cursorData = db.getData("SELECT "+Database.COL_21_ID+" , "+Database.COL_22_DATE+" , "+Database.COL_23_TIME+" , "+Database.COL_25_DESCRIPTION+" , "+Database.COL_26_WAGES+" , "+Database.COL_28_P1+" , "+Database.COL_29_P2+" , "+Database.COL_291_P3+" , "+Database.COL_292_P4+" , "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + data.getId() + "'" + " AND "+Database.COL_22_DATE+"= '" + data.getDate() + "'" + " AND "+Database.COL_23_TIME+"='" + data.getTime() + "'");
-            cursorData.moveToFirst();//this cursor is not closed
+           // Cursor cursorData = db.getData("SELECT "+Database.COL_21_ID+" , "+Database.COL_22_DATE+" , "+Database.COL_23_TIME+" , "+Database.COL_25_DESCRIPTION+" , "+Database.COL_26_WAGES+" , "+Database.COL_28_P1+" , "+Database.COL_29_P2+" , "+Database.COL_291_P3+" , "+Database.COL_292_P4+" , "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + data.getId() + "'" + " AND "+Database.COL_22_DATE+"= '" + data.getDate() + "'" + " AND "+Database.COL_23_TIME+"='" + data.getTime() + "'");
+                Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getDate(),data.getTime());
+                cursorData.moveToFirst();//this cursor is not closed
 
 //********************************CUSTOMIZATION*******************************************************************************************
             //initially every field will be invisible based on indicator others fields will be visible
@@ -236,7 +237,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
             //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
             //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_SKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
+            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
             previousDataHold[0] = cursorDefault.getString(0) + "- " + cursorData.getString(5);//to write previous record in description
@@ -328,15 +329,17 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 String micPath=data.getMicPath();//default value if we don't fetch previous data then null will be inserted and previous voice will be deleted when we try to update only wages so it is important
 
-                 //To get exact time so write code in save button
+                 //To get exact onlyTime so write code in save button
 //                Date d = Calendar.getInstance().getTime();
 //                SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-                String onlyTime = MyUtility.getOnlyTime();
-                inputTime.setText(onlyTime);//setting time to take time and store in db
-                String time = inputTime.getText().toString();//time will be inserted automatically
+//                String onlyTime = MyUtility.getOnlyTime();
+//                inputTime.setText(onlyTime);//setting onlyTime to take onlyTime and store in db
+//                String onlyTime = inputTime.getText().toString();//onlyTime will be inserted automatically
+
+                String onlyTime =MyUtility.getOnlyTime();
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                String remarks = "[" + time +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+ description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//time is set automatically to remarks if user enter any remarks;
+                String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+ description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[5] = 1;//this is important because when user do not enter any data while updating then at least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 String date = inputDate.getText().toString();//date will be inserted automatically
@@ -371,27 +374,35 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
                 //*********************************all the upper code are common to all indicator 1,2,3,4*******************
-                success=db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + currentDate +"' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date.when ever user update then that person will become active.This will work for all indicators
-
-                if(!success)
-                    Toast.makeText(context, "UPDATE TO SET ACTIVE AND LATEST DATE FAILED", Toast.LENGTH_LONG).show();
+//                if(!db.activateIdWithLatestDate(data.getId(),onlyTime)){
+//                    Toast.makeText(context, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
+//                }
 
                 if (indicator == 1) {
                     if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                         //UPDATE to database
                          if(micPath != null){//if it is not null then update micPath
-                             // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                             success=db.update_1_TABLE_NAME2(date,time,remarks,micPath,wages,p1,data.getId(),data.getDate(),data.getTime());
+                             // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                             //success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,data.getId(),data.getDate(),data.getTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,0,0,0,data.getId(),data.getDate(),data.getTime());
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
-                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                             success=db.update_1_TABLE_NAME2(date,time,remarks,null,wages,p1,data.getId(),data.getDate(),data.getTime());
+                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                            // success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,data.getId(),data.getDate(),data.getTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,0,0,0,data.getId(),data.getDate(),data.getTime());
+
                          }
-                        if (success) {
-                            displayResultAndRefresh(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
-                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
-                            dialog.dismiss();//dialog will be dismiss after saved automatically
-                        } else
-                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
+                         if(!success){
+                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                         }
+                         refreshCurrentActivity(data.getId());
+                         dialog.dismiss();//dialog will be dismiss after saved automatically
+
+//                         if (success) {
+//                            displayResultAndRefresh(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
+//                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
+//                            dialog.dismiss();//dialog will be dismiss after saved automatically
+//                        } else
+//                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else//once user enter wrong data and left blank then user wound be able to save because array value would not be change it will be 2 so  user have to "Cancel and enter again" if use don't leave blank then it will save successfully
                         Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
@@ -403,18 +414,26 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         }
                         //UPDATE to database
                         if(micPath != null){//if it is not null then update micPath
-                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',MICPATH='"+micPath+"',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_2_TABLE_NAME2(date,time,remarks,micPath,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
+                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='"+micPath+"',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                            //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,0,0,data.getId(),data.getDate(),data.getTime());
+
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
-                            //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_2_TABLE_NAME2(date,time,remarks,null,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
+                            //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                            //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,0,0,data.getId(),data.getDate(),data.getTime());
                         }
-                        if (success) {
-                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
-                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
-                            dialog.dismiss();//dialog will be dismiss after saved automatically
-                        } else
-                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
+                        if(!success){
+                            Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                        }
+                        refreshCurrentActivity(data.getId());
+                        dialog.dismiss();//dialog will be dismiss after saved automatically
+//                        if (success) {
+//                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
+//                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
+//                            dialog.dismiss();//dialog will be dismiss after saved automatically
+//                        } else
+//                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     }else
                         Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
@@ -428,25 +447,33 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         }
                         //UPDATE to database
                         if(micPath != null){//if it is not null then update micPath
-                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_3_TABLE_NAME2(date,time,remarks,micPath,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
+                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                           // success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,p3,0,data.getId(),data.getDate(),data.getTime());
+
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
-                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_3_TABLE_NAME2(date,time,remarks,null,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
+                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                            //success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,p3,0,data.getId(),data.getDate(),data.getTime());
                         }
 
-                        if (success) {
-                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
-                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
-                            dialog.dismiss();//dialog will be dismiss after saved automatically
-                        } else
-                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
+                        if(!success){
+                            Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                        }
+                        refreshCurrentActivity(data.getId());
+                        dialog.dismiss();//dialog will be dismiss after saved automatically
+//                        if (success) {
+//                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
+//                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
+//                            dialog.dismiss();//dialog will be dismiss after saved automatically
+//                        } else
+//                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else
                         Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
 
                 } else if (indicator == 4) {
                     if (isDataPresent == true && isWrongData == false) {
-                        if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that time it will save from crashing app.So due to this condition if field is empty then default value will be taken
+                        if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that onlyTime it will save from crashing app.So due to this condition if field is empty then default value will be taken
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to INT and stored
                         }
                         if (inputP3.getText().toString().length() >= 1) {//to prevent null pointer exception
@@ -457,19 +484,28 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         }
                         //UPDATE to database
                         if(micPath != null){//if it is not null then update micPath
-                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_4_TABLE_NAME2(date,time,remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                           // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                           // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
-                            //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
-                            success=db.update_4_TABLE_NAME2(date,time,remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                            //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
+                           // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                            System.out.println("---------------------------------------------------------------------");
                         }
-                            if (success) {
-                                displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3 + "     " + p4, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
-                                fromIntentPersonId = data.getId();//update to send to other intent for refresh
-                                dialog.dismiss();//dialog will be dismiss after saved automatically
-                            } else
-                                Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
+
+                        if(!success){
+                            Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                        }
+                        refreshCurrentActivity(data.getId());
+                        dialog.dismiss();//dialog will be dismiss after saved automatically
+//                            if (success) {
+//                                displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3 + "     " + p4, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
+//                                fromIntentPersonId = data.getId();//update to send to other intent for refresh
+//                                dialog.dismiss();//dialog will be dismiss after saved automatically
+//                            } else
+//                                Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else
                         Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
                 }
@@ -737,6 +773,14 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             return false;
         });
     }
+
+    public void refreshCurrentActivity(String id) {
+        Intent intent1=new Intent(context,IndividualPersonDetailActivity.class);
+        intent1.putExtra("ID",id);
+        ((Activity)context).finish();//destroying this current activity typecast to activity
+        context.startActivity(intent1);
+    }
+
     public void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1,p2,p3,p4;
         p1 = inputP1.getText().toString().trim();
@@ -883,5 +927,4 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         SimpleDateFormat dateFormat = new SimpleDateFormat("d-M-yyyy");//d-M-yyyy to get date as 19-3-2022 or 9-3-2022 by lifting 0. ie.19-03-2022 or 09-3-2022
          return dateFormat.format(calendar.getTimeInMillis());
     }
-
 }

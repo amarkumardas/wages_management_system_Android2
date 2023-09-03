@@ -33,6 +33,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     //final Calendar current=Calendar.getInstance();//to get current date
     // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
     String []dateArray;
+    byte monthsInactive=1;//if 1 months inactive then make id inactive
     //int d,m,y;
     LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
     String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
@@ -78,12 +79,24 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             dateArray = data.getLatestDate().split("-");
             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
             // making it active or inactive using latest date (2022-05-01,2022-05-01)
-            if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= 1){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
-                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 0 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//user has no permission to make it inactive it is automatically
-
+            if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= monthsInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+                if(!db.makeIdInActive(data.getId())){
+                    Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_inactive), Toast.LENGTH_LONG).show();
+                }
             }else{
-                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
-            }
+                if(db.isActiveOrInactive(data.getId())){
+                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
+                 }else{
+                    //for testing make if condition false
+//                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
+//                    if(!db.makeIdInActive(data.getId())){
+//                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
+//                    }
+                    if(!db.makeIdActive(data.getId())){
+                        Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
+                    }
+                }
+             }
         }else{
             holder.yellowBg.setBackgroundColor(Color.WHITE);
         }
@@ -109,7 +122,6 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 //        }
 //        cursor2.close();
         //**************************************************************************************************************
-
         holder.profileImg.setOnClickListener(view -> {
             Intent intent = new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID", data.getId());
@@ -138,6 +150,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             yellowBg =itemView.findViewById(R.id.yellow_layout);
         }
     }
+
 }
 
 

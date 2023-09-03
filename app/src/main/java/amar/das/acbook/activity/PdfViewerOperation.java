@@ -598,7 +598,6 @@ public class PdfViewerOperation extends AppCompatActivity {
             return "error";
         }
     }
-    @NonNull
     private String getTotalWagesDepositAndWorkingAccordingToIndicator(byte indicator, String[] headerBasedOnIndicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, boolean isDepositPresent) {
     try{
         /*
@@ -861,7 +860,6 @@ public class PdfViewerOperation extends AppCompatActivity {
             return false;
         }
     }
-
     public boolean isApplicationInstalled(String packageName){
         try {
         PackageManager packageManager = getApplicationContext().getPackageManager();//in manifest <query>.. </query> permission added

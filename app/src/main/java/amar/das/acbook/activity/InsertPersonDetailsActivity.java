@@ -42,11 +42,11 @@ import amar.das.acbook.ui.search.SearchFragment;
 import amar.das.acbook.utility.MyUtility;
 
 
-public class InsertDataActivity extends AppCompatActivity {
+public class InsertPersonDetailsActivity extends AppCompatActivity {
     Button add;
   EditText name,account, acHolderName, ifscCode, aadhaarCard,phone, fatherName;
   AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
-  Database personDb;
+  Database db;
   RadioGroup radioGroup;
   RadioButton  laberRadio,womenRadio,mestreRadio;
   String skill,fromIntentPersonId;
@@ -71,7 +71,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
 
         //database created
-        personDb=new Database(this);
+        db =new Database(this);
         //set ids
         add=findViewById(R.id.add_button);
         name=findViewById(R.id.name_et);
@@ -110,15 +110,15 @@ public class InsertDataActivity extends AppCompatActivity {
         });
 
         indianBank =getResources().getStringArray(R.array.indian_bank_names); //get bank names
-        ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, indianBank);
+        ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, indianBank);
         bankName_autoComplete.setAdapter(bankAdapter);
 
         religionHashSet=new HashSet<>(Arrays.asList(MyUtility.getReligionFromDb(getBaseContext()))); //hashset is taken to insert only unique data in table
-        ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
+        ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
         religion_autoComplete.setAdapter(religionAdapter);
 
         locationHashSet=new HashSet<>(Arrays.asList(MyUtility.getLocationFromDb(getBaseContext())));//hashset is taken to insert only unique data in table
-        ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(InsertDataActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
+        ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
         location_autoComplete.setAdapter(locationAdapter);
 
         //For camera and galary*********************************************************************************
@@ -137,7 +137,7 @@ public class InsertDataActivity extends AppCompatActivity {
         if(getIntent().hasExtra("ID")){//after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
             //retrieving data from db
-            Cursor cursor1=personDb.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_SKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
+            Cursor cursor1= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
 
             if(cursor1 != null) {
                 cursor1.moveToFirst();
@@ -259,7 +259,7 @@ public class InsertDataActivity extends AppCompatActivity {
     }
     // Here we will pick image from gallery or camera
     private void pickFromGallery() {
-        CropImage.activity().start(InsertDataActivity.this);
+        CropImage.activity().start(InsertPersonDetailsActivity.this);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -277,7 +277,7 @@ public class InsertDataActivity extends AppCompatActivity {
     }
     //action while clicking insert button
     public void insert_click(View view) {
-        add.setVisibility(View.GONE);//so that user do not enter again add buttion while data is  inserting in database beacuse if user do again then it will overload
+        add.setVisibility(View.GONE);//so that user do not enter again add button while data is  inserting in database because if user do again then it will overload
 
         String personName=name.getText().toString().toUpperCase().trim();//taking all value in uppercase
         String personAccount=account.getText().toString().trim();
@@ -321,16 +321,20 @@ public class InsertDataActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
 
-                    boolean  success;
+                    boolean  success=false;
                     //update
                     if(getIntent().hasExtra("ID")){//will execute only when updating
 
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
-                            Toast.makeText(InsertDataActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(InsertPersonDetailsActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
-                        success=personDb.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,fromIntentPersonId,location,religion);
+
+                        if(db.updatePersonSkillAndShiftData(personSkill,fromIntentPersonId)){//if skill get updated then only all data will be updated its important
+                            success= db.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,fromIntentPersonId,location,religion);
+                        }
+
                         if(success){//if it is updated then show successfully message
-                            Toast.makeText(InsertDataActivity.this, "ID- "+fromIntentPersonId+" "+getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(InsertPersonDetailsActivity.this, "ID- "+fromIntentPersonId+" "+getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
 //                            final Calendar current=Calendar.getInstance();//to get current date
@@ -345,20 +349,20 @@ public class InsertDataActivity extends AppCompatActivity {
                             finish();//destroy current activity
 
                         }else
-                            Toast.makeText(InsertDataActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(InsertPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
 
                     }else {//this will execute only when adding new person
 
                         //for (int k = 1; k <= 10; k++) {
                             //inserting data to sqlite database
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
-                            Toast.makeText(InsertDataActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(InsertPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                         }
-                        success = personDb.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,location,religion);
+                        success = db.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,location,religion);
                         //}
 
                         if (success) {//checking for duplicate
-                            Cursor result = personDb.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2,location,religion);
+                            Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2,location,religion);
                             StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
                             String holdLastId="";
 
@@ -399,7 +403,7 @@ public class InsertDataActivity extends AppCompatActivity {
                     }
                 }
                 private void displayResult(String title, String message) {
-                    AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertDataActivity.this);
+                    AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertPersonDetailsActivity.this);
                     showDataFromDataBase.setCancelable(false);
                     showDataFromDataBase.setTitle(title);
                     showDataFromDataBase.setMessage(message);
@@ -421,7 +425,7 @@ public class InsertDataActivity extends AppCompatActivity {
        detailsReview.create().show();
     }
     private void insertDataToTable3(String id) {
-        boolean bool=personDb.insertDataTable3( id,0,0,0,0,null,null,null,null);
+        boolean bool= db.insertDataTable3( id,0,0,0,0,null,null,null,null);
         if(!bool)
             Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
     }

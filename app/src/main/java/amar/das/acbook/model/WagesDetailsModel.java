@@ -122,6 +122,4 @@ public class WagesDetailsModel implements Serializable {
     public void setDeposit(int deposit) {
         this.deposit = deposit;
     }
-
-
 }

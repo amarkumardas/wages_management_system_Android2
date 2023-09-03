@@ -64,7 +64,7 @@ public class ActiveMFragment extends Fragment {
          advance=root.findViewById(R.id.active_m_advance);
          balance=root.findViewById(R.id.active_m_balance);
 
-         Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1'");
+         Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1'");
          advanceBalanceCursor.moveToFirst();
          advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+advanceBalanceCursor.getLong(0)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
          balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+advanceBalanceCursor.getLong(1)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -78,7 +78,7 @@ public class ActiveMFragment extends Fragment {
         Cursor cursorMestre;
         mestreActiveArrayList =new ArrayList<>(80);//insuring initial capacity to (10+initialDataToLoad)  10 is extra for  if new person present
         //**if latest date is null then first it will be top of arraylist that's why two WHILE LOOP is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
@@ -91,7 +91,7 @@ public class ActiveMFragment extends Fragment {
             mestreActiveArrayList.add(data);
         }
        // cursorMestre=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE TYPE='M' AND ACTIVE='1' AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC LIMIT "+ initialLoadDataFotActiveMAndL);
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
         while(cursorMestre.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
@@ -159,10 +159,10 @@ public class ActiveMFragment extends Fragment {
         int count;
         Database db=new Database(getContext());
         Cursor cursor;
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         cursor.moveToFirst();
         count=cursor.getInt(0);
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
         cursor.moveToFirst();
         count=count+cursor.getInt(0);
         db.close();
@@ -183,7 +183,7 @@ public class ActiveMFragment extends Fragment {
         arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
 
         //**if latest date is null then first it will be top of arraylist that's why two while Loop is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_SKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));

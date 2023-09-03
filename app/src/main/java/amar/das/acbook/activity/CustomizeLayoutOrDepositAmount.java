@@ -1,6 +1,4 @@
 package amar.das.acbook.activity;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -169,9 +167,9 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 String micPath=null;
 
                 String onlyTime = MyUtility.getOnlyTime();
-                binding.customTimeTv.setText(onlyTime);//setting time to take time and store in db
+                //binding.customTimeTv.setText(onlyTime);//setting time to take time and store in db
 
-                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its wages or deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
+               // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its  deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
 
                 if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                     micPath= audioPath;
@@ -181,11 +179,11 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     arr[1]=0;
 
                 if(binding.customDescriptionEt.getText().toString().length() >=1){//to prevent null pointer exception.it execute when user enter date
-                    remarks="["+binding.customTimeTv.getText().toString()+getResources().getString(R.string.hyphen_entered)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
+                    remarks="["+onlyTime+getResources().getString(R.string.hyphen_entered)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
                     //arr[2]=1;
                 }
                 else{
-                    remarks="["+binding.customTimeTv.getText().toString()+getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+getResources().getString(R.string.deposited);//adding default deposit message so that when user don't enter remarks this remarks will be added
+                    remarks="["+onlyTime+getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+getResources().getString(R.string.deposited);//adding default deposit message so that when user don't enter remarks this remarks will be added
                   // arr[2]=1;
                 }
                 arr[2]=1;//for description
@@ -194,16 +192,25 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                   isWrongData=MyUtility.isEnterDataIsWrong(arr);//it should be here to get updated result
                   isDataPresent= MyUtility.isDataPresent(arr);
                 if(isDataPresent==true && isWrongData==false ) {  //means if data is present then check is it right data or not
+                    //db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" +" WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user update then that person will become active
+//                    if(!db.activateIdWithLatestDate(fromIntentPersonId,onlyTime)){
+//                        Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
+//                    }
+
                     if(binding.customDepositEt.getText().toString().trim().length() >= 1) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
 
-                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" +" WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user update then that person will become active
-                    success = db.insert_Deposit_Table2(fromIntentPersonId,binding.customDateTv.getText().toString(),binding.customTimeTv.getText().toString(),micPath,remarks,depositAmount,"1");
-                    if (success) {
-                        showResult("DEPOSIT - "+depositAmount,"\nDATE-  "+binding.customDateTv.getText().toString()+"\n\nREMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                    } else
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                    //success = db.insert_Deposit_Table2(fromIntentPersonId,binding.customDateTv.getText().toString(),binding.customTimeTv.getText().toString(),micPath,remarks,depositAmount,"1");
+                    success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,0,0,0,0,0,depositAmount,"1");
+                    if(!success){
+                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    }
+                    goBackToIndividualPersonActivity(fromIntentPersonId);
+//                    if (success){
+//                        showResult("DEPOSIT - "+depositAmount,"\nDATE-  "+binding.customDateTv.getText().toString()+"\n\nREMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+//                    } else
+//                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
 
                 }else
                     Toast.makeText(CustomizeLayoutOrDepositAmount.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
@@ -235,7 +242,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
 
             db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
-            Cursor cursorData = db.getData("SELECT  "+Database.COL_25_DESCRIPTION+","+Database.COL_27_DEPOSIT+","+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + getIntent().getStringExtra("ID") + "'" + " AND "+Database.COL_22_DATE+"= '" + getIntent().getStringExtra("DATE") + "'" + " AND "+Database.COL_23_TIME+"='" + getIntent().getStringExtra("TIME") + "'");
+            //Cursor cursorData = db.getData("SELECT  "+Database.COL_25_DESCRIPTION+","+Database.COL_27_DEPOSIT+","+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + getIntent().getStringExtra("ID") + "'" + " AND "+Database.COL_22_DATE+"= '" + getIntent().getStringExtra("DATE") + "'" + " AND "+Database.COL_23_TIME+"='" + getIntent().getStringExtra("TIME") + "'");
+            Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
             cursorData.moveToFirst();//this cursor is not closed
             String cDescription,cDeposit,cMicPath;
             cDescription=cursorData.getString(0);
@@ -290,13 +298,14 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 String micPath=cMicPath;//default value if we don't fetch previous data then null will be inserted and previous voice will be deleted when we try to update only deposit so it is important
                 String remarks;
 
-                //To get exact time so write code in save button
+                //To get exact onlyTime so write code in save button
 //                Date d=Calendar.getInstance().getTime();
 //                SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for AM or PM
 
-                String onlyTime = MyUtility.getOnlyTime();
-                binding.customTimeTv.setText(onlyTime);//setting time to take time and store in db
-                String time=binding.customTimeTv.getText().toString();
+                //String onlyTime = MyUtility.getOnlyTime();
+               // binding.customTimeTv.setText(onlyTime);//setting onlyTime to take onlyTime and store in db
+               // String onlyTime=binding.customTimeTv.getText().toString();
+                String onlyTime=MyUtility.getOnlyTime();
                 String date=binding.customDateTv.getText().toString();
 
                 //this will store latest date by taking current date
@@ -306,37 +315,49 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //                if(date.equals(currentDate)) {//if it is true then store
 //                    db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" +date + "'" +" WHERE ID='" + getIntent().getStringExtra("ID") + "'");
 //                }
-                db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its wages or deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
+
+
+                //db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its  deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
 
                 if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                     micPath= audioPath ;
                  }
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                remarks = "[" + time + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + previousDataHold[1] + "\n" + previousDataHold[2] + "\n" + previousDataHold[3] ;//time is set automatically to remarks if user enter any remarks;
+                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + previousDataHold[1] + "\n" + previousDataHold[2] + "\n" + previousDataHold[3] ;//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[1] = 1;//this is important because when user do not enter any data while updating then least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 boolean isWrongData,isDataPresent,success;
                   isWrongData=MyUtility.isEnterDataIsWrong(arr);//it should be here to get updated result
                   isDataPresent=MyUtility.isDataPresent(arr);
                 if(isDataPresent==true && isWrongData==false ) {  //means if data is present then check is it right data or not
+                    //  db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + getIntent().getStringExtra("ID") + "'");//when ever user update then that person will become active
+//                    if(!db.activateIdWithLatestDate(getIntent().getStringExtra("ID"),onlyTime)){
+//                        Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
+//                    }
+
                     if(binding.customDepositEt.getText().toString().trim().length() >= 1) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
 
-                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + getIntent().getStringExtra("ID") + "'");//when ever user update then that person will become active
-
                     if(micPath != null) {//if it is not null then update mic-path
-                      //  success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',MICPATH='" + micPath + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
-                        success=db.update_Deposit_TABLE_NAME2(date,time,micPath,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                      //  success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='" + micPath + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
+                       // success=db.update_Deposit_TABLE_NAME2(date,onlyTime,micPath,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+
                     } else {//if micPath == null then we are not updating because null in text will be set to mic-path and give wrong result like it will indicate that audio is present but actually audio is not present
-                       // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + time + "',DESCRIPTION='" + remarks + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
-                        success=db.update_Deposit_TABLE_NAME2(date,time,null,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                       // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
+                        //success=db.update_Deposit_TABLE_NAME2(date,onlyTime,null,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
                     }
-                    if (success) {
-                        showResult("DEPOSIT - "+depositAmount,"\nDATE-  "+date+"\n\nREMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-                    } else
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
+                    if(!success){
+                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                    }
+                    goBackToIndividualPersonActivity(fromIntentPersonId);
+//                    if (success) {
+//                        showResult("DEPOSIT - "+depositAmount,"\nDATE-  "+date+"\n\nREMARKS- "+remarks+"\n\nMICPATH- "+micPath);
+//                    } else
+//                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
 
                 }else {
                     Toast.makeText(CustomizeLayoutOrDepositAmount.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
@@ -360,21 +381,22 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         }
         return data;
     }
-    private void showResult(String title, String message) {
-        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(CustomizeLayoutOrDepositAmount.this);
-        showDataFromDataBase.setCancelable(false);
-        showDataFromDataBase.setTitle(title);
-        showDataFromDataBase.setMessage(message);
-        showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {
-            dialogInterface.dismiss();
-            //after data entered successfully
-            finish();//destroy current activity
-            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
-            intent.putExtra("ID",fromIntentPersonId);
-            startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
-        });
-        showDataFromDataBase.create().show();
-    }
+
+//    private void showResult(String title, String message) {
+//        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(CustomizeLayoutOrDepositAmount.this);
+//        showDataFromDataBase.setCancelable(false);
+//        showDataFromDataBase.setTitle(title);
+//        showDataFromDataBase.setMessage(message);
+//        showDataFromDataBase.setPositiveButton("OK", (dialogInterface, i) -> {
+//            dialogInterface.dismiss();
+//            //after data entered successfully
+//            finish();//destroy current activity
+//            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+//            intent.putExtra("ID",fromIntentPersonId);
+//            startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
+//        });
+//        showDataFromDataBase.create().show();
+//    }
     private void goBackToIndividualPersonActivity(String id){
         finish();//destroy current activity
         Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);

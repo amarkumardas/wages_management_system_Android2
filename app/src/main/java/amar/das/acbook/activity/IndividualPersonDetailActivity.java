@@ -6,6 +6,7 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -40,8 +41,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -377,6 +376,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 else if(cursor1.getString(0).equals("0"))
                     activeRadio.setChecked(false);
 
+                if(cursor1 != null){
+                    cursor1.close();
+                }
                 //this should not be use in other class   other wise it will not be called when user change radio button
                 radioGroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
                     if (checkedIdOfRadioBtn == R.id.active_metadata) {
@@ -479,21 +481,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                         String data = adapterView.getItemAtPosition(pos).toString();
                         try(Database db=new Database(getBaseContext());
-                        Cursor cursor1 =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
-                            cursor1.moveToFirst();//skill which is null there skill is updated
+                        Cursor cursorx =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                            cursorx.moveToFirst();//skill which is null there skill is updated
                             switch (data) {
                                 case "ADD L": //adding L means p2
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
 
-                                    if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
+                                    if (cursorx.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED L", "STATUS: SUCCESS", "FAILED TO ADD L", "STATUS: FAILED");
+                                    } else if (cursorx.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED L", "STATUS: SUCCESS", "FAILED TO  ADD L", "STATUS: FAILED");
+                                    } else if (cursorx.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
@@ -502,14 +504,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 case "ADD M": //adding M p3
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
-                                    if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
+                                    if (cursorx.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED M", "STATUS: SUCCESS", "FAILED TO ADD M", "STATUS: FAILED");
+                                    } else if (cursorx.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED M", "STATUS: SUCCESS", "SUCCESSFULLY  ADD M", "STATUS: SUCCESS");
+                                    } else if (cursorx.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
@@ -519,14 +521,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
 
-                                    if (cursor1.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
+                                    if (cursorx.getString(0) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY ADDED G", "STATUS: SUCCESS", "FAILED TO ADD G", "STATUS: FAILED");
+                                    } else if (cursorx.getString(1) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
-                                    } else if (cursor1.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", "SUCCESSFULLY  ADDED G", "STATUS: SUCCESS", "FAILED TO  ADD G", "STATUS: FAILED");
+                                    } else if (cursorx.getString(2) == null) {
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
@@ -547,8 +549,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2 so set null
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                }else{
+                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                }
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
@@ -558,8 +563,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                }else{
+                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                }
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
@@ -568,8 +576,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 11) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
-                                                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                                displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                }else{
+                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                }
                                             } else if (result.getInt(0) >= 1) {
                                                 displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
@@ -683,7 +694,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 EditText p1RateTv,p2RateTv,p3RateTv,p4RateTv;
                 Button longPressToSaveAndCreatePdf,cancel;
                 int []innerArray=new int[4];
-                int totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0,indicate=0;//while saving this variable required
+                int totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0;//while saving this variable required
+                byte indicate=0;
                 @Override
                 public boolean onLongClick(View view){
                     AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
@@ -869,7 +881,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 totalP1AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r1 * p1));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
-                                if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
+                                if(MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
                                     longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
@@ -912,7 +924,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 totalP2AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r2 * p2));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
-                                if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
+                                if(MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
                                     longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
@@ -953,7 +965,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 totalP3AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r3 * p3));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
-                                if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
+                                if(MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
                                     longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
@@ -992,7 +1004,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 totalP4AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(r4 * p4));
                                 updateTotalWorkAmountAndAdvanceOrBalanceTv();
 
-                                if(isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
+                                if(MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1,r2,r3,r4,p1,p2,p3,p4,indicate)){
                                     longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                     advanceOrBalanceTv.setText("");
                                     workTotalAmountTv.setText(" - 0");
@@ -1010,140 +1022,104 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     sumCursor.close();
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click multiple times
+                        try{Database dB=Database.getInstance(getBaseContext());
+                            if((checkInternalStorageAvailability()*1000) >= 30){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+                                if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){//Take permission
 
-                        //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-                        if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {//Take permission
-                            if (updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method could access db and get balance or advance
-                                if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
-                                    if (savePdfToDatabase(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
-                                        if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
+                                    String pdfAbsolutePath = generatePDFAndReturnFileAbsolutePath(fromIntentPersonId);//first pdf is created
+                                    if(dB.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(fromIntentPersonId, totalDeposit, totalWages, p1, p2, p3, p4, r1, r2, r3, r4, indicate, innerArray, pdfAbsolutePath)) {
+                                        if (finalDialog != null && finalDialog.isShowing()){//dismiss dialog before going to pdf-viewer activity
                                             finalDialog.dismiss();
                                         }
-                                        if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
-                                            if (deleteDataFromDB()) {
-                                                Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
-                                            } else {
-                                                Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
-                                            }
-                                        } else {
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                        if (!viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF", Toast.LENGTH_LONG).show();
                                         }
-                                    } else {
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                    }else {
+                                        if (viewPDFFromDb((byte) 4, fromIntentPersonId)) {//view blank pdf
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE PDF", Toast.LENGTH_LONG).show();
+                                        }
                                     }
-                            }else{
-                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE TEXT FILE IN DEVICE\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                                }else {//request for permission
+                                    Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                                    ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
                                 }
-                            } else {
-                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();
                             }
-                        }else {//request for permission
-                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                            ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                        }catch(Exception ex){
+                            Toast.makeText(IndividualPersonDetailActivity.this, "ERROR", Toast.LENGTH_LONG).show();
+                            ex.printStackTrace();
+                            return false;
+                        }finally {
+                            Database.closeDatabase();//closing connection pool
                         }
+
+                        //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+//                        if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){//Take permission
+//                            if (updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
+//                                if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
+//                                    if (savePdfToDatabaseAndDeleteFromDevice(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
+//                                        if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
+//                                            finalDialog.dismiss();
+//                                        }
+//                                        if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
+//                                            if (deleteDataFromDB(fromIntentPersonId)){
+//                                                Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
+//                                            } else {
+//                                                Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
+//                                            }
+//                                        } else {
+//                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+//                                        }
+//                                    } else {
+//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+//                                    }
+//                            }else{
+//                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE TEXT FILE IN DEVICE\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+//                                }
+//                            } else {
+//                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
+//                            }
+//                        }else {//request for permission
+//                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//                            ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+//                       }
                         return false;
                     });
                     finalDialog.show();
                     return false;
                 }
-                private boolean deleteDataFromDB() {
-                    try(Database personDb=new Database(getApplicationContext())){//so that object close automatically
-                         boolean success;
-                            //this function will be written when existing from pdf viewer
-//                                boolean deleted = deletePdfFromDevice(pdfPath);
-//                                if (!deleted) {
-//                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE PDF FILE FROM DEVICE", Toast.LENGTH_SHORT).show();
-//                                }
-                       // if(updateInvoiceNumberBy1ToDb(fromIntentPersonId)){//updating invoice number by 1
-                           // if (deleteAudios(fromIntentPersonId)) {
-                                if (deleteWagesAndAudiosFromDBorRecyclerView(fromIntentPersonId)){//delete records from recycle view this should be perform first so that update will be visible else update message will also be deleted //if this failed then recycler view still contain previous data
-
-                                    if (!addMessageAfterFinalCalculationToRecyclerview(fromIntentPersonId)){ //update balance or advance to db.this code is not in else block because if data is not deleted from db then this code should not be executed
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO ADD MESSAGE IN RECYCLER VIEW AFTER FINAL CALCULATION .\nCHECK PREVIOUS INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                       // success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]", 0, 0, "0");
-                                       /**change this insertWagesOrDepositOnlyToActiveTableTransaction method*/
-                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]",0,0,0,0,0,0,"0");
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "UPDATE RECYCLERVIEW \nCHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION", Toast.LENGTH_LONG).show();
-                                    }
-
-                                    if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                        //success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
-                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]",0,0,0,0,0,0,"0");
-
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-                                    }
-
-//                                    if (!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio
-//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-//                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
-//                                        if (!success)
-//                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-//                                    }
-                                }else{//add this message to recycle view
-
-                                    if(!updateInvoiceNumberBy1ToDb(fromIntentPersonId)) {//updating invoice number by 1 CANT REVERSE
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recyclerview", Toast.LENGTH_LONG).show();
-                                       // success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]", 0, 0, "0");
-                                        success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-FAILED TO UPDATE INVOICE NUMBER IN DATABASE NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE]",0,0,0,0,0,0,"0");
-
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "NOTHING TO DO JUST REMEMBER FROM NOW INVOICE NUMBER \nWOULD NOT BE CORRECT FOR THIS ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-                                    }
-//                                    if (!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio
-//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-//                                        success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
-//                                        if (!success)
-//                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-//                                    }
-
-                                        String  message=  "[AUTOMATIC ENTERED-FAILED TO DELETE RECORD FROM DATABASE. CURRENT DATA IS SAVED TO PREVIOUS INVOICE2. ACTION TO PERFORM BY YOURSELF SEQUENTIALLY(strictly) \n\n " +
-                                                "1.MANUALLY EDIT ALL WAGES DATA TO 0 ie.set all wages and work days to 0 IN RECYCLER VIEW (IF NOT DONE THEN PREVIOUS DATA WILL BE THERE AND GIVE INCORRECT CALCULATION ITS MANDATORY) AFTER THAT\n\n " +
-                                                "2.CHECK INVOICE2 TO KNOW ABOUT PREVIOUS CALCULATION AND SINCE CALCULATION IS DONE SO ADD DATA TO RECYCLERVIEW (LIKE HOW YOU ADD WAGES) WHATEVER TOTAL ADVANCE OR BALANCE IS.ITS MANDATORY TO GET CORRECT CALCULATION]";
-                                                //"3.DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)\n\n" +
-                                                //"*JUST REMEMBER FROM NOW INVOICE NUMBER WOULD NOT BE CORRECT FOR THIS ID:"+fromIntentPersonId+" BECAUSE PDF/INVOICE IS GENERATED BUT INVOICE NUMBER NOT UPDATED IN DATABASE";
-
-                                        Toast.makeText(IndividualPersonDetailActivity.this, message, Toast.LENGTH_LONG).show();
-                                    //success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, message, 0, 0, "0");
-                                    success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null, message,0,0,0,0,0,0,"0");
-
-                                    if (success) {
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "CHECK RECYCLER VIEW REMARKS TO KNOW", Toast.LENGTH_LONG).show();//because data is deleted so set all data to 0
-                                        }else{//it will execute when message is not set//data is save to pdf ie.invoice2
-                                            Toast.makeText(IndividualPersonDetailActivity.this,"ATTENTION \nWRITE ALL DATA BY HAND\n IN PAPER MANUALLY", Toast.LENGTH_LONG).show();
-                                        }
-                                            return false;
-                                    }
-                    }catch(Exception ex){
-                        Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
-                        ex.printStackTrace();
-                        return false;
-                    }
-                      return true;
-                }
-                private boolean updateInvoiceNumberBy1ToDb(String id) {
-                    try(Database db=new Database(getApplicationContext())){
-                        Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
-                        cursor.moveToFirst();//means only one row is returned
-                       if(!db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'")){
-                          return false;
-                       }
-                        cursor.close();
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                        Toast.makeText(IndividualPersonDetailActivity.this, "INVOICE NUMBER NOT UPDATED TO DB ERROR OCCURRED", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                    return true;
-                }
-                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {
+//                private boolean deleteDataFromDB(String id) {
+//                    try(Database db=new Database(getApplicationContext())){//so that object close automatically
+//                       return db.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(id);
+//                    }catch(Exception ex){
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
+//                        ex.printStackTrace();
+//                        return false;
+//                    }
+//                }
+//                private boolean updateInvoiceNumberBy1ToDb(String id) {
+//                    try(Database db=new Database(getApplicationContext());
+//                        Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+//                        cursor.moveToFirst();//means only one row is returned
+////                       if(!db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'")){
+////                          return false;
+////                       }
+//                        return db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'");
+//
+//                       // cursor.close();
+//                    }catch (Exception ex){
+//                        ex.printStackTrace();
+//                        return false;
+//                    }
+////                    return true;
+//                }
+                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {//deleting all audios
                     try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+Database.COL_4__MICPATH +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"= '" + id + "'")){//so that object close automatically
+                        Cursor cursor = personDb.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
                          while(cursor.moveToNext()){
                              if(cursor.getString(0) != null) {//checking path may be null
-                                 if (!MyUtility.deletePdfOrRecordingFromDevice(cursor.getString(0))) {
+                                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(cursor.getString(0))) {
                                       return false;
                                  }
                              }
@@ -1151,100 +1127,107 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return true;
                     }
                 }
-                private boolean deleteWagesAndAudiosFromDBorRecyclerView(String fromIntentPersonId) {
-                    try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+Database.COL_1__ID +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"= '" + fromIntentPersonId + "'")){//so that object close automatically
-                        cursor.moveToFirst();
-                        if(cursor.getCount()==0){//if already record not present then return true
-                            return true;
-                        }
-                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(fromIntentPersonId)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-                                        //boolean success = personDb.insert_1_Person_WithWagesTable2(fromIntentPersonId, "0-0-0", "0:0:0:0", null, "[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)", 0, 0, "0");
-                                        boolean success = personDb.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,"0-0-0", "0:0:0:0",null,"[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+fromIntentPersonId+" (IF NOT DELETED THEN IT WILL BE IN DEVICE)",0,0,0,0,0,0,"0");
-                                        if (!success)
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+fromIntentPersonId, Toast.LENGTH_LONG).show();
-                          return false;//because audio failed to delete
-                         }//else not required because below statement should be executed
-
-                        if(!personDb.deleteAllRowsTransaction(fromIntentPersonId,Database.TABLE_NAME2)) {
-                            return false;//if failed to deleted
-                        }
-                        return true;
-                    }
-                }
-                private boolean addMessageAfterFinalCalculationToRecyclerview(String fromIntentPersonId) {
-                    //PersonRecordDatabase db=null;
-                   // Cursor cursor=null;
-                    try(Database db = new Database(getApplicationContext());
-                        Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId + "'"))
-                    {
-                       // db = new PersonRecordDatabase(getApplicationContext());//so db close automatically
-                        int amount=0;
-                        boolean success;
-//                        final Calendar current = Calendar.getInstance();//to get current date
-//                        String date = current.get(Calendar.DAY_OF_MONTH) + "-" + (current.get(Calendar.MONTH) + 1) + "-" + current.get(Calendar.YEAR);
-                         String date=MyUtility.getOnlyCurrentDate();
-//                        Date d = Calendar.getInstance().getTime(); //To get exact onlyTime so write code in save button
-//                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-//                        String onlyTime = sdf.format(d);
-                        String onlyTime = MyUtility.getOnlyTime();
-                       // cursor = db.getData("SELECT ADVANCE,BALANCE FROM " + db.TABLE_NAME1 + " WHERE ID= '" + fromIntentPersonId + "'");
-                        cursor.moveToFirst();//means only one row is returned
-                        if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
-                            amount = cursor.getInt(0);
-                            //insert to database taking just first person                                                      //remarks
-                           // success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]", amount, 0, "0");
-                            success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + amount+" ]",amount,0,0,0,0,0,"0");
-                            if (!success)
-                                return false;
-                        }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
-                            amount = cursor.getInt(1);
-                            //insert to database taking just first person                                                      //remarks
-                            //success = db.insert_Deposit_Table2(fromIntentPersonId, date, onlyTime, null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]", amount, "1");
-                            success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,onlyTime,null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + amount+" ]",0,0,0,0,0,amount,"1");
-
-                            if (!success)
-                                return false;
-                        }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-                            //insert to database taking just first person                                                      //remarks
-                            //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date, onlyTime, null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]", amount, 0, "0");
-                            success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. " + amount+" ]",amount,0,0,0,0,0,"0");
-                            if (!success)
-                                return false;
-                        }
-                        return true;
-
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                        return false;
-                    }
-                }
-                private boolean savePdfToDatabase(String pdfAbsolutePath) {
-                    if(pdfAbsolutePath != null) {
-                        try (Database db = new Database(getApplicationContext());
-                             Cursor cursor = db.getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
-                             cursor.moveToFirst();
-                            byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
-
-                            if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
-                                // Toast.makeText(IndividualPersonDetailActivity.this, "pdf not there", Toast.LENGTH_LONG).show();
-                                return db.insertPdf(fromIntentPersonId, newPDF, 2);
-                            }
-                            //if pdf1 is not null then store in pdf 2
-                            if (db.insertPdf(fromIntentPersonId, cursor.getBlob(0), 1)) {//store pdf2 in pdf1
-                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store new pdf in pdf2
-                            }
-                            return false;
-                        }catch (Exception ex){
-                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
-                            ex.printStackTrace();
-                            return false;
-                        }finally{
-                            MyUtility.deletePdfOrRecordingFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
-                        }
-                    }else return false;
-                }
+//                private boolean deleteAudioFirstThenWagesAndDepositFromDBorRecyclerView(String id) {//If audio failed to delete then recycler view data will not be deleted
+//                  try(Database db=new Database(getBaseContext());
+//                        Cursor cursor=db.getData("SELECT EXISTS (SELECT 1 FROM " + db.tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){ //SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
+//                        cursor.moveToFirst();
+//                        if (cursor.getShort(0) != 1){//if getShort(0) is 1 that means data is present in table.
+//                            return true;//if already no single record present then return true so if != 1 means no data present in table.
+//                        }
+//                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(id)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
+//                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+//                            if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE SO YOURSELF DELETE ALL AUDIO HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE. BETTER TO DELETE AUDIO THEN TRY TO DO FINAL CALCULATION)",0,0,0,0,0,0,"0")){
+//                                Toast.makeText(IndividualPersonDetailActivity.this, "DELETE ALL AUDIO ID: "+id+" \nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
+//                            }
+//                          return false;//because audio failed to delete so don't perform any operation else this message in recyclerview will be deleted if we delete all rows
+//                         }
+//
+//                        return db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id));//delete all rows from recycler view
+//                    }catch(Exception x){
+//                        x.printStackTrace();
+//                        return false;
+//                    }
+//
+//                    //-----------------------------------------------------------
+////                    try(Database db=new Database(getBaseContext());
+////                        // Cursor cursor = db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 1) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
+////
+////                        Cursor cursor=db.g etData("SELECT EXISTS (SELECT 1 FROM " + db.tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){ //SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
+////                        cursor.moveToFirst();
+////                        if (cursor.getShort(0) != 1){//if getShort(0) is 1 that means data is present in table.
+////                            return true;//if already no single record present then return true so if != 1 means no data present in table.
+////                        }
+////                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(id)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
+//////                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+//////                                        if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE)",0,0,0,0,0,0,"0")){
+//////                                           Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+id, Toast.LENGTH_LONG).show();
+//////                                       }
+////                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+////                            if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE SO YOURSELF DELETE ALL AUDIO HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE. BETTER TO DELETE AUDIO THEN TRY TO DO FINAL CALCULATION)",0,0,0,0,0,0,"0")){
+////                                Toast.makeText(IndividualPersonDetailActivity.this, "DELETE ALL AUDIO ID: "+id+" \nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
+////                            }
+////                            return false;//because audio failed to delete so don't perform any operation else this message in recyclerview will be deleted if we delete all rows
+////                        }
+////
+//////                        if(!db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id))){
+//////                            return false;//if failed to deleted
+//////                        }
+////                        return db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id));//delete all rows from recycler view
+////                    }catch(Exception x){
+////                        x.printStackTrace();
+////                        return false;
+////                    }
+//                }
+//                private boolean addMessageAfterFinalCalculationToRecyclerview(String id) {
+//                    try(Database db = new Database(getApplicationContext());
+//                        Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
+//                    {
+//                        String date=MyUtility.getOnlyCurrentDate();
+//                        String onlyTime = MyUtility.getOnlyTime();
+//                        cursor.moveToFirst();//means only one row is returned
+//                        if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
+//
+//                            return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
+//
+//                        }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
+//
+//                            return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date,onlyTime,null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
+//
+//                        }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
+//
+//                             return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. 0 ]",0,0,0,0,0,0,"0");
+//
+//                        }
+//                        return false;
+//                    }catch (Exception ex){
+//                        ex.printStackTrace();
+//                        return false;
+//                    }
+//                }
+               // private boolean savePdfToDatabaseAndDeleteFromDevice(String pdfAbsolutePath) {//deleting from device because it is stored in database
+//                    if(pdfAbsolutePath != null) {
+//                        try (Database db = new Database(getApplicationContext());
+//                             Cursor cursor = db.getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
+//                             cursor.moveToFirst();
+//                            byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
+//
+//                            if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
+//                                return db.insertPdf(fromIntentPersonId, newPDF, 2);
+//                            }
+//                            //if pdf1 is not null then store in pdf 2
+//                            if (db.insertPdf(fromIntentPersonId, cursor.getBlob(0), 1)) {//store pdf2 in pdf1
+//                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store new pdf in pdf2
+//                            }
+//                            return false;
+//                        }catch (Exception ex){
+//                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
+//                            ex.printStackTrace();
+//                            return false;
+//                        }finally{
+//                            MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
+//                        }
+//                    }else return false;
+ //               }
                 private boolean viewPDFFromDb(byte whichPdf,String fromIntentPersonId) {
                     try {//to view pdf
                         finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
@@ -1326,8 +1309,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     cursor.close();
 
                     if(success){//if rate is updated then proceed
-                       if (!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
-                           if (!isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
+                       if (!MyUtility.isEnterDataIsWrong(innerArray)){//if data is right then only change fields.This condition is already checked but checking again
+                           if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
                                //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
 
                                if(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)){//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
@@ -1375,7 +1358,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     return true;
                 }
-                public boolean isp1p2p3p4PresentAndRateNotPresent(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,int indicator){
+                public boolean isp1p2p3p4PresentAndRateNotPresenth(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,int indicator){
                     if(indicator==1 && (p1 !=0 && r1==0)){
                         return true;
                     }else if(indicator==2 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0))){
@@ -1764,7 +1747,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     }
     public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
         try{
-            byte indicator= (byte) MyUtility.get_indicator(getBaseContext(),id);
+            byte indicator= MyUtility.get_indicator(getBaseContext(),id);
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
             String[] skillHeader = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
             float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
@@ -1772,7 +1755,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
             String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id,errorDetection);//it amy return null   when no data
             if(errorDetection[0]==false){
-                if(!makeSummaryAndWriteToPDFBasedOnIndicator(indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
+                if(!makeSummaryAndWriteToPDFBasedOnIndicator(getBaseContext(),indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
                 if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
 
                            if (recyclerViewWagesData != null){//null means data not present
@@ -1819,8 +1802,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             return new float[]{1f,1f,1f};//to avoid error
         }
     }
-    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(byte indicator,String id,MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
-        try(Database db = new Database(getApplicationContext());
+    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
+        Database db = Database.getInstance(context);
+        try(//Database db = new Database(getApplicationContext());
             Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
          {
              if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
@@ -2091,22 +2075,22 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              if(howManyPerson==1) {
                  if(sum1DayAmountCursor.getInt(0) !=0) {//to avoid arithmetic exception 1/0
                                                                    //total advance / r1
-                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / sum1DayAmountCursor.getInt(0)));
+                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / sum1DayAmountCursor.getInt(0))+1));//1 is added to get right days because we are not considering point values when dividing
                  }
              }else if(howManyPerson==2){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1) != 0) {
                            //                                         total advance/(R1+R1)
-                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1))));
+                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1)))+1));//1 is added to get right days because we are not considering point values when dividing
                  }
              }else if(howManyPerson==3){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2) != 0) {
                      //                                               total advance/(R1+R2+R3)
-                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2))));
+                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2)))+1));//1 is added to get right days because we are not considering point values when dividing
                  }
              }else if(howManyPerson==4){//to avoid arithmetic exception 1/0
                  if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2)+sum1DayAmountCursor.getInt(3) != 0) {
                      //                                                total advance/(R1+R2+R3+R4)
-                     noOfDaysToWork.setText(String.valueOf(advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2) + sum1DayAmountCursor.getInt(3))));
+                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2) + sum1DayAmountCursor.getInt(3)))+1));//1 is added to get right days because we are not considering point values when dividing
                  }
              }
             sum1DayAmountCursor.close();
@@ -2418,7 +2402,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
         cancel.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
             customDialog.dismiss();
         });
         customDialog.show();
@@ -2683,6 +2667,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
     }
 }

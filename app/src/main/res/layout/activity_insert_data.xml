@@ -49,7 +49,8 @@
         android:layout_gravity="center_horizontal"
         android:id="@+id/imageview"
         android:src="@drawable/defaultprofileimage"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY"
+        android:foreground="?android:attr/selectableItemBackground"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -73,6 +74,7 @@
         android:textColor="@color/black"
         android:textSize="17dp"
         android:inputType="textCapCharacters"
+        android:foreground="?android:attr/selectableItemBackground"
         android:id="@+id/name_et"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -126,6 +128,7 @@
             android:textColor="@color/purple_700"
             android:inputType="number"
             android:digits="1234567890"
+            android:foreground="?android:attr/selectableItemBackground"
             android:id="@+id/phonenumber_et"/>
 
         <EditText
@@ -143,6 +146,7 @@
             android:textColor="@color/purple_700"
             android:inputType="number"
             android:digits="1234567890"
+            android:foreground="?android:attr/selectableItemBackground"
             android:id="@+id/acholder_et"
             />
     </LinearLayout>
@@ -198,6 +202,7 @@
             android:id="@+id/location_autoComplete_tv"
             android:completionThreshold="1"
             android:dropDownWidth="300dp"
+            android:foreground="?android:attr/selectableItemBackground"
             />
 
         <AutoCompleteTextView
@@ -217,6 +222,7 @@
             android:id="@+id/religion_autoComplete_tv"
             android:completionThreshold="1"
             android:dropDownWidth="300dp"
+            android:foreground="?android:attr/selectableItemBackground"
             />
     </LinearLayout>
     <TextView
@@ -241,7 +247,8 @@
         android:textColor="@color/black"
         android:textSize="17dp"
         android:maxLength="12"
-        android:id="@+id/aadharcard_et"/>
+        android:id="@+id/aadharcard_et"
+        android:foreground="?android:attr/selectableItemBackground"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -266,6 +273,7 @@
         android:id="@+id/bankname_autocomplte_tv"
         android:completionThreshold="1"
         android:dropDownWidth="300dp"
+        android:foreground="?android:attr/selectableItemBackground"
         />
     <LinearLayout
         android:layout_width="match_parent"
@@ -318,7 +326,8 @@
             android:textColor="@color/purple_700"
             android:inputType="number"
             android:digits="1234567890"
-            android:id="@+id/accountno_et"/>
+            android:id="@+id/accountno_et"
+            android:foreground="?android:attr/selectableItemBackground"/>
 
         <EditText
             android:layout_weight="1"
@@ -336,6 +345,7 @@
             android:textColor="@color/black"
             android:inputType="textCapCharacters"
             android:id="@+id/ifsccode_et"
+            android:foreground="?android:attr/selectableItemBackground"
             />
     </LinearLayout>
 
@@ -360,7 +370,8 @@
         android:inputType="textCapCharacters"
         android:textColor="@color/black"
         android:textSize="17dp"
-        android:id="@+id/fathername_et"/>
+        android:id="@+id/fathername_et"
+        android:foreground="?android:attr/selectableItemBackground"/>
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -379,6 +390,7 @@
             android:id="@+id/mestre"
             android:textStyle="bold"
             android:textSize="17dp"
+            android:foreground="?android:attr/selectableItemBackground"
             />
         <RadioButton
             android:layout_width="wrap_content"
@@ -388,7 +400,8 @@
             android:layout_weight="1"
             android:id="@+id/laber"
             android:textStyle="bold"
-            android:textSize="17dp"/>
+            android:textSize="17dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -398,6 +411,7 @@
             android:textStyle="bold"
             android:id="@+id/women_laber"
             android:textSize="17dp"
+            android:foreground="?android:attr/selectableItemBackground"
             />
     </RadioGroup>
 

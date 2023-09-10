@@ -213,7 +213,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             Button cancel = myView.findViewById(R.id.cancel_btn);
             cancel.setOnClickListener(view13 -> {
                 VoiceRecorder.stopAudioPlayer();//when audio is playing and   user clock  cancel then stop audio also
-                MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+                MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
                 dialog.dismiss();
             });
 

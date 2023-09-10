@@ -52,7 +52,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 
         binding.customCancelBtn.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
 
             goBackToIndividualPersonActivity(fromIntentPersonId);
 //            finish();//destroy current activity
@@ -62,7 +62,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         });
         binding.gobackDeposit.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
             goBackToIndividualPersonActivity(fromIntentPersonId);
 //            finish();//destroy current activity
 //            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
@@ -406,7 +406,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     @Override
     public void onBackPressed() {//on back press button
         super.onBackPressed();
-        MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
         finish();//destroy current activity
         Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",fromIntentPersonId);
@@ -415,6 +415,6 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyUtility.deletePdfOrRecordingFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
     }
 }

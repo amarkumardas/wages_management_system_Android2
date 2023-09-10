@@ -76,6 +76,7 @@
                 android:textSize="17sp"
                 android:text="RATE"
                 android:inputType="numberDecimal"
+
                 android:id="@+id/p1_rate_tv_final"/>
         </LinearLayout>
         <TextView
@@ -151,6 +152,7 @@
                 android:textSize="17sp"
                 android:text="RATE"
                 android:inputType="numberDecimal"
+
                 android:id="@+id/p2_rate_tv_final"/>
         </LinearLayout>
 
@@ -225,6 +227,7 @@
                 android:textSize="17sp"
                 android:text="RATE"
                 android:inputType="numberDecimal"
+
                 android:id="@+id/p3_rate_tv_final"/>
         </LinearLayout>
         <TextView
@@ -298,6 +301,7 @@
                 android:textSize="17sp"
                 android:text="RATE"
                 android:inputType="numberDecimal"
+
                 android:id="@+id/p4_rate_tv_final"/>
         </LinearLayout>
         <TextView

@@ -61,7 +61,18 @@ public class MyUtility {
             return "0-0-0000";//error
         }
     }
-
+    public static boolean isp1p2p3p4PresentAndRateNotPresent(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,byte indicator){
+        if(indicator==1 && (p1 !=0 && r1==0)){
+            return true;
+        }else if(indicator==2 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0))){
+            return true;
+        }else if(indicator==3 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0))){
+            return true;
+        }else if(indicator==4 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0) || (p4 !=0 && r4==0))){
+            return true;
+        }
+        return false;
+    }
     public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
         try(Database db=new Database(context);
             Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
@@ -98,7 +109,6 @@ public class MyUtility {
             if (arr[i] == 2)//value 2 represents wrong data
                 wrongData++;
         }
-
         return wrongData >= 1;
     }
     public static boolean isDataPresent(int[] arr){
@@ -118,7 +128,7 @@ public class MyUtility {
             bool= true;
         return bool;
     }
-    public static boolean deletePdfOrRecordingFromDevice(String pdfPath){
+    public static boolean deletePdfOrRecordingUsingPathFromDevice(String pdfPath){
         if(pdfPath != null){
             try {
                 File filePath = new File(pdfPath);//file to be delete
@@ -185,11 +195,11 @@ public class MyUtility {
             String[] personDetail=fetchPersonDetailOfPDF(id,context);//person detail
             sb.append("NAME: ").append(personDetail[0]).append("\n").
                append("ID: ").append(personDetail[1]).append(" A/C: ").append(personDetail[2]).append(" AADHAAR: ").append(personDetail[3]).append(" PHONE: ").append(personDetail[4]).append("\n").
-                append("CREATED ON: ").append(personDetail[5]).append("\nINVOICE No. ").append(personDetail[6]).append("\n");
+               append("CREATED ON: ").append(personDetail[5]).append("\nINVOICE No. ").append(personDetail[6]).append("\n");
 
             sb.append("------------SUMMARY-------------\n");
             //summary
-            byte indicator=(byte) get_indicator(context,id);
+            byte indicator=get_indicator(context,id);
             if(!(indicator >= 1 && indicator <=4)) return false;//if indicator is not in range 1 to 4 then return false ie.error
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
             int[] arrayOfTotalWagesDepositRate = getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(context,id,indicator,errorDetection);//if error cause errorDetection will be set true
@@ -224,7 +234,8 @@ public class MyUtility {
         }
     }
     public static String generateUniqueFileName(Context context,String id) {
-        try(Database db=new Database(context)){
+        Database db=Database.getInstance(context);
+            try{
             StringBuilder fileName = new StringBuilder();
             fileName.append("id").append(id);
             Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
@@ -401,9 +412,10 @@ public class MyUtility {
         }
     }
     public static String[][] getAllDepositFromDb(Context context,String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        try(Database db = new Database(context);
-            Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
-        {
+        Database db = Database.getInstance(context);
+        try(
+            //Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
+            Cursor depositCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+ db.columnNameOutOf4Table(id, (byte) 7) +" ,"+ db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.columnNameOutOf4Table(id, (byte) 12) +"='1'")){
             String[][] recyclerViewDepositData =null;
             if(depositCursor!= null&&depositCursor.getCount()!=0){
                 recyclerViewDepositData= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
@@ -428,13 +440,18 @@ public class MyUtility {
         }
     }
     public static String[][] getAllWagesDetailsFromDbBasedOnIndicator(Context context,String id, byte indicator, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
-        try(Database db = new Database(context)){
+        Database db = Database.getInstance(context);
+        try{
             Cursor wagesCursor = null;
             switch(indicator){
-                case 1:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-                case 2:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-                case 3:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-                case 4:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_11__P4 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+//                case 1:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+//                case 2:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+//                case 3:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+//                case 4:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_11__P4 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
+                case 1:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
+                case 2:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
+                case 3:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
+                case 4:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 11) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
             }
             String[][] recyclerViewWagesData =null;
             if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
@@ -461,13 +478,13 @@ public class MyUtility {
             return new String[][]{{"error"}};//to avoid error
         }
     }
-    public static String[] getWagesHeadersFromDbBasedOnIndicator(Context context,String id, byte indicator, boolean[] errorDetection ) {//  if error errorDetection will be set to true
+    public static String[] getWagesHeadersFromDbBasedOnIndicator(Context context,String id, byte indicator, boolean[] errorDetection) {//  if error errorDetection will be set to true
         if(!(indicator >= 1 && indicator <=4)) return new String[]{"error"};//indicator is not in range 1 to 4 then return to avoid error
 
         Cursor cursor2=null;//returnOnlySkill will return only string of array
-        try(Database db = new Database(context);
-            Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'"))
-        {
+        Database db=Database.getInstance(context);
+        try(
+            Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'")){
             cursor1.moveToFirst();
             switch (indicator) {
                 case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
@@ -501,18 +518,19 @@ public class MyUtility {
         if(!(indicator >= 1 && indicator <=4)) return new int[2*(indicator+1)];//if indicator is not in range 1 to 4 then return exception all value will be 0
 
         Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
-        try(Database db = new Database(context)){
+        Database db = Database.getInstance(context);
+        try{
             switch(indicator){
-                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
+                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
+                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"),SUM("+Database.COL_10__P3 +"), SUM("+Database.COL_7__DEPOSIT +") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
+                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+Database.COL_6__WAGES +"),SUM("+Database.COL_8__P1 +"),SUM("+Database.COL_9__P2 +"),SUM("+Database.COL_10__P3 +"),SUM("+Database.COL_11__P4 +"), SUM("+Database.COL_7__DEPOSIT +")  FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_1__ID +"= '"+id +"'");
+                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 11) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +")  FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
             }
@@ -542,17 +560,18 @@ public class MyUtility {
             }
         }
     }
-    public static int get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default
-        try(Database db=new Database(context);
+    public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default
+        Database db=Database.getInstance(context);
+        try(
             Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getString(0) == null) {//if null then indicator should be 1
                     return 1;
                 } else {
-                    return cursor.getInt(0);
+                    return (byte) cursor.getShort(0);
                 }
-            } else
+            }else
                 Log.d(MyUtility.class.getSimpleName(), "NO DATA IN CURSOR" + Thread.currentThread().getStackTrace()[2].getMethodName());
 
         }catch(Exception ex){
@@ -563,10 +582,9 @@ public class MyUtility {
     }
     public static String[][] makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
         if(!(indicator >= 1 && indicator <=4)) return new String[][]{new String[]{"error"},new String[]{"error"},new String[]{"error"}};//if indicator is not in range 1 to 4 then return
-
-        try(Database db = new Database(context);
-            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
-        {
+        Database db=Database.getInstance(context);
+        try(
+            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned
             String[] header =null,totalCalculationForSummary =null,finalMessage =null;
 
@@ -640,7 +658,8 @@ public class MyUtility {
         }
     }
     public static String[] fetchPersonDetailOfPDF(String id, Context context){
-        try (Database db=new Database(context);
+        Database db=Database.getInstance(context);
+          try(
              Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
              Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
@@ -713,9 +732,9 @@ public class MyUtility {
         }
     }
     public static String getActivePhoneNumbersFromDb(String id,Context context){//if no data return null..it return first phone number if first not available then send second phone number will be return
-        try (Database db=new Database(context);
-             Cursor cursor = db.getData("SELECT " +Database.COL_7_ACTIVE_PHONE1+" , "+Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
-        {
+        Database db = Database.getInstance(context);
+        try (
+             Cursor cursor = db.getData("SELECT " +Database.COL_7_ACTIVE_PHONE1+" , "+Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor != null) {//which ever phone is available that phone will be send
                 cursor.moveToFirst();
                 if (cursor.getString(0).length() == 10){

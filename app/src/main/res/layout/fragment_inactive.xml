@@ -56,7 +56,8 @@
                 android:id="@+id/mestre_total_inactive_radiogroup"
                 android:text="@string/mestre"
                 android:textSize="15sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,7 +65,8 @@
                 android:text="@string/laber"
                 android:textSize="15sp"
                 android:textStyle="bold"
-                android:id="@+id/laber_total_inactive_radiogroup"/>
+                android:id="@+id/laber_total_inactive_radiogroup"
+                android:foreground="?android:attr/selectableItemBackground"/>
             <RadioButton
                 android:id="@+id/g_total_inactive_radiogroup"
                 android:layout_width="wrap_content"
@@ -72,7 +74,8 @@
                 android:layout_weight="1"
                 android:text="@string/women_laber"
                 android:textSize="15sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:foreground="?android:attr/selectableItemBackground"/>
         </RadioGroup>
     </LinearLayout>
     <ScrollView

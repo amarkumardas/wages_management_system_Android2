@@ -29,6 +29,7 @@
     <string name="total_no_of_wages_entries">*TOTAL N0. OF WAGES ENTRIES:</string>
     <string name="message">MESSAGE</string>
     <string name="total_sum">TOTAL SUM</string>
+    <string name="share_message_using">SHARE MESSAGE USING</string>
 
    <!--CustomizeLayoutOrDepositAmount-->
     <string name="update_deposit_amount">UPDATE DEPOSIT AMOUNT=</string>
@@ -79,6 +80,12 @@
     <string name="no_data_present_so_removed">NO DATA PRESENT SO REMOVED</string>
     <string name="status_colon_success">STATUS: SUCCESS</string>
     <string name="because_data_is_present_newline_total_sum_equal">BECAUSE DATA IS PRESENT\nTOTAL SUM= </string>
+    <string name="successfully_added_l">SUCCESSFULLY  ADDED L</string>
+    <string name="failed_to_add_l">FAILED TO ADD L</string>
+    <string name="successfully_added_m">SUCCESSFULLY  ADDED M</string>
+    <string name="failed_to_add_m">FAILED TO ADD M</string>
+    <string name="successfully_added_g">SUCCESSFULLY  ADDED G</string>
+    <string name="failed_to_add_g">FAILED TO ADD G</string>
 
     <!-- Database.java-->
     <string name="check_last_remarks">CHECK LAST REMARKS</string>

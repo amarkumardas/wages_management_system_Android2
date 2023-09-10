@@ -8,14 +8,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
+import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.utility.MyUtility;
-
-
 public class Database extends SQLiteOpenHelper {
     public final static int Database_Version=1;//5to update db version just increase the value by 1.when this value is increase then constructor is called
     SQLiteDatabase db;
     Context context;
     public final static String DATABASE_NAME="person_db";
+    private static Database instance; // Step 1: Private static instance
 
     //table 1---------------------------------------------------------------------------------------
     public final static String TABLE_NAME1="person_details_table";
@@ -39,19 +43,19 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_18_RELIGION="RELIGION";
 
     //table 2---------------------------------------------------------------------------------------
-    public final static String TABLE_NAME2="wages_table";
-    public final static String COL_1__ID ="ID";
-    public final static String COL_2__DATE ="DATE";//here date and time and id is acting like primary key
-    public final static String COL_3__TIME ="TIME";
-    public final static String COL_4__MICPATH ="MICPATH";
-    public final static String COL_5__DESCRIPTION ="REMARKS";
-    public final static String COL_6__WAGES ="WAGES";
-    public final static String COL_7__DEPOSIT ="DEPOSIT";
-    public final static String COL_8__P1 ="P1";
-    public final static String COL_9__P2 ="P2";
-    public final static String COL_10__P3 ="P3";
-    public final static String COL_11__P4 ="P4";
-    public final static String COL_12__ISDEPOSITED ="ISDEPOSITED";
+//    public final static String TABLE_NAME20="wages_table";
+//    public final static String COL_1__ID ="ID";
+//    public final static String COL_2__DATE ="DATE";//here date and time and id is acting like primary key
+//    public final static String COL_3__TIME ="TIME";
+//    public final static String COL_4__MICPATH ="MICPATH";
+//    public final static String COL_5__DESCRIPTION ="REMARKS";
+//    public final static String COL_6__WAGES ="WAGES";
+//    public final static String COL_7__DEPOSIT ="DEPOSIT";
+//    public final static String COL_8__P1 ="P1";
+//    public final static String COL_9__P2 ="P2";
+//    public final static String COL_10__P3 ="P3";
+//    public final static String COL_11__P4 ="P4";
+//    public final static String COL_12__ISDEPOSITED ="ISDEPOSITED";
 
 //----------------------------------TABLE_ACTIVE_MESTRE--------------------------------------------------
     public final static String TABLE0_ACTIVE_MESTRE ="active_mestre_wages_table";
@@ -144,12 +148,28 @@ public class Database extends SQLiteOpenHelper {
         this.context=context;
         System.out.println("constructor db*****************************");
     }
+    //Create a public static method to get the instance
+    public static synchronized Database getInstance(Context context) {
+        if (instance == null) {
+            instance = new Database(context.getApplicationContext());
+        }
+        return instance;
+    }
+    public static void closeDatabase() {//In the closeDatabase() method, you can use either getWritableDatabase() or getReadableDatabase() to close the database connection. Both methods essentially return the same underlying database connection, and closing the connection obtained from either method will close the database properly.
+        if (instance != null) {
+            SQLiteDatabase db = instance.getWritableDatabase(); // or getReadableDatabase()
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+            instance = null; // Set the instance to null to indicate it's closed
+        }
+    }
     //If we explicitly insert default NULL into the column then in database blank will be shown instead of NULL
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {//it will execute only once        //NOT NULL OR DEFAULT NOT WORKING AND VARCHAR GIVEN VALUE NOT WORKING HOLDING MORE THAN GIVEN VALUE
      try {//if some error occur it will handle
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(100) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
-         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME2 + " ("+ COL_1__ID +" INTEGER ,"+ COL_2__DATE +" TEXT DEFAULT NULL,"+ COL_3__TIME +" TEXT DEFAULT NULL,"+ COL_4__MICPATH +" TEXT DEFAULT NULL,"+ COL_5__DESCRIPTION +" TEXT DEFAULT NULL,"+ COL_6__WAGES +" NUMERIC DEFAULT NULL,"+ COL_7__DEPOSIT +" NUMERIC DEFAULT NULL,"+ COL_8__P1 +" INTEGER DEFAULT NULL,"+ COL_9__P2 +" INTEGER DEFAULT NULL,"+ COL_10__P3 +" INTEGER DEFAULT NULL,"+ COL_11__P4 +" INTEGER DEFAULT NULL,"+ COL_12__ISDEPOSITED +" CHAR(1) DEFAULT NULL);");
+         //sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME2 + " ("+ COL_1__ID +" INTEGER ,"+ COL_2__DATE +" TEXT DEFAULT NULL,"+ COL_3__TIME +" TEXT DEFAULT NULL,"+ COL_4__MICPATH +" TEXT DEFAULT NULL,"+ COL_5__DESCRIPTION +" TEXT DEFAULT NULL,"+ COL_6__WAGES +" NUMERIC DEFAULT NULL,"+ COL_7__DEPOSIT +" NUMERIC DEFAULT NULL,"+ COL_8__P1 +" INTEGER DEFAULT NULL,"+ COL_9__P2 +" INTEGER DEFAULT NULL,"+ COL_10__P3 +" INTEGER DEFAULT NULL,"+ COL_11__P4 +" INTEGER DEFAULT NULL,"+ COL_12__ISDEPOSITED +" CHAR(1) DEFAULT NULL);");
 
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE0_ACTIVE_MESTRE + " ("+ COL_1_ID_AM +" INTEGER ,"+ COL_2_DATE_AM +" TEXT DEFAULT NULL,"+ COL_3_TIME_AM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_AM +" TEXT DEFAULT NULL,"+ COL_5_DESCRIPTION_AM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_AM +" NUMERIC DEFAULT NULL,"+ COL_7_DEPOSIT_AM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_AM +" INTEGER DEFAULT NULL,"+ COL_9_P2_AM +" INTEGER DEFAULT NULL,"+ COL_10_P3_AM +" INTEGER DEFAULT NULL,"+ COL_11_P4_AM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_AM +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE1_ACTIVE_LG + " ("+ COL_1_ID_ALG +" INTEGER ,"+ COL_2_DATE_ALG +" TEXT DEFAULT NULL,"+ COL_3_TIME_ALG +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_ALG +" TEXT DEFAULT NULL,"+ COL_5_DESCRIPTION_ALG +" TEXT DEFAULT NULL,"+ COL_6_WAGES_ALG +" NUMERIC DEFAULT NULL,"+ COL_7_DEPOSIT_ALG +" NUMERIC DEFAULT NULL,"+ COL_8_P1_ALG +" INTEGER DEFAULT NULL,"+ COL_9_P2_ALG +" INTEGER DEFAULT NULL,"+ COL_10_P3_ALG +" INTEGER DEFAULT NULL,"+ COL_11_P4_ALG +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_ALG +" CHAR(1) DEFAULT NULL);");
@@ -227,13 +247,11 @@ public class Database extends SQLiteOpenHelper {
     public  Cursor getId(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String type, String fatherName,String acHolder,String location,String religion){
             db = this.getReadableDatabase();//error when closing db or cursor
             String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + fatherName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + acHolder + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
-            Cursor cursor = db.rawQuery(query, null);
-            return cursor;
+            return db.rawQuery(query, null);
      }
     public Cursor getData(String query){//error when closing db or cursor so don't close cursor
             db = this.getReadableDatabase();
-            Cursor cursor = db.rawQuery(query, null);
-            return cursor;
+             return db.rawQuery(query, null);
     }
     public boolean updateDataTable1(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, byte[] image, String acHolder, String Id,String location,String religion ) {
         boolean success=false;
@@ -302,7 +320,7 @@ public class Database extends SQLiteOpenHelper {
     }
     public boolean updatePersonSkillAndShiftData(String changedSkill,String id) {
         try{
-            String previousActiveOrInactiveAndSkill[]=getActiveOrInactiveAndSkill(id);
+            String[] previousActiveOrInactiveAndSkill =getActiveOrInactiveAndSkill(id);
             /**if previous  and changedSkill
              *      M  =  M=return true =previousActiveOrInactiveAndSkill[1].equals(changedSkill)
              *      L  =  L=return true =previousActiveOrInactiveAndSkill[1].equals(changedSkill)
@@ -348,7 +366,7 @@ public class Database extends SQLiteOpenHelper {
             previousActiveOrInactiveAndSkill=getActiveOrInactiveAndSkill(id);//this statement should be here to get previous data like skill
 
             if(database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
-                success=shiftDataToActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false,getSkill(id));//getSkill(id) gives updated skill
+                success=shiftDataToActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getMainSkill(id));//getSkill(id) gives updated skill
             }
 
         }catch (Exception e){
@@ -373,7 +391,7 @@ public class Database extends SQLiteOpenHelper {
             previousActiveOrInactiveAndSkill=getActiveOrInactiveAndSkill(id);//this statement should be here to get previous data like skill
 
             if(database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
-                success=shiftDataToInActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false,getSkill(id));//getSkill(id) gives updated skill
+                success=shiftDataToInActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getMainSkill(id));//getSkill(id) gives updated skill
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -387,7 +405,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean insertWagesOrDepositToActiveTable(SQLiteDatabase db, String skill, String id, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
+    public boolean insertWagesOrDepositToActiveTableDirectly(SQLiteDatabase db, String skill, String id, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
                 ContentValues cv = new ContentValues();//to enter data at once it is like hash map
                 if(skill.equals(context.getResources().getString(R.string.laber)) || skill.equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
                     if (id != null) {
@@ -470,7 +488,7 @@ public class Database extends SQLiteOpenHelper {
                 }
           return false;//any error return false
     }
-    public boolean insertWagesOrDepositToInActiveTable(SQLiteDatabase db, String skill, String id, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
+    public boolean insertWagesOrDepositToInActiveTableDirectly(SQLiteDatabase db, String skill, String id, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
         ContentValues cv = new ContentValues();//to enter data at once it is like hash map
         if(skill.equals(context.getResources().getString(R.string.laber)) || skill.equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
             if (id != null) {
@@ -1133,7 +1151,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return false;
     }
-    public boolean deleteFromOtherTableAndAddRemarksInCurrentTableTransactional(byte duplicateDataPresentTableNumber, String id, String activeAndSkill[]) {
+    public boolean deleteFromOtherTableAndAddRemarksInCurrentTableTransactional(byte duplicateDataPresentTableNumber, String id, String activeAndSkill[]) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
         boolean success=false;
         SQLiteDatabase dB =null;
         try {
@@ -1143,11 +1161,11 @@ public class Database extends SQLiteOpenHelper {
             String remarks= formatCursorDataToText(otherTableDataCursor);
 
             if(activeAndSkill[0].equals("1")){//insert remarks in current active table
-                if(!insertWagesOrDepositToActiveTable(dB, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, remarks, 0, 0, 0, 0, 0, 0, "0")){
+                if(!insertWagesOrDepositToActiveTableDirectly(dB, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, remarks, 0, 0, 0, 0, 0, 0, "0")){
                     return false;
                 }
             }else if (activeAndSkill[0].equals("0")){//insert remarks in current inactive table
-               if(!insertWagesOrDepositToInActiveTable(dB, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, remarks, 0, 0, 0, 0, 0, 0, "0")){
+               if(!insertWagesOrDepositToInActiveTableDirectly(dB, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, remarks, 0, 0, 0, 0, 0, 0, "0")){
                    return false;
                }
             }
@@ -1247,7 +1265,7 @@ public class Database extends SQLiteOpenHelper {
               }
           return table;
     }
-    public boolean shiftDataToActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateLatestDate,String insertAccordingToSkillIntoActiveTable) {
+    public boolean shiftDataToActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateLatestDate,String insertAccordingToSkillIntoActiveTable) {//this method should be called only when id is active because data will be inserted directly to active table without checking
         boolean success=false;
         SQLiteDatabase dB =null;
        try {
@@ -1260,7 +1278,7 @@ public class Database extends SQLiteOpenHelper {
 
             if (dataFromTableCursor != null) {
                 while (dataFromTableCursor.moveToNext()){
-                   if(!insertWagesOrDepositToActiveTable(dB,insertAccordingToSkillIntoActiveTable,dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(10), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(11))){
+                   if(!insertWagesOrDepositToActiveTableDirectly(dB,insertAccordingToSkillIntoActiveTable,dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(10), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(11))){
                        return false;
                    }
                 }
@@ -1281,7 +1299,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean shiftDataToInActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateActive,String skill) {
+    public boolean shiftDataToInActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateActive,String skill) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -1293,7 +1311,7 @@ public class Database extends SQLiteOpenHelper {
 
             if (dataFromTableCursor != null) {
                 while (dataFromTableCursor.moveToNext()) {
-                    if(!insertWagesOrDepositToInActiveTable(dB, skill, dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(10), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(11))){
+                    if(!insertWagesOrDepositToInActiveTableDirectly(dB, skill, dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(10), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(11))){
                         return false;
                     }
                 }
@@ -1391,32 +1409,33 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean insertPdf(String id,byte [] pdf,int whichPdf1or2){
-        boolean success=false;
-        SQLiteDatabase dB=null;
+    public boolean insertPdf(String id,byte [] pdf,byte whichPdf1or2,SQLiteDatabase dB){
+//        boolean success=false;
+//        SQLiteDatabase dB=null;
         try {
-            dB = this.getWritableDatabase();//getting permission it should be here
-            dB.beginTransaction();//transaction start
+//            dB = this.getWritableDatabase();//getting permission it should be here
+//            dB.beginTransaction();//transaction start
             ContentValues cv = new ContentValues();//to enter data at once it is like hash map
             if(whichPdf1or2==1) {
                 cv.put(COL_394_INVOICE1, pdf);//pdf1
-            }else {//if whichPdf1or2==2
+            }else if(whichPdf1or2==2){
                 cv.put(COL_395_INVOICE2, pdf);//pdf2
             }
-            success=(db.update(TABLE_NAME3,cv,Database.COL_31_ID+"= '"+id+"'",null) ==1)?true:false;//if update return 1 then data is updated else not updated
+            return (dB.update(TABLE_NAME3,cv,Database.COL_31_ID+"= '"+id+"'",null) == 1)?true:false;//if update return 1 then data is updated else not updated
         }catch (Exception e){
             e.printStackTrace();
             return false;
-        }finally {
-            if (dB != null){
-                if(success){//if success then only commit
-                    dB.setTransactionSuccessful();//If you want to commit the transaction there is a method setTransactionSuccessful() which will commit the values in the database.If you want to rollback your transaction then you need to endTransaction() without committing the transaction by setTransactionSuccessful().
-                }
-                dB.endTransaction(); //Commit or rollback the transaction
-                dB.close();
-            }
         }
-        return success;
+//        finally {
+//            if (dB != null){
+//                if(success){//if success then only commit
+//                    dB.setTransactionSuccessful();//If you want to commit the transaction there is a method setTransactionSuccessful() which will commit the values in the database.If you want to rollback your transaction then you need to endTransaction() without committing the transaction by setTransactionSuccessful().
+//                }
+//                dB.endTransaction(); //Commit or rollback the transaction
+//                dB.close();
+//            }
+//        }
+       // return success;
     }
     public String columnNameOutOf4Table(String id, byte columnIndex){//this method will take more time
         try{
@@ -1558,7 +1577,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return -1;//means incorrect table number
     }
-    public String getSkill(String id){
+    public String getMainSkill(String id){
         db = this.getReadableDatabase();
         Cursor cursor=null;
         try {
@@ -1575,10 +1594,12 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     public boolean isActiveOrInactive(String id){
-        db = this.getReadableDatabase();
+       // db = this.getReadableDatabase();
+        Database db=Database.getInstance(context);
         Cursor cursor=null;
         try {
-            cursor=db.rawQuery("SELECT  "+Database.COL_12_ACTIVE+" FROM "+ Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
+            //cursor=db.rawQuery("SELECT  "+Database.COL_12_ACTIVE+" FROM "+ Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
+            cursor=db.getData("SELECT  "+Database.COL_12_ACTIVE+" FROM "+ Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'");
             cursor.moveToFirst();
             return cursor.getString(0).equals("1")? true :false;
         }catch (Exception x){
@@ -1615,22 +1636,228 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    //    @SuppressLint("SuspiciousIndentation")
-//    public boolean deleteRows(String id, String tableName){
-//        try {
-//            db = this.getWritableDatabase();//getting permission
-//            int row = db.delete(tableName, "ID= '" + id + "'", null);
-//            if (row > 0){//delete method return number of record deleted
-//                return true;
-//            }
-//
-//            return false;
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            return false;
-//        }finally {
-//            if(db != null)
-//            db.close();
-//        }
-//    }
+  public boolean deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(String id,int totalDeposit,int totalWages,int p1,int p2,int p3,int p4,int r1,int r2,int r3,int r4,byte indicate,int []innerArray,String pdfAbsolutePath){
+    /**should be follow in sequence strictly because to call this method id should be active otherwise data will ne inserted directly to other table
+     * 0.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table
+     *1.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table
+     * 2.delete all wages and deposit
+     * 3.add final message to database or recycle view so that after deletion message would be inserted and visible to user
+     * 4.update pdf sequence
+     * 5.deleted all audio from device*/
+
+     // 0.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table
+      boolean success=false;//value should be false
+      if(!activateIdWithLatestDate(id,MyUtility.getOnlyTime())){
+          Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
+          return false;
+      }
+    SQLiteDatabase dB =null;
+    try {
+        dB = this.getWritableDatabase();//getting permission it should be here to rollback
+        dB.beginTransaction();//transaction start
+
+        success=updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(dB,id,totalDeposit,  totalWages,  p1,  p2,  p3,  p4,  r1,  r2,  r3,  r4,  indicate,innerArray);//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
+        if(!success) return false;
+
+        success=MyUtility.createTextFileInvoice(id,context,context.getExternalFilesDir(null).toString());//creating text file for backup in device folder
+        if(!success) return false;
+
+        success=savePdfToDatabaseAndDeleteFromDevice(pdfAbsolutePath,id,dB);//after saving pdf in db then deleted from device
+        if(!success) return false;
+
+        //1.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table
+        ArrayList<String> allAudioList=getAllAudioPathFromDb(id);//before deleting all audio getting all audio from db and storing in arraylist
+
+        //2.delete all wages and deposit
+         dB.delete(tableNameOutOf4Table(id), "ID= '" + id + "'", null);//if error occur then control goes to catch block there success will be false so if above code is executes successfully that operation should not be committed
+
+        //3.add final message to database or recycle view so that after deletion message would be inserted and visible to user
+         success=addMessageAfterFinalCalculationToRecyclerview(id,dB);
+         if(!success)return false;
+
+        //4.update pdf sequence
+         success=updateInvoiceNumberBy1ToDb(id,dB);
+         if(!success) return false;
+
+         //if control reach till here that means all main operation executed successfully. If this code fail to execute then no need to rollback
+        //5.deleted all audio from device
+        success=beforeDeletingWagesAudiosShouldBeDeletedFirst(allAudioList);
+        if(!success){
+            Toast.makeText(context, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: " + id + "\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+            if (!insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0")) {//this insertion should be perform only when id is active
+                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
+            }
+            success=true;//making true to commit all above main operation. if here if else statement fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+        }
+    }catch (Exception x){
+        x.printStackTrace();
+        return false;//if delete method produce error then this will execute and success will be false from before
+    }finally {
+        if(!success){//if any operation fail
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(TextFile.textFileAbsolutePathInDevice);//if any operation fail then delete the created text file alse from device
+            TextFile.textFileAbsolutePathInDevice=null;//setting null to static variable for save
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//if any operation fail then delete the created pdf from device
+        }
+        if (dB != null){
+            if(success){//if success then only commit
+                dB.setTransactionSuccessful();//If you want to commit the transaction there is a method setTransactionSuccessful() which will commit the values in the database.If you want to rollback your transaction then you need to endTransaction() without committing the transaction by setTransactionSuccessful().
+            }
+            dB.endTransaction(); //Commit or rollback the transaction
+            dB.close();
+        }
+    }
+    return success;
+  }
+    private boolean savePdfToDatabaseAndDeleteFromDevice(String pdfAbsolutePath,String id,SQLiteDatabase dB){//storing in device and deleting from device because it is stored in database
+        if(pdfAbsolutePath != null) {
+            try (Cursor cursor = getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){//so that object close automatically
+                cursor.moveToFirst();
+                byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
+
+                if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
+                    return insertPdf(id, newPDF, (byte) 2,dB);
+                }
+                //if pdf1 is not null then store in pdf 2
+                if (insertPdf(id, cursor.getBlob(0), (byte) 1,dB)) {//store pdf2 in pdf1
+                    return insertPdf(id, newPDF, (byte) 2,dB);//store new pdf in pdf2
+                }
+                return false;
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return false;
+            }finally{
+                MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
+            }
+        }else return false;
+    }
+  private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(SQLiteDatabase dB,String id,int totalDeposit,int totalWages,int p1,int p2,int p3,int p4,int r1,int r2,int r3,int r4,byte indicate,int []innerArray){
+      //Cursor cursor = getData("SELECT " + Database.COL_397_TOTAL_WORKED_DAYS + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+      try(Cursor cursor = getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")) {
+           cursor.moveToFirst();//means only one row is returned
+
+           //updating rate and total worked days
+           //boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"' , "+Database.COL_397_TOTAL_WORKED_DAYS+" ='" +(cursor.getInt(0)+p1)+"' WHERE "+Database.COL_31_ID+"='" + id + "'");
+           dB.execSQL("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_32_R1 + "='" + r1 + "' , " + Database.COL_33_R2 + "='" + r2 + "' , " + Database.COL_34_R3 + "='" + r3 + "' , " + Database.COL_35_R4 + "='" + r4 + "' , " + Database.COL_397_TOTAL_WORKED_DAYS + " ='" + (cursor.getInt(0) + p1) + "' WHERE " + Database.COL_31_ID + "='" + id + "'");
+//           cursor.close();
+
+           if (!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
+               if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
+                   //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
+
+                   if (((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
+                       Toast.makeText(context, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
+                       return false;
+                   }
+                   if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
+                       //updating Advance to db
+                       // success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+
+                       //if there is advance then balance  column should be 0
+                       // success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+
+                   } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
+
+                       //updating balance to db if greater then 0
+                       // success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+
+                       //if there is balance then update advance column should be 0
+                       //success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                   }
+               } else {
+                   Toast.makeText(context, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
+                   return false;
+               }
+           } else {
+               Toast.makeText(context, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
+               return false;
+           }
+       }catch (Exception x){
+           x.printStackTrace();
+           return false;
+       }
+       return true;
+    }
+    private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB) {//to call this method id should be active otherwise data will ne inserted directly to other table
+        try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
+            cursor.moveToFirst();//means only one row is returned
+            if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
+
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
+
+            }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
+
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(),MyUtility.getOnlyTime(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
+
+            }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
+
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. 0 ]",0,0,0,0,0,0,"0");
+
+            }
+            return false;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    private boolean updateInvoiceNumberBy1ToDb(String id,SQLiteDatabase dB) {
+        try(Cursor cursor=getData("SELECT "+Database.COL_396_PDFSEQUENCE +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+            cursor.moveToFirst();//means only one row is returned
+            dB.execSQL("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'");
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(ArrayList<String> allAudio) {//deleting all audios
+        if(allAudio==null) return false;//means error occurred while fetching audio from db
+        if(allAudio.size() != 0) {//allAudio.size() will be 0 when no single audio present in db but allAudio reference will not be null
+             for (String audio : allAudio) {
+                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(audio)) {
+                     return false;
+                 }
+             }
+         }
+        return true;//if there is no single audio then also return true
+    }
+    private ArrayList<String> getAllAudioPathFromDb(String id){//may return null when exception occur
+        ArrayList<String> audiosPathAl=new ArrayList<>();
+        if(isSingleRowPresentInTable(id)){//if data present in table then execute
+            try (Cursor cursor = getData("SELECT " + columnNameOutOf4Table(id, (byte) 4) + " FROM " + tableNameOutOf4Table(id) + " WHERE " + columnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'")) {//so that object close automatically
+                while (cursor.moveToNext()) {
+                    if (cursor.getString(0) != null) {//checking path may be null
+                        audiosPathAl.add(cursor.getString(0));
+                    }
+                }
+            }catch (Exception x) {
+                x.printStackTrace();
+                return null;
+            }
+        }
+        return audiosPathAl;//if no data then array list size will be 0
+    }
+    private boolean isSingleRowPresentInTable(String id){
+        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){//SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
+            cursor.moveToFirst();
+            return (cursor.getShort(0) == 1)? true:false;//if getShort(0) is 1 that means data is present in table.
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+    }
 }
+//    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it
+//        ChatGPT
+//        Your statement is generally correct, but there's a slight clarification needed. SQLiteOpenHelper is typically used in Android applications to manage database connections and database version management. It's important to use a single instance of SQLiteOpenHelper throughout your application's lifecycle to prevent issues with database locking and maintain a consistent database state. Here's a more detailed explanation:
+//
+//        Single Instance of SQLiteOpenHelper: Creating multiple instances of SQLiteOpenHelper to access the same database file can lead to problems. Each instance maintains its own database connection pool, and if multiple instances are used, they may not coordinate their access to the database file effectively, leading to locking conflicts.
+//
+//        Database Locking: When multiple instances of SQLiteOpenHelper or other database access methods are used concurrently, they may try to perform read and write operations on the same database file simultaneously. This can result in database locking issues, where one instance locks the database for a write operation, preventing other instances from reading or writing until the lock is released. This can lead to inconsistencies and data corruption.
+//
+//        Consistent Database State: To maintain a consistent database state and avoid locking conflicts, it's best practice to use a single instance of SQLiteOpenHelper throughout your application. This ensures that all database operations are synchronized and that the database is accessed in a coordinated manner.
+//
+//        Closing the Database: Additionally, it's essential to close the database connection when you are done with it. This can be achieved by calling the close() method on your SQLiteOpenHelper instance. Failing to close the database properly can lead to resource leaks and potential issues with your application.

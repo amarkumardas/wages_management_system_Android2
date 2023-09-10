@@ -2,7 +2,7 @@ package amar.das.acbook.activity;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -72,7 +72,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         sharePdfLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),activityResult ->{//ActivityResultCallback it will execute when return from other intent
             for (String path:absolutePathArrayToDelete){
                 if(path!=null){
-                   if(!MyUtility.deletePdfOrRecordingFromDevice(path)){
+                   if(!MyUtility.deletePdfOrRecordingUsingPathFromDevice(path)){
                        Log.d(this.getClass().getSimpleName(),"failed to delete file from device");
                    }
                 }
@@ -109,7 +109,7 @@ public class PdfViewerOperation extends AppCompatActivity {
                 }else{
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
-                if(MyUtility.deletePdfOrRecordingFromDevice(absolutePathArrayToDelete[1])){//manually delete the generated file from app private storage because this file is downloaded and stored in download folder so deleting it otherwise same file will be twice.it will be deleted when error occurred or not
+                if(MyUtility.deletePdfOrRecordingUsingPathFromDevice(absolutePathArrayToDelete[1])){//manually delete the generated file from app private storage because this file is downloaded and stored in download folder so deleting it otherwise same file will be twice.it will be deleted when error occurred or not
                     absolutePathArrayToDelete[1]=null; //after file deleted set null
                 }
             }else//when whichPdfIndicatorChangesDynamically is 4
@@ -835,7 +835,7 @@ public class PdfViewerOperation extends AppCompatActivity {
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, message);
                 shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
-                startActivity(Intent.createChooser(shareIntent, "SHARE MESSAGE USING"));//startActivity launch activity without expecting any result back SO we don't need any result back so using start activity
+                startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share_message_using)));//startActivity launch activity without expecting any result back SO we don't need any result back so using start activity
                 return true;
         }catch (Exception ex){
             ex.printStackTrace();
@@ -1176,7 +1176,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         super.onDestroy();
         for (String path:absolutePathArrayToDelete){
             if(path!=null){
-                if(!MyUtility.deletePdfOrRecordingFromDevice(path)){
+                if(!MyUtility.deletePdfOrRecordingUsingPathFromDevice(path)){
                     Log.d(this.getClass().getSimpleName(),"failed to delete file from device");
                 }
             }

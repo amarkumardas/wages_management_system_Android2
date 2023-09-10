@@ -7,6 +7,7 @@ import amar.das.acbook.utility.MyUtility;
 
 public class TextFile {
     private StringBuilder text;
+    public static String textFileAbsolutePathInDevice;
 
     public TextFile (){
         this.text=new StringBuilder();
@@ -28,9 +29,9 @@ public class TextFile {
                FileOutputStream outputStream = new FileOutputStream(filePathInDevice);
                outputStream.write(this.text.toString().getBytes());//writing to the file which is there in device
                outputStream.close();
+               textFileAbsolutePathInDevice =filePathInDevice.getAbsolutePath();
                return true;
            }
-            System.out.println();
            return false;
         }catch (Exception x){
             x.printStackTrace();

@@ -85,7 +85,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
                 }
             }else{
                 if(db.isActiveOrInactive(data.getId())){//to make id inactive change to false if(!db.isActiveOrInactive(data.getId())){
-                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
+                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
                  }else{
                     //for testing make if condition false
 //                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
@@ -129,9 +129,9 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             context.startActivity(intent);
 
             //optional to know only
-            Cursor cursor5 = db.getData("SELECT "+Database.COL_15_LATESTDATE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
-            cursor5.moveToFirst();
-            Toast.makeText(context, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
+//            Cursor cursor5 = db.getData("SELECT "+Database.COL_15_LATESTDATE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
+//            cursor5.moveToFirst();
+//            Toast.makeText(context, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
         });
     }
     @Override

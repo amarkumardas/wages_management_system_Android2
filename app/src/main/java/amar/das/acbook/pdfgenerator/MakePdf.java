@@ -519,7 +519,7 @@ public class MakePdf{
          the total height of all the gaps to get the total height of the block of text.*/
     }
 
-    public  String createFileToSavePdfDocumentAndReturnFileAbsolutePath3(String externalFileDir, String fileName){//return null when exception
+    public  File createFileToSavePdfDocumentAndReturnFile(String externalFileDir, String fileName){//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
 //            File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
 //            if (!folder.exists()) {//of folder not exist then create folder
@@ -529,7 +529,8 @@ public class MakePdf{
             if(MyUtility.checkFolderIfNotExistCreateIt(externalFileDir,"acBookPDF")) {
                 File filePath = new File(externalFileDir + "/acBookPDF/" + fileName + ".pdf");//path of pdf where it is saved in device
                 myPdfDocument.writeTo(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
-                return filePath.getAbsolutePath();//returning created file absolute path
+               // return filePath.getAbsolutePath();//returning created file absolute path
+                return filePath;
             }else return null;
 
         }catch (Exception e){

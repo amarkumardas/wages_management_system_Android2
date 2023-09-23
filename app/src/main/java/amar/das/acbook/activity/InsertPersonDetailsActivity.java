@@ -321,20 +321,20 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
 
-                    boolean  success=false;
+                    boolean success = false;
                     //update
-                    if(getIntent().hasExtra("ID")){//will execute only when updating
+                    if (getIntent().hasExtra("ID")) {//will execute only when updating
 
-                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
+                        if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(InsertPersonDetailsActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
 
-                        if(db.updatePersonSkillAndShiftData(personSkill,fromIntentPersonId)){//if skill get updated then only all data will be updated its important
-                            success= db.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,fromIntentPersonId,location,religion);
+                        if (db.updatePersonSkillAndShiftData(personSkill, fromIntentPersonId)) {//if skill get updated then only all data will be updated its important
+                            success = db.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, fromIntentPersonId, location, religion);
                         }
 
-                        if(success){//if it is updated then show successfully message
-                            Toast.makeText(InsertPersonDetailsActivity.this, "ID- "+fromIntentPersonId+" "+getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
+                        if (success) {//if it is updated then show successfully message
+                            Toast.makeText(InsertPersonDetailsActivity.this, "ID- " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
 //                            final Calendar current=Calendar.getInstance();//to get current date
@@ -343,33 +343,31 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
 
 
                             //after success then go to previous activity automatically and destroy current activity so that when pressing back user should not get same activity this is done by finish();
-                            Intent in=new Intent(getBaseContext(),IndividualPersonDetailActivity.class);//completed then go back
-                            in.putExtra("ID",fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
+                            Intent in = new Intent(getBaseContext(), IndividualPersonDetailActivity.class);//completed then go back
+                            in.putExtra("ID", fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
                             startActivity(in);
                             finish();//destroy current activity
 
-                        }else
+                        } else
                             Toast.makeText(InsertPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
 
-                    }else {//this will execute only when adding new person
+                    } else {//this will execute only when adding new person
 
-                        //for (int k = 1; k <= 10; k++) {
-                            //inserting data to sqlite database
-                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,location,religionHashSet,religion,getBaseContext())){//UPDATING location and religion table
+                      //  for (int k = 1; k <= 50; k++) {
+                        if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(InsertPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                         }
-                        success = db.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2,location,religion);
-                        //}
+                        success = db.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, location, religion);
 
                         if (success) {//checking for duplicate
-                            Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2,location,religion);
+                            Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2, location, religion);
                             StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
-                            String holdLastId="";
+                            String holdLastId = "";
 
-                            if(result.getCount() == 1 || result.getCount() > 1){//no duplicate
-                                buffer=new StringBuilder( );
+                            if (result.getCount() == 1 || result.getCount() > 1) {//no duplicate
+                                buffer = new StringBuilder();
 
-                                if(result.moveToFirst() && result.getCount()==1) {//ONLY 1 DATE NO DUPLICATE
+                                if (result.moveToFirst() && result.getCount() == 1) {//ONLY 1 DATE NO DUPLICATE
 
                                     insertDataToTable3(result.getString(0));//update R1,R2,R3,R4 TO 0
 
@@ -378,29 +376,28 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                                     add.setVisibility(View.VISIBLE);
                                 }
 
-                                if(result.getCount() > 1){//this will be true when user all details is same to others means DUPLICATE
+                                if (result.getCount() > 1) {//this will be true when user all details is same to others means DUPLICATE
                                     buffer.append("Matching ").append(result.getCount()).append(" Person with same Details-").append("\n");
                                     result.moveToPrevious();//it help to start from first otherwise 1 item is not displayed
-                                    while(result.moveToNext()){
-                                        holdLastId=""+result.getString(0);//to display new added person ids comes at last when loop
+                                    while (result.moveToNext()) {
+                                        holdLastId = "" + result.getString(0);//to display new added person ids comes at last when loop
                                         buffer.append("\nPerson ID- ").append(result.getString(0));
                                     }
                                     //update R1,R2,R3,R4 TO 0
                                     insertDataToTable3(holdLastId);//hold last id variable has newly added id.If this insertDataToTable3(hold last id);  method is placed in while loop then all matching duplicate then have to  execute which is useless and produce exception
 
-                                    displayResult("Successfully Added New Person ID- "+holdLastId,buffer.toString());
+                                    displayResult("Successfully Added New Person ID- " + holdLastId, buffer.toString());
                                     add.setVisibility(View.VISIBLE);
                                 }
                                 result.close();//closing cursor
-                            }
-                            else
-                                displayResult("Data is Inserted but Query not returned any ID","\n"+"result.getCount()= "+result.getCount());
+                            } else
+                                displayResult("Data is Inserted but Query not returned any ID", "\n" + "result.getCount()= " + result.getCount());
 
                             // eraseAllDataAfterInsertingFromLayout();//should be here because control does not wait for its execution
-                        }
-                        else
-                            displayResult("Data FAILED to Insert","\n"+"Number of column maybe different in DataBase");
-                    }
+                        } else
+                            displayResult("Data FAILED to Insert", "\n" + "Number of column maybe different in DataBase");
+                   // }//for inserting duplicate rows
+                }
                 }
                 private void displayResult(String title, String message) {
                     AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertPersonDetailsActivity.this);
@@ -425,8 +422,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
        detailsReview.create().show();
     }
     private void insertDataToTable3(String id) {
-        boolean bool= db.insertDataTable3( id,0,0,0,0,null,null,null,null);
-        if(!bool)
+        if(!db.insertDataTable3( id,0,0,0,0,null,null,null,null))
             Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
     }
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {

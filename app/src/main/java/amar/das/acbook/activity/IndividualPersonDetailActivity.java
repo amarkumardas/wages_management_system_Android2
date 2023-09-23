@@ -6,7 +6,6 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.Manifest;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -48,13 +47,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.WagesDetailsAdapter;
 import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
 import amar.das.acbook.model.WagesDetailsModel;
-import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
@@ -1021,40 +1022,61 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     sumCursor.close();
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
-                        longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click multiple times
-                        try{Database dB=Database.getInstance(getBaseContext());
-                            if((checkInternalStorageAvailability()*1000) >= 30){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-                                if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){//Take permission
+                        longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click button multiple times
 
-                                    String pdfAbsolutePath = generatePDFAndReturnFileAbsolutePath(fromIntentPersonId);//first pdf is created
-                                    if(dB.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(fromIntentPersonId, totalDeposit, totalWages, p1, p2, p3, p4, r1, r2, r3, r4, indicate, innerArray, pdfAbsolutePath)) {
-                                        if (finalDialog != null && finalDialog.isShowing()){//dismiss dialog before going to pdf-viewer activity
-                                            finalDialog.dismiss();
-                                        }
-                                        if (!viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF", Toast.LENGTH_LONG).show();
-                                        }
-                                    }else {
-                                        if (viewPDFFromDb((byte) 4, fromIntentPersonId)) {//view blank pdf
-                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE PDF", Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                }else {//request for permission
-                                    Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                                    ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
-                                }
-                            }else{
-                                Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();
-                            }
-                        }catch(Exception ex){
-                            Toast.makeText(IndividualPersonDetailActivity.this, "ERROR", Toast.LENGTH_LONG).show();
-                            ex.printStackTrace();
+                        if((checkInternalStorageAvailability() * 1000) >= 30) {//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+                         if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {//Take permission
+
+                              ProgressDialogHelper progressBar = new ProgressDialogHelper(IndividualPersonDetailActivity.this);
+                              ExecutorService backgroundTask = Executors.newSingleThreadExecutor(); // Create an ExecutorService
+                              backgroundTask.execute(() -> {
+                                                       //on pre execute
+                                                       runOnUiThread(() -> {//first close the dialog then showing progress bar on main thread
+                                                                           if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
+                                                                               finalDialog.dismiss();
+                                                                            }
+                                                                             progressBar.showProgressBar();
+                                                                            });
+                             boolean success=dataBaseDeleteAndCreatePdfOperation();//background task
+
+                            //on post execute method.will execute after all operation completed
+                            runOnUiThread(() ->{ progressBar.hideProgressBar();
+                                               if(success){
+                                                   if(!viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
+                                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF", Toast.LENGTH_LONG).show();
+                                                      }
+                                               }else{viewPDFFromDb((byte) 4, fromIntentPersonId);//view blank pdf 4
+                                                    Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE PDF", Toast.LENGTH_LONG).show();
+                                               }
+                            });
+
+                        });backgroundTask.shutdown();//it will shutdown when all task is completed.The backgroundTask.shutdown() method is executed when you want to stop the ExecutorService. This can be useful for a number of reasons, such as when you are finished using the ExecutorService or when you want to conserve resources.When you call the backgroundTask.shutdown() method, the ExecutorService will stop accepting new tasks. However, any tasks that are already in progress will continue to run until they are finished.Once all of the tasks in the ExecutorService have finished running, the ExecutorService will be shutdown. This means that all of the threads in the pool will be cleaned up and the ExecutorService will no longer be usable.It is important to note that the backgroundTask.shutdown() method will not block your app. This means that you can continue to use your app after calling the backgroundTask.shutdown() method.
+
+                    }else{Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                           ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                         }
+                }else{Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();}
+
+                   return false;
+                    });//on long press
+                    finalDialog.show();
+                    return false;
+                }
+                private boolean dataBaseDeleteAndCreatePdfOperation() {
+                    try {
+                        Database dB = Database.getInstance(getBaseContext());
+                        if (!dB.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(fromIntentPersonId, totalDeposit, totalWages, p1, p2, p3, p4, r1, r2, r3, r4, indicate, innerArray)) {
                             return false;
-                        }finally {
-                            Database.closeDatabase();//closing connection pool
                         }
-
-                        //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+                    }catch (Exception ex) {
+                        ex.printStackTrace();
+                        return false;
+                    }finally {
+                        Database.closeDatabase();//closing connection pool
+                    }
+                    return true;
+                }
+                //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
 //                        if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){//Take permission
 //                            if (updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
 //                                if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
@@ -1084,11 +1106,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
 //                            ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
 //                       }
-                        return false;
-                    });
-                    finalDialog.show();
-                    return false;
-                }
+
 //                private boolean deleteDataFromDB(String id) {
 //                    try(Database db=new Database(getApplicationContext())){//so that object close automatically
 //                       return db.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(id);
@@ -1114,19 +1132,19 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                    }
 ////                    return true;
 //                }
-                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {//deleting all audios
-                    try(Database personDb=new Database(getApplicationContext());
-                        Cursor cursor = personDb.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
-                         while(cursor.moveToNext()){
-                             if(cursor.getString(0) != null) {//checking path may be null
-                                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(cursor.getString(0))) {
-                                      return false;
-                                 }
-                             }
-                         }
-                        return true;
-                    }
-                }
+//                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {//deleting all audios
+//                    try(Database personDb=new Database(getApplicationContext());
+//                        Cursor cursor = personDb.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
+//                         while(cursor.moveToNext()){
+//                             if(cursor.getString(0) != null) {//checking path may be null
+//                                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(cursor.getString(0))) {
+//                                      return false;
+//                                 }
+//                             }
+//                         }
+//                        return true;
+//                    }
+//                }
 //                private boolean deleteAudioFirstThenWagesAndDepositFromDBorRecyclerView(String id) {//If audio failed to delete then recycler view data will not be deleted
 //                  try(Database db=new Database(getBaseContext());
 //                        Cursor cursor=db.getData("SELECT EXISTS (SELECT 1 FROM " + db.tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){ //SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
@@ -1242,34 +1260,34 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return false;
                     }
                 }
-                public String generatePDFAndReturnFileAbsolutePath(String id) {//if error return null otherwise file path
-                    try{
-                        String fileAbsolutePath;
-                        MakePdf makePdf = new MakePdf(); //create PDF
-                       if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
-
-                       if(!fetchOrganizationDetailsAndWriteToPDF(makePdf)) return null;//org details
-
-                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf))return null;//personal detail
-
-                      if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return null;//calculation
-
-                        if(!makePdf.createdPageFinish2()) return null;
-
-                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(getBaseContext(),id));
-
-                        if(!makePdf.closeDocumentLastOperation4())return null;
-
-                       if(fileAbsolutePath !=null){
-                           return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
-                       }else return null;
-
-                    }catch (Exception ex){
-                        Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
-                        ex.printStackTrace();
-                        return null;
-                    }
-                }
+//                public String generatePDFAndReturnFileAbsolutePath(String id) {//if error return null otherwise file path
+//                    try{
+//                        String fileAbsolutePath;
+//                        MakePdf makePdf = new MakePdf(); //create PDF
+//                       if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
+//
+//                       if(!fetchOrganizationDetailsAndWriteToPDF(makePdf)) return null;//org details
+//
+//                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf))return null;//personal detail
+//
+//                      if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return null;//calculation
+//
+//                        if(!makePdf.createdPageFinish2()) return null;
+//
+//                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(getBaseContext(),id));
+//
+//                        if(!makePdf.closeDocumentLastOperation4())return null;
+//
+//                       if(fileAbsolutePath !=null){
+//                           return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
+//                       }else return null;
+//
+//                    }catch (Exception ex){
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
+//                        ex.printStackTrace();
+//                        return null;
+//                    }
+//                }
 //                private void displayFinalResult(String title,String message) {
 //                    AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
 //                    showDataFromDataBase.setCancelable(false);
@@ -1285,91 +1303,96 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                    showDataFromDataBase.create().show();
 //                }
                 private float checkInternalStorageAvailability(){
-                    File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
-                    StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
-                    long blockSize = stat.getBlockSizeLong();//The size, in bytes, of a block on the file system. This corresponds to the Unix statvfs.f_frsize field.
-                    long availableBlocks = stat.getAvailableBlocksLong();//The number of bytes that are free on the file system and available to applications.
-                    String format = Formatter.formatFileSize(IndividualPersonDetailActivity.this, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
-                    format=format.trim();//for safer side
+                    try {
+                        File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
+                        StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
+                        long blockSize = stat.getBlockSizeLong();//The size, in bytes, of a block on the file system. This corresponds to the Unix statvfs.f_frsize field.
+                        long availableBlocks = stat.getAvailableBlocksLong();//The number of bytes that are free on the file system and available to applications.
+                        String format = Formatter.formatFileSize(IndividualPersonDetailActivity.this, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
+                        format = format.trim();//for safer side
 
-                    StringBuilder stringBuilder=new StringBuilder();
-                    for(int i=0;i<format.length();i++){
-                        if(format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
-                            break;
-                        stringBuilder.append(format.charAt(i));
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (int i = 0; i < format.length(); i++) {
+                            if (format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
+                                break;
+                            stringBuilder.append(format.charAt(i));
+                        }
+                        return Float.parseFloat(stringBuilder.toString());
+                    }catch (Exception x){
+                        x.printStackTrace();
                     }
-                    return  Float.parseFloat(stringBuilder.toString());
+                    return 0;
                 }
-                private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(){
-                        Cursor cursor = db.getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'");
-                        cursor.moveToFirst();//means only one row is returned
-
-                    //updating rate and total worked days
-                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"' , "+Database.COL_397_TOTAL_WORKED_DAYS+" ='" +(cursor.getInt(0)+p1)+"' WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
-                    cursor.close();
-
-                    if(success){//if rate is updated then proceed
-                       if (!MyUtility.isEnterDataIsWrong(innerArray)){//if data is right then only change fields.This condition is already checked but checking again
-                           if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
-                               //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
-
-                               if(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)){//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-                                   Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
-                                   return false;
-                               }else if((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages){
-                                   //updating Advance to db
-                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                                   if(!success){
-                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-                                       return false;
-                                   }
-                                   //if there is advance then balance  column should be 0
-                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                                   if (!success) {
-                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-                                       return false;
-                                      }
-                               }else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
-
-                                   //updating balance to db if greater then 0
-                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                                   if (!success) {
-                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-                                       return false;
-                                   }
-                                   //if there is balance then update advance column should be 0
-                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                                   if (!success) {
-                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-                                       return false;
-                                   }
-                               }
-                           }else{
-                               Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
-                               return false;
-                           }
-                       }else{
-                           Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
-                           return false;
-                       }
-                   }else{
-                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE RATE AND TOTAL WORKED DAYS", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                    return true;
-                }
-                public boolean isp1p2p3p4PresentAndRateNotPresenth(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,int indicator){
-                    if(indicator==1 && (p1 !=0 && r1==0)){
-                        return true;
-                    }else if(indicator==2 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0))){
-                        return true;
-                    }else if(indicator==3 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0))){
-                        return true;
-                    }else if(indicator==4 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0) || (p4 !=0 && r4==0))){
-                        return true;
-                    }
-                    return false;
-                }
+//                private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(){
+//                        Cursor cursor = db.getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'");
+//                        cursor.moveToFirst();//means only one row is returned
+//
+//                    //updating rate and total worked days
+//                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"' , "+Database.COL_397_TOTAL_WORKED_DAYS+" ='" +(cursor.getInt(0)+p1)+"' WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+//                    cursor.close();
+//
+//                    if(success){//if rate is updated then proceed
+//                       if (!MyUtility.isEnterDataIsWrong(innerArray)){//if data is right then only change fields.This condition is already checked but checking again
+//                           if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
+//                               //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
+//
+//                               if(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)){//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
+//                                   Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
+//                                   return false;
+//                               }else if((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages){
+//                                   //updating Advance to db
+//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                                   if(!success){
+//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
+//                                       return false;
+//                                   }
+//                                   //if there is advance then balance  column should be 0
+//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                                   if (!success) {
+//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
+//                                       return false;
+//                                      }
+//                               }else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
+//
+//                                   //updating balance to db if greater then 0
+//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                                   if (!success) {
+//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
+//                                       return false;
+//                                   }
+//                                   //if there is balance then update advance column should be 0
+//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                                   if (!success) {
+//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
+//                                       return false;
+//                                   }
+//                               }
+//                           }else{
+//                               Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
+//                               return false;
+//                           }
+//                       }else{
+//                           Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
+//                           return false;
+//                       }
+//                   }else{
+//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE RATE AND TOTAL WORKED DAYS", Toast.LENGTH_LONG).show();
+//                        return false;
+//                    }
+//                    return true;
+//                }
+//                public boolean isp1p2p3p4PresentAndRateNotPresenth(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,int indicator){
+//                    if(indicator==1 && (p1 !=0 && r1==0)){
+//                        return true;
+//                    }else if(indicator==2 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0))){
+//                        return true;
+//                    }else if(indicator==3 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0))){
+//                        return true;
+//                    }else if(indicator==4 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0) || (p4 !=0 && r4==0))){
+//                        return true;
+//                    }
+//                    return false;
+//                }
                 private void updateTotalWorkAmountAndAdvanceOrBalanceTv() {
                     if(!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields
                         workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4) + totalDeposit));
@@ -1745,229 +1768,228 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-    public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
-        try{
-            byte indicator= MyUtility.get_indicator(getBaseContext(),id);
-            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
-            String[] skillHeader = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
-            float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
-            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
-            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
-            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id,errorDetection);//it amy return null   when no data
-            if(errorDetection[0]==false){
-                if(!makeSummaryAndWriteToPDFBasedOnIndicator(getBaseContext(),indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
-                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
-
-                           if (recyclerViewWagesData != null){//null means data not present
-                                if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
-                                                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
-                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
-                                        return false;
-                                    }
-                                }else return false;
-                             }
-
-                if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
-                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
-                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
-                            return false;
-                        }
-                    }else return false;
-                }
-                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, skillHeader)) {return false;}
-            }else return false;//means error has occurred
-
-            return true;
-        }catch(Exception ex){
-            ex.printStackTrace();
-             return false;
-        }
-    }
-    public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
-        try{
-            switch (indicator) {
-                case 1: return new float[]{12f, 12f, 5f, 71f};
-
-                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
-
-                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
-
-                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
-            }
-            return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
-        }catch (Exception ex){
-            ex.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            errorDetection[0]=true;//indicate error has occur
-            return new float[]{1f,1f,1f};//to avoid error
-        }
-    }
-    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
-        Database db = Database.getInstance(context);
-        try(//Database db = new Database(getApplicationContext());
-            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
-         {
-             if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
-
-            cursor.moveToFirst();//means only one row is returned
-            if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
-
-               if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
-                                                                                                                                                                                                                                          //yellow                               green
-                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
-                if(!makePdf.singleCustomRow(new String[]{ " *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
-
-            }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
-
-                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
-                //                                                                                                                                                                                                                      yellow                               green                                    green
-                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
-                if(!makePdf.singleCustomRow(new String[]{ " *After calculation balance Rs. " +MyUtility.convertToIndianNumberSystem(cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
-
-            }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
-                                                                                                                                                                                                                                            // yellow                               green                                green
-                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
-                if(!makePdf.singleCustomRow(new String[]{ " * After calculation all cleared Rs. 0"},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
-
-            }
-            return true;
-        }catch (Exception ex){
-            ex.printStackTrace();
-             return false;
-        }
-    }
-    public boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
-        try{
-            switch(indicator){
-                case 1: {
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 88, (byte) 88);
-                    if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    } else {//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                         //                                                                                                                                                                                                                                                                           green color
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }
-                }break;
-                case 2: {
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
-                        //                                                                                                                                      P1*R1                              +                             P2*R2
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }else{//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                        //                       P1*R1                             +                             P2*R2                             +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }
-                }break;
-                case 3:{
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-
-                    if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }else{ //when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                              +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }
-                }break;
-                case 4:{
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-
-                    if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
-                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }else{//when there is deposit then add deposit
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88 );
-                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                                                           P4*R4                                  +  DEPOSIT
-                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-                    }
-                }break;
-            }
-            return true;
-    }catch(Exception ex){
-        ex.printStackTrace();
-        return false;
-    }
-    }
-    public String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
-        try{
-                switch (indicator) {
-                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
-
-                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
-
-                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
-
-                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
-                }
-                return new String[]{"no indicator"};//this code will not execute due to return in switch block just using to avoid error
-        }catch (Exception ex){
-            ex.printStackTrace();
-            System.out.println("error occurred in getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator method**************************");
-            errorDetection[0]=true;//indicate error has occur
-            return new String[]{"error occurred"};//to avoid error
-        }
-    }
-    public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
-        try{
-            makePdf.makeTopHeaderOrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
-            return true;
-        }catch(Exception ex){
-            ex.printStackTrace();
-           return false;
-        }
-    }
-    public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-        try (Database db=new Database(getApplicationContext());
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
-            if (cursor1 != null){
-                cursor1.moveToFirst();
-                String bankAccount, aadhaar;
-                int pdfSequenceNo;
-
-                if (cursor1.getString(1).length() > 4) {
-                    bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
-                } else {
-                    bankAccount = "";
-                }
-                if (cursor1.getString(2).length() > 5) {
-                    aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
-                } else {
-                    aadhaar = "";
-                }
-
-                if (cursor2 != null) {//this make filename unique
-                    cursor2.moveToFirst();
-                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
-                } else {
-                    pdfSequenceNo = -1;//if error
-                }
-
-                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
-                if(activePhoneNumber != null){
-                    activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
-                }else{
-                    activePhoneNumber="";
-                }
-                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
-            }else{
-                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
-                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]","[NULL NO DATA IN CURSOR]",false);
-            }
-            return true;
-        }catch (Exception ex){
-            ex.printStackTrace();
-             return false;
-        }
-    }
+//    public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
+//        try{
+//            byte indicator= MyUtility.get_indicator(getBaseContext(),id);
+//            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
+//            String[] skillHeader = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
+//            float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
+//            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
+//            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
+//            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id,errorDetection);//it amy return null   when no data
+//            if(errorDetection[0]==false){
+//                if(!makeSummaryAndWriteToPDFBasedOnIndicator(getBaseContext(),indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
+//                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
+//
+//                           if (recyclerViewWagesData != null){//null means data not present
+//                                if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
+//                                                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
+//                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
+//                                        return false;
+//                                    }
+//                                }else return false;
+//                             }
+//
+//                if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
+//                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
+//                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+//                            return false;
+//                        }
+//                    }else return false;
+//                }
+//                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, skillHeader)) {return false;}
+//            }else return false;//means error has occurred
+//
+//            return true;
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//             return false;
+//        }
+//    }
+//    public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
+//        try{
+//            switch (indicator) {
+//                case 1: return new float[]{12f, 12f, 5f, 71f};
+//
+//                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
+//
+//                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
+//
+//                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
+//            }
+//            return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
+//            errorDetection[0]=true;//indicate error has occur
+//            return new float[]{1f,1f,1f};//to avoid error
+//        }
+//    }
+//    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
+//        Database db = Database.getInstance(context);
+//        try(//Database db = new Database(getApplicationContext());
+//            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
+//         {
+//             if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
+//
+//            cursor.moveToFirst();//means only one row is returned
+//            if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
+//
+//               if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
+//                                                                                                                                                                                                                                          //yellow                               green
+//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
+//                if(!makePdf.singleCustomRow(new String[]{ " *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
+//
+//            }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
+//
+//                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+//                //                                                                                                                                                                                                                      yellow                               green                                    green
+//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
+//                if(!makePdf.singleCustomRow(new String[]{ " *After calculation balance Rs. " +MyUtility.convertToIndianNumberSystem(cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
+//
+//            }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
+//                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+//                                                                                                                                                                                                                                            // yellow                               green                                green
+//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
+//                if(!makePdf.singleCustomRow(new String[]{ " * After calculation all cleared Rs. 0"},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
+//
+//            }
+//            return true;
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//             return false;
+//        }
+//    }
+//    public boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
+//        try{
+//            switch(indicator){
+//                case 1: {
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 88, (byte) 88);
+//                    if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
+//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    } else {//when there is deposit then add deposit
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                         //                                                                                                                                                                                                                                                                           green color
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }
+//                }break;
+//                case 2: {
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                    if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
+//                        //                                                                                                                                      P1*R1                              +                             P2*R2
+//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }else{//when there is deposit then add deposit
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                        //                       P1*R1                             +                             P2*R2                             +  DEPOSIT
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }
+//                }break;
+//                case 3:{
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//
+//                    if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
+//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }else{ //when there is deposit then add deposit
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                              +  DEPOSIT
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }
+//                }break;
+//                case 4:{
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
+//
+//                    if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
+//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }else{//when there is deposit then add deposit
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88 );
+//                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                                                           P4*R4                                  +  DEPOSIT
+//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
+//                    }
+//                }break;
+//            }
+//            return true;
+//    }catch(Exception ex){
+//        ex.printStackTrace();
+//        return false;
+//    }
+//    }
+//    public String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
+//        try{
+//                switch (indicator) {
+//                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
+//
+//                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
+//
+//                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
+//
+//                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
+//                }
+//                return new String[]{"no indicator"};//this code will not execute due to return in switch block just using to avoid error
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//            errorDetection[0]=true;//indicate error has occur
+//            return new String[]{"error occurred"};//to avoid error
+//        }
+//    }
+//    public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
+//        try{
+//            makePdf.makeTopHeaderOrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
+//            return true;
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//           return false;
+//        }
+//    }
+//    public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
+//        try (Database db=new Database(getApplicationContext());
+//             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+//             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+//            if (cursor1 != null){
+//                cursor1.moveToFirst();
+//                String bankAccount, aadhaar;
+//                int pdfSequenceNo;
+//
+//                if (cursor1.getString(1).length() > 4) {
+//                    bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
+//                } else {
+//                    bankAccount = "";
+//                }
+//                if (cursor1.getString(2).length() > 5) {
+//                    aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
+//                } else {
+//                    aadhaar = "";
+//                }
+//
+//                if (cursor2 != null) {//this make filename unique
+//                    cursor2.moveToFirst();
+//                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
+//                } else {
+//                    pdfSequenceNo = -1;//if error
+//                }
+//
+//                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
+//                if(activePhoneNumber != null){
+//                    activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
+//                }else{
+//                    activePhoneNumber="";
+//                }
+//                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
+//            }else{
+//                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
+//                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]","[NULL NO DATA IN CURSOR]",false);
+//            }
+//            return true;
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//             return false;
+//        }
+//    }
     private void indicator1234CalculateAndUpdate(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
         boolean bool;
         int  totalDeposit,totalWages;
@@ -2246,9 +2268,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
                     //success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0");
-                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0")){
-                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
-                    }
+                   for(int i=0;i<=1000;i++) {
+                       if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
+                           Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                       }
+                   }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 
@@ -2269,8 +2293,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                      // success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0");
-                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0")){
-                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    for(int i=0;i<=1000;i++) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                        }
                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
@@ -2293,8 +2319,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0");
-                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0")){
-                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    for(int i=0;i<=1000;i++) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                        }
                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
@@ -2321,9 +2349,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
 
                    // success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0");
-
-                    if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")){
-                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                    for(int i=0;i<=1000;i++) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
+                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                        }
                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();

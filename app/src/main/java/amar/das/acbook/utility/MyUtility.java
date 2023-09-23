@@ -74,8 +74,10 @@ public class MyUtility {
         return false;
     }
     public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
-        try(Database db=new Database(context);
+        try(Database db=new Database (context);
             Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
+            if (cursor2.getCount() == 0) { return false; }// or throw an exception this will occur when there is no id in db or no data in db or table
+
             cursor2.moveToFirst();
 
             if (cursor2.getString(0) != null){
@@ -144,7 +146,8 @@ public class MyUtility {
     }
     public static String[] getReligionFromDb(Context context) {
         String [] religion=null;
-        try(Database db=new Database(context);
+        try(//Database db=new Database(context);
+            Database db=Database.getInstance(context);
             Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME5)){
             religion=new String[religionCursor.getCount()];
             int i=0;
@@ -159,7 +162,8 @@ public class MyUtility {
     }
     public static String[] getLocationFromDb(Context context) {
         String [] location=null;
-        try(Database db=new Database(context);
+        try(//Database db=new Database(context);
+            Database db=  Database.getInstance(context);
             Cursor locationCursor=db.getData("SELECT "+Database.COL_41_LOCATION+" FROM "+Database.TABLE_NAME4)){
             location=new String[locationCursor.getCount()];
             int i=0;
@@ -174,17 +178,25 @@ public class MyUtility {
     }
     public static boolean updateLocationReligionToTableIf(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
         /*The isEmpty() method checks whether a String is empty, meaning it has a length of 0, and returns true if it is empty. It does not consider whitespace characters as part of the string content.On the other hand, the isBlank() method was introduced in Java 11. It checks whether a String is empty or contains only whitespace characters, and returns true in such cases*/
-        try(Database db=new Database(context)){
+
+        try(Database db=new Database(context))
+        {
             if (!location.trim().isEmpty() && locationHashSet.add(location)) {//if false that means data is duplicate
-                db.updateTable("INSERT INTO "+Database.TABLE_NAME4+" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );");
+                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME4+" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
+                   return false;//means error
+                }
             }
             if (!religion.trim().isEmpty() && religionHashSet.add(religion)) {//if false that means data is duplicate
-                db.updateTable("INSERT INTO "+Database.TABLE_NAME5+" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );");
+                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME5+" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );")){
+                    return false;//means error
+                }
             }
             return true;
         }catch (Exception x){
             x.printStackTrace();
             return false;
+        }finally {
+          Database.closeDatabase();
         }
     }
     public static boolean createTextFileInvoice(String id,Context context,String externalFileDir){
@@ -411,13 +423,61 @@ public class MyUtility {
             return "error";
         }
     }
+    public static String getMessageOnlyTotalWagesAndDeposit(String id,Context context){
+        if(id==null){
+            return "id null";
+        }
+        try{
+            StringBuilder sb=new StringBuilder();
+            byte indicator=MyUtility.get_indicator(context,id);
+            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
+            String[] header = MyUtility.getWagesHeadersFromDbBasedOnIndicator(context,id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateBasedOnIndicator   TO AVOID INDEX EXCEPTION
+            String[][] recyclerViewDepositData =MyUtility.getAllDepositFromDb(context,id, errorDetection);//it amy return null   when no data
+            int[] arrayOfTotalWagesDepositRateBasedOnIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(context,id,indicator,errorDetection);//if error cause errorDetection will be set true
+
+            if(errorDetection[0]==false){
+                 sb.append(getTotalWagesDepositAndWorkingAccordingToIndicator(indicator, header, arrayOfTotalWagesDepositRateBasedOnIndicator, recyclerViewDepositData != null));
+            }else{
+                sb.append("error");
+            }
+            return sb.toString();
+        }catch (Exception x){
+            x.printStackTrace();
+            return "error";
+        }
+    }
+    public static String getTotalWagesDepositAndWorkingAccordingToIndicator(byte indicator, String[] headerBasedOnIndicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, boolean isDepositPresent) {
+        try{
+            /*
+             * return message like:
+             * TOTAL WAGES: 23,000
+             * TOTAL M: 59
+             * TOTAL DEPOSIT: 55,000*/
+            StringBuilder sb=new StringBuilder();
+            switch (indicator) {//based on indicator generate message
+                case 1:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]);}break;
+                case 2:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]);}break;
+                case 3:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]);}break;
+                case 4:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]).append("\nTOTAL ").append(headerBasedOnIndicator[5]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[4]);}break;
+            }
+
+            if(isDepositPresent){//if deposit present then only add
+                sb.append("\nTOTAL DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]));//[indicator + 1] it is index of deposit
+            }
+            return sb.toString();
+
+        }catch (Exception x){
+            x.printStackTrace();
+            return "ERROR OCCURRED";
+        }
+    }
     public static String[][] getAllDepositFromDb(Context context,String id, boolean[] errorDetection) {//return null when no data and if error errorDetection will be set to true
         Database db = Database.getInstance(context);
         try(
             //Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
             Cursor depositCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+ db.columnNameOutOf4Table(id, (byte) 7) +" ,"+ db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.columnNameOutOf4Table(id, (byte) 12) +"='1'")){
             String[][] recyclerViewDepositData =null;
-            if(depositCursor!= null&&depositCursor.getCount()!=0){
+            if(depositCursor!= null && depositCursor.getCount()!=0){
                 recyclerViewDepositData= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
                 int row = 0;
                 while (depositCursor.moveToNext()) {
@@ -483,8 +543,7 @@ public class MyUtility {
 
         Cursor cursor2=null;//returnOnlySkill will return only string of array
         Database db=Database.getInstance(context);
-        try(
-            Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'")){
+        try(Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'")){
             cursor1.moveToFirst();
             switch (indicator) {
                 case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
@@ -562,7 +621,7 @@ public class MyUtility {
     }
     public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default
         Database db=Database.getInstance(context);
-        try(
+        try(//Database db=new Database(context);//to this database automatically
             Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
                 cursor.moveToFirst();

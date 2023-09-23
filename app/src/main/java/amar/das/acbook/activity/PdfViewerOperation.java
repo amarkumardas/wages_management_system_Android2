@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteBlobTooBigException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -45,12 +46,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.ActivityPdfViewerBinding;
 import amar.das.acbook.Database;
 
 import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class PdfViewerOperation extends AppCompatActivity {
@@ -68,6 +72,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         binding = ActivityPdfViewerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        ProgressDialogHelper progressBar = new ProgressDialogHelper( this);
 
         sharePdfLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),activityResult ->{//ActivityResultCallback it will execute when return from other intent
             for (String path:absolutePathArrayToDelete){
@@ -103,7 +108,7 @@ public class PdfViewerOperation extends AppCompatActivity {
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
             }else if(whichPdfIndicatorChangesDynamically ==(byte) 3){
-                absolutePathArrayToDelete[1]=createCurrentInvoiceAndReturnAbsolutePath(fromIntentPersonId);
+                absolutePathArrayToDelete[1]= createCurrentInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
                 if(downloadPdfUsingAbsPathOrByte(absolutePathArrayToDelete[1],null,fromIntentPersonId)){
                     displayDialogMessage("DOWNLOADED","CURRENT INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
                 }else{
@@ -117,28 +122,39 @@ public class PdfViewerOperation extends AppCompatActivity {
         });
 
         binding.sharePdfBtn.setOnClickListener(view -> {
-            try {
-                String absolutePathPdf=null;
-                if (whichPdfIndicatorChangesDynamically == (byte) 1 || whichPdfIndicatorChangesDynamically == (byte) 2){//1 or 2
-                    absolutePathArrayToDelete[0]=absolutePathPdf = convertBytesToFileForSharingAndReturnAbsolutePath(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId),"invoice", fromIntentPersonId);
+            ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+            backgroundTask.execute(() -> {
+                //pre execute
+                if(whichPdfIndicatorChangesDynamically==3) {//3 is referring to current invoice.Progress bar is needed because it take time to create.Where as 1 and 2 don't take time so no need of progress bar
+                    runOnUiThread(() -> progressBar.showProgressBar());
                 }
-                if(whichPdfIndicatorChangesDynamically == (byte) 3){
-                    absolutePathArrayToDelete[1]= absolutePathPdf = createCurrentInvoiceAndReturnAbsolutePath(fromIntentPersonId);
+                //background task
+                try {
+                    File pdfFile=null;
+
+                    if (whichPdfIndicatorChangesDynamically == (byte) 1 || whichPdfIndicatorChangesDynamically == (byte) 2){//1 or 2
+                        pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId),"invoice", fromIntentPersonId);
+                        absolutePathArrayToDelete[0]=pdfFile.getAbsolutePath();
+                    }else if(whichPdfIndicatorChangesDynamically == (byte) 3){
+                        pdfFile= createCurrentInvoiceAndReturnFile(fromIntentPersonId);
+                        absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();
+                    }
+                    /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
+                    if(whichPdfIndicatorChangesDynamically <=(byte)3){// this will only execute when value is 1,2 or 3
+                        if (!shareFileToAnyApp(pdfFile,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING", sharePdfLauncher)) {//open intent to share
+                            runOnUiThread(() -> displayDialogMessage("CANNOT","SHARE FILE"));
+                        }
+                    }else if(whichPdfIndicatorChangesDynamically==(byte)4){//4 represent blank
+                        runOnUiThread(() -> displayDialogMessage("PLEASE SELECT","INVOICE TO SHARE"));
+                    }
+
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
 
-                /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
-                if(whichPdfIndicatorChangesDynamically <=(byte)3){// this will only execute when value is 1,2 or 3
-                    if (!shareFileToAnyApp(absolutePathPdf,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING", sharePdfLauncher)) {//open intent to share
-                        Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
-                    }
-                }
-                if(whichPdfIndicatorChangesDynamically==(byte)4){//4 represent blank
-                    displayDialogMessage("PLEASE SELECT","INVOICE TO SHARE");
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-                Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            }
+                runOnUiThread(() -> progressBar.hideProgressBar()); //post execute
+
+            });backgroundTask.shutdown();//when all task completed then only shutdown
         });
         //-----------TEXT BUTTON-----------------------------------------
         String[] shareOptions = getResources().getStringArray(R.array.sharingOptions);
@@ -149,42 +165,51 @@ public class PdfViewerOperation extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 try {
                     String itemName = adapterView.getItemAtPosition(position).toString();
+                    boolean errorIndicator=false;
                     switch (itemName) {
                         case "A/C": {
                             if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetailsFromDb(fromIntentPersonId,getIdNamePhone(fromIntentPersonId)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
-                                Toast.makeText(PdfViewerOperation.this, "SOMETHING WENT WRONG", Toast.LENGTH_LONG).show();
+                                errorIndicator=true;
                             }
-                        }
-                        break;
+                        }break;
                         case "PHONE NUMBER": {
                             String message = activePhoneNumberToShare(fromIntentPersonId);//if there is no phone number then return null also when exception
                             if (message != null) {//if no phone number then don't open dialog because its useless
                                 if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(message, getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) {
-                                    Toast.makeText(PdfViewerOperation.this, "SOMETHING WENT WRONG", Toast.LENGTH_LONG).show();
-                                }
+                                    errorIndicator=true;
+                                 }
                             } else {
-                                Toast.makeText(PdfViewerOperation.this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        break;
-                        case "CURRENT INVOICE": {
+                                displayDialogMessage("",getResources().getString(R.string.no_phone_number));
+                             }
+                        }break;
+                        case "CURRENT INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
+                            Toast.makeText(PdfViewerOperation.this, getResources().getString(R.string.please_wait_a_few_seconds), Toast.LENGTH_SHORT).show();
                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true),"currentInvoice", fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
-                                Toast.makeText(PdfViewerOperation.this, "SOMETHING WENT WRONG", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        break;
+                                errorIndicator=true;
+                             }
+                        }break;
                         case "IMAGE": {
                             if (!shareImageAndMessageToAnyApp(getIdNamePhone(fromIntentPersonId),fromIntentPersonId,sharePdfLauncher)) {
-                                Toast.makeText(PdfViewerOperation.this, "SOMETHING WENT WRONG", Toast.LENGTH_LONG).show();
+                                errorIndicator=true;
                             }
-                        }
-                        break;
+                        }break;
                         case "SHARE ALL": {
-                            if (!shareAllData(fromIntentPersonId, sharePdfLauncher)) {
-                                Toast.makeText(PdfViewerOperation.this, "SOMETHING WENT WRONG", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        break;
+                            ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                             backgroundTask.execute(() -> {
+                                 //pre execute
+                                 runOnUiThread(() -> progressBar.showProgressBar());
+
+                                 //background execute
+                                 if (!shareAllData(fromIntentPersonId, sharePdfLauncher)) {
+                                    runOnUiThread(() -> displayDialogMessage("SOMETHING","WENT WRONG"));
+                                 }
+                                 //post execute
+                                 runOnUiThread(() -> progressBar.hideProgressBar());
+                             });
+                        }break;
+                    }
+                    if(errorIndicator){//IF ANY ERROR display dialogbox
+                        displayDialogMessage("SOMETHING","WENT WRONG");
                     }
                     //after selecting second time any option data is not shown so 0 is set so that when second time click it will show data
                     //int initialposition = holder.spinnerdescAudioIcon.getSelectedItemPosition();
@@ -216,12 +241,22 @@ public class PdfViewerOperation extends AppCompatActivity {
             });
 
         binding.currentPdfBtn.setOnClickListener(view -> {
-            if(onlyViewPdf((byte)3,fromIntentPersonId)){
-                changeButtonColorBackgroundAsSelected((byte)3);
-                whichPdfIndicatorChangesDynamically = (byte)3;//this will be updated when SUCCESSFULLY pdf is displayed and  user click pdf1 for share and download
-            }else{
-                displayDialogMessage("ERROR OCCURRED", "ERROR OCCURRED WHILE DISPLAYING INVOICE");
-            }
+            ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+            backgroundTask.execute(() -> {
+                runOnUiThread(() -> progressBar.showProgressBar());//pre execute
+
+                //execute background
+                if(onlyViewPdf((byte)3,fromIntentPersonId)){
+                    changeButtonColorBackgroundAsSelected((byte)3);
+                    whichPdfIndicatorChangesDynamically = (byte)3;//this will be updated when SUCCESSFULLY pdf is displayed and  user click pdf1 for share and download
+                }else{
+                    runOnUiThread(() ->displayDialogMessage("ERROR OCCURRED", "WHILE DISPLAYING INVOICE"));
+                }
+
+                runOnUiThread(() -> progressBar.hideProgressBar()); //post execute
+
+            });backgroundTask.shutdown();//when all task completed then only shutdown
+
         });
     }
     private boolean downloadPdfUsingAbsPathOrByte(String absolutePath, byte[] pdfByte,String id) {
@@ -263,8 +298,7 @@ public class PdfViewerOperation extends AppCompatActivity {
             }
         }catch (IOException e) {
             e.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"io exception in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            return false;
+             return false;
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -305,7 +339,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         }
     }
     private String getOtherDetails(String id){
-        try(Database db=new Database(getApplicationContext());
+        try(Database db=new Database(getBaseContext());
             Cursor cursor = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if(cursor != null){
                 cursor.moveToFirst();
@@ -329,7 +363,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         if(message==null|| id==null || sharePdfLauncher ==null){
             return false;
         }
-        try(Database db=new Database(getApplicationContext());
+        try(Database db=Database.getInstance(getBaseContext());
             Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
 
             if(cursor != null){
@@ -338,7 +372,7 @@ public class PdfViewerOperation extends AppCompatActivity {
 
             byte[] image=cursor.getBlob(0);
             if (image!=null) {
-                if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {
+                if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length); //for resizing image -Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//image size
 
                    //Why do we need to Save the image to external storage? When sharing an image with other apps in Android, you need to provide a file URI that points to the location of the image on the device's storage. If you don't save the image to external storage, you won't be able to share it with other apps.In addition, apps are not allowed to share files directly from their internal storage with other apps. This is a security measure implemented by Android to prevent apps from accessing each other's data without explicit user permission.
@@ -396,7 +430,7 @@ public class PdfViewerOperation extends AppCompatActivity {
             dialogBuilder.setMessage(message);
 
             dialogBuilder.setNegativeButton(getResources().getString(R.string.send_only_total_to_contact), (dialogInterface, i) -> {
-                success[0]= sendMessageToContact(id,getMessageOnlyTotalWagesAndDeposit(id));//sending only total wages and deposit due to long text cannot send as sms
+                success[0]= sendMessageToContact(id,getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(id));//sending only total wages and deposit due to long text cannot send as sms
                       if(!success[0]){//if no contact then send full txt file message to any app
                           success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING",sharePdfLauncher);
                       }
@@ -413,8 +447,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                 dialogInterface.dismiss();
             });
 
-            dialogBuilder.create().show();
-        }catch (Exception x){
+              dialogBuilder.create().show();
+         }catch (Exception x){
             x.printStackTrace();
             return false;
         }
@@ -469,7 +503,7 @@ public class PdfViewerOperation extends AppCompatActivity {
             return false;
         }
         try{
-            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
+            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getBaseContext());
             if(phoneNumber!=null){
                 if(checkPermissionForSMS()){   //send an SMS using an intent
                     Intent intent=new Intent(Intent.ACTION_VIEW,Uri.fromParts("sms",phoneNumber,null));//The first parameter specifies the protocol ("sms"), the second parameter specifies the recipient's phone number.URI can be used to launch the SMS app with a pre-filled recipient phone number.
@@ -510,34 +544,20 @@ public class PdfViewerOperation extends AppCompatActivity {
             return null;
         }
     }
-    private String getMessageOnlyTotalWagesAndDeposit(String id){
+    private String getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(String id){
         if(id==null){
             return "id null";
         }
-        try{
-            StringBuilder sb=new StringBuilder();
-            byte indicator=(byte)MyUtility.get_indicator(getBaseContext(),id);
-            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
-            String[] header = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateBasedOnIndicator   TO AVOID INDEX EXCEPTION
-             String[][] recyclerViewDepositData =MyUtility.getAllDepositFromDb(getBaseContext(),id, errorDetection);//it amy return null   when no data
-            int[] arrayOfTotalWagesDepositRateBasedOnIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
-
-            if(errorDetection[0]==false){
+                StringBuilder sb=new StringBuilder();
                 sb.append(getMessageForCurrentInvoice(id,false));//if this method getMessageForCurrentInvoice() return null then string builder will append null instead of throwing NULL POINTER EXCEPTION
-                sb.append(getTotalWagesDepositAndWorkingAccordingToIndicator(indicator, header, arrayOfTotalWagesDepositRateBasedOnIndicator, recyclerViewDepositData != null));
-            }else{
-                sb.append("error");
-            }
+                sb.append(MyUtility.getMessageOnlyTotalWagesAndDeposit(id,getBaseContext()));
+
             return sb.toString();
-        }catch (Exception x){
-            x.printStackTrace();
-            return "error";
-        }
     }
     private String getAllSumAndDepositAndWagesDetails(String id) {
         StringBuilder sb=new StringBuilder();
         try{
-            byte indicator=(byte)MyUtility.get_indicator(getBaseContext(),id);
+            byte indicator=MyUtility.get_indicator(getBaseContext(),id);
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
             String[] header = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateBasedOnIndicator   TO AVOID INDEX EXCEPTION
             String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
@@ -547,7 +567,7 @@ public class PdfViewerOperation extends AppCompatActivity {
             if(errorDetection[0]==false){
 
                 sb.append("-----------").append(getResources().getString(R.string.total_sum)).append("-----------");
-                sb.append(getTotalWagesDepositAndWorkingAccordingToIndicator(indicator,header,arrayOfTotalWagesDepositRateBasedOnIndicator,recyclerViewDepositData!=null));
+                sb.append(MyUtility.getTotalWagesDepositAndWorkingAccordingToIndicator(indicator,header,arrayOfTotalWagesDepositRateBasedOnIndicator,recyclerViewDepositData!=null));
 
 
                 if (recyclerViewDepositData != null) {//null means data not present so don't add deposit in text
@@ -598,32 +618,31 @@ public class PdfViewerOperation extends AppCompatActivity {
             return "error";
         }
     }
-    private String getTotalWagesDepositAndWorkingAccordingToIndicator(byte indicator, String[] headerBasedOnIndicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, boolean isDepositPresent) {
-    try{
-        /*
-         * return message like:
-         * TOTAL WAGES: 23,000
-         * TOTAL M: 59
-         * TOTAL DEPOSIT: 55,000*/
-        StringBuilder sb=new StringBuilder();
-        switch (indicator) {//based on indicator generate message
-                case 1:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]);}break;
-                case 2:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]);}break;
-                case 3:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]);}break;
-                case 4:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]).append("\nTOTAL ").append(headerBasedOnIndicator[5]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[4]);}break;
-                }
-
-        if(isDepositPresent){//if deposit present then only add
-            sb.append("\nTOTAL DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem( arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]));//[indicator + 1] it is index of deposit
-        }
-        return sb.toString();
-
-    }catch (Exception x){
-        x.printStackTrace();
-        return "ERROR OCCURRED";
-    }
-    }
-
+//    private String getTotalWagesDepositAndWorkingAccordingToIndicator(byte indicator, String[] headerBasedOnIndicator, int[] arrayOfTotalWagesDepositRateAccordingToIndicator, boolean isDepositPresent) {
+//    try{
+//        /*
+//         * return message like:
+//         * TOTAL WAGES: 23,000
+//         * TOTAL M: 59
+//         * TOTAL DEPOSIT: 55,000*/
+//        StringBuilder sb=new StringBuilder();
+//        switch (indicator) {//based on indicator generate message
+//                case 1:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]);}break;
+//                case 2:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]);}break;
+//                case 3:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]);}break;
+//                case 4:{sb.append("\nTOTAL ").append(headerBasedOnIndicator[1]).append(": ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0])).append("\nTOTAL ").append(headerBasedOnIndicator[2]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[1]).append("\nTOTAL ").append(headerBasedOnIndicator[3]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[2]).append("\nTOTAL ").append(headerBasedOnIndicator[4]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[3]).append("\nTOTAL ").append(headerBasedOnIndicator[5]).append(": ").append(arrayOfTotalWagesDepositRateAccordingToIndicator[4]);}break;
+//                }
+//
+//        if(isDepositPresent){//if deposit present then only add
+//            sb.append("\nTOTAL DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]));//[indicator + 1] it is index of deposit
+//        }
+//        return sb.toString();
+//
+//    }catch (Exception x){
+//        x.printStackTrace();
+//        return "ERROR OCCURRED";
+//    }
+//    }
     private boolean openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(String message, String input1Header,String id,boolean defaultTrueForOpenAnyAppAndFalseForWhatsApp) {//true is for Open anyApp
         if(message==null || input1Header==null){
             return false;
@@ -809,8 +828,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(message.getBytes());
                 outputStream.close();
-
-                if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
+              // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
+                if (!shareFileToAnyApp(file , mimeType, title, sharePdfLauncher)) {//open intent to share
                     Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
                     return false;
                 }
@@ -842,22 +861,23 @@ public class PdfViewerOperation extends AppCompatActivity {
             return false;
         }
 }
-    public boolean shareFileToAnyApp(String absolutePathPdf, String mimeType, String title, ActivityResultLauncher<Intent> sharePdfLauncher){
-        if(absolutePathPdf==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+    public boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title, ActivityResultLauncher<Intent> sharePdfLauncher){
+        if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
             return false;
         }
         try {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType(mimeType);
-            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(absolutePathPdf));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+
+            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
             sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            return false;
+             return false;
         }
     }
     public boolean isApplicationInstalled(String packageName){
@@ -919,9 +939,8 @@ public class PdfViewerOperation extends AppCompatActivity {
        }
     }
     private boolean onlyViewPdf(byte whichPdfIndicator1or2,String id) {
-       if(!(whichPdfIndicator1or2 >=1 && whichPdfIndicator1or2 <=3)){//if indicator is other then 1 or 2 or 3 then show wrong pdf indicator
-           Log.d(this.getClass().getSimpleName(),"wrong pdf indicator");
-            return false;
+       if(!(whichPdfIndicator1or2 >=1 && whichPdfIndicator1or2 <=3)){//if indicator is other then 1 or 2 or 3 then show wrong pdf indicator.if indicator is 4 that means blank pdf and indicator 3 is for current pdf
+             return false;
         }
         try{
           if(whichPdfIndicator1or2!=3){//1 or 2
@@ -935,39 +954,41 @@ public class PdfViewerOperation extends AppCompatActivity {
           }
         }catch (Exception e){
             e.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            return false;
+             return false;
         }
         return true;
     }
-    public byte[] getPdfByteFromDb(byte whichPdfIndicator,String id){//return null when no data
+    public byte[] getPdfByteFromDb(byte whichPdfIndicator,String id){//return null when no data or error
         if(!(whichPdfIndicator >=1 && whichPdfIndicator <=2)){//if indicator is other then 1 or 2 then show wrong pdf indicator
-            Log.d(this.getClass().getSimpleName(),"wrong pdf indicator");
-            return null;
+             return null;
         }
         Cursor cursor=null;
-        try(Database db = new Database(getApplicationContext())) {
-         switch(whichPdfIndicator){
-            case 1:{
-                cursor = db.getData("SELECT " + Database.COL_394_INVOICE1 + " FROM " + Database.TABLE_NAME3 + " WHERE "+ Database.COL_31_ID+"= '" + id + "'");
-                cursor.moveToFirst();
-                if (cursor.getBlob(0) != null){
-                    return cursor.getBlob(0);
-                }
+        try(Database db = new Database(getBaseContext())) {
+            switch (whichPdfIndicator) {
+                case 1: {
+                    cursor = db.getData("SELECT " + Database.COL_394_INVOICE1 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+                    cursor.moveToFirst();
+                    if (cursor.getBlob(0) != null) {
+                        return cursor.getBlob(0);
+                    }
 
-            }break;
-            case 2:{
-                cursor = db.getData("SELECT " + Database.COL_395_INVOICE2 + " FROM " + Database.TABLE_NAME3 + " WHERE "+ Database.COL_31_ID+"= '" + id + "'");
-                cursor.moveToFirst();
-                if (cursor.getBlob(0) != null) {
-                   return cursor.getBlob(0);
                 }
+                break;
+                case 2: {
+                    cursor = db.getData("SELECT " + Database.COL_395_INVOICE2 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+                    cursor.moveToFirst();
+                    if (cursor.getBlob(0) != null) {
+                        return cursor.getBlob(0);
+                    }
 
-            }break;
-        }
+                }
+                break;
+            }
+        }catch(SQLiteBlobTooBigException x){
+            Toast.makeText(this, "LARGE FILE SIZE CAN'T VIEW", Toast.LENGTH_LONG).show();
+            return null;
         }catch (Exception e){
-             e.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
+             e.printStackTrace(); // Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
             return null;
         }finally {
             if(cursor!=null){
@@ -978,24 +999,36 @@ public class PdfViewerOperation extends AppCompatActivity {
 }
     public boolean createAndDisplayCurrentInvoiceAndUpdateArrayToDelete(String id){
 
-     absolutePathArrayToDelete[1]=createCurrentInvoiceAndReturnAbsolutePath(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
-            try {
-                if (absolutePathArrayToDelete[1] != null) {
-                     binding.pdfView.fromFile(new File(absolutePathArrayToDelete[1])).load();
-                    return true;
-                }else return false;
+//     absolutePathArrayToDelete[1]= createCurrentInvoiceAndReturnFile(id).getAbsolutePath();//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
+//            try {
+//                if (absolutePathArrayToDelete[1] != null) {
+//                     binding.pdfView.fromFile(new File(absolutePathArrayToDelete[1])).load();
+//                    return true;
+//                }else return false;
+//
+//            }catch (Exception e){
+//                e.printStackTrace();
+//                 return false;
+//            }
 
-            }catch (Exception e){
-                e.printStackTrace();
-                Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-                return false;
-            }
+        try {//optimised code
+            File pdfFile= createCurrentInvoiceAndReturnFile(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
+            if (pdfFile != null) {
+                absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();//update to delete
+                binding.pdfView.fromFile(pdfFile).load();
+                return true;
+            }else return false;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
-    public String createCurrentInvoiceAndReturnAbsolutePath(String id) {//return null when error
+    public File createCurrentInvoiceAndReturnFile(String id) {//return null when error
         try {
-            byte indicator = (byte) MyUtility.get_indicator(getBaseContext(),id);
+            byte indicator =  MyUtility.get_indicator(getBaseContext(),id);
             boolean[] errorDetection = {false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
-            String absoluteFilePath = null;
+            File pdfFile = null;
             MakePdf makePdf = new MakePdf();
             if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1))
                 return null;//created page 1
@@ -1031,10 +1064,10 @@ public class PdfViewerOperation extends AppCompatActivity {
                     return null;//after finish page we cannot write to it
 
                 //while creating current pdf then its file name should be same because if user click on current PDF button repeatedly then many file will be create in device which is useless.so to avoid that file name is kept same so that whenever user click current pdf button then new file will be replaced with old file so it is necessary to keep same file name.if file name is unique then many file will be created in device
-                absoluteFilePath = makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(), "id" + id + "currentInvoice");//we have to return filename  view pdf using file path
+                pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), "id" + id + "currentInvoice");//we have to return filename  view pdf using file path
                 if (!makePdf.closeDocumentLastOperation4()) return null;
             }
-            return absoluteFilePath;
+            return pdfFile;
         }catch (Exception x){
             x.printStackTrace();
             return null;
@@ -1077,7 +1110,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         return true;
     }
     public String[] getPersonDetailsForCurrentInvoice(String id) {
-        try (Database db=new Database(getApplicationContext());
+        try (Database db=new Database(getBaseContext());
              Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
              Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
@@ -1099,7 +1132,6 @@ public class PdfViewerOperation extends AppCompatActivity {
             return new String[]{"ERROR",id,"ERROR","ERROR"};//to avoid error
         }
     }
-
     public void displayDialogMessage(String title, String message) {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(PdfViewerOperation.this);
         showDataFromDataBase.setCancelable(true);
@@ -1108,7 +1140,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         showDataFromDataBase.setPositiveButton(getResources().getString(R.string.ok), (dialogInterface, i) -> dialogInterface.dismiss());
         showDataFromDataBase.create().show();
     }
-    private String convertBytesToFileForSharingAndReturnAbsolutePath(byte [] pdfByte,String fileName, String id){//return null when error. Converts the array of bytes into a File
+    private File convertBytesToFileForSharingAndReturnFile(byte [] pdfByte, String fileName, String id){//return null when error. Converts the array of bytes into a File
         if(pdfByte==null || id==null){//to prevent file create in device when pdfByte is null
             return null;
         }
@@ -1119,21 +1151,18 @@ public class PdfViewerOperation extends AppCompatActivity {
             }
             File file = new File(getExternalFilesDir(null) + "/acBookPDF/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
 
-
                 FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
                 fileOutputStream.write(pdfByte);
                 fileOutputStream.close();
-                return file.getAbsolutePath(); //get absoluteFile path
+               // return file.getAbsolutePath(); //get absoluteFile path
+                return file;
             } catch (FileNotFoundException ex) {
                 ex.printStackTrace();
-                Log.d(this.getClass().getSimpleName(), "FileNotFoundException");
-                return null;
+                 return null;
             } catch (Exception ex) {
                 ex.printStackTrace();
-                Log.d(this.getClass().getSimpleName(), "exception occurred in method " + Thread.currentThread().getStackTrace()[2].getMethodName());
-                return null;
+                 return null;
             }
-
 
         /*What is difference in file.getansolutepath() and file.getansoluteFile() in java
 

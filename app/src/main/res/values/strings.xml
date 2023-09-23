@@ -30,6 +30,7 @@
     <string name="message">MESSAGE</string>
     <string name="total_sum">TOTAL SUM</string>
     <string name="share_message_using">SHARE MESSAGE USING</string>
+    <string name="please_wait_a_few_seconds">PLEASE WAIT A FEW SECONDS</string>
 
    <!--CustomizeLayoutOrDepositAmount-->
     <string name="update_deposit_amount">UPDATE DEPOSIT AMOUNT=</string>
@@ -86,6 +87,15 @@
     <string name="failed_to_add_m">FAILED TO ADD M</string>
     <string name="successfully_added_g">SUCCESSFULLY  ADDED G</string>
     <string name="failed_to_add_g">FAILED TO ADD G</string>
+    <string name="star_after_calculation_advance_rs_dot">*After calculation advance Rs.</string>
+    <string name="star_after_calculation_balance_rs_dot">*After calculation balance Rs.</string>
+    <string name="star_after_calculation_no_dues_dot">* After calculation no dues.</string>
+    <string name="star_total_star">****TOTAL****</string>
+    <string name="total_work_amount_equal">TOTAL WORK AMOUNT =</string>
+    <string name="total_deposit_equal">TOTAL DEPOSIT =</string>
+    <string name="total_work_deposit_plus_work_amount_equal">TOTAL DEPOSIT+WORK AMOUNT=</string>
+    <string name="rate">RATE</string>
+    <string name="x">X</string>
 
     <!-- Database.java-->
     <string name="check_last_remarks">CHECK LAST REMARKS</string>

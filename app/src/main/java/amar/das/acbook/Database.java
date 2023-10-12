@@ -559,11 +559,12 @@ public class Database extends SQLiteOpenHelper {
       /**Before inserting first 1. make id active because only(INSERTION,UPDATION,AND PRESSING ACTIVE RADIO BUTTON) would make id active so since it is insertion method so make it active
        * 2. check for duplicate data then
        * 3.insert into active table*/
+
         if(!activateIdWithLatestDate(id,time)){
             Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
             return false;
         }
-        if(checkIfRedundantDataPresentInOtherTable(id)){//if redundant data is present then it will delete duplicate data from other table and that data will be inserted in current table as remarks so that user would know about redundant data.but this thing would not happen just for tight checking
+        if(isRedundantDataPresentInOtherTable(id)){//if redundant data is present then it will delete duplicate data from other table and that data will be inserted in current table as remarks so that user would know about redundant data.but this thing would not happen just for tight checking
             Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -619,6 +620,7 @@ public class Database extends SQLiteOpenHelper {
                         return false;
                     }
                      success=(dB.insert(TABLE1_ACTIVE_LG, null, cv) == -1)? false :true; //if data not inserted return -1
+                //testing success=(dB.insert(TABLE2_IN_ACTIVE_MESTRE, null,cv) == -1)? false :true; //if data not inserted return -1
             }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
                    if (id != null) {
                        cv.put(COL_1_ID_AM, id);
@@ -660,6 +662,8 @@ public class Database extends SQLiteOpenHelper {
                        return false;
                    }
                   success=(dB.insert(TABLE0_ACTIVE_MESTRE, null,cv) == -1)? false :true; //if data not inserted return -1
+               //testing success=(dB.insert(TABLE2_IN_ACTIVE_MESTRE, null,cv) == -1)? false :true; //if data not inserted return -1
+
            }
         }else {
             Toast.makeText(context, "insertion only happens in active table but its inactive", Toast.LENGTH_LONG).show();
@@ -686,7 +690,7 @@ public class Database extends SQLiteOpenHelper {
             Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
             return false;
         }
-        if(checkIfRedundantDataPresentInOtherTable(id)){//if redundant data is present then it will delete duplicate data from other table and that data will be inserted in current table as remarks so that user would know about redundant data.but this thing would not happen just for tight checking
+        if(isRedundantDataPresentInOtherTable(id)){//if redundant data is present then it will delete duplicate data from other table and that data will be inserted in current table as remarks so that user would know about redundant data.but this thing would not happen just for tight checking
             Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -1059,7 +1063,7 @@ public class Database extends SQLiteOpenHelper {
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
             if (activeInactiveSkill[0].equals("0")){//if person is inactive then insert data from inactive table to active table
-                 if(checkIfRedundantDataPresentInOtherTable(id)){
+                 if(isRedundantDataPresentInOtherTable(id)){
                      Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
                      return false;
                  }
@@ -1087,7 +1091,7 @@ public class Database extends SQLiteOpenHelper {
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
             if (activeInactiveSkill[0].equals("1")){//if person is active then insert data from active table to inactive table
-                if(checkIfRedundantDataPresentInOtherTable(id)){
+                if(isRedundantDataPresentInOtherTable(id)){
                     Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
                     return false;
                 }
@@ -1110,7 +1114,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return false;
     }
-    private boolean checkIfRedundantDataPresentInOtherTable(String id){//if redundant return true else false
+    private boolean isRedundantDataPresentInOtherTable(String id){//if redundant return true else false
     /**if redundant data is present then this method delete duplicate data from other table and add all data remarks to current table and return true.
      * if there is no redundant data then this method return false*/
         boolean isRedundantDataPresent=false;
@@ -1138,13 +1142,15 @@ public class Database extends SQLiteOpenHelper {
         return false;
     }
     private boolean deleteFromOtherTableAndAddRemarksInCurrentTableTransactional(byte duplicateDataPresentTableNumber, String id, String activeAndSkill[]) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
+        /**in this method we can either insert only message or insert all entries individually by taking cursor data directly.for now this method only inserting message as entries having all entries of other table*/
         boolean success=false;
         SQLiteDatabase dB =null;
         try {
             dB = this.getWritableDatabase();//getting permission it should be here to rollback
             dB.beginTransaction();//transaction start
             Cursor otherTableDataCursor= getDataFromOtherTable(duplicateDataPresentTableNumber,id);
-            String remarks= formatCursorDataToText(otherTableDataCursor);
+            //StringBuilder remarks=new StringBuilder(formatCursorDataToText(otherTableDataCursor)).append("\n\nALL "+otherTableDataCursor.getCount()+" ENTRIES TOTAL SUM").append(MyUtility.getMessageOnlyTotalWagesAndDeposit(id,context));
+            String  remarks= formatCursorDataToText(otherTableDataCursor);
 
             if(activeAndSkill[0].equals("1")){//insert remarks in current active table
                 if(!insertWagesOrDepositToActiveTableDirectly(dB, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, remarks, 0, 0, 0, 0, 0, 0, "0")){
@@ -1155,7 +1161,14 @@ public class Database extends SQLiteOpenHelper {
                    return false;
                }
             }
+
+            ArrayList<String> allAudioList=getAllAudioPathFromDb(id,getTableName(duplicateDataPresentTableNumber));//getting audio from other table
+
             dB.delete(getTableName(duplicateDataPresentTableNumber), "ID= '" + id + "'", null);//deleting data from other table table
+
+            if(!deleteAudioOrPdf(allAudioList)){//deleting audio from other table.if above delete operation fail then this operation should not work
+                return false;
+            }
 
             success=true;
         }catch (Exception x){
@@ -1178,11 +1191,18 @@ public class Database extends SQLiteOpenHelper {
         StringBuilder depositSb=new StringBuilder();
 
         depositSb.append("["+MyUtility.getOnlyTime()+context.getResources().getString(R.string.hyphen_automatic_entered))
-                .append("\n\nDATA FOUND IN OTHER TABLE. ")
-                .append("\nDATA DELETED FROM OTHER TABLE. ")
-                .append("\nTOTAL NUMBER OF DELETED DATA: ").append(otherTableDataCursor.getCount());
-         
-        while(otherTableDataCursor.moveToNext()){
+//                .append("\n\nDATA FOUND IN OTHER TABLE. ")
+//                .append("\nDATA DELETED FROM OTHER TABLE. ")
+//                .append("\nTOTAL NUMBER OF DELETED DATA: ").append(otherTableDataCursor.getCount());
+                                                        //or
+//                .append("\n\n").append(otherTableDataCursor.getCount()).append(" ENTRIES FOUND IN OTHER TABLE.")
+//                .append("\n").append(otherTableDataCursor.getCount()).append(" ENTRIES DELETED FROM OTHER TABLE.")
+//                .append("\n").append(otherTableDataCursor.getCount()).append(" DELETED ENTRIES ARE: ");
+
+                .append("\n\n").append(otherTableDataCursor.getCount()).append(" ENTRIES FOUND IN OTHER TABLE.")
+                .append("\nENTRIES ARE: ");
+
+        while(otherTableDataCursor.moveToNext()){//sequence number cant be used because it will not be in sequence order
             
             if(otherTableDataCursor.getString(8).equals("0")) {//IF wages
                wagesSb.append("\n\n").append("-> ").append(otherTableDataCursor.getString(0)).append(" WAGES=").append(otherTableDataCursor.getString(2)).append("  ");
@@ -1200,11 +1220,11 @@ public class Database extends SQLiteOpenHelper {
                     wagesSb.append(otherTableDataCursor.getString(7)).append(" ");
                 }
                 wagesSb.append("\n").append(otherTableDataCursor.getString(1));//remarks
-            }else if (otherTableDataCursor.getString(8).equals("1")) {
+            }else if (otherTableDataCursor.getString(8).equals("1")) {//if deposit
                 depositSb.append("\n\n").append("-> ").append(otherTableDataCursor.getString(0)).append(" DEPOSITED=").append(otherTableDataCursor.getString(3)).append("\n").append(otherTableDataCursor.getString(1));
             }
          }
-        return depositSb.append(wagesSb).append("\n----------FINISH----------").toString();
+        return depositSb.append(wagesSb).append("\n\n----------FINISH----------").toString();
     }
     private Cursor getDataFromOtherTable(byte tableNumber, String id) {
         if(tableNumber == -1) return null;//if incorrect table number
@@ -1534,13 +1554,13 @@ public class Database extends SQLiteOpenHelper {
         if (activeOrInactiveAndSkill[0].equals("1")) {//active
             if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.mestre))) {
                 return 0;
-            } else if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.laber)) || activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.women_laber))) {
+            } else if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.laber)) || activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.women_laber))){
                 return 1;
             }
         } else if (activeOrInactiveAndSkill[0].equals("0")) {//inactive
             if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.mestre))) {
                 return 2;
-            } else if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.laber)) || activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.women_laber))) {
+            } else if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.laber)) || activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.women_laber))){
                 return 3;
             }
         }
@@ -1605,30 +1625,44 @@ public class Database extends SQLiteOpenHelper {
 //    }
     public boolean deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(String id,int totalDeposit,int totalWages,int p1,int p2,int p3,int p4,int r1,int r2,int r3,int r4,byte indicate,int []innerArray){
     /**should be follow in sequence strictly because to call this method id should be active otherwise data will Be inserted directly to other table
-     * 0.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table
-     * 1.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table
-     * 2.delete all wages and deposit
-     * 3.add final message to database or recycle view so that after deletion message would be inserted and visible to user
-     * 4.update pdf sequence
-     * 5.deleted all audio from device which is present in arraylist*/
+     * 1.Check for redundant data present in other table if present then delete those data and add in recyclerview as remarks so that user would know.Redundant data will be in table when deletion operation delete only half data while making id active or in active but this will not happen due to transaction applied just for 100% confirmation checking
+     * 2.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table
+     * 3.updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
+     * 4.get total sum of wages deposit and m l m m to specify as remarks after final calculation.Do this operation otherwise it will be lost after operation perform ie.deletion.after that
+     * 5.create pdf and text file to get updated rate data if user changes rate after that
+     * 6.save pdf in db then deleted from device
+     * 7.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table
+     * 8.delete all wages and deposit
+     * 9.update pdf sequence so that while will get updated pdf sequence while add final remarks to recycler view
+     * 10.add final message to database or recycle view so that after deletion message would be inserted and visible to user
+     * 11.deleted all audio from device which is present in arraylist*/
 
-     // 0.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table
+     /**1.Check for redundant data present in other table if present then delete those data and add in recyclerview as remarks so that user would know.Redundant data will be in table when deletion operation delete only half data while making id active or in active but this will not happen due to transaction applied just for 100% confirmation checking*/
+    if(isRedundantDataPresentInOtherTable(id)){//if redundant data is present then it will delete duplicate data from other table and that data will be inserted in current table as remarks so that user would know about redundant data.but this thing would not happen just for tight checking
+           // Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();//cant use during background task
+            return false;
+    }
+     /**2.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table*/
       boolean success=false;//value should be false
       if(!activateIdWithLatestDate(id,MyUtility.getOnlyTime())){
-          Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
+         // Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();//cant use during background task
           return false;
       }
+
       SQLiteDatabase dB =null;
       String pdfAbsolutePath=null;
     try {
         dB = this.getWritableDatabase();//getting permission it should be here to rollback
         dB.beginTransaction();//transaction start
 
+       /**3.updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance*/
         success=updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(dB,id,totalDeposit,  totalWages,  p1,  p2,  p3,  p4,  r1,  r2,  r3,  r4,  indicate,innerArray);//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
         if(!success) return false;
 
-        String summaryTotal=MyUtility.getMessageOnlyTotalWagesAndDeposit(id,context);//getting total sum of wages deposit and m l m m to specify as remarks after final calculation.getting data here otherwise it will be lost after deletion
+        /**4.get total sum of wages deposit and m l m m to specify as remarks after final calculation.Do this operation otherwise it will be lost after operation perform ie.deletion.after that*/
+        String previousInvoiceSummaryTotal=MyUtility.getMessageOnlyTotalWagesAndDeposit(id,context);//getting total sum of wages deposit and m l m m to specify as remarks after final calculation.getting data here otherwise it will be lost after deletion
 
+        /**5.create pdf and text file to get updated rate data if user changes rate after that*/
          pdfAbsolutePath = generatePDFAndReturnFileAbsolutePath(id);//first pdf is created here to get updated rate data if user changes rate
         if(pdfAbsolutePath == null) {//if error in creating pdf pdfAbsolutePath will be null
             success=false;//to rollback transaction
@@ -1637,36 +1671,39 @@ public class Database extends SQLiteOpenHelper {
         success=MyUtility.createTextFileInvoice(id,context,context.getExternalFilesDir(null).toString());//creating text file for backup in device folder
         if(!success) return false;
 
+        /**6.save pdf in db then deleted from device*/
         success=savePdfToDatabaseAndDeleteFromDevice(pdfAbsolutePath,id,dB);//after saving pdf in db then deleted from device
         if(!success) return false;
 
-        //1.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table
-        ArrayList<String> allAudioList=getAllAudioPathFromDb(id);//before deleting all audio getting all audio from db and storing in arraylist
+        /**7.get all audio path from db and store in arraylist as backup.if all operation executed successfully then delete all audio from device save option.but its important to delete audio first then all data from table otherwise audio path will be deleted from table*/
+        ArrayList<String> allAudioList=getAllAudioPathFromDb(id,tableNameOutOf4Table(id));//before deleting all audio getting all audio from db and storing in arraylist
 
-        //2.delete all wages and deposit
+        /**8.delete all wages and deposit*/
          dB.delete(tableNameOutOf4Table(id), "ID= '" + id + "'", null);//if error occur then control goes to catch block there success will be false so if above code is executes successfully that operation should not be committed
 
-        //3.add final message to database or recycle view so that after deletion message would be inserted and visible to user
-         success=addMessageAfterFinalCalculationToRecyclerview(id,dB,summaryTotal);
+        /**9.update pdf sequence*/
+        success=updateInvoiceNumberBy1ToDb(id,dB);
+        if(!success) return false;
+
+        /**10.add final message to database or recycle view so that after deletion message would be inserted and visible to user*/
+         success=addMessageAfterFinalCalculationToRecyclerview(id,dB,previousInvoiceSummaryTotal);
          if(!success)return false;
 
-        //4.update pdf sequence
-         success=updateInvoiceNumberBy1ToDb(id,dB);
-         if(!success) return false;
-
-         //if control reach till here that means all main operation executed successfully. If this code fail to execute then no need to rollback
-        //5.deleted all audio from device
-        success= deleteAudioOrPdf(allAudioList);
+         //if control reach till here that means all main important operation executed successfully. If this code fail to execute then no need to rollback
+        /**11.deleted all audio from device*/
+        success=deleteAudioOrPdf(allAudioList);
         if(!success){
-            Toast.makeText(context, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: " + id + "\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-            if (!insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0")) {//this insertion should be perform only when id is active
-                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
-            }
-            success=true;//making true to commit all above main operation. if here if else statement fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+//            Toast.makeText(context, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: " + id + "\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
+//            if (!insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0")) {//this insertion should be perform only when id is active
+//                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
+//            }//toast will not work while doing background task
+
+            insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){
         x.printStackTrace();
-        return false;//if delete method produce error then this will execute and success will be false from before
+        return false;//if delete operation 8 method produce error then this will execute and success will be false from before
     }finally {
         if(!success){//if any operation fail
             MyUtility.deletePdfOrRecordingUsingPathFromDevice(TextFile.textFileAbsolutePathInDevice);//if any operation fail then delete the created text file alse from device
@@ -1720,7 +1757,8 @@ public class Database extends SQLiteOpenHelper {
     }
     private boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
         try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-             Cursor cursor2 = getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+            // Cursor cursor2 = getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")
+             ){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -1737,12 +1775,19 @@ public class Database extends SQLiteOpenHelper {
                     aadhaar = "";
                 }
 
-                if (cursor2 != null) {//this make filename unique
-                    cursor2.moveToFirst();
-                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
-                } else {
-                    pdfSequenceNo = -1;//if error
+//                if (cursor2 != null) {//this make filename unique
+//                    cursor2.moveToFirst();
+//                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING in db so that if pdf generation is failed sequence should not be updated in db*/
+//                } else {
+//                    pdfSequenceNo = -1;//if error
+//                }
+                pdfSequenceNo=MyUtility.getPdfSequence(id,context);//pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING in db so that if pdf generation is failed sequence should not be updated in db
+                if(pdfSequenceNo != -1){
+                    pdfSequenceNo=pdfSequenceNo+1;
                 }
+//                else {
+//                    pdfSequenceNo=-1;//if error
+//                }
 
                 String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
                 if(activePhoneNumber != null){
@@ -2002,20 +2047,21 @@ public class Database extends SQLiteOpenHelper {
        }
        return true;
     }
-    private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
+    private boolean  addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
         try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned
+
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\nSUMMARY"+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(),MyUtility.getOnlyTime(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\nSUMMARY"+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(),MyUtility.getOnlyTime(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\nSUMMARY"+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,0,"0");
+                return insertWagesOrDepositToActiveTableDirectly(dB,getMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,0,"0");
 
             }
             return false;
@@ -2045,10 +2091,10 @@ public class Database extends SQLiteOpenHelper {
          }
         return true;//if there is no single audio then also return true
     }
-    private ArrayList<String> getAllAudioPathFromDb(String id){//may return null when exception occur
+    private ArrayList<String> getAllAudioPathFromDb(String id,String tableName){//may return null when exception occur
         ArrayList<String> audiosPathAl=new ArrayList<>();
         if(isSingleRowPresentInTable(id)){//if data present in table then execute
-            try (Cursor cursor = getData("SELECT " + columnNameOutOf4Table(id, (byte) 4) + " FROM " + tableNameOutOf4Table(id) + " WHERE " + columnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'")) {//so that object close automatically
+            try (Cursor cursor = getData("SELECT " + columnNameOutOf4Table(id, (byte) 4) + " FROM " + tableName + " WHERE " + columnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'")) {//so that object close automatically
                 while (cursor.moveToNext()) {
                     if (cursor.getString(0) != null) {//checking path may be null
                         audiosPathAl.add(cursor.getString(0));

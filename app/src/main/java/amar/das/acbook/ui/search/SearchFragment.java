@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import amar.das.acbook.activity.AllCalculatedInvoicesActivity;
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
@@ -86,22 +87,20 @@ public class SearchFragment extends Fragment  {
             PopupMenu popup=new PopupMenu(getContext(),binding.verticledotsmenuClick);
             popup.inflate(R.menu.popuo_menu);
 
-            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    switch(item.getItemId()){
-                        case R.id.insert_new:{
-                            Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case R.id.update:{//can be add more item like setting
-                            Toast.makeText(getContext(), "Update button clicked", Toast.LENGTH_SHORT).show();
-                            break;
-                        }
+            popup.setOnMenuItemClickListener(item -> {
+                switch(item.getItemId()){
+                    case R.id.insert_new:{
+                        Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
+                        startActivity(intent);
+                        break;
                     }
-                    return true;
+                    case R.id.all_invoice:{//can be add more item like setting
+                        Intent intent = new Intent(getContext(), AllCalculatedInvoicesActivity.class);
+                        startActivity(intent);
+                        break;
+                    }
                 }
+                return true;
             });
             popup.show();
         });

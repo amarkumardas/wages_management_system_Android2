@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/purple_700"
+    android:orientation="vertical"
+    tools:context=".activity.AllCalculatedInvoicesActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="6dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/baseline_arrow_goback"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:onClick="invoice_layout_go_back"/>
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/text_file_serach_view"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:layout_weight="9"
+            android:background="@drawable/white_detailsbg"
+            android:inputType="textCapCharacters|textAutoCorrect"
+            app:defaultQueryHint="Search Calculated Invoices"
+            app:iconifiedByDefault="false"
+            app:searchIcon="@null">
+
+            <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
+        </androidx.appcompat.widget.SearchView>
+        <!-- app:iconifiedByDefault="false" so that user enter anywhere to write and show icon by default.means to make searchview
+expanded automatically
+ app:searchIcon="@null" to remove default icon-->
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10"
+        android:background="#FAFAFA">
+    <TextView
+        android:layout_weight="5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/all_text_file_invoice"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="12sp"/>
+        <TextView
+            android:id="@+id/text_file_total_count"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="12345"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/text_file_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        tools:listitem="@layout/text_file_single_file"
+        android:background="#D6DADF">
+     </androidx.recyclerview.widget.RecyclerView>
+</LinearLayout>

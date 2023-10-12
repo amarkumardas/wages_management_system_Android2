@@ -101,7 +101,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     binding.customMicIconTv.setEnabled(false);
                     binding.customMicIconTv.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
 
-                    VoiceRecorder voiceRecorder=new VoiceRecorder(fromIntentPersonId,getExternalFilesDir(null).toString());
+                    VoiceRecorder voiceRecorder=new VoiceRecorder(fromIntentPersonId,getExternalFilesDir(null).toString());//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
                     if(voiceRecorder.startRecording()){
                         binding.customChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
                         binding.customChronometer.start();

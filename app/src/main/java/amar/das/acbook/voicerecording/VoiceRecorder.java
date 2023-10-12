@@ -11,6 +11,8 @@ public class VoiceRecorder{
    private static MediaRecorder mediaRecorder;//it should be static
     private static MediaPlayer mediaPlayer;
     private  String audioAbsolutePath;
+    private String audioFolderName="acBookAudio";
+    private String audioFileName="audio";
 
   public VoiceRecorder(String id,String getExternalFilesDir){
       audioAbsolutePath=getRecordingAbsolutePath(getExternalFilesDir,id);
@@ -65,8 +67,8 @@ public class VoiceRecorder{
         return mediaRecorder;
     }
     private String getRecordingAbsolutePath(String getExternalFilesDir,String id){//return null if error
-        if(MyUtility.checkFolderIfNotExistCreateIt(getExternalFilesDir,"/acBookAudio")) {
-            return new File(getExternalFilesDir+"/acBookAudio/"+MyUtility.generateUniqueFileNameByTakingDateTime(id,"audio") +".mp3").getAbsolutePath();//path of audio where it is saved in device
+        if(MyUtility.isFolderExistIfNotExistCreateIt(getExternalFilesDir,"/"+audioFolderName+"")) {//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
+            return new File(getExternalFilesDir+"/"+audioFolderName+"/"+MyUtility.generateUniqueFileNameByTakingDateTime(id,audioFileName) +".mp3").getAbsolutePath();//path of audio where it is saved in device
         }else{
             return null;
         }

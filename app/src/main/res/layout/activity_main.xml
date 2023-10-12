@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:background="#FFEB3B"
         android:baselineAligned="false"
-        android:text="@string/all_records"
+        android:text="hgfh"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="15sp"

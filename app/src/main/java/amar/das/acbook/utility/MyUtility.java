@@ -199,6 +199,20 @@ public class MyUtility {
           Database.closeDatabase();
         }
     }
+    public static int getPdfSequence(String id,Context context){//if error return -1
+        if(id==null){
+            return -1;
+        }
+        Database database=Database.getInstance(context);
+        try(Cursor cursor = database.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+              cursor.moveToFirst();
+            return cursor.getInt(0);
+
+        }catch(Exception x){
+            x.printStackTrace();
+            return -1;
+        }
+    }
     public static boolean createTextFileInvoice(String id,Context context,String externalFileDir){
         try{
             TextFile textFile=new TextFile();
@@ -239,7 +253,7 @@ public class MyUtility {
             }else return false;
 
             textFile.appendText(sb.toString());
-          return textFile.createTextFile(externalFileDir,"acBookTextFile",generateUniqueFileName(context,id));
+          return textFile.createTextFile(externalFileDir,TextFile.textFileFolderName,generateUniqueFileName(context,id));
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -768,7 +782,7 @@ public class MyUtility {
             return false;
         }
     }
-    public static boolean checkFolderIfNotExistCreateIt(String externalFileDir,String folderName){
+    public static boolean isFolderExistIfNotExistCreateIt(String externalFileDir, String folderName){
          //be carefully take only getExternalFilesDir( null ) https://stackoverflow.com/questions/59017202/mediarecorder-stop-failed
         try{
             File folder = new File( externalFileDir + "/"+folderName);//File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir

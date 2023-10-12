@@ -80,7 +80,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
             // making it active or inactive using latest date (2022-05-01,2022-05-01)
             if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= monthsInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
-                if(!db.makeIdInActive(data.getId())){
+                if(!db.makeIdInActive(data.getId())){//if latest date is one month old
                     Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_inactive), Toast.LENGTH_LONG).show();
                 }
             }else{
@@ -92,6 +92,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
 //                    }
+
                     if(!db.makeIdActive(data.getId())){
                         Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
                     }

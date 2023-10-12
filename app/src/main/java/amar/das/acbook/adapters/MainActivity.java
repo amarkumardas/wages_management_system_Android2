@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         startActivity(intent);
                         break;
                        }
-            case R.id.update:{
+            case R.id.all_invoice:{
                              Toast.makeText(MainActivity.this, "Update button clicked", Toast.LENGTH_SHORT).show();
                              break;
                               }

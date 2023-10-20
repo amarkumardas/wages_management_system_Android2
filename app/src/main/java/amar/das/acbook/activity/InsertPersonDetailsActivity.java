@@ -334,7 +334,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                         }
 
                         if (success) {//if it is updated then show successfully message
-                            Toast.makeText(InsertPersonDetailsActivity.this, "ID- " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
+                             Toast.makeText(InsertPersonDetailsActivity.this, "ID- " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
 //                            final Calendar current=Calendar.getInstance();//to get current date

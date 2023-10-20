@@ -6,13 +6,15 @@
     android:layout_height="match_parent"
     android:background="@color/purple_700"
     android:orientation="vertical"
+    android:id="@+id/all_calculated_invoices_layout"
     tools:context=".activity.AllCalculatedInvoicesActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="10">
+        android:weightSum="10"
+        android:id="@+id/searchbar_goback">
 
         <Button
             android:layout_width="0dp"
@@ -50,12 +52,15 @@ expanded automatically
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
         android:background="#FAFAFA">
     <TextView
+        android:id="@+id/total_backup_message"
         android:layout_weight="5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/all_text_file_invoice"
+        android:text="@string/backup_invoice_files"
         android:gravity="center"
         android:textColor="@color/black"
         android:textSize="12sp"/>
@@ -64,7 +69,6 @@ expanded automatically
             android:layout_weight="5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="12345"
             android:textColor="@color/black"
             android:textSize="12sp" />
     </LinearLayout>
@@ -75,7 +79,7 @@ expanded automatically
         android:layout_height="match_parent"
         android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
-        tools:listitem="@layout/text_file_single_file"
+        tools:listitem="@layout/text_file_single_row"
         android:background="#D6DADF">
      </androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

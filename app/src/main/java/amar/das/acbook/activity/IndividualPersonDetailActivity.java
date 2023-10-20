@@ -680,7 +680,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             binding.pdfShareTv.setOnClickListener(view -> {
                 try {//to view pdf
                     finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
-                    Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
+                    Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperationActivity.class);
                     intent.putExtra("pdf1_or_2_or_3_for_blank_4",(byte)4);
                     intent.putExtra("ID",fromIntentPersonId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1249,7 +1249,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 private boolean viewPDFFromDb(byte whichPdf,String fromIntentPersonId) {
                     try {//to view pdf
                         finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
-                        Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperation.class);
+                        Intent intent=new Intent(IndividualPersonDetailActivity.this, PdfViewerOperationActivity.class);
                         intent.putExtra("pdf1_or_2_or_3_for_blank_4",whichPdf);
                         intent.putExtra("ID",fromIntentPersonId);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

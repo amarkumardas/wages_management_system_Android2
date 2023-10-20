@@ -1,12 +1,17 @@
 package amar.das.acbook.utility;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -804,6 +809,20 @@ public class MyUtility {
             return false;
         }
     }
+//    public static boolean requestReadWriteExternalStoragePermission(Context context) {//Casting Context to Activity: In your code, you are casting the Context to an Activity with (Activity)context before making the permission request. This may lead to a ClassCastException if the provided context is not an Activity. You should ensure that the context passed to this method is indeed an instance of an Activity. If it's not an Activity, you should handle this case to prevent a runtime exception.
+//        if (context instanceof Activity) {
+//            Toast.makeText(context, "READ, WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+//            return true;
+//        } else {
+//            // Handle the case where the provided context is not an Activity
+//            // You might display an error message or log a message.
+//            Log.e("PermissionRequest", "Context is not an Activity");
+//            Toast.makeText(context, "context is not an activity", Toast.LENGTH_LONG).show();
+//            return false;
+//        }
+//    }
+
     public static String getActivePhoneNumbersFromDb(String id,Context context){//if no data return null..it return first phone number if first not available then send second phone number will be return
         Database db = Database.getInstance(context);
         try (
@@ -900,6 +919,13 @@ public class MyUtility {
             //since array list already sorted in asc order so just reversing to get desc order
             reverseArrayListUsingIndex(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull,nullCountInArraylist[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size() - nullCountInArraylist[1]);
         }//else
+    }
+    public static void snackBar(View view,String message){
+        try {
+            Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
+        }catch (Exception x){
+            x.printStackTrace();
+        }
     }
     public static int[] countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(ArrayList<MestreLaberGModel> al) {
         int[] arr =new int[2];

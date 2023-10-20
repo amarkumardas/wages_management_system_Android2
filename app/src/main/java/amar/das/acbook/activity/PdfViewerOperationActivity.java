@@ -43,7 +43,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -56,7 +55,7 @@ import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.utility.MyUtility;
 
-public class PdfViewerOperation extends AppCompatActivity {
+public class PdfViewerOperationActivity extends AppCompatActivity {
     ActivityPdfViewerBinding binding;
     byte whichPdfIndicatorChangesDynamically;
     String fromIntentPersonId;
@@ -102,7 +101,7 @@ public class PdfViewerOperation extends AppCompatActivity {
 
         binding.gobackPdfViewer.setOnClickListener(view -> {
             finish();//destroy current activity
-            Intent intent=new Intent( PdfViewerOperation.this,IndividualPersonDetailActivity.class);
+            Intent intent=new Intent( PdfViewerOperationActivity.this,IndividualPersonDetailActivity.class);
             intent.putExtra("ID",fromIntentPersonId);
             startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
         });
@@ -164,7 +163,7 @@ public class PdfViewerOperation extends AppCompatActivity {
                     /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
                     if(whichPdfIndicatorChangesDynamically <=(byte)3){// this will only execute when value is 1,2 or 3
                         if (!shareFileToAnyApp(pdfFile,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING")) {//open intent to share
-                            runOnUiThread(() -> displayDialogMessage("CANNOT","SHARE FILE"));
+                            runOnUiThread(() -> displayDialogMessage("CANNOT","SHARE PDF"));
                         }
                     }else if(whichPdfIndicatorChangesDynamically==(byte)4){//4 represent blank
                         runOnUiThread(() -> displayDialogMessage("PLEASE SELECT","INVOICE TO SHARE"));
@@ -205,8 +204,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                              }
                         }break;
                         case "CURRENT INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
-                            //Toast.makeText(PdfViewerOperation.this, getResources().getString(R.string.please_wait_a_few_seconds), Toast.LENGTH_SHORT).show();
-                            if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true),currentInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
+                            MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
+                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true),currentInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                              }
                         }break;
@@ -324,8 +323,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                outputStream.close();
             return true;
         }else{
-            Toast.makeText(PdfViewerOperation.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-            ActivityCompat.requestPermissions(PdfViewerOperation.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
+            Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+            ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
             return false;
             }
         }catch (IOException e) {
@@ -445,12 +444,12 @@ public class PdfViewerOperation extends AppCompatActivity {
                     startActivity(chooser);//start chooser dialog
 
                 }else{
-                    Toast.makeText(PdfViewerOperation.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                    ActivityCompat.requestPermissions(PdfViewerOperation.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                    Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                     return false;
                 }
             }else{
-                Toast.makeText(PdfViewerOperation.this, "NO IMAGE", Toast.LENGTH_LONG).show();
+                Toast.makeText(PdfViewerOperationActivity.this, "NO IMAGE", Toast.LENGTH_LONG).show();
                 return false;
             }
            return true;
@@ -565,8 +564,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                     startActivity(intent);
                     return true;
                 }else{
-                    Toast.makeText(PdfViewerOperation.this, "SMS PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                    ActivityCompat.requestPermissions(PdfViewerOperation.this, new String[]{Manifest.permission.SEND_SMS}, 31);
+                    Toast.makeText(PdfViewerOperationActivity.this, "SMS PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.SEND_SMS}, 31);
                     return false;
                 }
             }else{
@@ -702,8 +701,8 @@ public class PdfViewerOperation extends AppCompatActivity {
             return false;
         }
         try {
-            AlertDialog.Builder customDialogBuilder = new AlertDialog.Builder(PdfViewerOperation.this);
-            LayoutInflater inflater = LayoutInflater.from(PdfViewerOperation.this);
+            AlertDialog.Builder customDialogBuilder = new AlertDialog.Builder(PdfViewerOperationActivity.this);
+            LayoutInflater inflater = LayoutInflater.from(PdfViewerOperationActivity.this);
             View myView = inflater.inflate(R.layout.take_two_input_from_user_layout, null);//myView contain all layout view ids
             customDialogBuilder.setView(myView);//set custom layout to alert dialog
             customDialogBuilder.setCancelable(false);//if user touch to other place then dialog will not be close
@@ -763,7 +762,7 @@ public class PdfViewerOperation extends AppCompatActivity {
             });
             showMessage_tV.setOnClickListener(view -> {
                 if(copyTextToClipBoard(message)){
-                     Toast.makeText(PdfViewerOperation.this,  getResources().getString(R.string.message_copied), Toast.LENGTH_LONG).show();
+                     Toast.makeText(PdfViewerOperationActivity.this,  getResources().getString(R.string.message_copied), Toast.LENGTH_LONG).show();
                 }
             });
             dialog.show();
@@ -891,8 +890,8 @@ public class PdfViewerOperation extends AppCompatActivity {
                 //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
                 return true;
             }else{
-                Toast.makeText(PdfViewerOperation.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(PdfViewerOperation.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                 return false;
             }
         } catch (IOException e) {
@@ -935,8 +934,8 @@ public class PdfViewerOperation extends AppCompatActivity {
 
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType(mimeType);
-            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.This method is used to share a file with another app using a content URI
-            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
+            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             Intent chooser = Intent.createChooser(intent, title);
             chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1208,7 +1207,7 @@ public class PdfViewerOperation extends AppCompatActivity {
         }
     }
     public void displayDialogMessage(String title, String message) {
-        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(PdfViewerOperation.this);
+        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(PdfViewerOperationActivity.this);
         showDataFromDataBase.setCancelable(true);
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
@@ -1220,11 +1219,11 @@ public class PdfViewerOperation extends AppCompatActivity {
             return null;
         }
         try {
-            File folder = new File(getExternalFilesDir(null) + "/"+PdfViewerOperation.pdfFolderName+"");//create directory
+            File folder = new File(getExternalFilesDir(null) + "/"+ PdfViewerOperationActivity.pdfFolderName+"");//create directory
             if (!folder.exists()) {//if folder not exist then create folder
                 folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
             }
-            File file = new File(getExternalFilesDir(null) + "/"+PdfViewerOperation.pdfFolderName+"/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
+            File file = new File(getExternalFilesDir(null) + "/"+ PdfViewerOperationActivity.pdfFolderName+"/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
 
                 FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
                 fileOutputStream.write(pdfByte);
@@ -1316,8 +1315,9 @@ public class PdfViewerOperation extends AppCompatActivity {
                         }
                     }
                 }
-            }else{Toast.makeText(PdfViewerOperation.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(PdfViewerOperation.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+            }else{
+                Toast.makeText(PdfViewerOperationActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
                 return false;
             }
             return true;
@@ -1331,7 +1331,7 @@ public class PdfViewerOperation extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();//destroy current activity
-        Intent intent=new Intent( PdfViewerOperation.this,IndividualPersonDetailActivity.class);
+        Intent intent=new Intent( PdfViewerOperationActivity.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",fromIntentPersonId);
         startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
     }

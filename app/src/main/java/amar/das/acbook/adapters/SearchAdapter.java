@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -19,16 +20,17 @@ import java.util.ArrayList;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.model.SearchModel;
+import amar.das.acbook.model.TextFileModel;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> implements Filterable {
     Context context;
-    ArrayList<SearchModel> arrayList ;
+    ArrayList<SearchModel> dataList;
     ArrayList<SearchModel> backup  ;
 
 
     public SearchAdapter(Context context, ArrayList<SearchModel> dataList) {
         this.context = context;
-        this.arrayList = dataList;
+        this.dataList = dataList;
         backup=new ArrayList<>(dataList);//storing object to backup arraylist
 
     }
@@ -41,7 +43,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-       SearchModel data=arrayList.get(position);
+       SearchModel data= dataList.get(position);
 
 
        holder.id.setText("ID- "+data.getId());
@@ -72,7 +74,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return  arrayList.size();
+        return  dataList.size();
     }
 
     @Override
@@ -88,7 +90,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             ArrayList<SearchModel> filteredData=new ArrayList<>();//whatever data is filtered will be store here
 
 
-            if(keyword.toString().matches("[\\s*[0-9]+\\s*]+")) {//\\s is whitespace and * is optional if user enter space between character then also work
+            if(keyword.toString().matches("[\\s*[0-9]+\\s*]+")){//\\s is whitespace and * is optional if user enter space between character then also work
 
                 String str=keyword.toString().replaceAll(" ","");//removing all spaces with ""
 
@@ -136,18 +138,24 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     }
                 }
             }
-
             //we have to return FilterResults so creating its object
-            FilterResults result=new FilterResults();
-            result.values=filteredData;
-            return result; //this return will go in publishResults method
+            FilterResults  filterResults=new FilterResults();
+            filterResults.values=filteredData;
+            return filterResults;//this return will go in publishResults method
         }
-
-        @Override //main UI thread
+        @Override //view main UI thread
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-              arrayList.clear();//clearing to show new filter search result
-              arrayList.addAll( (ArrayList<SearchModel>) filterResults.values);//typecasting to arraylist because
+              dataList.clear();//clearing to show new filter search result
+              dataList.addAll( (ArrayList<SearchModel>) filterResults.values);//typecasting to arraylist because
               notifyDataSetChanged();//when background child thread searching is completed then this method will notify to main UI thread that search is completed
+//            dataList.clear(); // Clearing to show new filter search result
+//            ArrayList<SearchModel> filteredList = (ArrayList<SearchModel>) filterResults.values;
+//            if (filteredList.isEmpty()) {
+//                Toast.makeText(context,context.getResources().getString(R.string.not_found), Toast.LENGTH_SHORT).show();
+//            } else {
+//                dataList.addAll(filteredList);
+//            }
+//            notifyDataSetChanged();
         }
     };//it is like statement so ; is necessary
 

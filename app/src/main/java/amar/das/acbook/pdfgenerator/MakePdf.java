@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import amar.das.acbook.activity.PdfViewerOperation;
+import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.utility.MyUtility;
 
 public class MakePdf{
@@ -527,8 +527,8 @@ public class MakePdf{
 //                folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
 //             }
 
-            if(MyUtility.isFolderExistIfNotExistCreateIt(externalFileDir,PdfViewerOperation.pdfFolderName)) {
-                File filePath = new File(externalFileDir + "/"+PdfViewerOperation.pdfFolderName+"/" + fileName + ".pdf");//path of pdf where it is saved in device
+            if(MyUtility.isFolderExistIfNotExistCreateIt(externalFileDir, PdfViewerOperationActivity.pdfFolderName)) {
+                File filePath = new File(externalFileDir + "/"+ PdfViewerOperationActivity.pdfFolderName+"/" + fileName + ".pdf");//path of pdf where it is saved in device
                 myPdfDocument.writeTo(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
                // return filePath.getAbsolutePath();//returning created file absolute path
                 return filePath;

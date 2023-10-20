@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">AC Book</string>
     <string name="update">UPDATE</string>
-    <string name="all_text_file_invoice">ALL TEXT FILE INVOICE</string>
     <string name="search_by_name_or_id_or_last_4_digit_of_a_c">Search by Name  or  ID  or  A/C  or  Aadhaar</string>
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name">NAME</string>
@@ -14,9 +13,14 @@
     <string name="enter_bank_name">Bank Name</string>
     <!--<string name="enter_ifsc_code">IFSC Code</string>-->
     <string name="menu_insert_new_">NEW PERSON</string>
-    <string name="menu_all_invoices">ALL INVOICE</string>
+    <string name="menu_backup_invoices">BACKUP INVOICE</string>
     <string name="insert_data">ADD</string>
     <string name="account_holder_name">A/C HOLDER NAME</string>
+
+    <!--AllCalculatedInvoicesActivity-->
+    <string name="backup_invoice_files">BACKUP INVOICE FILES</string>
+    <string name="not_found">NOT FOUND</string>
+    <string name="no_backup_invoice_available">NO BACKUP INVOICE AVAILABLE</string>
 
     <!-- PdfViewerOperation Activity-->
     <string name="enter_amount">ENTER AMOUNT</string>
@@ -109,6 +113,7 @@
 
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
+    <string name="delete">DELETE</string>
 
     <string-array name="addOrRemoveMlG">
         <item>SELECT</item>
@@ -301,8 +306,9 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
-    <string name="action_settings">Settings</string>
-
+    <string name="action_delete">DELETE</string>
+    <string name="action_share">SHARE</string>
+    <string name="action_select_all">SELECT ALL</string>
 
 
 </resources>

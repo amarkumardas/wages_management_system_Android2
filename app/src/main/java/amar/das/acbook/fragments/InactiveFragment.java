@@ -38,7 +38,7 @@ public class InactiveFragment extends Fragment {
     Database db;
     Boolean isScrolling1 =false,loadOrNot=true;
     TextView advance,balance;
-
+    byte initialDataToLoad=29;//byte range from -128 to 127
     LinearLayoutManager layoutManager;
     int currentItem1, totalItem1, scrollOutItems1, totalNumberOfLoadedData,totalSpecificInactiveRecord;
     //char skillIndicator='M';//for loading initial data
@@ -66,11 +66,11 @@ public class InactiveFragment extends Fragment {
 
         binding.inactiveRadiogroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
             if(checkedIdOfRadioBtn==R.id.mestre_total_inactive_radiogroup){
-                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.mestre),29);
+                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.mestre),initialDataToLoad);
             } else if (checkedIdOfRadioBtn==R.id.laber_total_inactive_radiogroup) {
-                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.laber),29);
+                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.laber),initialDataToLoad);
             } else if (checkedIdOfRadioBtn==R.id.g_total_inactive_radiogroup) {
-                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.women_laber),29);
+                loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.women_laber),initialDataToLoad);
             }
 
            // switch(checkedIdOfRadioBtn){

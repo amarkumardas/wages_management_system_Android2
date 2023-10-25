@@ -33,6 +33,31 @@ import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.textfilegenerator.TextFile;
 
 public class MyUtility {
+    public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    }
+    public static String extractTime12hr(String systemDateTime) {//if error return null
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = formatter.parse(systemDateTime);
+            SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss a");
+            return timeFormatter.format(date);
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
+    public static String extractDate(String systemDateTime) {//if error return null
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = formatter.parse(systemDateTime);
+            SimpleDateFormat timeFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            return timeFormatter.format(date);
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
     public static int get24hrCurrentTimeRemoveColon() {//unique time
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");//capital HH stands for 24hr time format
        return  Integer.parseInt(sdf.format(new Date()).replaceAll("[:]", ""));//convert 01:30:55 to 13055 by parsing to INTEGER initial 0 is removed
@@ -883,12 +908,12 @@ public class MyUtility {
             Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(0, arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()));//natural sorting based on latest date desc comparator implemented
 
          }else {//sorting to original array in asc order by taking latest date
-            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(nullCountInArraylist[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), new Comparator<MestreLaberGModel>() {
+            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(nullCountInArraylist[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), new Comparator<>() {
                 DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                 @Override
                 public int compare(MestreLaberGModel obj1, MestreLaberGModel obj2) {
                     try {
-                        return sdf.parse(obj1.getLatestDate()).compareTo(sdf.parse(obj2.getLatestDate()));
+                        return sdf.parse(obj1.getLatestDate()).compareTo(sdf.parse(obj2.getLatestDate()));//will return o when two dates is same
                     } catch (ParseException e) {
                         throw new IllegalArgumentException(e);
                     }catch (Exception x){

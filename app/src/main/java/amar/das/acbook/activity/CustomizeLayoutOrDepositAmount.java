@@ -40,7 +40,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     boolean toggleToStartRecording =false;
 
     int []arr=new int[3];//to give information which field is empty or contain data
-    String []previousDataHold=new String[4];
+    String []previousDataHold=new String[3];
     int cYear,cMonth,cDayOfMonth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,7 +154,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             datePickerDialog.show();
         });
 
-        if (getIntent().hasExtra("ID") && !getIntent().hasExtra("DATE") &&  !getIntent().hasExtra("TIME")) {//if id present than only operation will be performed
+        //if (getIntent().hasExtra("ID") && !getIntent().hasExtra("DATE") &&  !getIntent().hasExtra("TIME")) {//if id present than only operation will be performed
+        if (getIntent().hasExtra("ID") && !getIntent().hasExtra("SYSTEM_DATETIME")) {//if id present than only operation will be performed
             db = new Database(this);//on start only database should be create
             binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);
             binding.customSaveBtn.setOnClickListener(view -> {
@@ -202,7 +203,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     }
 
                     //success = db.insert_Deposit_Table2(fromIntentPersonId,binding.customDateTv.getText().toString(),binding.customTimeTv.getText().toString(),micPath,remarks,depositAmount,"1");
-                    success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,0,0,0,0,0,depositAmount,"1");
+                    success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,0,0,0,0,0,depositAmount,"1");
                     if(!success){
                         Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                     }
@@ -229,34 +230,51 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 }
             });
 
-            //while updating this will execute
-        }else if(getIntent().hasExtra("ID") &&  getIntent().hasExtra("DATE") &&  getIntent().hasExtra("TIME")){
+            //while updating this will execute else statement
+        //}else if(getIntent().hasExtra("ID") &&  getIntent().hasExtra("DATE") &&  getIntent().hasExtra("TIME")){
+        }else if(getIntent().hasExtra("ID") &&  getIntent().hasExtra("SYSTEM_DATETIME")){
 
             binding.customDepositAmountTv.setText(getResources().getString(R.string.update_deposit_amount));
             binding.customSaveBtn.setText(getResources().getString(R.string.long_press_to_update));
 
-            String recycleDate= getIntent().getStringExtra("DATE");
-              cDayOfMonth = extractData(0,recycleDate);
-              cMonth = extractData(1, recycleDate);
-              cYear = extractData(2, recycleDate);
-            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
+//            String recycleDate= getIntent().getStringExtra("DATE");
+//              cDayOfMonth = extractData(0,recycleDate);
+//              cMonth = extractData(1, recycleDate);
+//              cYear = extractData(2, recycleDate);
+//            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
 
             db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
             //Cursor cursorData = db.getData("SELECT  "+Database.COL_25_DESCRIPTION+","+Database.COL_27_DEPOSIT+","+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + getIntent().getStringExtra("ID") + "'" + " AND "+Database.COL_22_DATE+"= '" + getIntent().getStringExtra("DATE") + "'" + " AND "+Database.COL_23_TIME+"='" + getIntent().getStringExtra("TIME") + "'");
-            Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+           // Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+            Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
             cursorData.moveToFirst();//this cursor is not closed
             String cDescription,cDeposit,cMicPath;
             cDescription=cursorData.getString(0);
             cDeposit=cursorData.getString(1);
             cMicPath=cursorData.getString(2);
-            cursorData.close();
+
+//            String userGivenDate= cursorData.getString(3);
+//            cDayOfMonth = extractData(0,userGivenDate);
+//            cMonth = extractData(1, userGivenDate);
+//            cYear = extractData(2, userGivenDate);
+//            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
+
+            String[] userGivenDate= cursorData.getString(3).split("-");
+            cDayOfMonth = Integer.parseInt(userGivenDate[0]);
+            cMonth = Integer.parseInt(userGivenDate[1])-1;//-1 because it is global variable updated to when user click date button
+            cYear = Integer.parseInt(userGivenDate[2]);
+            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
 
             binding.customDepositEt.setText(cDeposit);//fetching deposit
 
-             previousDataHold[0]="DATE- "+getIntent().getStringExtra("DATE");
-             previousDataHold[1]="TIME- "+getIntent().getStringExtra("TIME");
-             previousDataHold[2]="DEPOSIT- "+cDeposit;
-             previousDataHold[3]="REMARKS- "+cDescription;
+//             previousDataHold[0]="DATE- "+getIntent().getStringExtra("DATE");
+//             previousDataHold[1]="TIME- "+getIntent().getStringExtra("TIME");
+
+             previousDataHold[0]="DATE: "+cursorData.getString(3);
+//             previousDataHold[1]="TIME- "+MyUtility.extractTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME"));
+             previousDataHold[1]="DEPOSIT: "+cDeposit;
+             previousDataHold[2]="REMARKS: "+cDescription;
+            cursorData.close();
 
             if(cMicPath != null) {//if there is audio then set to color  green
                 binding.customMicIconTv.setVisibility(View.GONE);//user wound be able to save voice for second time if there is already voice because we want to keep previous voice save we don't want to delete previous voice
@@ -306,7 +324,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                // binding.customTimeTv.setText(onlyTime);//setting onlyTime to take onlyTime and store in db
                // String onlyTime=binding.customTimeTv.getText().toString();
                 String onlyTime=MyUtility.getOnlyTime();
-                String date=binding.customDateTv.getText().toString();
+                String userDate=binding.customDateTv.getText().toString();
 
                 //this will store latest date by taking current date
 //                final Calendar current1 =Calendar.getInstance();//to get current date
@@ -324,7 +342,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                  }
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + previousDataHold[1] + "\n" + previousDataHold[2] + "\n" + previousDataHold[3] ;//onlyTime is set automatically to remarks if user enter any remarks;
+                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + "TIME: "+MyUtility.extractTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME")) + "\n" + previousDataHold[1] + "\n" + previousDataHold[2] ;//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[1] = 1;//this is important because when user do not enter any data while updating then least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 boolean isWrongData,isDataPresent,success;
@@ -343,12 +361,15 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     if(micPath != null) {//if it is not null then update mic-path
                       //  success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='" + micPath + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                        // success=db.update_Deposit_TABLE_NAME2(date,onlyTime,micPath,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                       // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
 
                     } else {//if micPath == null then we are not updating because null in text will be set to mic-path and give wrong result like it will indicate that audio is present but actually audio is not present
                        // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                         //success=db.update_Deposit_TABLE_NAME2(date,onlyTime,null,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                       // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
+
                     }
                     if(!success){
                         Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -369,18 +390,18 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         }else
             Toast.makeText(this, "No ID from other Intent", Toast.LENGTH_SHORT).show();
     }
-    private int extractData(int i,String date) {
-        int data=0;
-        String[] str=date.split("-");//converting using String.split() method with "-" as a delimiter
-        if(i==0){//0 is for day of month
-            return Integer.parseInt(str[0]);
-        }else if(i==1){//1 is for month
-            return (Integer.parseInt(str[1])-1);//month-1 to get right result
-        }else if(i==2){//2 is for year
-            return Integer.parseInt(str[2]);
-        }
-        return data;
-    }
+//    private int extractData(int i,String date) {
+//        int data=0;
+//        String[] str=date.split("-");//converting using String.split() method with "-" as a delimiter
+//        if(i==0){//0 is for day of month
+//            return Integer.parseInt(str[0]);
+//        }else if(i==1){//1 is for month
+//            return (Integer.parseInt(str[1])-1);//month-1 to get right result
+//        }else if(i==2){//2 is for year
+//            return Integer.parseInt(str[2]);
+//        }
+//        return data;
+//    }
 
 //    private void showResult(String title, String message) {
 //        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(CustomizeLayoutOrDepositAmount.this);

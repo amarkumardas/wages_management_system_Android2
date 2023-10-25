@@ -31,6 +31,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import amar.das.acbook.Database;
@@ -69,7 +71,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
        WagesDetailsModel data=arrayList.get(position);
 
-       holder.date.setText(data.getDate());
+       holder.date.setText(data.getUserGivenDate());
        if(data.getWages() !=0 && data.getDeposit() == 0) {//if wages is there and deposit not there then set wages
            holder.wages.setText(MyUtility.convertToIndianNumberSystem(data.getWages()));
            holder.wages.setTextColor(Color.BLACK);
@@ -163,16 +165,16 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             }
         }
          //************************SETTING BACKGROUND COLOR ACCORDING TO PREVIOUS AND TODAY'S DATE*******************************
-         if (data.getDate().equals(getPreviousDate()))//if data has entered yesterday then set background to gray
-            holder.singleRecordLayout.setBackgroundColor(context.getColor(R.color.background));
-       else if(currentDate.equals(data.getDate()))//if data has entered today then set background to yellow
-       holder.singleRecordLayout.setBackgroundColor(context.getColor(R.color.yellow));
-       else//if we don't put else statement then other layout also color get change so else is important
-       holder.singleRecordLayout.setBackgroundColor(context.getColor(R.color.wagesSingleRecord));
+        if (MyUtility.extractDate(data.getSystemDateAndTime()).equals(getPreviousDateFromCurrentDate((byte) 1)))//if data has entered yesterday then set background to gray
+            holder.itemView.setBackgroundColor(context.getColor(R.color.background));
+        else if(getPreviousDateFromCurrentDate((byte) 0).equals(MyUtility.extractDate(data.getSystemDateAndTime())))//if data has entered today then set background to yellow
+        holder.itemView.setBackgroundColor(context.getColor(R.color.yellow));
+        else//if we don't put else statement then other layout also color get change so else is important
+        holder.itemView.setBackgroundColor(context.getColor(R.color.wagesSingleRecord));
         //************************ DONE SETTING BACKGROUND COLOR ACCORDING TO PREVIOUS AND TODAY'S DATE*******************************
 
         //for updating
-        holder.singleRecordLayout.setOnLongClickListener(view -> {
+        holder.itemView.setOnLongClickListener(view -> {
             AlertDialog.Builder updateCustomDialog = new AlertDialog.Builder(view.getContext());
             LayoutInflater inflater = LayoutInflater.from(view.getContext());
 
@@ -223,7 +225,8 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
             db = new Database(holder.wages.getContext());//we can take any field context
            // Cursor cursorData = db.getData("SELECT "+Database.COL_21_ID+" , "+Database.COL_22_DATE+" , "+Database.COL_23_TIME+" , "+Database.COL_25_DESCRIPTION+" , "+Database.COL_26_WAGES+" , "+Database.COL_28_P1+" , "+Database.COL_29_P2+" , "+Database.COL_291_P3+" , "+Database.COL_292_P4+" , "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + data.getId() + "'" + " AND "+Database.COL_22_DATE+"= '" + data.getDate() + "'" + " AND "+Database.COL_23_TIME+"='" + data.getTime() + "'");
-                Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getDate(),data.getTime());
+                //Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getUserGivenDate(),data.getTime());
+                Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getSystemDateAndTime());
                 cursorData.moveToFirst();//this cursor is not closed
 
 //********************************CUSTOMIZATION*******************************************************************************************
@@ -296,24 +299,26 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
 //********************************Done CUSTOMIZATION*******************************************************************************************
 
-            previousDataHold[4] = "WAGES- " + cursorData.getString(4);//wages to write previous record in description
-            previousDataHold[5] = "DATE- " + cursorData.getString(1);//date to write previous record in description
-            previousDataHold[6] = "TIME- " + cursorData.getString(2);//time to write previous record in description
-            previousDataHold[7] = "REMARKS- " + cursorData.getString(3);//description or remarks
+            previousDataHold[4] = "WAGES: " + cursorData.getString(4);//wages to write previous record in description
+            previousDataHold[5] = "DATE: " + cursorData.getString(1);//date to write previous record in description
+           // previousDataHold[6] = "TIME- " + cursorData.getString(2);//time to write previous record in description
+            previousDataHold[6] = "TIME: " +MyUtility.extractTime12hr(cursorData.getString(10));//time to write previous record in description
+            previousDataHold[7] = "REMARKS: " + cursorData.getString(3);//description or remarks
 
                 String [] dateArray =cursorData.getString(1).split("-");
+                cursorData.close();
                 int cDayOfMonth=Integer.parseInt(dateArray[0]);
                 int cMonth=Integer.parseInt(dateArray[1]);
                 int cYear=Integer.parseInt(dateArray[2]);
-            inputDate.setText(cDayOfMonth + "-" + (cMonth) + "-" + cYear);
+                inputDate.setText(cDayOfMonth + "-" + (cMonth) + "-" + cYear);
                 inputDate.setOnClickListener(view1 -> {
-                    //To show calendar dialog
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(myView.getContext(), (datePicker, year, month, dayOfMonth) -> {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(myView.getContext(), (datePicker, year, month, dayOfMonth) -> { //To show calendar dialog
                         inputDate.setText(dayOfMonth + "-" + (month + 1) + "-" + year);//month start from 0 so 1 is added to get right month like 12
                     }, cYear, (cMonth-1), cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
                     datePickerDialog.show();
                 });
 
+                //
             //description.setText(cursorData.getString(3));//don't set previous data because if the data is more then update button or cancel button will hide due to large data
             dialog.show();
             //*************************************SAVING*****************************************************************************************************
@@ -339,10 +344,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 String onlyTime =MyUtility.getOnlyTime();
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+ description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
+                String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[5] = 1;//this is important because when user do not enter any data while updating then at least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
-                String date = inputDate.getText().toString();//date will be inserted automatically
+                String userDate = inputDate.getText().toString();//date will be inserted automatically
 
                 //this will store latest date in db if that date is current date
 //                         final Calendar current=Calendar.getInstance();//to get current date
@@ -378,17 +383,18 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 //                    Toast.makeText(context, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
 //                }
 
+
                 if (indicator == 1) {
                     if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                         //UPDATE to database
                          if(micPath != null){//if it is not null then update micPath
                              // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                              //success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,data.getId(),data.getDate(),data.getTime());
-                             success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,0,0,0,data.getId(),data.getDate(),data.getTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,0,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             // success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,data.getId(),data.getDate(),data.getTime());
-                             success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,0,0,0,data.getId(),data.getDate(),data.getTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,0,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
 
                          }
                          if(!success){
@@ -416,12 +422,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='"+micPath+"',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,0,0,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,0,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,0,0,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,0,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
                         }
                         if(!success){
                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -449,12 +455,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,p3,0,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,0,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,p3,0,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,0,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
                         }
 
                         if(!success){
@@ -486,13 +492,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,micPath,wages,0,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,0,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTable(date,onlyTime,remarks,null,wages,0,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
-                            System.out.println("---------------------------------------------------------------------");
+                            success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,0,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
                         }
 
                         if(!success){
@@ -762,8 +767,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 deposit_btn_tv.setOnClickListener(view14 -> {//sending date,time and id to update deposit
                     Intent intent=new Intent(context,CustomizeLayoutOrDepositAmount.class);
                     intent.putExtra("ID",data.getId());
-                    intent.putExtra("DATE",data.getDate());
-                    intent.putExtra("TIME",data.getTime());
+                    intent.putExtra("SYSTEM_DATETIME",data.getSystemDateAndTime());
+//                    intent.putExtra("DATE",data.getUserGivenDate());
+//                    intent.putExtra("TIME",data.getTime());
                     dialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
                     ((Activity)context).finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
                    context.startActivity(intent);
@@ -773,14 +779,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             return false;
         });
     }
-
     public void refreshCurrentActivity(String id) {
         Intent intent1=new Intent(context,IndividualPersonDetailActivity.class);
         intent1.putExtra("ID",id);
         ((Activity)context).finish();//destroying this current activity typecast to activity
         context.startActivity(intent1);
     }
-
     public void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1,p2,p3,p4;
         p1 = inputP1.getText().toString().trim();
@@ -882,7 +886,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView date,wages,p1,p2,p3,p4;
         Spinner spinnerDescAudioIcon;
-        LinearLayout singleRecordLayout;
+       // LinearLayout singleRecordLayout;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             date=itemView.findViewById(R.id.date_in_recycler_tv);
@@ -892,7 +896,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             p3=itemView.findViewById(R.id.p3_in_recycler_tv);
             p4=itemView.findViewById(R.id.p4_in_recycler_tv);
             spinnerDescAudioIcon =itemView.findViewById(R.id.spinner_in_recycler_tv);
-            singleRecordLayout=itemView.findViewById(R.id.single_record_layout);
+            //singleRecordLayout=itemView.findViewById(R.id.single_record_layout);
         }
     }
     public void showResult(String title, String message) {
@@ -906,25 +910,26 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         });
         showDataFromDataBase.create().show();
     }
-    public void displayResultAndRefresh(String title, String message) {
-        AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(context);
-        showDataFromDataBase.setCancelable(false);
-        showDataFromDataBase.setTitle(title);
-        showDataFromDataBase.setMessage(message);
-        showDataFromDataBase.setPositiveButton(context.getResources().getString(R.string.ok), (dialogInterface, i) -> {
-            dialogInterface.dismiss();
-            Intent intent1=new Intent(context,IndividualPersonDetailActivity.class);
-            intent1.putExtra("ID",fromIntentPersonId);
-            ((Activity)context).finish();//destroying this current activity typecast to activity
-            context.startActivity(intent1);
-        });
-        showDataFromDataBase.create().show();
+
+public String getPreviousDateFromCurrentDate(byte days){//if error return null
+    try {//if 0 is passed then current date is return
+        LocalDate currentDate = LocalDate.now();
+
+
+//            if (negativeDays >= 0) {
+//                // Calculate a future date
+//                resultDate = currentDate.plusDays(negativeDays);
+//            } else {
+//                // Calculate a past date
+//                resultDate = currentDate.minusDays(Math.abs(negativeDays));
+//            }
+        LocalDate  resultDate = currentDate.minusDays(days);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return resultDate.format(formatter);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
     }
-    public String getPreviousDate(){
-        //to get previous date
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);//-1 to get previous date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("d-M-yyyy");//d-M-yyyy to get date as 19-3-2022 or 9-3-2022 by lifting 0. ie.19-03-2022 or 09-3-2022
-         return dateFormat.format(calendar.getTimeInMillis());
-    }
+}
 }

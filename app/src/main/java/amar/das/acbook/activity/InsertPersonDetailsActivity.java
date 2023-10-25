@@ -38,7 +38,7 @@ import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
-import amar.das.acbook.ui.search.SearchFragment;
+import amar.das.acbook.ui.ml.MLFragment;
 import amar.das.acbook.utility.MyUtility;
 
 
@@ -440,7 +440,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         }else {//go from activity to fragment
             finish();//first destroy current activity then go back
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.insert_detailsof_l_m_g, new SearchFragment()).commit();
+            transaction.replace(R.id.insert_detailsof_l_m_g, new MLFragment()).commit();
         }
     }
 }

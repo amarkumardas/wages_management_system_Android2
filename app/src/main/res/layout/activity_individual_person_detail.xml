@@ -14,14 +14,14 @@
     android:id="@+id/individual_person_details_activity">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
         android:orientation="horizontal"
         android:background="@color/purple_700"
         android:id="@+id/leaving_or_not_color_indication_layout"
         android:weightSum="20">
         <TextView
             android:layout_marginStart="6dp"
-            android:layout_height="25dp"
+            android:layout_height="29dp"
 
           android:layout_marginRight="2dp"
 
@@ -35,12 +35,17 @@
         <TextView
             android:layout_weight="15"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="wrap_content"
             android:textSize="13sp"
              android:textStyle="bold"
+            android:text="AMAR KUMAR DA"
+            android:paddingTop="2dp"
+
+            android:layout_gravity="center_vertical"
              android:textColor="@color/white"
              android:textAlignment="center"
-            android:id="@+id/name_tv"/>
+            android:id="@+id/name_tv"
+            tools:ignore="RtlCompat" />
         <TextView
             android:layout_weight="3"
             android:layout_width="0dp"
@@ -48,7 +53,6 @@
             android:textSize="13dp"
             android:layout_gravity="center"
             android:textAlignment="center"
-
             android:textColor="@color/white"
             android:textStyle="bold"
             android:id="@+id/star_rating_tv"
@@ -349,7 +353,8 @@
                     android:text="@string/total_equal"
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
-                    android:textSize="12sp"/>
+                    android:textSize="12sp"
+                    tools:ignore="RtlCompat" />
 
                 <TextView
                     android:id="@+id/blue_total_wages_tv"
@@ -360,7 +365,8 @@
                     android:textAlignment="center"
                     android:textColor="#EF9005"
                     android:textSize="14dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:ignore="RtlCompat" />
 
                 <TextView
                     android:id="@+id/blue_totalp1_tv"
@@ -780,7 +786,7 @@
                 android:layout_below="@+id/total_calculation_layout"
                 android:layout_centerInParent="true"
                 android:layout_marginTop="19dp"
-                android:layout_marginBottom="11dp"
+                android:layout_marginBottom="25dp"
                 android:background="@drawable/dark_blue_buttonbg"
                 android:drawableStart="@drawable/ic_round_calculate_24"
                 android:foreground="?android:attr/selectableItemBackground"

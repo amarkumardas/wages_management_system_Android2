@@ -2,11 +2,9 @@ package amar.das.acbook.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.os.Bundle;
@@ -15,19 +13,20 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import amar.das.acbook.R;
-import amar.das.acbook.adapters.SeparateAllMLGRecordAdapter;
-import amar.das.acbook.adapters.TextFileAdapter;
+import amar.das.acbook.adapters.CalculatedTextFileAdapter;
 import amar.das.acbook.databinding.AllCalculatedInvoicesBinding;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.textfilegenerator.TextFile;
-import amar.das.acbook.ui.search.SearchFragment;
+import amar.das.acbook.ui.ml.MLFragment;
 import amar.das.acbook.utility.MyUtility;
 
 public class AllCalculatedInvoicesActivity extends AppCompatActivity {
       AllCalculatedInvoicesBinding binding;
+      byte toDeleteOldInvoiceIndicator=100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +34,7 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
         binding = AllCalculatedInvoicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        ArrayList<String> allFilePathFromDevice= getAllAbsolutePathOfFilesFromFolderDevice(TextFile.textFileFolderName);
+        ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(TextFile.textFileFolderName);
         if(allFilePathFromDevice != null){//if null means error
 
           if(allFilePathFromDevice.size()==0){
@@ -45,18 +44,21 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
             LinkedList<TextFileModel> pathList=new LinkedList<>();
 
             File file=null;TextFileModel model=null;
-            for (String absolutePath: allFilePathFromDevice) {//if allFilePathFromDevice is null then gives nullpointer exception
+            for (String absolutePath: allFilePathFromDevice){//if allFilePathFromDevice is null then gives nullpointer exception
                 file=new File(absolutePath);
                 model=new TextFileModel();
                 model.setAbsolutePath(absolutePath);
                 model.setFileName(file.getName().replace(".txt","").trim());//removing file extension
                 pathList.add(model);
             }
-            TextFileAdapter textFileAdapter=new TextFileAdapter(this,pathList);
+
+            Collections.sort(pathList);//in ascending order
+
+            CalculatedTextFileAdapter textFileAdapter=new CalculatedTextFileAdapter(this,pathList);
             binding.textFileRecyclerview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             binding.textFileRecyclerview.setAdapter(textFileAdapter);
             binding.textFileRecyclerview.setHasFixedSize(true);
-            textFileAdapter.RecyclerViewListener(new TextFileAdapter.RecyclerViewListener() {//this is automatically triggered when in adapter class any event or click happen
+            textFileAdapter.RecyclerViewListener(new CalculatedTextFileAdapter.RecyclerViewListener() {//this is automatically triggered when in adapter class any event or click happen
                 @Override
                 public void updatedCount(int count) {
                     if(count == 0){
@@ -87,6 +89,10 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
                 }
             });
 
+            if(allFilePathFromDevice.size() >= toDeleteOldInvoiceIndicator){
+                MyUtility.snackBar(binding.getRoot().findFocus(),"DELETE OLD INVOICES TO FREE SPACE");
+            }
+
         }else if(allFilePathFromDevice==null){
             binding.totalBackupMessage.setText("ERROR IN RETRIEVING FILE");
         }
@@ -94,7 +100,7 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
     public void invoice_layout_go_back(View view){
         finish();//first destroy current activity then go back
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.all_calculated_invoices_layout, new SearchFragment()).commit();
+        transaction.replace(R.id.all_calculated_invoices_layout, new MLFragment()).commit();
     }
     private ArrayList<String> getAllAbsolutePathOfFilesFromFolderDevice(String folderName){//if no data return empty list ie 0 size, and if error return null
         try{
@@ -125,4 +131,8 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
             return null;
         }
     }
+//    private int findFileSizeInMB(File file) {
+//        long fileSizeInBytes = file.length();
+//        return (int) (fileSizeInBytes / (1024 * 1024));
+//    }
 }

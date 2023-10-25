@@ -20,7 +20,7 @@ import amar.das.acbook.adapters.SeparateAllMLGRecordAdapter;
 import amar.das.acbook.adapters.SearchAdapter;
 import amar.das.acbook.model.MLGAllRecordModel;
 import amar.das.acbook.model.SearchModel;
-import amar.das.acbook.ui.search.SearchFragment;
+import amar.das.acbook.ui.ml.MLFragment;
 
 public class FindActivity extends AppCompatActivity {
 SearchView searchView;
@@ -173,7 +173,7 @@ boolean bool=false;
     public void goto_back(View view) {
         finish();//first destroy then go back
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.find_layout, new SearchFragment()).commit();
+        transaction.replace(R.id.find_layout, new MLFragment()).commit();
     }
 
     /*In some situations, we need to recall activity again from onCreate(). This example demonstrates how to reload activity

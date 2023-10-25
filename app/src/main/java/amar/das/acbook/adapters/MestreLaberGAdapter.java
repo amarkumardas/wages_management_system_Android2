@@ -123,7 +123,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 //        }
 //        cursor2.close();
         //**************************************************************************************************************
-        holder.profileImg.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID", data.getId());
             intent.putExtra("FromMesterLaberGAdapter", 1);

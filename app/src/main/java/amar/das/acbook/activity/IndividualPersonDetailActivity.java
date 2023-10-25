@@ -235,7 +235,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
               if(allDataCursor!=null) {
                   while (allDataCursor.moveToNext()) {
                       WagesDetailsModel model = new WagesDetailsModel();
-                      model.setDate(allDataCursor.getString(0));
+                      model.setUserGivenDate(allDataCursor.getString(0));
                       model.setMicPath(allDataCursor.getString(1));
                       model.setDescription(allDataCursor.getString(2));
                       model.setWages(allDataCursor.getInt(3));
@@ -247,6 +247,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       model.setId(allDataCursor.getString(9));
                       model.setTime(allDataCursor.getString(10));
                       model.setIsdeposited((allDataCursor.getString(11)));
+                      model.setSystemDateAndTime(allDataCursor.getString(12));
                       dataList.add(model);
                   }
                   allDataCursor.close();
@@ -2268,11 +2269,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
                     //success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0");
-                   for(int i=0;i<=1000;i++) {
-                       if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
+                       if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                        }
-                   }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 
@@ -2293,11 +2292,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                      // success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0");
-                    for(int i=0;i<=1000;i++) {
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
-                    }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {
@@ -2319,11 +2316,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0");
-                    for(int i=0;i<=1000;i++) {
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
-                    }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {
@@ -2350,7 +2345,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                    // success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0");
                     for(int i=0;i<=1000;i++) {
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
                     }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.search.SearchFragment">
+    tools:context=".ui.ml.MLFragment">
 
 
     <LinearLayout
@@ -29,8 +29,7 @@
             android:hint="@string/search_by_name_or_id_or_last_4_digit_of_a_c"
             android:paddingLeft="4dp"
             android:textSize="15sp"
-            android:id="@+id/search_click_tv"
-             />
+            android:id="@+id/search_click_tv"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="35dp"

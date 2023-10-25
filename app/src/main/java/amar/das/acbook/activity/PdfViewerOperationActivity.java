@@ -93,7 +93,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         if(onlyViewPdf(whichPdfIndicatorChangesDynamically,fromIntentPersonId,largeFileSizeIndicat)) {//by default it will show pdf according to whichPdfIndicatorChangesDynamically
             changeButtonColorBackgroundAsSelected(whichPdfIndicatorChangesDynamically);//set by default button as selected
         }else if (largeFileSizeIndicat[0]){
-            displayDialogMessage("LARGE FILE SIZE", "CAN'T VIEW");
+          //  displayDialogMessage("LARGE PDF SIZE", "CAN'T VIEW");
+            displayDialogMessage("LARGE PDF SIZE CAN'T VIEW", "CHECK BACKUP INVOICE\nNAME (id"+fromIntentPersonId+"invoice"+MyUtility.getPdfSequence(fromIntentPersonId,getBaseContext())+")");
         }
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();//StrictMode is a developer tool which detects things you might be doing by accident and brings them to your attention so you can fix them.
@@ -204,7 +205,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                              }
                         }break;
                         case "CURRENT INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
-                            MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
+                            //MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
                              if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true),currentInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                              }
@@ -248,8 +249,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if(onlyViewPdf((byte)1,fromIntentPersonId,largeFileSizeIndicator)){
                 changeButtonColorBackgroundAsSelected((byte)1);//WHEN PDF VIEWED THEN SET BUTTON AS SELECTED
                 whichPdfIndicatorChangesDynamically = (byte)1;//this will be updated when SUCCESSFULLY pdf is displayed and  user click pdf1 for share and download
-            } else if (largeFileSizeIndicator[0]) {//if true
-                displayDialogMessage("LARGE FILE SIZE", "CAN'T VIEW");
+            }else if(largeFileSizeIndicator[0]) {//if true
+                //displayDialogMessage("LARGE PDF SIZE", "CAN'T VIEW");
+                displayDialogMessage("LARGE PDF SIZE CAN'T VIEW", "CHECK BACKUP INVOICE\nNAME (id"+fromIntentPersonId+"invoice"+(MyUtility.getPdfSequence(fromIntentPersonId,getBaseContext())-1)+")");
             }else{
                 displayDialogMessage("NO PREVIOUS INVOICE", "IT WILL BE AVAILABLE WHEN AGAIN CALCULATION IS DONE");
             }
@@ -260,10 +262,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if(onlyViewPdf((byte)2,fromIntentPersonId,largeFileSizeIndicator)){
                 changeButtonColorBackgroundAsSelected((byte)2);
                 whichPdfIndicatorChangesDynamically = (byte)2;//this will be updated when SUCCESSFULLY pdf is displayed and  user click pdf1 for share and download
-            } else if (largeFileSizeIndicator[0]) {//if true
-               // Toast.makeText(this, "LARGE FILE SIZE CAN'T VIEW", Toast.LENGTH_LONG).show();
-                displayDialogMessage("LARGE FILE SIZE", "CAN'T VIEW");
-            } else {
+            }else if (largeFileSizeIndicator[0]) {//if true
+                displayDialogMessage("LARGE PDF SIZE CAN'T VIEW", "CHECK BACKUP INVOICE\nNAME (id"+fromIntentPersonId+"invoice"+MyUtility.getPdfSequence(fromIntentPersonId,getBaseContext())+")");
+            }else {
                 displayDialogMessage("NO PREVIOUS INVOICE", "IT WILL BE AVAILABLE WHEN CALCULATION IS DONE");
             }
             });
@@ -279,7 +280,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     changeButtonColorBackgroundAsSelected((byte)3);
                     whichPdfIndicatorChangesDynamically = (byte)3;//this will be updated when SUCCESSFULLY pdf is displayed and  user click pdf1 for share and download
                 } else if (largeFileSizeIndicator[0]) {
-                    runOnUiThread(() ->displayDialogMessage("LARGE FILE SIZE", "CAN'T VIEW"));
+                    runOnUiThread(() ->displayDialogMessage("LARGE PDF SIZE", "CAN'T VIEW"));
                 } else{
                     runOnUiThread(() ->displayDialogMessage("ERROR OCCURRED", "WHILE DISPLAYING INVOICE"));
                 }

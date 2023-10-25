@@ -24,8 +24,8 @@ public class MakePdf{
     private Canvas canvas;
     private PdfDocument.Page myPage;
 
-    private static final byte defaultSideGab =4;//gab between data and page
-    public static int defaultPageWidth=350,defaultPageHeight=600;
+    private static final byte defaultSideGab =4;//gab between data and page.its like padding
+    public static int defaultPageWidth=380,defaultPageHeight=600;//350 was before
     private static final byte gabBetweenComponents=3;//gabBetweenComponents ensure gab between components
     public  float currentHeightOfDataOfPage;//this variable cant be static otherwise produce wrong result and better not to initialize .IT KEEP TRACK TILL HOW MUCH height data is written SO THAT WE CAN MOVE TO NEXT PAGE IF PAGE IS FULL.it is updated when all content is written
     public MakePdf(){
@@ -255,7 +255,6 @@ public class MakePdf{
 
             return true;
         } catch (Exception ex) {
-           // System.out.println("makeTable method error***************************");
             ex.printStackTrace();
             return false;
         }

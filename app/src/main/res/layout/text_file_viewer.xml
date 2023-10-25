@@ -68,7 +68,7 @@
 
 </LinearLayout>
 </ScrollView>
-<!--<TextView-->
+<!--<TextView  for arrow go back-->
 <!--android:layout_marginStart="6dp"-->
 <!--android:gravity="center_vertical"-->
 <!--android:layout_width="29dp"-->
@@ -77,3 +77,11 @@
 <!--android:id="@+id/goback_text_file_viewer"-->
 <!--android:foreground="?android:attr/selectableItemBackground"-->
 <!--    />-->
+
+<!--<WebView-->
+<!--android:id="@+id/text_file_webView"-->
+<!--android:visibility="gone"-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:padding="16dp"-->
+<!--tools:ignore="WebViewLayout" />-->

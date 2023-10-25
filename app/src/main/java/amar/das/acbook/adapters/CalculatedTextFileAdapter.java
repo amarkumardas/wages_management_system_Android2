@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ import amar.das.acbook.R;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.utility.MyUtility;
 
-public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHolder> implements Filterable {
+public class CalculatedTextFileAdapter extends RecyclerView.Adapter<CalculatedTextFileAdapter.ViewHolder> implements Filterable {
     Context context;
     LinkedList<TextFileModel> dataList;//LinkedList because more operation is deleting
     LinkedList<TextFileModel> backupData;//this data will not be changed
@@ -59,21 +60,21 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
     public void RecyclerViewListener(RecyclerViewListener listener){//callback
         this.listener=listener;
     }
-    public TextFileAdapter(Context context, LinkedList<TextFileModel> list){
+    public CalculatedTextFileAdapter(Context context, LinkedList<TextFileModel> list){
         this.context =context;
         this.dataList =list;
         backupData =new LinkedList<>(dataList);//storing object to backup for search view
     }
     @NonNull
     @Override
-    public TextFileAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CalculatedTextFileAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater=LayoutInflater.from(parent.getContext());
         View view=inflater.inflate(R.layout.text_file_single_row,parent,false);
-        return new TextFileAdapter.ViewHolder(view);//constructor  public ViewHolder(@NonNull View itemView)
+        return new CalculatedTextFileAdapter.ViewHolder(view);//constructor  public ViewHolder(@NonNull View itemView)
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TextFileAdapter.ViewHolder holder, int position) {//to fill data on every view filed
+    public void onBindViewHolder(@NonNull CalculatedTextFileAdapter.ViewHolder holder, int position) {//to fill data on every view filed
        TextFileModel data= dataList.get(position);
        holder.fileName.setText(data.getFileName());
 
@@ -114,7 +115,7 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
                                }
                                //don't update the adapter here because when user return back after sharing file then in activity user can see selected file.so this can help to delete selected shared file
                            }break;
-                           case R.id.menu_delete_all:{
+                           case R.id.menu_delete:{
                                 if(userSelectedFiles.size() > 0){
                                   AlertDialog.Builder detailsReview = new AlertDialog.Builder(context);
                                   detailsReview.setCancelable(true);
@@ -197,15 +198,35 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
             myCustomDialog.setCancelable(true);//if user touch to other place then dialog will not be close
 
              final androidx.appcompat.app.AlertDialog customDialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
-             TextView textFileViewer=myView.findViewById(R.id.textViewer);
-             TextView textFileName=myView.findViewById(R.id.file_name);
+             TextView textFileViewerTv=myView.findViewById(R.id.textViewer);
+            // WebView  textFileWebView=myView.findViewById(R.id.text_file_webView);
+             TextView textFileNameTv=myView.findViewById(R.id.file_name);
              Button textFileShare= myView.findViewById(R.id.text_file_share);
              Button textFileCancel= myView.findViewById(R.id.text_file_cancel_btn);
              textFileCancel.setOnClickListener(view1 -> customDialog.dismiss());
 
             File file=new File(data.getAbsolutePath());
-            textFileName.setText("INVOICE\n"+data.getFileName());
-            viewTextFile(file,textFileViewer);
+            textFileNameTv.setText("INVOICE\n"+data.getFileName());
+            viewTextFile(file,textFileViewerTv);
+
+            //textFileWebView.setVisibility(View.VISIBLE);
+            // Handle URL loading within the WebView
+           // textFileWebView.setWebViewClient(new WebViewClient());
+            // Enable JavaScript (if needed)
+//            textFileWebView.getSettings().setJavaScriptEnabled(true);
+//            textFileWebView.loadData(convertFileToStringData(file), "text/html", "UTF-8");
+//            textFileWebView.setWebChromeClient(new WebChromeClient(){
+//                @Override
+//                public void onProgressChanged(WebView view1,int newProgress){
+//                    super.onProgressChanged(view1,newProgress);
+//                }
+//                @Override
+//                public void onReceivedTitle(WebView view, String title) {
+//                    super.onReceivedTitle(view, title);
+//                }
+//
+//            });
+
 
              textFileShare.setOnClickListener(view12 -> {
                  ArrayList<File> textFile=new ArrayList<>();
@@ -232,9 +253,26 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
       holder.itemView.setBackgroundColor(Color.WHITE); //set background color
   }
     }
+//    private String convertFileToStringData(File file) {//return null when error or if file not present
+//        if (file.exists() && file.isFile()) {
+//            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+//                StringBuilder stringBuilder = new StringBuilder();
+//                String line;
+//                while ((line = bufferedReader.readLine()) != null) {
+//                    stringBuilder.append(line).append("\n");
+//                }
+//                 return stringBuilder.toString(); //Converted file content to a data
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return null;
+//            }
+//        }else{
+//            return null;
+//        }
+//    }
 
     private boolean viewTextFile(File textFile,TextView textFileViewer){
-        if (textFile.exists()) {
+        if (textFile.exists()){
             try (BufferedReader br = new BufferedReader(new FileReader(textFile))) {
                 StringBuilder text = new StringBuilder();
                 String line;
@@ -278,7 +316,6 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
                 Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
                 uris.add(uri);
             }
-
             Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.setType(mimeType);
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);//for multiple files
@@ -352,15 +389,12 @@ public class TextFileAdapter extends RecyclerView.Adapter<TextFileAdapter.ViewHo
             notifyDataSetChanged();
         }};//anonymous filter class
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view
-       // ImageView shareTextFileImg;
-        TextView fileName;
 
+        TextView fileName;
         ImageView ivCheckBox;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-          //  shareTextFileImg =itemView.findViewById(R.id.text_file_share_img);
             fileName =itemView.findViewById(R.id.text_file_name_tv);
-
             ivCheckBox=itemView.findViewById(R.id.iv_check_box);
         }
     }

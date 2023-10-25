@@ -74,11 +74,11 @@ public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGMo
     public int compareTo(MestreLaberGModel obj1) {//natural sorting latest date desc
         DateFormat f = new SimpleDateFormat("dd-MM-yyyy");
         try {
-            return f.parse(obj1.getLatestDate()).compareTo(f.parse(this.getLatestDate()));
-        } catch (ParseException e) {
+            return f.parse(obj1.getLatestDate()).compareTo(f.parse(this.getLatestDate()));//will return 0 if two date is same
+        }catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
-    }//sort data by taking latestdate in desc order.so that search would be easy.
+    }//sort data by taking latest date in desc order.so that search would be easy.
 
 
 

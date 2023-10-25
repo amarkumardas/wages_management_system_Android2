@@ -51,7 +51,7 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
             holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }
 
-        holder.profileImg.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(view -> {
             Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID",data.getId());
             context.startActivity(intent);

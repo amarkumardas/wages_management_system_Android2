@@ -4,7 +4,17 @@ import java.io.Serializable;
 
 public class WagesDetailsModel implements Serializable {
     private static final long serialVersionUID = 42345L;
-    private String date;
+    private String userGivenDate;
+
+    public String getSystemDateAndTime() {
+        return systemDateAndTime;
+    }
+
+    public void setSystemDateAndTime(String systemDateAndTime) {
+        this.systemDateAndTime = systemDateAndTime;
+    }
+
+    private String systemDateAndTime;
 
     public String getIsdeposited() {
         return isdeposited;
@@ -51,12 +61,12 @@ public class WagesDetailsModel implements Serializable {
     public String getId(){
         return  id;
     }
-    public String getDate() {
-        return date;
+    public String getUserGivenDate() {
+        return userGivenDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setUserGivenDate(String userGivenDate) {
+        this.userGivenDate = userGivenDate;
     }
 
     public String getMicPath() {

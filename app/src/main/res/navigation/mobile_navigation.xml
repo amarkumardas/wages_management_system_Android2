@@ -3,23 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_search">
-
-    <fragment
-        android:id="@+id/navigation_search"
-        android:name="amar.das.acbook.ui.search.SearchFragment"
-        android:label="@string/title_ml"
-        tools:layout="@layout/fragment_home"/>
-
-    <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="amar.das.acbook.ui.home.HomeFragment"
-        android:label="@string/title_houseowner"
-        tools:layout="@layout/fragment_search_tab" />
+    app:startDestination="@+id/navigation_ml"> <!--default id will be shown to user when user open app-->
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="amar.das.acbook.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_notifications_tab"/>
+    <fragment
+        android:id="@+id/navigation_ml"
+        android:name="amar.das.acbook.ui.ml.MLFragment"
+        android:label="@string/title_ml"
+        tools:layout="@layout/fragment_ml_tab" /><!--MLFragment is class name-->
+
+    <fragment
+    android:id="@+id/navigation_history"
+    android:name="amar.das.acbook.ui.history.HistoryFragment"
+    android:label="@string/title_history"
+    tools:layout="@layout/fragment_history_tab"/>
+
 </navigation>
+
+<!--to place activity-->
+<!--<activity-->
+<!--android:id="@+id/navigation_history"-->
+<!--android:name="amar.das.acbook.activity.HistoryActivity"--> <!--HistoryActivity class name -->
+<!--android:label="@string/title_history"-->
+<!--tools:layout="@layout/activity_history"/>-->

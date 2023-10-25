@@ -79,7 +79,6 @@ expanded automatically
         android:layout_height="match_parent"
         android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
-        tools:listitem="@layout/text_file_single_row"
         android:background="#D6DADF">
      </androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

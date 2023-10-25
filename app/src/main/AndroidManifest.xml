@@ -21,11 +21,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ACBook">
+<!--        <activity-->
+<!--            android:name=".HistoryActivity"-->
+<!--            android:exported="false" />-->
+        <activity android:name=".activity.HistoryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".activity.AllCalculatedInvoicesActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible"/><!-- when activity start keyboard will open -->
+            android:windowSoftInputMode="stateVisible" /> <!-- when activity start keyboard will open -->
         <activity
             android:name=".activity.CustomizeLayoutOrDepositAmount"
             android:exported="false"

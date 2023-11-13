@@ -7,66 +7,150 @@
     android:orientation="vertical"
     tools:context=".ui.history.HistoryFragment"
     android:background="#D6DADF">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white">
         <TextView
-            android:background="@color/white"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:id="@+id/historyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="HISTORY"
             android:paddingStart="6dp"
-            android:layout_marginBottom="1dp"
+            android:layout_marginTop="11dp"
             android:textSize="20sp"
-            android:gravity="center_vertical"
             android:textColor="@color/black"
             android:layout_gravity="center_vertical"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            android:layout_alignParentStart="true"/>
+        <TextView
+            android:id="@+id/history_share_pdf_or_textfile_Icon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/baseline_share_24"
+            android:layout_marginEnd="13dp"
+            android:layout_marginTop="11dp"
+            android:layout_gravity="center_vertical"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10"
-        android:padding="4dp">
-
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:padding="4dp"
+        android:background="@drawable/round_background">
         <TextView
-            android:id="@+id/history_date_view"
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_marginStart="2dp"
-            android:layout_weight="9"
-            android:text="TODAY 21-10-2023, MONDAY"
-            android:textColor="@color/black"
-            android:textSize="15sp"
-            android:textAlignment="center"
-            android:paddingTop="12dp"
-            android:textStyle="bold"
-            android:layout_marginBottom="2dp"
-            android:background="@drawable/white_detailsbg">
-        </TextView>
-        <TextView
-            android:id="@+id/history_calendar"
+            android:id="@+id/history_minus_one_tv"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="10dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="20dp"
             android:layout_gravity="center_vertical"
             android:foreground="?android:attr/selectableItemBackground"
-            android:background="@drawable/ic_round_edit_calendar_20"/>
+            android:drawableStart="@drawable/baseline_arrow_back_ios_new_24"/>
+
         <TextView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-             android:background="@drawable/baseline_share_24"
+            android:id="@+id/history_date_view_tv"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="8"
+            android:paddingTop="12dp"
+            android:text="TODAY 21-10-2023, MONDAY"
+            android:textAlignment="center"
             android:textColor="@color/black"
-            android:layout_marginEnd="5dp"
+            android:textSize="15sp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/history_plus_one_tv"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="20dp"
             android:layout_gravity="center_vertical"
-            android:foreground="?android:attr/selectableItemBackground" />
+            android:foreground="?android:attr/selectableItemBackground"
+            android:drawableEnd="@drawable/baseline_arrow_forward_ios_24"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_detailsbg"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:padding="0dp"
+        android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:paddingTop="4dp"
+            android:textAlignment="center"
+            android:text="@string/total_payment"
+            android:textSize="12sp"
+             />
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:paddingTop="4dp"
+            android:textAlignment="center"
+            android:text="@string/total_amount_received"
+            android:layout_height="25dp"
+            android:textSize="12sp"
+              />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+        <TextView
+            android:background="@drawable/grey_line_bg_forlayout"
+            android:id="@+id/history_total_payment"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:text="2000"
+            android:textAlignment="center"
+            android:paddingTop="4dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="13sp"/>
+        <TextView
+            android:background="@drawable/grey_line_bg_forlayout"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="2000"
+            android:paddingTop="4dp"
+            android:textAlignment="center"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+    </LinearLayout>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/history_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/history_single_row"
-        android:background="#D6DADF">
+        android:background="#D6DADF"
+        android:paddingBottom="60dp"
+        android:foreground="?android:attr/selectableItemBackground">
     </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>

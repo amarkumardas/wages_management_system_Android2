@@ -36,7 +36,7 @@ public class WagesDetailsModel implements Serializable {
 
     private String time;
     private String micPath;
-    private String description;
+    private String remarks;
     private String id;
     private int p1;
     private int p2;
@@ -77,12 +77,12 @@ public class WagesDetailsModel implements Serializable {
         this.micPath = micPath;
     }
 
-    public String getDescription() {
-        return description;
+    public String getRemarks() {
+        return remarks;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     public int getP1() {

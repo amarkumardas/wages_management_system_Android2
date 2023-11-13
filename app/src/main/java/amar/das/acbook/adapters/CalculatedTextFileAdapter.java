@@ -206,7 +206,7 @@ public class CalculatedTextFileAdapter extends RecyclerView.Adapter<CalculatedTe
              textFileCancel.setOnClickListener(view1 -> customDialog.dismiss());
 
             File file=new File(data.getAbsolutePath());
-            textFileNameTv.setText("INVOICE\n"+data.getFileName());
+            textFileNameTv.setText(context.getResources().getString(R.string.calculated_invoice)+"\n"+data.getFileName());
             viewTextFile(file,textFileViewerTv);
 
             //textFileWebView.setVisibility(View.VISIBLE);

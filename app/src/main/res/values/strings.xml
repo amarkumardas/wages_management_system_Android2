@@ -21,6 +21,7 @@
     <string name="backup_invoice_files">BACKUP INVOICE FILES</string>
     <string name="not_found">NOT FOUND</string>
     <string name="no_backup_invoice_available">NO BACKUP INVOICE AVAILABLE</string>
+    <string name="calculated_invoice">CALCULATED INVOICE</string>
 
     <!-- PdfViewerOperation Activity-->
     <string name="enter_amount">ENTER AMOUNT</string>
@@ -65,7 +66,7 @@
     <string name="no_remarks">NO REMARKS</string>
     <string name="you_are_updating">YOU ARE UPDATING</string>
     <string name="click_to_update_deposit">CLICK TO UPDATE DEPOSIT</string>
-    <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND\nMAY BE DELETED</string>
+    <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND MAY BE DELETED</string>
     <string name="failed_to_update">FAILED TO UPDATE</string>
 
     <!--IndividualPersonDetailActivity-->
@@ -76,6 +77,7 @@
     <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
     <string name="no_phone_number">NO PHONE NUMBER</string>
     <string name="failed_to_insert">FAILED TO INSERT</string>
+<!--    <string name="failed_to_make_history">FAILED TO MAKE HISTORY</string>-->
     <string name="value_out_of_range_please_check_total_work_amount">VALUE OUT OF RANGE PLEASE CHECK TOTAL WORK AMOUNT</string>
     <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
     <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
@@ -111,6 +113,9 @@
     <!--InactiveFragment-->
     <string name="please_wait_loading">PLEASE WAIT LOADING</string>
 
+    <!--history fragment-->
+    <string name="history_not_available">HISTORY NOT AVAILABLE</string>
+
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
     <string name="delete">DELETE</string>
@@ -125,10 +130,11 @@
         <!--        <item>REMOVE G</item>-->
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
-    <string-array name="audioAndRemarks">
+    <string-array name="audioRemarksShare">
         <item>SELECT</item>
         <item>AUDIO</item>
         <item>REMARKS</item>
+        <item>SHARE</item>
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="sharingOptions">
@@ -309,6 +315,8 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
+    <string name="total_amount_received">TOTAL AMOUNT RECEIVED</string>
+    <string name="total_payment">TOTAL PAYMENT</string>
 
 
 </resources>

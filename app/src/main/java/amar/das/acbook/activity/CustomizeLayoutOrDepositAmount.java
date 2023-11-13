@@ -203,7 +203,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     }
 
                     //success = db.insert_Deposit_Table2(fromIntentPersonId,binding.customDateTv.getText().toString(),binding.customTimeTv.getText().toString(),micPath,remarks,depositAmount,"1");
-                    success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,0,0,0,0,0,depositAmount,"1");
+                    success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,0,0,0,0,0,depositAmount,"1");
                     if(!success){
                         Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                     }
@@ -342,7 +342,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                  }
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + "TIME: "+MyUtility.extractTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME")) + "\n" + previousDataHold[1] + "\n" + previousDataHold[2] ;//onlyTime is set automatically to remarks if user enter any remarks;
+                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + "TIME: "+MyUtility.getTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME")) + "\n" + previousDataHold[1] + "\n" + previousDataHold[2] ;//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[1] = 1;//this is important because when user do not enter any data while updating then least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 boolean isWrongData,isDataPresent,success;
@@ -362,13 +362,13 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                       //  success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='" + micPath + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                        // success=db.update_Deposit_TABLE_NAME2(date,onlyTime,micPath,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
                        // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
 
                     } else {//if micPath == null then we are not updating because null in text will be set to mic-path and give wrong result like it will indicate that audio is present but actually audio is not present
                        // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                         //success=db.update_Deposit_TABLE_NAME2(date,onlyTime,null,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
                        // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTable(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
 
                     }
                     if(!success){

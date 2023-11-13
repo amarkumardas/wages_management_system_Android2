@@ -1035,7 +1035,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         try(Database db = new Database(getBaseContext())) {
             switch (whichPdfIndicator) {
                 case 1: {
-                    cursor = db.getData("SELECT " + Database.COL_394_INVOICE1 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+                    cursor = db.getData("SELECT " + Database.COL_394_INVOICE1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
                     cursor.moveToFirst();
                     if (cursor.getBlob(0) != null) {
                         return cursor.getBlob(0);
@@ -1043,7 +1043,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 }
                 break;
                 case 2: {
-                    cursor = db.getData("SELECT " + Database.COL_395_INVOICE2 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+                    cursor = db.getData("SELECT " + Database.COL_395_INVOICE2 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
                     cursor.moveToFirst();
                     if (cursor.getBlob(0) != null) {
                         return cursor.getBlob(0);

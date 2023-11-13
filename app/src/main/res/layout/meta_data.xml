@@ -24,7 +24,7 @@
                 android:text="PERSON INFO"
                 android:background="@color/purple_700"
                 android:textAlignment="center"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 />

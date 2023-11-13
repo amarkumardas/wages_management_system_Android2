@@ -104,7 +104,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              }else
                  binding.totalDepositAmountLayout.setVisibility(View.GONE);
 
-            Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             if(skillNRateCursor != null) {
                 skillNRateCursor.moveToFirst();
                 int indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
@@ -237,7 +237,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       WagesDetailsModel model = new WagesDetailsModel();
                       model.setUserGivenDate(allDataCursor.getString(0));
                       model.setMicPath(allDataCursor.getString(1));
-                      model.setDescription(allDataCursor.getString(2));
+                      model.setRemarks(allDataCursor.getString(2));
                       model.setWages(allDataCursor.getInt(3));
                       model.setDeposit(allDataCursor.getInt(4));
                       model.setP1(allDataCursor.getInt(5));
@@ -287,7 +287,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
             }
           //setting star rating
-            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
             cursor2.moveToFirst();
             if(cursor2.getString(0) != null || cursor2.getString(1) != null) {
 
@@ -403,7 +403,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                }
 //                cursor1.close();
                 //---------------------------------------------------------------------------------------------------------------------------
-                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
                 cursor21.moveToFirst();
 
                 //total worked days
@@ -483,7 +483,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                         String data = adapterView.getItemAtPosition(pos).toString();
                         try(Database db=new Database(getBaseContext());
-                        Cursor cursorx =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                        Cursor cursorx =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
                             cursorx.moveToFirst();//skill which is null there skill is updated
                             switch (data) {
                                 case "ADD L": //adding L means p2
@@ -491,13 +491,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     editOrNot[1] = true;//indicate user has selected option
 
                                     if (cursorx.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
@@ -507,13 +507,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
                                     if (cursorx.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
@@ -524,13 +524,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     editOrNot[1] = true;//indicate user has selected option
 
                                     if (cursorx.getString(0) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(1) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                                     } else if (cursorx.getString(2) == null) {
-                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+                                        showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                                     } else
                                         displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
@@ -540,7 +540,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 {
                                     editOrNot[1] = true;//indicate user has selected option
                                     //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
-                                    Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                                    Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
                                     if (cursorIndicator != null) {
                                         cursorIndicator.moveToFirst();
                                         if (cursorIndicator.getString(0) == null) {//person1
@@ -551,7 +551,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2 so set null
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
                                                     displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -565,7 +565,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
                                                     displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -578,7 +578,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 11) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
                                                     displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -733,7 +733,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         totalDepositAmountLayout.setVisibility(View.GONE);
                     }
 
-                    Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+                    Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
                     if(skillNRateCursor != null) {
                         skillNRateCursor.moveToFirst();
                        //initializing this variables to take during saving
@@ -1548,15 +1548,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     }
     private void rateUpdateManually(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
         try(Database db=new Database(getBaseContext());
-            Cursor skillCursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'")) {
-           if(skillCursor1 != null) skillCursor1.moveToFirst();
-
-            Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_1_ID + "= '" + id + "'");
+            Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
             if(rateCursor1 != null) rateCursor1.moveToFirst();
+            String mainSkill=db.getOnlyMainSkill(id);
 
             Cursor skillNRateCursor=null;
-            if(indicator > 1) {//if more than 1 then get all skill and rate
-                  skillNRateCursor = db.getData("SELECT " + Database.COL_36_SKILL2 + "," + Database.COL_37_SKILL3 + "," + Database.COL_38_SKILL4 + " , "+ Database.COL_33_R2 + "," + Database.COL_34_R3 + "," + Database.COL_35_R4 + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
+            if(indicator > 1) {//if indicator more than 1 then get all skill and rate
+                  skillNRateCursor = db.getData("SELECT " + Database.COL_36_SKILL2 + "," + Database.COL_37_SKILL3 + "," + Database.COL_38_SKILL4 + " , "+ Database.COL_33_R2 + "," + Database.COL_34_R3 + "," + Database.COL_35_R4 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'");
                 if (skillNRateCursor != null) skillNRateCursor.moveToFirst();
             }
             //initially hide
@@ -1569,7 +1567,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             switch (indicator){
                 case 1: {
-                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    hardcodedP1Tv.setText(mainSkill);
                     inputP1Rate.setText(rateCursor1.getString(0));
                     rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
                 }
@@ -1578,7 +1576,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     hardcodedP2Tv.setVisibility(View.VISIBLE);
                     inputP2Rate.setVisibility(View.VISIBLE);
 
-                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    hardcodedP1Tv.setText(mainSkill);
                     inputP1Rate.setText(rateCursor1.getString(0));
                     rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
 
@@ -1594,7 +1592,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     hardcodedP3Tv.setVisibility(View.VISIBLE);
                     inputP3Rate.setVisibility(View.VISIBLE);
 
-                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    hardcodedP1Tv.setText(mainSkill);
                     inputP1Rate.setText(rateCursor1.getString(0));
                     rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
 
@@ -1617,7 +1615,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     hardcodedP4Tv.setVisibility(View.VISIBLE);
                     inputP4Rate.setVisibility(View.VISIBLE);
 
-                    hardcodedP1Tv.setText(skillCursor1.getString(0));
+                    hardcodedP1Tv.setText(mainSkill);
                     inputP1Rate.setText(rateCursor1.getString(0));
                     rate1Et(inputP1Rate, saveButton, checkCorrectionArray, userInputRateArray);//input rate array is updated
 
@@ -2091,7 +2089,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             advanceOrBalanceWarring.setTextColor(Color.RED);
             advanceOrBalanceWarring.setText(advanceAmountCursor.getString(0));
 
-            Cursor sum1DayAmountCursor=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor sum1DayAmountCursor=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
                    sum1DayAmountCursor.moveToFirst();
            // int howManyPerson=get_indicator(fromIntentPersonId);
             int howManyPerson=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
@@ -2163,7 +2161,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         hardcodedP1.setText(cursorDefault.getString(0));
         cursorDefault.close();
 
-        Cursor skillsCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+        Cursor skillsCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
         if(skillsCursor != null) {
             skillsCursor.moveToFirst();
             if (indicator == 2) {//two person
@@ -2269,7 +2267,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
                     //success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0");
-                       if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
+                       if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                        }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2292,7 +2290,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                      // success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0");
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2316,7 +2314,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //insert to database
                       //success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
                    // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0");
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
+                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2344,11 +2342,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
 
                    // success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0");
-                    for(int i=0;i<=1000;i++) {
-                        if (!db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
+
+                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                         }
-                    }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {
@@ -2455,7 +2452,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) { }
         });
         inputP1.addTextChangedListener(new TextWatcher() {
-            Cursor result =db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor result =db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2482,7 +2479,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
         inputP2.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2510,7 +2507,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
         inputP3.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
@@ -2539,7 +2536,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
         inputP4.addTextChangedListener(new TextWatcher() {
-            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
+            Cursor result=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override

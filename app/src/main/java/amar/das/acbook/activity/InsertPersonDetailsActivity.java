@@ -43,7 +43,7 @@ import amar.das.acbook.utility.MyUtility;
 
 
 public class InsertPersonDetailsActivity extends AppCompatActivity {
-    Button add;
+   Button add;
   EditText name,account, acHolderName, ifscCode, aadhaarCard,phone, fatherName;
   AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
   Database db;

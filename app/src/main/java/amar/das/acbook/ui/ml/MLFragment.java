@@ -42,7 +42,6 @@ public class MLFragment extends Fragment  {
 
         });
 
-
         binding.viewPager2.setAdapter(new FragmentAdapter(getActivity()));
         new TabLayoutMediator(binding.tabLayout, binding.viewPager2,((tab,position)-> tab.setText(titles[position]))).attach();//set text to page according to position
 //        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {//when tab select or swipe it will perform operation so we are getting position

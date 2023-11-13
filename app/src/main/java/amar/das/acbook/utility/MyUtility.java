@@ -1,13 +1,13 @@
 package amar.das.acbook.utility;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.AdapterView;
 
 import androidx.core.app.ActivityCompat;
 
@@ -29,14 +29,16 @@ import java.util.HashSet;
 import java.util.List;
 
 import amar.das.acbook.Database;
+import amar.das.acbook.R;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.textfilegenerator.TextFile;
+import amar.das.acbook.voicerecording.VoiceRecorder;
 
 public class MyUtility {
     public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
-    public static String extractTime12hr(String systemDateTime) {//if error return null
+    public static String getTime12hr(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = formatter.parse(systemDateTime);
@@ -47,7 +49,7 @@ public class MyUtility {
             return null;
         }
     }
-    public static String extractDate(String systemDateTime) {//if error return null
+    public static String getDate(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = formatter.parse(systemDateTime);
@@ -82,7 +84,7 @@ public class MyUtility {
             return "00:00:00: pm";//error
         }
     }
-    public static String getOnlyCurrentDate(){
+    public static String getOnlyCurrentDate(){//latest date not contain 0
         try{
             Calendar currentDate =Calendar.getInstance();//to get current date like 1-2-2021 or 11-22-2023 no zero
             return currentDate.get(Calendar.DAY_OF_MONTH)+"-"+(currentDate.get(Calendar.MONTH)+1)+"-"+ currentDate.get(Calendar.YEAR);
@@ -105,7 +107,7 @@ public class MyUtility {
     }
     public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
         try(Database db=new Database (context);
-            Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME3 + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
+            Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
             if (cursor2.getCount() == 0) { return false; }// or throw an exception this will occur when there is no id in db or no data in db or table
 
             cursor2.moveToFirst();
@@ -115,7 +117,7 @@ public class MyUtility {
                 LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
                 //between (2022-05-01,2022-05-01) like
                 if(ChronoUnit.DAYS.between(dbDate, todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
-                   return db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
+                   return db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
                 }
             }
             return true;
@@ -178,7 +180,7 @@ public class MyUtility {
         String [] religion=null;
         try(//Database db=new Database(context);
             Database db=Database.getInstance(context);
-            Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME5)){
+            Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME_RELIGION)){
             religion=new String[religionCursor.getCount()];
             int i=0;
             while(religionCursor.moveToNext()){
@@ -194,7 +196,7 @@ public class MyUtility {
         String [] location=null;
         try(//Database db=new Database(context);
             Database db=  Database.getInstance(context);
-            Cursor locationCursor=db.getData("SELECT "+Database.COL_41_LOCATION+" FROM "+Database.TABLE_NAME4)){
+            Cursor locationCursor=db.getData("SELECT "+Database.COL_41_LOCATION+" FROM "+Database.TABLE_NAME_LOCATION)){
             location=new String[locationCursor.getCount()];
             int i=0;
             while(locationCursor.moveToNext()){
@@ -212,12 +214,12 @@ public class MyUtility {
         try(Database db=new Database(context))
         {
             if (!location.trim().isEmpty() && locationHashSet.add(location)) {//if false that means data is duplicate
-                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME4+" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
+                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_LOCATION +" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
                    return false;//means error
                 }
             }
             if (!religion.trim().isEmpty() && religionHashSet.add(religion)) {//if false that means data is duplicate
-                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME5+" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );")){
+                if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_RELIGION +" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );")){
                     return false;//means error
                 }
             }
@@ -234,7 +236,7 @@ public class MyUtility {
             return -1;
         }
         Database database=Database.getInstance(context);
-        try(Cursor cursor = database.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+        try(Cursor cursor = database.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
               cursor.moveToFirst();
             return cursor.getInt(0);
 
@@ -294,7 +296,7 @@ public class MyUtility {
             try{
             StringBuilder fileName = new StringBuilder();
             fileName.append("id").append(id);
-            Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
+            Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
             cursor.moveToFirst();//means only one row is returned
             fileName.append("invoice").append(cursor.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
 
@@ -592,15 +594,15 @@ public class MyUtility {
             switch (indicator) {
                 case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
                 case 2: {
-                    cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                    cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), "REMARKS"};
                 }
-                case 3: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                case 3: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), "REMARKS"};
                 }
-                case 4: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " ," + Database.COL_38_SKILL4 + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + id + "'");
+                case 4: { cursor2 = db.getData("SELECT " + Database.COL_36_SKILL2 + " ," + Database.COL_37_SKILL3 + " ," + Database.COL_38_SKILL4 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + id + "'");
                     cursor2.moveToFirst();
                     return new String[]{"DATE", "WAGES", cursor1.getString(0), cursor2.getString(0), cursor2.getString(1), cursor2.getString(2), "REMARKS"};
                 }
@@ -625,16 +627,16 @@ public class MyUtility {
         try{
             switch(indicator){
                 case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
-                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
+                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
                 case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
-                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
+                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
                 case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
-                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
+                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
                 case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 11) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +")  FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
-                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME3 +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
+                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
             }
             int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size.like indicator 1 need 4 space in array so formula is [2*(indicator+1)]
@@ -663,10 +665,10 @@ public class MyUtility {
             }
         }
     }
-    public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default
+    public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.indicator value start from 1
         Database db=Database.getInstance(context);
         try(//Database db=new Database(context);//to this database automatically
-            Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
+            Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getString(0) == null) {//if null then indicator should be 1
@@ -764,7 +766,7 @@ public class MyUtility {
         Database db=Database.getInstance(context);
           try(
              Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -983,6 +985,42 @@ public class MyUtility {
             al.set(end-1,a);
             start++;
             end--;
+        }
+    }
+    public static void showResult(String title, String message,Context context) {
+        AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(context);
+        showDataFromDataBase.setCancelable(false);
+        showDataFromDataBase.setTitle(title);
+        showDataFromDataBase.setMessage(message);
+        showDataFromDataBase.setPositiveButton(context.getResources().getString(R.string.ok), (dialogInterface, i) -> {
+            dialogInterface.dismiss();//while here refreshing getting error cursor out of bound exception if we put code of refresh then when user want to see remarks then also it will refresh so no needed
+        });
+        showDataFromDataBase.create().show();
+    }
+    public static void spinnerAudioRemarksShare(AdapterView<?> adapterView, int pos, View view, String micPath, String remarks, Context context){
+        String a = adapterView.getItemAtPosition(pos).toString();//get adapter position
+        switch(a){
+            case "AUDIO": {
+                if (micPath != null) {//checking audi is present or not
+                    if(VoiceRecorder.audioPlayer(micPath)){
+                        MyUtility.snackBar(view,view.getContext().getResources().getString(R.string.audio_playing));
+                    }else{
+                        MyUtility.snackBar(view,view.getContext().getResources().getString(R.string.audio_not_found_may_be_deleted));
+                    }
+                } else{
+                    MyUtility.snackBar(view,view.getContext().getResources().getString(R.string.no_audio) );
+                }
+            }break;
+            case "REMARKS":{
+                if(remarks != null) {//checking remarks is present or not
+                    MyUtility.showResult(view.getContext().getResources().getString(R.string.remarks),remarks,context);
+                }else{
+                    MyUtility.snackBar(view,view.getResources().getString(R.string.no_remarks));
+                }
+            }break;
+            case "SHARE":{
+
+            }break;
         }
     }
 }

@@ -20,8 +20,7 @@ public class HistoryModel {
     private Integer wagesOrDeposit;
     private Boolean isDeposit;
     private boolean isShared;
-    private Integer  subtractedAdvanceOrBal;
-
+    private String  subtractedAdvanceOrBal;//String taken because we want null if data is not present in database
     public String getSystemTimeDate() {
         return systemTimeDate;
     }
@@ -158,11 +157,11 @@ public class HistoryModel {
         isShared = shared;
     }
 
-    public Integer getSubtractedAdvanceOrBal() {
+    public String getSubtractedAdvanceOrBal() {
         return subtractedAdvanceOrBal;
     }
 
-    public void setSubtractedAdvanceOrBal(Integer subtractedAdvanceOrBal) {
+    public void setSubtractedAdvanceOrBal(String subtractedAdvanceOrBal) {
         this.subtractedAdvanceOrBal = subtractedAdvanceOrBal;
     }
 }

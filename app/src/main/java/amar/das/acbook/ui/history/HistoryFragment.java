@@ -14,16 +14,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
-import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.adapters.HistoryAdapter;
 import amar.das.acbook.databinding.FragmentHistoryTabBinding;
 import amar.das.acbook.model.HistoryModel;
@@ -33,26 +29,29 @@ import amar.das.acbook.utility.MyUtility;
 public class HistoryFragment extends Fragment {
     public static String sameDayinserted ="1";//means inserted on same day
     public static String sameDayUpdated ="2";//means inserted and updated on same day
-    public static String previousRecordUpdated ="3";//means updated previous record
+    public static String previousRecordUpdated ="3";//means updated previous day record
     public static String automaticInserted="4";//means automatic inserted by application
-
+    public static boolean shareingToggle=false;
     LocalDate now=LocalDate.now();
     int year=now.getYear();
-    byte dayOfMonth= (byte) now.getDayOfMonth(),month= (byte) now.getMonthValue(),plus1,minus1;
+    byte dayOfMonth= (byte) now.getDayOfMonth(),month= (byte) now.getMonthValue();
     private FragmentHistoryTabBinding binding;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState){
         binding = FragmentHistoryTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        binding.historyDateViewTv.setText(dayOfMonth+"-"+(month+1)+"-"+year+" , "+getDayName(this.year,this.month,this.dayOfMonth));//initially set this
-        fetchData(container);
+        binding.historyDateViewTv.setText(dayOfMonth+"-"+(month)+"-"+year+" , "+getDayName(this.year,this.month,this.dayOfMonth));//initially set this
+
+        binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));
+        binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));
+        fetchData(container);//initially fetch today's date data
+
         binding.historyDateViewTv.setOnClickListener(view -> {
             DatePickerDialog datePickerDialog=new DatePickerDialog(getContext(), (datePicker, year, month, dayOfMonth) -> { //To show calendar dialog
                 this.dayOfMonth=(byte)dayOfMonth;
-                this.month=(byte)(month+1);
+                this.month=(byte)(month+1);//because her month value start from 0 so adding 1 to month
                 this.year=year;
-                minus1=plus1=0;
                 binding.historyDateViewTv.setText(dayOfMonth+"-"+(month+1)+"-"+year+" , "+getDayName(this.year,this.month,this.dayOfMonth));//month start from 0 so 1 is added to get right month like 12
             },year,month-1,dayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
             datePickerDialog.show();
@@ -62,9 +61,10 @@ public class HistoryFragment extends Fragment {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
-
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));
+                binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));
                 fetchData(container);
             }
             @Override
@@ -72,20 +72,51 @@ public class HistoryFragment extends Fragment {
 
             }
         });
+        binding.historyPlusOneTv.setOnClickListener(view -> {
+            setDate((byte)1);
+        });
+        binding.historyMinusOneTv.setOnClickListener(view -> {
+           setDate((byte)-1);
+       });
 
-        //LocalDate currentDate = LocalDate.of();
-        //Increase the date by one day
-//        LocalDate increasedDate = currentDate.plusDays(1);
-//        DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//        increasedDate.format(formatters);
-//
-//        //Decrease the date by one day
-//        LocalDate decreasedDate = currentDate.minusDays(1);
-//
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//        decreasedDate.format(formatter);
-
+        binding.historyToggleToShare.setChecked((shareingToggle)?true:false);//due to static variable
+        binding.historyToggleToShare.setOnClickListener(view -> {
+               if(binding.historyToggleToShare.isChecked()){
+                   shareingToggle=true;
+                   MyUtility.snackBar(view,getResources().getString(R.string.sharing_to_active_phone_number_enabled));
+               }else{
+                   shareingToggle=false;
+                   MyUtility.snackBar(view,getResources().getString(R.string.sharing_to_whatsapp_enabled));
+               }
+        });
         return root;
+    }
+    private long getTotalPayment(int year,byte month,byte dayOfMonth){
+        try(Database db=Database.getInstance(getContext())){
+           return Integer.parseInt(db.getTotalPaymentHistory(year,month,dayOfMonth));
+        }catch(Exception x){
+            x.printStackTrace();
+            return 0;
+        }
+    }
+    private long getTotalReceivedPayment(int year,byte month,byte dayOfMonth){
+        try(Database db=Database.getInstance(getContext())){
+            return Integer.parseInt(db.getTotalReceivedPaymentHistory(year,month,dayOfMonth));
+        }catch(Exception x){
+            x.printStackTrace();
+            return 0;
+        }
+    }
+    private void setDate(byte days){
+        int date[]= getBeforeOrForwardDate(days,this.year,this.month,this.dayOfMonth);
+        if(date != null){//updating
+            this.year = date[0];
+            this.month = (byte) date[1];
+            this.dayOfMonth = (byte) date[2];
+            binding.historyDateViewTv.setText(dayOfMonth+"-"+(month)+"-"+year+" , "+getDayName(this.year,this.month,this.dayOfMonth));//month start from 0 so 1 is added to get right month like 12
+        }else{
+            binding.historyDateViewTv.setText("ERROR");
+        }
     }
     String getDayName(int year,byte month,byte dayOfMonth){
         LocalDate currentDate = LocalDate.of(year,month,dayOfMonth);
@@ -95,7 +126,7 @@ public class HistoryFragment extends Fragment {
         Database db=Database.getInstance(getContext());
         try(Cursor cursor = db.getSpecificDateHistory(year,month,dayOfMonth)){//data is sorted in desc order
             ArrayList<HistoryModel> historyData = new ArrayList<>();
-            while (cursor.moveToNext()){
+            while(cursor.moveToNext()){
                 HistoryModel model = new HistoryModel();
                 model.setId(cursor.getString(0));
                 model.setUserDate(cursor.getString(1));
@@ -113,7 +144,7 @@ public class HistoryFragment extends Fragment {
                 model.setP4Skill( cursor.getString(13) );
                 model.setShared((cursor.getString(14) != null)?true:false);
                 model.setStatus(cursor.getString(15));
-                model.setSubtractedAdvanceOrBal( cursor.getInt(16));
+                model.setSubtractedAdvanceOrBal(cursor.getString(16));
                 model.setName(cursor.getString(17));
                 historyData.add(model);
             }
@@ -132,20 +163,40 @@ public class HistoryFragment extends Fragment {
         }
         return true;
     }
-    public static HashMap<String,String> stringToHashMap(String string) {//1.if key is there and value not there then get() method will return null.2.if key is not there but we try to retrieve value then get() method will alse return null.
-        HashMap<String, String> hashMap = new HashMap<>();
-        string = string.replaceAll("[{}]", "");// Remove curly brackets using a single replace call.eg {WAGES=5000, P1_SKILL=0, P1_WORK=6, NAME=AMAR KUMAR DAS}
-        String[] keyValuePairs = string.split(",");
-        for (String keyValuePair : keyValuePairs) {
-            String[] keyValueArray = keyValuePair.split("=");
-            if (keyValueArray.length == 2) {//Added a check to ensure that a valid key-value pair is added to the HashMap. This check verifies that there are exactly two parts when splitting by "=", avoiding potential ArrayIndexOutOfBoundsException errors.
-                String key = keyValueArray[0].trim();
-                String value = keyValueArray[1].trim();
-                hashMap.put(key, value);
+    public int[] getBeforeOrForwardDate(byte forForwardDaysPlusAndPreviousDayMinus, int year, byte month, byte daysOfMonth){//if error return null
+        try {//if 0 is passed then current date is return.if -1 then previous day +1 forward days
+            int []date=new int[3];
+            LocalDate currentDate = LocalDate.of(year,month,daysOfMonth);
+            LocalDate  resultDate=null;
+
+            if(forForwardDaysPlusAndPreviousDayMinus >= 0){
+                resultDate = currentDate.plusDays(forForwardDaysPlusAndPreviousDayMinus);// Calculate a future date
+            }else{
+                resultDate = currentDate.minusDays(Math.abs(forForwardDaysPlusAndPreviousDayMinus));  // Calculate a past date
             }
+            date[0]= resultDate.getYear();
+            date[1]=resultDate.getMonthValue();
+            date[2]=resultDate.getDayOfMonth();
+            return date;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return hashMap;
     }
+//    public static HashMap<String,String> stringToHashMap(String string) {//1.if key is there and value not there then get() method will return null.2.if key is not there but we try to retrieve value then get() method will alse return null.
+//        HashMap<String, String> hashMap = new HashMap<>();
+//        string = string.replaceAll("[{}]", "");// Remove curly brackets using a single replace call.eg {WAGES=5000, P1_SKILL=0, P1_WORK=6, NAME=AMAR KUMAR DAS}
+//        String[] keyValuePairs = string.split(",");
+//        for (String keyValuePair : keyValuePairs) {
+//            String[] keyValueArray = keyValuePair.split("=");
+//            if (keyValueArray.length == 2) {//Added a check to ensure that a valid key-value pair is added to the HashMap. This check verifies that there are exactly two parts when splitting by "=", avoiding potential ArrayIndexOutOfBoundsException errors.
+//                String key = keyValueArray[0].trim();
+//                String value = keyValueArray[1].trim();
+//                hashMap.put(key, value);
+//            }
+//        }
+//        return hashMap;
+//    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

@@ -9,10 +9,10 @@
     android:orientation="horizontal"
     android:foreground="?android:attr/selectableItemBackground">
 
-<ImageView
+<TextView
     android:layout_weight="3"
     android:layout_width="0dp"
-    android:layout_height="40dp"
+    android:layout_height="35dp"
     android:background="@drawable/baseline_file_open_24"/>
 
     <TextView

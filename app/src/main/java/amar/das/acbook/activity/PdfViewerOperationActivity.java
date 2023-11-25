@@ -483,7 +483,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             dialogBuilder.setMessage(message);
 
             dialogBuilder.setNegativeButton(getResources().getString(R.string.send_only_total_to_contact), (dialogInterface, i) -> {
-                success[0]= sendMessageToContact(id,getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(id));//sending only total wages and deposit due to long text cannot send as sms
+                success[0]=MyUtility.sendMessageToContact(id,getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(id),getBaseContext());//sending only total wages and deposit due to long text cannot send as sms
                       if(!success[0]){//if no contact then send full txt file message to any app
                           success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                       }
@@ -493,7 +493,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             dialogBuilder.setPositiveButton( "", (dialogInterface, i) -> {
                 if(defaultTrueForOpenAnyAppAndFalseForWhatsApp) {
                     success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
-
                 }else{
                     success[0]= sendMessageDirectToWhatsAppOrAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                 }
@@ -507,17 +506,13 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return success[0];
     }
-    private boolean sendMessageToContact(String id, String message){
-        if(id==null || message==null){
-            return false;
-        }
-        try{
-            return sendSMSUsingIntentToPhoneNumber(message,id);
-        }catch (Exception x){
-            x.printStackTrace();
-            return false;
-        }
-    }
+//    private boolean sendMessageToContact(String id, String message){
+//        if(id==null || message==null){
+//            return false;
+//        }
+//        return sendSMSUsingIntentToPhoneNumber(message,id);
+//
+//    }
     private boolean sendMessageDirectToWhatsAppOrAnyApp(String id,String fileName,String message,String mimeType,String title) {//disadvantage-when phone number has no whatsapp then cant send message.
         //if(id==null|| message==null|| mimeType==null||title==null||sharePdfLauncher==null){
        if(id==null|| message==null|| mimeType==null||title==null ){
@@ -526,7 +521,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         try{
             String activePhone=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());//for opening whatsapp we have to check phone number is available or not
             if(activePhone!=null) {
-                if(!shareMessageDirectlyToWhatsApp(message,activePhone)){//if fail
+                if(!MyUtility.shareMessageDirectlyToWhatsApp(message,activePhone,getBaseContext())){//if fail
                      return shareLargeDataAsTextFileToAnyApp(id,fileName,message,mimeType,title);
                 }
             }else{//if no phone number then share text to any app
@@ -552,32 +547,32 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    private boolean sendSMSUsingIntentToPhoneNumber(String message, String id) {
-        if(message==null && id==null) {
-            return false;
-        }
-        try{
-            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getBaseContext());
-            if(phoneNumber!=null){
-                if(checkPermissionForSMS()){   //send an SMS using an intent
-                    Intent intent=new Intent(Intent.ACTION_VIEW,Uri.fromParts("sms",phoneNumber,null));//The first parameter specifies the protocol ("sms"), the second parameter specifies the recipient's phone number.URI can be used to launch the SMS app with a pre-filled recipient phone number.
-                    intent.putExtra("sms_body",message);//here adding flag not required
-                    startActivity(intent);
-                    return true;
-                }else{
-                    Toast.makeText(PdfViewerOperationActivity.this, "SMS PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.SEND_SMS}, 31);
-                    return false;
-                }
-            }else{
-                Toast.makeText(this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();
-                return false;
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-            return false;
-        }
-    }
+//    private boolean sendSMSUsingIntentToPhoneNumber(String message, String id) {
+//        if(message==null && id==null) {
+//            return false;
+//        }
+//        try{
+//            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getBaseContext());
+//            if(phoneNumber!=null){
+//                if(checkPermissionForSMS()){   //send an SMS using an intent
+//                    Intent intent=new Intent(Intent.ACTION_VIEW,Uri.fromParts("sms",phoneNumber,null));//The first parameter specifies the protocol ("sms"), the second parameter specifies the recipient's phone number.URI can be used to launch the SMS app with a pre-filled recipient phone number.
+//                    intent.putExtra("sms_body",message);//here adding flag not required due to its activity
+//                    startActivity(intent);
+//                    return true;
+//                }else{
+//                    Toast.makeText(PdfViewerOperationActivity.this, "SMS PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.SEND_SMS}, 31);
+//                    return false;
+//                }
+//            }else{
+//                Toast.makeText(this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();
+//                return false;
+//            }
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//            return false;
+//        }
+//    }
     private String getMessageForCurrentInvoice(String id,boolean trueForAllAndFalseForOnlyPersonDetails){//return null when exception
         StringBuilder sb=new StringBuilder();
         try{
@@ -729,9 +724,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     if(defaultTrueForOpenAnyAppAndFalseForWhatsApp){
                         shareShortMessageToAnyApp(MyUtility.get12hrCurrentTimeAndDate() + "\n" + message + amount + remarks);
                     }else{//execute only when boolean value is false
-                        String activePhone= MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());//for opening whatsapp we have to check phone number is available or not
+                        String activePhone= MyUtility.getActivePhoneNumbersFromDb(id,getBaseContext());//for opening whatsapp we have to check phone number is available or not
                         if(activePhone!=null) {
-                            shareMessageDirectlyToWhatsApp(MyUtility.get12hrCurrentTimeAndDate() + "\n" + message + amount + remarks,activePhone);
+                            MyUtility.shareMessageDirectlyToWhatsApp(MyUtility.get12hrCurrentTimeAndDate() + "\n" + message + amount + remarks,activePhone,getBaseContext());
                         }else{
                             Toast.makeText(this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();
                         }
@@ -852,26 +847,26 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return new String(arr).trim();
     }
-    public boolean shareMessageDirectlyToWhatsApp(String message,String indianWhatsappNumber){
-  if(message==null || indianWhatsappNumber==null){
-      return false;
-  }
-  try {
-      if (isInternetConnected(this)){//WE CAN SEND LARGE TEXT MESSAGE USING WHATSAPP
-          if (isApplicationInstalled("com.whatsapp")) {//package name
-              indianWhatsappNumber = "91"+indianWhatsappNumber; // Add country code prefix for Indian numbers
-              Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=" +indianWhatsappNumber+"&text="+message));
-              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
-              startActivity(intent);//startActivity launch activity without expecting any result back we don't need any result back so using startActivity WITHOUT CHOOSER BECAUSE it will directly open whatsapp
-              return true;
-          }
-      }
-  }catch(Exception ex){
-      ex.printStackTrace();
-      return false;
-  }
-  return false;
-}
+//    public boolean shareMjessageDirectlyToWhatsApp(String message,String indianWhatsappNumber){
+//  if(message==null || indianWhatsappNumber==null){
+//      return false;
+//  }
+//  try {
+//      if (isInternetConnected(this)){//WE CAN SEND LARGE TEXT MESSAGE USING WHATSAPP
+//          if (isApplicationInstalled("com.whatsapp")) {//package name
+//              indianWhatsappNumber = "91"+indianWhatsappNumber; // Add country code prefix for Indian numbers
+//              Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=" +indianWhatsappNumber+"&text="+message));
+//              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
+//              startActivity(intent);//startActivity launch activity without expecting any result back we don't need any result back so using startActivity WITHOUT CHOOSER BECAUSE it will directly open whatsapp
+//              return true;
+//          }
+//      }
+//  }catch(Exception ex){
+//      ex.printStackTrace();
+//      return false;
+//  }
+//  return false;
+//}
     public boolean shareLargeDataAsTextFileToAnyApp(String id,String fileName,String message,String mimeType,String title){
         //if(id==null|| message==null|| mimeType==null||title==null||sharePdfLauncher==null){
         if(id==null|| message==null|| mimeType==null||title==null){
@@ -915,7 +910,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             ex.printStackTrace();
             return false;
         }
-}
+    }
     public boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title){// ActivityResultLauncher<Intent> sharePdfLauncher
        // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
         if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
@@ -948,36 +943,36 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
              return false;
         }
     }
-    public boolean isApplicationInstalled(String packageName){
-        try {
-        PackageManager packageManager = getApplicationContext().getPackageManager();//in manifest <query>.. </query> permission added
-        packageManager.getPackageInfo(packageName,PackageManager.GET_ACTIVITIES);//if this getPackageInfo() throws exception that means not installed else installed.PackageManager.GET_ACTIVITIES is a flag that can be passed as an argument to the getPackageInfo() method of the PackageManager class in Android. This flag is used to indicate that the PackageInfo object returned should contain information about all the activities defined in the package.In the context of checking if WhatsApp is installed, using the GET_ACTIVITIES flag ensures that the method returns the information about the activities in the WhatsApp package, which is necessary for determining if WhatsApp is installed on the device or not. Without this flag, the getPackageInfo() method would only return basic information about the package, which may not be sufficient to determine if the app is installed.
-        return true;
-
-//        or this code will list all app installed in device and IF FOUND return true
-//        PackageManager packageManager = getPackageManager();
-//        List<PackageInfo> list = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
-//        for (PackageInfo p : list) {
-//            if (packageName.equals(p.packageName)) {
-//                return true;
-//            }
-//        }
-
-    }catch (PackageManager.NameNotFoundException e){
-      e.printStackTrace();
-      Log.d(this.getClass().getSimpleName(), "package name not found----------------------------------");
-      return false;
-    } catch(Exception ex){
-        ex.printStackTrace();
-        return false;
-    }
-    }
-    public static boolean isInternetConnected(Context context) {//permission required in manifest file for accessing ConnectivityManager permission is ACCESS_NETWORK_STATE
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return (activeNetwork != null && activeNetwork.isConnected());
-        //note:this method only checks for the availability of an active network connection and does not verify if the connection can actually access the internet. It is possible to have an active network connection but not be able to access the internet due to network issues or other reasons.
-    }
+//    public boolean isApplicationInstalled(String packageName){
+//        try {
+//        PackageManager packageManager = getApplicationContext().getPackageManager();//in manifest <query>.. </query> permission added
+//        packageManager.getPackageInfo(packageName,PackageManager.GET_ACTIVITIES);//if this getPackageInfo() throws exception that means not installed else installed.PackageManager.GET_ACTIVITIES is a flag that can be passed as an argument to the getPackageInfo() method of the PackageManager class in Android. This flag is used to indicate that the PackageInfo object returned should contain information about all the activities defined in the package.In the context of checking if WhatsApp is installed, using the GET_ACTIVITIES flag ensures that the method returns the information about the activities in the WhatsApp package, which is necessary for determining if WhatsApp is installed on the device or not. Without this flag, the getPackageInfo() method would only return basic information about the package, which may not be sufficient to determine if the app is installed.
+//        return true;
+//
+////        or this code will list all app installed in device and IF FOUND return true
+////        PackageManager packageManager = getPackageManager();
+////        List<PackageInfo> list = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+////        for (PackageInfo p : list) {
+////            if (packageName.equals(p.packageName)) {
+////                return true;
+////            }
+////        }
+//
+//    }catch (PackageManager.NameNotFoundException e){
+//      e.printStackTrace();
+//      Log.d(this.getClass().getSimpleName(), "package name not found----------------------------------");
+//      return false;
+//    } catch(Exception ex){
+//        ex.printStackTrace();
+//        return false;
+//    }
+//    }
+//    public static boolean isInternetConnected(Context context) {//permission required in manifest file for accessing ConnectivityManager permission is ACCESS_NETWORK_STATE
+//        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//        return (activeNetwork != null && activeNetwork.isConnected());
+//        //note:this method only checks for the availability of an active network connection and does not verify if the connection can actually access the internet. It is possible to have an active network connection but not be able to access the internet due to network issues or other reasons.
+//    }
     public boolean changeButtonColorBackgroundAsSelected(byte buttonNumber) {
        try {
            switch (buttonNumber) {
@@ -1336,9 +1331,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         intent.putExtra("ID",fromIntentPersonId);
         startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
     }
-    private boolean checkPermissionForSMS() {
-        return ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
-    }
+//    private boolean checkPermissionForSMS() {
+//        return ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+//    }
     public void showSoftKeyboardByForced() {
         try {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);//working

@@ -12,8 +12,6 @@ import android.widget.Toast;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import amar.das.acbook.pdfgenerator.MakePdf;
@@ -724,14 +722,14 @@ public class Database extends SQLiteOpenHelper {
                    return false;
                }
 
-               if (isDeposited != null) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
+               if (isDeposited != null){//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
                        cv.put(COL_12_ISDEPOSITED_AM, isDeposited);
                    } else {
                        Toast.makeText(context, "isDeposited value cannot be null ", Toast.LENGTH_LONG).show();
                        return false;
                    }
 
-                  if(!(success=(dB.insert(TABLE0_ACTIVE_MESTRE, null,cv) == -1)? false :true)) return false;//if data not inserted return -1
+                if(!(success=(dB.insert(TABLE0_ACTIVE_MESTRE, null,cv) == -1)? false :true)) return false;//if data not inserted return -1
                //testing success=(dB.insert(TABLE2_IN_ACTIVE_MESTRE, null,cv) == -1)? false :true; //if data not inserted return -1
            }
              //HISTORY TABLE
@@ -947,14 +945,20 @@ public class Database extends SQLiteOpenHelper {
 
                 if(MyUtility.getDate(prevSystemDateTime).equals(MyUtility.getDate(activeNewSystemDateTime))){//initially on new date while updating previous record then that record prevSystemDateTime would be different from now SystemDateTime
                     Boolean  bool= isThisRecordOfPreviousDateInHistoryTable(id,prevSystemDateTime);
-                    if(bool == null ) return false;//means error
+                    if(bool == null) return false;//means error
                     if(bool){//execute when user again  update its only wages or deposit of previous record only not todays date record
                         cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H,calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2), updatedDataFromActiveTableCursor.getString(3), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(8), getPrevSubtractedAdvanceOrBalanceFromHistoryTable(id,prevSystemDateTime)));
                         cv.put(COL_19_STATUS_H,HistoryFragment.previousRecordUpdated);//UPDATing BECAUSE DEFAult value is set.since cv is like hashmap then it will replace the value
                     }
-                    //execute when data is present in history table.if user updated record on same date then update history table because updating on same date data present in history table because it is inserted first in history table.if we insert again then it will become duplicate data in history table
+
+                    ContentValues c=new ContentValues();
+                    c.put(Database.COL_18_IS_SHARED_H, (String) null);//when ever user update then make isShared column to null to indicate that this updated record is not shared even if previously user has shared this this record
+                    if(!((dB.update(TABLE_HISTORY,c,Database.COL_1_ID_H +"= '"+id+"'"+" AND "+Database.COL_13_SYSTEM_DATETIME_H +"= '"+prevSystemDateTime+"'",null) !=1 )? false :true)) return false;
+
+
+                      //execute when data is present in history table.if user updated record on same date then update history table because updating on same date data present in history table because it is inserted first in history table.if we insert again then it will become duplicate data in history table
                     return (dB.update(TABLE_HISTORY,cv,Database.COL_1_ID_H +"= '"+id+"'"+" AND "+Database.COL_13_SYSTEM_DATETIME_H +"= '"+prevSystemDateTime+"'",null) !=1 )? false :true;//at a time only 1 row should be updated so if 1 row is updated then update method will return 1. and if update method return value is more than 1 then there is duplicate row so checking with value 1
-                }else{//if user update previous record then insert in history table
+                }else{//if user update previous record then first insert in history table and if new record then also insert
 
                     cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H, calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2), updatedDataFromActiveTableCursor.getString(3), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(8),null));
                     cv.put(COL_19_STATUS_H,HistoryFragment.previousRecordUpdated);///UPDATing BECAUSE DEFAult value is set.since cv is like hashmap then it will replace the value
@@ -1384,7 +1388,7 @@ public class Database extends SQLiteOpenHelper {
         StringBuilder wagesSb=new StringBuilder();
         StringBuilder depositSb=new StringBuilder();
 
-        depositSb.append("["+MyUtility.getOnlyTime()+context.getResources().getString(R.string.hyphen_automatic_entered))
+        depositSb.append("["+MyUtility.getOnlyTime()+context.getResources().getString(R.string.hyphen_entered))
 //                .append("\n\nDATA FOUND IN OTHER TABLE. ")
 //                .append("\nDATA DELETED FROM OTHER TABLE. ")
 //                .append("\nTOTAL NUMBER OF DELETED DATA: ").append(otherTableDataCursor.getCount());
@@ -1884,7 +1888,7 @@ public class Database extends SQLiteOpenHelper {
 //                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
 //            }//toast will not work while doing background task
 
-            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(), null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
             success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){
@@ -2239,15 +2243,15 @@ public class Database extends SQLiteOpenHelper {
 
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
+                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),MyUtility.getOnlyTime(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
+                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),MyUtility.getOnlyTime(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,0,"0");
+                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,0,"0");
 
             }
             return false;
@@ -2457,11 +2461,10 @@ public class Database extends SQLiteOpenHelper {
         return cv;
     }
     private Boolean isThisRecordOfPreviousDateInHistoryTable(String id, String prevSystemDateTime){//RETURN NULL IF ERROR
-        /**if status code is 3 then we can know this is previous date USER HAS updated*/
         //IF this primary key present in history then we can update
         try(Cursor cursor=getData("SELECT "+Database.COL_19_STATUS_H+" FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_1_ID_H + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_H + "='" + prevSystemDateTime+"'")){
             cursor.moveToFirst();
-            return (cursor.getShort(0) == 3)? true:false;
+            return (cursor.getShort(0) == 3)? true:false; //**if status code is 3 then we can know this is previous date USER HAS updated
 
         }catch (Exception x){
             x.printStackTrace();
@@ -2479,7 +2482,6 @@ public class Database extends SQLiteOpenHelper {
         }
        return null;
     }
-
     public Cursor getSpecificDateHistory(int year,byte month,byte day){//"2023-11-06"
         return getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC");
 
@@ -2487,6 +2489,28 @@ public class Database extends SQLiteOpenHelper {
         //%04d: This is a placeholder for an integer (d stands for decimal). The 4 specifies the minimum width of the field, and the 0 indicates that leading zeros should be used to pad the number if it has fewer than four digits. This is used for formatting the year.
         //-%02d: This is another integer placeholder with a minimum width of 2, and again, it uses leading zeros for padding. The hyphen (-) is a literal character in the pattern. This is used for formatting the month.
         //-%02d: Similar to the previous placeholder, it's used for formatting the day.
+    }
+    public String getTotalPaymentHistory(int year,byte month,byte day){
+        try(Cursor cursor1 = getData("SELECT SUM(" + Database.COL_6_WAGES_H + ") FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='0' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT SUM(" + Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + ") FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " < 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")){//if subtracted column value is less then 0 that means today payment done
+            cursor1.moveToFirst();
+            cursor2.moveToFirst();
+            return String.valueOf(cursor1.getInt(0)+Math.abs(cursor2.getInt(0)));
+        } catch (Exception x) {
+            x.printStackTrace();
+            return "error";
+        }
+    }
+    public String getTotalReceivedPaymentHistory(int year,byte month,byte day){
+        try(Cursor cursor1 = getData("SELECT SUM(" + Database.COL_6_WAGES_H + ") FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='1' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT SUM(" + Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + ") FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " > 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")){//if subtracted column value is less then 0 that means today payment done
+            cursor1.moveToFirst();
+            cursor2.moveToFirst();
+            return String.valueOf(cursor1.getInt(0)+Math.abs(cursor2.getInt(0)));
+        } catch (Exception x) {
+            x.printStackTrace();
+            return "error";
+        }
     }
     public String getName(String id){
         try(Cursor cursor=getData("SELECT " + Database.COL_2_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE " +Database.COL_1_ID+" ='"+id+"'")){
@@ -2499,13 +2523,22 @@ public class Database extends SQLiteOpenHelper {
     }
     public String getMicPath(String id,String systemDateTime){//String id,String systemDateTime this two variables act as primary key
        try(Cursor cursor=getData("SELECT "+columnNameOutOf4Table(id, (byte) 4) +" FROM " + tableNameOutOf4Table(id) + " WHERE "+columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'" + " AND "+columnNameOutOf4Table(id, (byte) 13) +"= '"+systemDateTime+ "'")){
-            cursor.moveToFirst();//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen
+            if(cursor.getCount() == 0) return null;//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+            cursor.moveToFirst();
             return cursor.getString(0);
         }catch (Exception x){
             x.printStackTrace();
             return null;
         }
     }
+    public boolean updateAsSharedToHistory(String id, String systemDateTime){
+        try {
+            return updateTable("UPDATE " + Database.TABLE_HISTORY + " SET " + Database.COL_18_IS_SHARED_H + "='1' WHERE " + Database.COL_1_ID_H + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_H + "='" + systemDateTime + "'");
+        }catch(Exception x){
+            x.printStackTrace();
+            return false;
+        }
+        }
 }
 
 //    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it

@@ -106,8 +106,6 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
        if(!MyUtility.updateLeavingDate(data.getId(),context,todayDate)){//update leaving date
            Toast.makeText(context, "LEAVING DATE NOT UPDATED", Toast.LENGTH_LONG).show();
        }
-
-
 //        Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
 //        cursor2.moveToFirst();
 //        if (cursor2.getString(0) != null) {
@@ -153,9 +151,6 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     }
 
 }
-
-
-
     //***************For setting or showing different layout to recycler view***********************************************************************************
 //    //This adapter will decide which person is active or not.Person will become inactive if its leaving duration is 1 month.if user enter any data in current date then that person become active.
 //    Context context;

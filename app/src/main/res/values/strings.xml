@@ -48,7 +48,7 @@
     <string name="tab_on_mic_to_start_recording">TAB ON MIC TO START RECORDING</string>
     <string name="hyphen_entered">-ENTERED]</string>
     <string name="deposited_with_hyphen">[DEPOSITED]-</string>
-    <string name="hyphen_automatic_entered">-AUTOMATIC ENTERED]</string>
+<!--<string name="hyphen_automatic_entered">-AUTOMATIC ENTERED]</string>-->
     <string name="deposited">[DEPOSITED]</string>
     <string name="audio_playing">AUDIO PLAYING</string>
     <string name="hyphen_edited">-EDITED]</string>
@@ -68,6 +68,16 @@
     <string name="click_to_update_deposit">CLICK TO UPDATE DEPOSIT</string>
     <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND MAY BE DELETED</string>
     <string name="failed_to_update">FAILED TO UPDATE</string>
+    <string name="correct_the_data_or_cancel_and_enter_again">CORRECT THE DATA OR CANCEL AND ENTER AGAIN</string>
+
+    <!--History adapter-->
+    <string name="updated_payment">UPDATED PAYMENT:</string>
+    <string name="updated_amount_received">UPDATED AMOUNT RECEIVED:</string>
+
+    <!--history fragment-->
+    <string name="history_not_available">HISTORY NOT AVAILABLE</string>
+    <string name="sharing_to_active_phone_number_enabled">SHARING TO ACTIVE PHONE NUMBER ENABLED</string>
+    <string name="sharing_to_whatsapp_enabled">SHARING TO WHATSAPP ENABLED</string>
 
     <!--IndividualPersonDetailActivity-->
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
@@ -112,9 +122,6 @@
 
     <!--InactiveFragment-->
     <string name="please_wait_loading">PLEASE WAIT LOADING</string>
-
-    <!--history fragment-->
-    <string name="history_not_available">HISTORY NOT AVAILABLE</string>
 
     <!--Common view text-->
     <string name="cancel">CANCEL</string>

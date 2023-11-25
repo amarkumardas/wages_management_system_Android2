@@ -1,13 +1,19 @@
 package amar.das.acbook.utility;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
@@ -30,7 +36,10 @@ import java.util.List;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
+import amar.das.acbook.activity.PdfViewerOperationActivity;
+import amar.das.acbook.model.HistoryModel;
 import amar.das.acbook.model.MestreLaberGModel;
+import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
@@ -997,7 +1006,7 @@ public class MyUtility {
         });
         showDataFromDataBase.create().show();
     }
-    public static void spinnerAudioRemarksShare(AdapterView<?> adapterView, int pos, View view, String micPath, String remarks, Context context){
+    public static void spinnerAudioRemarksShare(AdapterView<?> adapterView, int pos, View view, String micPath, String remarks, Context context, WagesDetailsModel data){
         String a = adapterView.getItemAtPosition(pos).toString();//get adapter position
         switch(a){
             case "AUDIO": {
@@ -1019,8 +1028,147 @@ public class MyUtility {
                 }
             }break;
             case "SHARE":{
+                 if(data !=null){//best code
+                     try(Database db=Database.getInstance(context)){//share to whats app if not contact open any app to share
+                         String phoneNumber = MyUtility.getActivePhoneNumbersFromDb(data.getId(), context);
+                         if (phoneNumber != null) {
+                             if (MyUtility.shareMessageDirectlyToWhatsApp(generateRecordMessageToSend(data,db.getAllSkill(data.getId())), phoneNumber, context)) {//if false then open any app
 
+                                 db.updateAsSharedToHistory(data.getId(), data.getSystemDateAndTime());//update table as shared.if data send to contact number or whatsapp
+
+                             }else{
+                                  shareShortMessageToAnyApp(generateRecordMessageToSend(data, db.getAllSkill(data.getId())), context);//open any app
+                             }
+                         }else{
+                             Toast.makeText(context, context.getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();//snack-bar not using because its get hide
+                              shareShortMessageToAnyApp(generateRecordMessageToSend(data, db.getAllSkill(data.getId())), context);//open any app
+                         }
+                     }catch (Exception x) {
+                         x.printStackTrace();
+                     }
+                 }
             }break;
         }
+    }
+    private static String generateRecordMessageToSend(WagesDetailsModel data,String[] skills){
+        if(data == null || skills==null) return null;
+        StringBuilder sb=new StringBuilder();
+        sb.append("ID: ").append(data.getId()).append("\n")
+                .append("DATE: ").append(data.getUserGivenDate()).append("\n");
+        if(data.getIsdeposited().equals("0")){
+            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
+        }else{
+            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(data.getDeposit())).append("\n");
+        }
+        if(skills[0]!=null){
+            sb.append(skills[0]).append(": ").append(data.getP1()).append("  ");
+        }
+        if(skills[1]!=null){
+            sb.append(skills[1]).append(": ").append(data.getP2()).append("  ");
+            if(skills[2]!=null){
+                sb.append(skills[2]).append(": ").append(data.getP3()).append("  ");
+                if(skills[3]!=null){
+                    sb.append(skills[3]).append(": ").append(data.getP4());
+                }
+            }
+        }
+        sb.append("\n");
+        sb.append("REMARKS: ").append(data.getRemarks());
+        return sb.toString();
+    }
+    public static boolean shareShortMessageToAnyApp(String message,Context context){
+        if(message==null) {
+            return false;
+        }
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, message);
+            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
+            context.startActivity(Intent.createChooser(shareIntent, context.getResources().getString(R.string.share_message_using)));//startActivity launch activity without expecting any result back SO we don't need any result back so using start activity
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    public static  boolean shareMessageDirectlyToWhatsApp(String message,String indianWhatsappNumber,Context context){
+        if(message==null || indianWhatsappNumber==null){
+            return false;
+        }
+        try {
+            if (isInternetConnected(context)){//WE CAN SEND LARGE TEXT MESSAGE USING WHATSAPP
+                if (isApplicationInstalled("com.whatsapp",context)) {//package name
+                    indianWhatsappNumber = "91"+indianWhatsappNumber; // Add country code prefix for Indian numbers
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=" +indianWhatsappNumber+"&text="+message));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
+                   context.startActivity(intent);//startActivity launch activity without expecting any result back we don't need any result back so using startActivity WITHOUT CHOOSER BECAUSE it will directly open whatsapp.//Including Intent.FLAG_ACTIVITY_NEW_TASK is necessary when you're trying to start an activity from a context that is not an activity
+                    return true;
+                }
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+    public static boolean isApplicationInstalled(String packageName,Context context){
+        try {
+            PackageManager packageManager = context.getPackageManager();//in manifest <query>.. </query> permission added
+            packageManager.getPackageInfo(packageName,PackageManager.GET_ACTIVITIES);//if this getPackageInfo() throws exception that means not installed else installed.PackageManager.GET_ACTIVITIES is a flag that can be passed as an argument to the getPackageInfo() method of the PackageManager class in Android. This flag is used to indicate that the PackageInfo object returned should contain information about all the activities defined in the package.In the context of checking if WhatsApp is installed, using the GET_ACTIVITIES flag ensures that the method returns the information about the activities in the WhatsApp package, which is necessary for determining if WhatsApp is installed on the device or not. Without this flag, the getPackageInfo() method would only return basic information about the package, which may not be sufficient to determine if the app is installed.
+            return true;
+
+//        or this code will list all app installed in device and IF FOUND return true
+//        PackageManager packageManager = getPackageManager();
+//        List<PackageInfo> list = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+//        for (PackageInfo p : list) {
+//            if (packageName.equals(p.packageName)) {
+//                return true;
+//            }
+//        }
+
+        }catch (PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+            return false;
+        } catch(Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    public static boolean isInternetConnected(Context context) {//permission required in manifest file for accessing ConnectivityManager permission is ACCESS_NETWORK_STATE
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return (activeNetwork != null && activeNetwork.isConnected());
+        //note:this method only checks for the availability of an active network connection and does not verify if the connection can actually access the internet. It is possible to have an active network connection but not be able to access the internet due to network issues or other reasons.
+    }
+    public static boolean sendMessageToContact(String id, String message,Context context){
+        if(id==null || message==null || context==null){
+            return false;
+        }
+        try{
+            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
+            if(phoneNumber!=null){
+                if(checkPermissionForSMS(context)){   //send an SMS using an intent
+                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms",phoneNumber,null));//The first parameter specifies the protocol ("sms"), the second parameter specifies the recipient's phone number.URI can be used to launch the SMS app with a pre-filled recipient phone number.
+                    intent.putExtra("sms_body",message);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//Including Intent.FLAG_ACTIVITY_NEW_TASK is necessary when you're trying to start an activity from a context that is not an activity
+                    context.startActivity(intent);
+                    return true;
+                }else{
+                    Toast.makeText(context, "SMS PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.SEND_SMS}, 31);
+                    return false;
+                }
+            }else{
+                Toast.makeText(context, context.getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    public static boolean checkPermissionForSMS(Context context) {
+        return ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
     }
 }

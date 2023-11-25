@@ -2245,7 +2245,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 arr[6]=1;//means data present
             }
             else {//if user don't enter anything then time will set automatically
-                remarks="["+time+getResources().getString(R.string.hyphen_automatic_entered);
+                remarks="["+time+getResources().getString(R.string.hyphen_entered);
                 arr[6] = 0;
             }
             boolean isWrongData, isDataPresent;

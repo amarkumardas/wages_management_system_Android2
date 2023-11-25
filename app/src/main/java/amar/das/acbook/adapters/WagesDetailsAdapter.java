@@ -64,7 +64,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.single_record_row,parent,false);
+        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.single_wages_row,parent,false);
         return new ViewHolder(view);
     }
     @Override
@@ -117,9 +117,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         holder.spinnerRemarksAudioIcon.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {//this will only execute when there is data
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-                MyUtility.spinnerAudioRemarksShare(adapterView,pos,view,data.getMicPath(),data.getRemarks(),context);
+                MyUtility.spinnerAudioRemarksShare(adapterView,pos,view,data.getMicPath(),data.getRemarks(),context,data);
                 //after selecting second time remarks data is not shown so 0 is set so that when second time click it will show data
-              //int initialPosition = holder.spinnerDescAudioIcon.getSelectedItemPosition();
+               //int initialPosition = holder.spinnerDescAudioIcon.getSelectedItemPosition();
                 holder.spinnerRemarksAudioIcon.setSelection(0, false);//clearing auto selected or if we remove this line then only one time we would be able to select audio and remarks which we don't want
               }
             @Override
@@ -162,7 +162,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             }
         }
          //************************SETTING BACKGROUND COLOR ACCORDING TO PREVIOUS AND TODAY'S DATE*******************************
-        if (MyUtility.getDate(data.getSystemDateAndTime()).equals(getPreviousDateFromCurrentDate((byte) 1)))//if data has entered yesterday then set background to gray
+        if(MyUtility.getDate(data.getSystemDateAndTime()).equals(getPreviousDateFromCurrentDate((byte)1)))//if data has entered yesterday then set background to gray
             holder.itemView.setBackgroundColor(context.getColor(R.color.background));
         else if(getPreviousDateFromCurrentDate((byte) 0).equals(MyUtility.getDate(data.getSystemDateAndTime())))//if data has entered today then set background to yellow
         holder.itemView.setBackgroundColor(context.getColor(R.color.yellow));
@@ -240,7 +240,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
-            previousDataHold[0] = cursorDefault.getString(0) + "- " + cursorData.getString(5);//to write previous record in description
+            previousDataHold[0] = cursorDefault.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
             toGive_Amount.setText(String.valueOf(cursorData.getInt(4)));//setting wages
             inputP1.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p1
             cursorDefault.close();
@@ -253,19 +253,19 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + "- " + cursorData.getString(6);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
                 } else if (indicator == 3) {//three person
                     //hardcodedP1,inputP1 by default visible so no need to mention
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + "- " + cursorData.getString(6);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + "- " + cursorData.getString(7);//to write previous record in description
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(7);//to write previous record in description
                     inputP3.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
                     inputP3.setVisibility(View.VISIBLE);
                 } else if (indicator == 4) {////two person
@@ -273,18 +273,18 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + "- " + cursorData.getString(6);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + "- " + cursorData.getString(7);//to write previous record in description
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(7);//to write previous record in description
                     inputP3.setVisibility(View.VISIBLE);
                     inputP3.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
 
                     hardcodedP4.setVisibility(View.VISIBLE);
                     hardcodedP4.setText(skillsCursor.getString(2));
-                    previousDataHold[3] = skillsCursor.getString(2) + "- " + cursorData.getString(8);//to write previous record in description
+                    previousDataHold[3] = skillsCursor.getString(2) + ": " + cursorData.getString(8);//to write previous record in description
                     inputP4.setText(String.valueOf(cursorData.getInt(8)));//setting same data to p3
                     inputP4.setVisibility(View.VISIBLE);
                 }
@@ -373,7 +373,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                     }
                 }else
-                    Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
 
                 //*********************************all the upper code are common to all indicator 1,2,3,4*******************
 //                if(!db.activateIdWithLatestDate(data.getId(),onlyTime)){
@@ -382,7 +382,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
 
                 if (indicator == 1) {
-                    if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
+                    if (isDataPresent && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                         //UPDATE to database
                          if(micPath != null){//if it is not null then update micPath
                              // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
@@ -407,11 +407,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 //                        } else
 //                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else//once user enter wrong data and left blank then user wound be able to save because array value would not be change it will be 2 so  user have to "Cancel and enter again" if use don't leave blank then it will save successfully
-                        Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                        MyUtility.snackBar(view12,context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again));
 
                 } else if (indicator == 2) {
                     //p1 is automatically added
-                    if (isDataPresent == true && isWrongData == false) {
+                    if (isDataPresent && isWrongData == false) {
                         if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
@@ -438,10 +438,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 //                        } else
 //                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     }else
-                        Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                        MyUtility.snackBar(view12,context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again));
 
                 } else if (indicator == 3) {
-                    if (isDataPresent == true && isWrongData == false) {
+                    if (isDataPresent && isWrongData == false) {
                         if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
@@ -472,10 +472,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 //                        } else
 //                            Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else
-                        Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                        MyUtility.snackBar(view12,context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again));
 
                 } else if (indicator == 4) {
-                    if (isDataPresent == true && isWrongData == false) {
+                    if (isDataPresent && isWrongData == false) {
                         if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that onlyTime it will save from crashing app.So due to this condition if field is empty then default value will be taken
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to INT and stored
                         }
@@ -509,8 +509,8 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 //                            } else
 //                                Toast.makeText(context, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
                     } else
-                        Toast.makeText(context, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
-                }
+                        MyUtility.snackBar(view12,context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again));
+                 }
 
                 audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
 
@@ -899,13 +899,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     public String getPreviousDateFromCurrentDate(byte days){//if error return null
     try {//if 0 is passed then current date is return
         LocalDate currentDate = LocalDate.now();
-//            if (negativeDays >= 0) {
-//                // Calculate a future date
-//                resultDate = currentDate.plusDays(negativeDays);
-//            } else {
-//                // Calculate a past date
-//                resultDate = currentDate.minusDays(Math.abs(negativeDays));
-//            }
         LocalDate  resultDate = currentDate.minusDays(days);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -914,5 +907,5 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         e.printStackTrace();
         return null;
     }
-}
+  }
 }

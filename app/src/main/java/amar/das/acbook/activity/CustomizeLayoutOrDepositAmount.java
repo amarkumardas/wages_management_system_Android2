@@ -184,7 +184,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     //arr[2]=1;
                 }
                 else{
-                    remarks="["+onlyTime+getResources().getString(R.string.hyphen_automatic_entered)+"\n\n"+getResources().getString(R.string.deposited);//adding default deposit message so that when user don't enter remarks this remarks will be added
+                    remarks="["+onlyTime+getResources().getString(R.string.hyphen_entered)+"\n\n"+getResources().getString(R.string.deposited);//adding default deposit message so that when user don't enter remarks this remarks will be added
                   // arr[2]=1;
                 }
                 arr[2]=1;//for description
@@ -214,7 +214,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
 
                 }else
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
 
                 audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
             });
@@ -381,7 +381,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
 
                 }else {
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, "CORRECT THE DATA or CANCEL AND ENTER AGAIN", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
                 }
 
                 audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button

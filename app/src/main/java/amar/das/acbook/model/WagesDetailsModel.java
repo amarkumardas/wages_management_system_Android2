@@ -26,15 +26,8 @@ public class WagesDetailsModel implements Serializable {
 
     private String isdeposited;
 
-    public String getTime() {
-        return time;
-    }
 
-    public void setTime(String time) {
-        this.time = time;
-    }
 
-    private String time;
     private String micPath;
     private String remarks;
     private String id;

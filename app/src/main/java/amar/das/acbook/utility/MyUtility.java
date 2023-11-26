@@ -36,8 +36,7 @@ import java.util.List;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
-import amar.das.acbook.activity.PdfViewerOperationActivity;
-import amar.das.acbook.model.HistoryModel;
+
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -530,7 +529,7 @@ public class MyUtility {
         Database db = Database.getInstance(context);
         try(
             //Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
-            Cursor depositCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+ db.columnNameOutOf4Table(id, (byte) 7) +" ,"+ db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.columnNameOutOf4Table(id, (byte) 12) +"='1'")){
+            Cursor depositCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+ db.columnNameOutOf4Table(id, (byte) 6) +" ,"+ db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.columnNameOutOf4Table(id, (byte) 11) +"='1'")){
             String[][] recyclerViewDepositData =null;
             if(depositCursor!= null && depositCursor.getCount()!=0){
                 recyclerViewDepositData= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
@@ -559,14 +558,10 @@ public class MyUtility {
         try{
             Cursor wagesCursor = null;
             switch(indicator){
-//                case 1:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-//                case 2:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-//                case 3:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-//                case 4:wagesCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_6__WAGES +" ,"+Database.COL_8__P1 +" ,"+Database.COL_9__P2 +" ,"+Database.COL_10__P3 +" ,"+Database.COL_11__P4 +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='0'");break;
-                case 1:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
-                case 2:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
-                case 3:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
-                case 4:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 6) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 11) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 12) +"='0'");break;
+                case 1:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
+                case 2:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
+                case 3:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
+                case 4:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
             }
             String[][] recyclerViewWagesData =null;
             if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
@@ -635,16 +630,16 @@ public class MyUtility {
         Database db = Database.getInstance(context);
         try{
             switch(indicator){
-                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 6) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 11) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 7) +")  FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +")  FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
             }

@@ -8,6 +8,7 @@ import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -245,9 +246,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       model.setP3(allDataCursor.getInt(7));
                       model.setP4(allDataCursor.getInt(8));
                       model.setId(allDataCursor.getString(9));
-                      model.setTime(allDataCursor.getString(10));
-                      model.setIsdeposited((allDataCursor.getString(11)));
-                      model.setSystemDateAndTime(allDataCursor.getString(12));
+                      model.setIsdeposited((allDataCursor.getString(10)));
+                      model.setSystemDateAndTime(allDataCursor.getString(11));
                       dataList.add(model);
                   }
                   allDataCursor.close();
@@ -548,7 +548,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                         } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2 so set null
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
@@ -562,7 +562,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                         } else if (cursorIndicator.getString(0).equals("3")) {//person3
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
@@ -575,7 +575,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             }
                                         } else if (cursorIndicator.getString(0).equals("4")) {//person4
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 11) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {

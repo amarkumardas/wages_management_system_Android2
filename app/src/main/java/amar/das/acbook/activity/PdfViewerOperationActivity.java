@@ -896,7 +896,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
     }
     public boolean shareShortMessageToAnyApp(String message){
-      if(message==null) {
+      if(message==null) {//Myutility code don't work here
         return false;
        }
         try {

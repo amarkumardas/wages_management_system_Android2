@@ -240,9 +240,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
-            previousDataHold[0] = cursorDefault.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
-            toGive_Amount.setText(String.valueOf(cursorData.getInt(4)));//setting wages
-            inputP1.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p1
+            previousDataHold[0] = cursorDefault.getString(0) + ": " + cursorData.getString(4);//to write previous record in description
+            toGive_Amount.setText(String.valueOf(cursorData.getInt(3)));//setting wages
+            inputP1.setText(String.valueOf(cursorData.getInt(4)));//setting same data to p1
             cursorDefault.close();
 
             Cursor skillsCursor = db.getData("SELECT "+Database.COL_36_SKILL2 +" , "+Database.COL_37_SKILL3 +" , "+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
@@ -253,39 +253,39 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
-                    inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
                 } else if (indicator == 3) {//three person
                     //hardcodedP1,inputP1 by default visible so no need to mention
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
-                    inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(7);//to write previous record in description
-                    inputP3.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(6);//to write previous record in description
+                    inputP3.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p3
                     inputP3.setVisibility(View.VISIBLE);
                 } else if (indicator == 4) {////two person
                     //hardcodedP1,inputP1 by default visible so no need to mention
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(6);//to write previous record in description
-                    inputP2.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p2
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(7);//to write previous record in description
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(6);//to write previous record in description
                     inputP3.setVisibility(View.VISIBLE);
-                    inputP3.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
+                    inputP3.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p3
 
                     hardcodedP4.setVisibility(View.VISIBLE);
                     hardcodedP4.setText(skillsCursor.getString(2));
-                    previousDataHold[3] = skillsCursor.getString(2) + ": " + cursorData.getString(8);//to write previous record in description
-                    inputP4.setText(String.valueOf(cursorData.getInt(8)));//setting same data to p3
+                    previousDataHold[3] = skillsCursor.getString(2) + ": " + cursorData.getString(7);//to write previous record in description
+                    inputP4.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
                     inputP4.setVisibility(View.VISIBLE);
                 }
             } else {
@@ -296,11 +296,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
 //********************************Done CUSTOMIZATION*******************************************************************************************
 
-            previousDataHold[4] = "WAGES: " + cursorData.getString(4);//wages to write previous record in description
+            previousDataHold[4] = "WAGES: " + cursorData.getString(3);//wages to write previous record in description
             previousDataHold[5] = "DATE: " + cursorData.getString(1);//date to write previous record in description
            // previousDataHold[6] = "TIME- " + cursorData.getString(2);//time to write previous record in description
-            previousDataHold[6] = "TIME: " +MyUtility.getTime12hr(cursorData.getString(10));//time to write previous record in description
-            previousDataHold[7] = "REMARKS: " + cursorData.getString(3);//description or remarks
+            previousDataHold[6] = "TIME: " +MyUtility.getTime12hr(cursorData.getString(9));//time to write previous record in description
+            previousDataHold[7] = "REMARKS: " + cursorData.getString(2);//description or remarks
 
                 String [] dateArray =cursorData.getString(1).split("-");
                 cursorData.close();

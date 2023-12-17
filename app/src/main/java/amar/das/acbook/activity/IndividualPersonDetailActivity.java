@@ -8,7 +8,6 @@ import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -89,19 +88,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) +"  =");//default calculation skill
                defaultSkillCursor.close();
 
-             //Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
-             Cursor sumCursor=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
-             sumCursor.moveToFirst();
+             //Cursor sumData=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+             Integer[] sumData=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
 
-             if(sumCursor.getInt(0) < 0)//if total wages amount cross the  range of int the this message will be shown
+             if(sumData[0] != null && sumData[0] < 0)//if total wages amount cross the  range of int the this message will be shown
                  Toast.makeText(this, getResources().getString(R.string.value_out_of_range_please_check_total_wages), Toast.LENGTH_LONG).show();
 
-             binding.blueTotalWagesTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));
-             binding.blueTotalp1Tv.setText(sumCursor.getString(1));
-             binding.totalP1CountTv.setText(sumCursor.getString(1));
+             binding.blueTotalWagesTv.setText(MyUtility.convertToIndianNumberSystem(sumData[0]));
+             binding.blueTotalp1Tv.setText(sumData[1]+"");
+             binding.totalP1CountTv.setText(sumData[1]+"");
                     //sum deposit
-             if(sumCursor.getString(5) != null) {//if there is deposit then set visibility visible or else layout visibility GONE
-                 binding.totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumCursor.getLong(5)));
+             if(sumData[5] != null && sumData[5] != 0) {//if there is deposit then set visibility visible or else layout visibility GONE
+                 binding.totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumData[5]));
              }else
                  binding.totalDepositAmountLayout.setVisibility(View.GONE);
 
@@ -114,17 +112,17 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                                     //R1
                     binding.p1RateTv.setText(skillNRateCursor.getString(3));//default skill
                                                                        //    R1 * p1
-                    binding.totalP1AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3)*sumCursor.getInt(1)));//default skill
+                    binding.totalP1AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3)*sumData[1]));//default skill
                 }else {
                     binding.totalP1AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));//default skill
                 }
                                //total wages
-                if(sumCursor.getString(0) !=null){//if total wages is not null then set total wages
-                    binding.wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));//total wages set
+                if(sumData[0] !=null){//if total wages is not null then set total wages
+                    binding.wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumData[0]));//total wages set
                 }
                    //by default= deposit,totalP2CountTv,defaultHardcodedTv,defaultSkillTextTv,p1RateTv,totalP1AmountTv is set automatically
                      if(indicate==1) {
-                         indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),0,0,0);
+                         indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],0,0,0);
                      }
 
                 binding.p2Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
@@ -136,25 +134,25 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         //R1
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                         //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumData[2]));
                     }else {
                         binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                         //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
 
-                    binding.totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
+                    binding.totalP2CountTv.setText(sumData[2]+"");//total p2 count
                     binding.skill1TextTv.setText(skillNRateCursor.getString(0)+"  =");//setting skill 1
                     binding.hardcoded1Tv.setText(skillNRateCursor.getString(0));
-                    binding.blueTotalp2Tv.setText(sumCursor.getString(2));
+                    binding.blueTotalp2Tv.setText(sumData[2]+"");
                     binding.p2Layout.setVisibility(View.VISIBLE);
 
-                    indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),0,0);
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],0,0);
 
                 } else if (indicate == 3) {
                     if(skillNRateCursor.getInt(4) != 0) {
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                                                                                 //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumData[2]));
                     }else {
                         binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                      }
@@ -162,29 +160,29 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
                                                                                  //    R3 * p3
-                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
+                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumData[3]));
                     }else {
                         binding.totalP3AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                         //Toast.makeText(this, "Long press FINAL TOTAL button to  provide rate", Toast.LENGTH_LONG).show();
                     }
-                    binding.totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
-                    binding.totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
+                    binding.totalP2CountTv.setText(sumData[2]+"");//total p2 count
+                    binding.totalP3CountTv.setText(sumData[3]+"");//total p3 count
                     binding.skill1TextTv.setText(skillNRateCursor.getString(0)+"  =");//setting skill 1
                     binding.skill2TextTv.setText(skillNRateCursor.getString(1)+"  =");//setting skill 2
                     binding.hardcoded1Tv.setText(skillNRateCursor.getString(0));
-                    binding.blueTotalp2Tv.setText(sumCursor.getString(2));
+                    binding.blueTotalp2Tv.setText(sumData[2]+"");
                     binding.hardcoded2Tv.setText(skillNRateCursor.getString(1));
-                    binding.blueTotalp3Tv.setText(sumCursor.getString(3));
+                    binding.blueTotalp3Tv.setText(sumData[3]+"");
                     binding.p2Layout.setVisibility(View.VISIBLE);
                     binding.p3Layout.setVisibility(View.VISIBLE);
 
-                    indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),0);
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],0);
 
                 }else if(indicate == 4) {
                     if(skillNRateCursor.getInt(4) != 0) {
                         binding.p2RateTv.setText(skillNRateCursor.getString(4));
                         //    R2 * p2
-                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                        binding.totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumData[2]));
                     }else{
                         binding.totalP2AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                      }
@@ -192,7 +190,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(skillNRateCursor.getInt(5) != 0) {
                         binding.p3RateTv.setText(skillNRateCursor.getString(5));
                         //    R3 * p3
-                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
+                        binding.totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumData[3]));
                     }else{
                         binding.totalP3AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                     }
@@ -200,33 +198,32 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if(skillNRateCursor.getInt(6) != 0) {
                         binding.p4RateTv.setText(skillNRateCursor.getString(6));
                         //    R4 * p4
-                        binding.totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumCursor.getInt(4)));
+                        binding.totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumData[4]));
                     }else{
                         binding.totalP4AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));
                     }
 
-                    binding.totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
-                    binding.totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
-                    binding.totalP4CountTv.setText(sumCursor.getString(4));//total p4 count
+                    binding.totalP2CountTv.setText(sumData[2]+"");//total p2 count
+                    binding.totalP3CountTv.setText(sumData[3]+"");//total p3 count
+                    binding.totalP4CountTv.setText(sumData[4]+"");//total p4 count
                     binding.skill1TextTv.setText(skillNRateCursor.getString(0)+"  =");//setting skill 1
                     binding.skill2TextTv.setText(skillNRateCursor.getString(1)+"  =");//setting skill 2
                     binding.skill3TextTv.setText(skillNRateCursor.getString(2)+"  =");//setting skill 3
                     binding.hardcoded1Tv.setText(skillNRateCursor.getString(0));
-                    binding.blueTotalp2Tv.setText(sumCursor.getString(2));
+                    binding.blueTotalp2Tv.setText(sumData[2]+"");
                     binding.hardcoded2Tv.setText(skillNRateCursor.getString(1));
-                    binding.blueTotalp3Tv.setText(sumCursor.getString(3));
+                    binding.blueTotalp3Tv.setText(sumData[3]+"");
                     binding.hardcoded3Tv.setText(skillNRateCursor.getString(2));
-                    binding.blueTotalp4Tv.setText(sumCursor.getString(4));
+                    binding.blueTotalp4Tv.setText(sumData[4]+"");
                     binding.p2Layout.setVisibility(View.VISIBLE);
                     binding.p3Layout.setVisibility(View.VISIBLE);
                     binding.p4Layout.setVisibility(View.VISIBLE);
-                    indicator1234CalculateAndUpdate(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),skillNRateCursor.getInt(6) * sumCursor.getInt(4));
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],skillNRateCursor.getInt(6) * sumData[4]);
                 }
             }
             if (skillNRateCursor != null) {
                 skillNRateCursor.close();
             }
-            sumCursor.close();
 
             //***********Done setting skill***********************************************
             //*******************Recycler view********************************************
@@ -239,15 +236,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       model.setUserGivenDate(allDataCursor.getString(0));
                       model.setMicPath(allDataCursor.getString(1));
                       model.setRemarks(allDataCursor.getString(2));
-                      model.setWages(allDataCursor.getInt(3));
-                      model.setDeposit(allDataCursor.getInt(4));
-                      model.setP1(allDataCursor.getInt(5));
-                      model.setP2(allDataCursor.getInt(6));
-                      model.setP3(allDataCursor.getInt(7));
-                      model.setP4(allDataCursor.getInt(8));
-                      model.setId(allDataCursor.getString(9));
-                      model.setIsdeposited((allDataCursor.getString(10)));
-                      model.setSystemDateAndTime(allDataCursor.getString(11));
+                      model.setWagesOrDeposit(allDataCursor.getInt(3));
+                      model.setP1(allDataCursor.getShort(4));
+                      model.setP2(allDataCursor.getShort(5));
+                      model.setP3(allDataCursor.getShort(6));
+                      model.setP4(allDataCursor.getShort(7));
+                      model.setId(allDataCursor.getString(8));
+                      model.setIsdeposited((allDataCursor.getString(9).equals("1")));
+                      model.setSystemDateAndTime(allDataCursor.getString(10));
                       dataList.add(model);
                   }
                   allDataCursor.close();
@@ -548,7 +544,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                         } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2 so set null
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
@@ -562,7 +558,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                                         } else if (cursorIndicator.getString(0).equals("3")) {//person3
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
@@ -575,7 +571,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             }
                                         } else if (cursorIndicator.getString(0).equals("4")) {//person4
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 10) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.columnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
@@ -714,21 +710,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     defaultSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
                     defaultSkillCursor.close();
 
-                   // Cursor sumCursor=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
-                    Cursor sumCursor=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
-                    sumCursor.moveToFirst();
-                    //initializing this variable to take during saving
-                    p1=sumCursor.getInt(1);
-                    p2=sumCursor.getInt(2);
-                    p3=sumCursor.getInt(3);
-                    p4=sumCursor.getInt(4);
-                    totalWages=sumCursor.getInt(0);
+                   // Cursor sumData=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+                    Integer[] sumArr=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
 
-                    totalP1CountTv.setText(sumCursor.getString(1));//default skill
+                    //initializing this variable to take during saving
+                    p1=sumArr[1];
+                    p2=sumArr[2];
+                    p3=sumArr[3];
+                    p4=sumArr[4];
+                    totalWages=sumArr[0];
+
+                    totalP1CountTv.setText(sumArr[1]+"");//default skill
                     //sum deposit
-                    if(sumCursor.getString(5) != null) {//if there is deposit then set visibility visible or else layout visibility GONE
-                         totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumCursor.getLong(5)));
-                         totalDeposit=sumCursor.getInt(5);//updating totalDeposit to take during save
+                    if(sumArr[5] != null && sumData[5] != 0) {//if there is deposit then set visibility visible or else layout visibility GONE
+                         totalDepositAmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(sumArr[5]));
+                         totalDeposit=sumArr[5];//updating totalDeposit to take during save
                     }else {
                         totalDepositAmountLayout.setVisibility(View.GONE);
                     }
@@ -743,7 +739,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         r4=skillNRateCursor.getInt(6);
 
                         //if both wages and total work amount is less then 0 then both message have to show so if statement two times
-                        if(sumCursor.getInt(0) < 0 ) {//if total wages amount cross the  range of int the this message will be shown.its important
+                        if(sumArr[0] != null && sumArr[0] < 0 ) {//if total wages amount cross the  range of int the this message will be shown.its important
                             Toast.makeText(IndividualPersonDetailActivity.this,getResources().getString(R.string.value_out_of_range_please_check_total_wages), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                         }
@@ -758,18 +754,18 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             //R1
                              p1RateTv.setText(skillNRateCursor.getString(3));//default skill
                             //    R1 * p1
-                            totalP1AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3) * sumCursor.getInt(1)));//default skill
+                            totalP1AmountTv.setText("= " + MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3) * sumArr[1]));//default skill
                         } else {
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                             totalP1AmountTv.setText(getResources().getString(R.string.equal_provide_rate));//default skill
                         }
                         //total wages
-                        if (sumCursor.getString(0) != null) {//if total wages is not null then set total wages
-                             wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumCursor.getLong(0)));//total wages set
+                        if (sumArr[0] != null) {//if total wages is not null then set total wages
+                             wagesTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(sumArr[0]));//total wages set
                         }
                         //by default= deposit,totalP2CountTv,defaultHardcodedTv,defaultSkillTextTv,p1RateTv,totalP1AmountTv is set automatically
                         if (indicate == 1) {
-                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),0,0,0);
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumArr,skillNRateCursor.getInt(3) * sumArr[1],0,0,0);
                         }
 
                         p2Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
@@ -781,21 +777,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 //R1
                                 p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                                totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumArr[2]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
 
-                             totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
+                             totalP2CountTv.setText(sumArr[2]+"");//total p2 count
                              skill1TextTv.setText(skillNRateCursor.getString(0)+" =");//setting skill 1
                              p2Layout.setVisibility(View.VISIBLE);
-                             indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),0,0);
+                             indicator1234CalculateButDoNotUpdateToDBFinal(sumArr,skillNRateCursor.getInt(3) * sumArr[1],skillNRateCursor.getInt(4) * sumArr[2],0,0);
                         } else if (indicate == 3) {
                             if(skillNRateCursor.getInt(4) != 0) {
                                  p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumArr[2]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
@@ -803,24 +799,24 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             if(skillNRateCursor.getInt(5) != 0) {
                                  p3RateTv.setText(skillNRateCursor.getString(5));
                                 //    R3 * p3
-                                totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
+                                totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumArr[3]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP3AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
-                             totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
-                             totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
+                             totalP2CountTv.setText(sumArr[2]+"");//total p2 count
+                             totalP3CountTv.setText(sumArr[3]+"");//total p3 count
                              skill1TextTv.setText(skillNRateCursor.getString(0)+" =");//setting skill 1
                              skill2TextTv.setText(skillNRateCursor.getString(1)+" =");//setting skill 2
                              p2Layout.setVisibility(View.VISIBLE);
                              p3Layout.setVisibility(View.VISIBLE);
-                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),0);
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumArr,skillNRateCursor.getInt(3) * sumArr[1],skillNRateCursor.getInt(4) * sumArr[2],skillNRateCursor.getInt(5) * sumArr[3],0);
 
                         } else if (indicate == 4) {
                             if(skillNRateCursor.getInt(4) != 0) {
                                  p2RateTv.setText(skillNRateCursor.getString(4));
                                 //    R2 * p2
-                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumCursor.getInt(2)));
+                                 totalP2AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(4)*sumArr[2]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP2AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
@@ -829,7 +825,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             if(skillNRateCursor.getInt(5) != 0) {
                                 p3RateTv.setText(skillNRateCursor.getString(5));
                                 //    R3 * p3
-                                 totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumCursor.getInt(3)));
+                                 totalP3AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(5)*sumArr[3]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP3AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
@@ -838,21 +834,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             if(skillNRateCursor.getInt(6) != 0) {
                                  p4RateTv.setText(skillNRateCursor.getString(6));
                                 //    R4 * p4
-                                 totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumCursor.getInt(4)));
+                                 totalP4AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(6)*sumArr[4]));
                             }else {
                                 longPressToSaveAndCreatePdf.setVisibility(View.GONE);
                                 totalP4AmountTv.setText(getResources().getString(R.string.equal_provide_rate));
                             }
-                             totalP2CountTv.setText(sumCursor.getString(2));//total p2 count
-                             totalP3CountTv.setText(sumCursor.getString(3));//total p3 count
-                             totalP4CountTv.setText(sumCursor.getString(4));//total p4 count
+                             totalP2CountTv.setText(sumArr[2]+"");//total p2 count
+                             totalP3CountTv.setText(sumArr[3]+"");//total p3 count
+                             totalP4CountTv.setText(sumArr[4]+"");//total p4 count
                              skill1TextTv.setText(skillNRateCursor.getString(0)+" =");//setting skill 1
                              skill2TextTv.setText(skillNRateCursor.getString(1)+" =");//setting skill 2
                              skill3TextTv.setText(skillNRateCursor.getString(2)+" =");//setting skill 3
                              p2Layout.setVisibility(View.VISIBLE);
                              p3Layout.setVisibility(View.VISIBLE);
                              p4Layout.setVisibility(View.VISIBLE);
-                            indicator1234CalculateButDoNotUpdateToDBFinal(sumCursor,skillNRateCursor.getInt(3) * sumCursor.getInt(1),skillNRateCursor.getInt(4) * sumCursor.getInt(2),skillNRateCursor.getInt(5) * sumCursor.getInt(3),skillNRateCursor.getInt(6) * sumCursor.getInt(4));
+                            indicator1234CalculateButDoNotUpdateToDBFinal(sumArr,skillNRateCursor.getInt(3) * sumArr[1],skillNRateCursor.getInt(4) * sumArr[2],skillNRateCursor.getInt(5) * sumArr[3],skillNRateCursor.getInt(6) * sumArr[4]);
                         }
                     }
                     //if rate 1 is changed
@@ -1021,7 +1017,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     if (skillNRateCursor != null) {
                         skillNRateCursor.close();
                     }
-                    sumCursor.close();
+
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click button multiple times
 
@@ -1425,11 +1421,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         workTotalAmountTv.setText(" - 0");
                     }
                 }
-                private void indicator1234CalculateButDoNotUpdateToDBFinal(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
+                private void indicator1234CalculateButDoNotUpdateToDBFinal(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
                     int  totalDeposit,totalWages;
                     int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
-                    totalWages=sumCursor.getInt(0);
-                    totalDeposit=sumCursor.getInt(5);
+                    totalWages=sumCursor[0];
+                    totalDeposit=sumCursor[5];
 
                     if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                         Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
@@ -1989,12 +1985,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //             return false;
 //        }
 //    }
-    private void indicator1234CalculateAndUpdate(Cursor sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
+    private void indicator1234CalculateAndUpdate(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
         boolean bool;
         int  totalDeposit,totalWages;
         int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
-        totalWages=sumCursor.getInt(0);
-        totalDeposit=sumCursor.getInt(5);
+        totalWages=sumCursor[0];
+        totalDeposit=sumCursor[5];
 
         if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
             Toast.makeText(this,getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
@@ -2265,11 +2261,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             if(indicator==1){
                 if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                     //insert to database
-                      //success = db.insert_1_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, "0");
-                    //success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,0,0,0,0,"0");
-                       if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0, 0, "0")) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0,  "0")) {
                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
-                       }
+                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 
@@ -2288,11 +2282,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                     // success = db.insert_2_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, "0");
-                   // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,0,0,0,"0");
-                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0, 0, "0")) {
+                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0,  "0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
-                        }
+                       }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {
@@ -2312,11 +2304,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                      //success = db.insert_3_Person_WithWagesTable2(fromIntentPersonId, date,time, micPath, remarks, wages, p1, p2, p3, "0");
-                   // success=db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId,date,time,micPath,remarks,wages,p1,p2,p3,0,0,"0");
-                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0, 0, "0")) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0,"0")) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
-                        }
+                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {
@@ -2339,13 +2329,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                        //success = db.insert_4_Person_WithWagesTable2(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, "0");
-
-                   // success = db.insertWagesOrDepositOnlyToActiveTableTransaction(fromIntentPersonId, date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0");
-
-                        if (!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4, 0, "0")) {
-                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
-                        }
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4,"0")) {
+                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                     }
                     refreshCurrentActivity(fromIntentPersonId);
                     customDialog.dismiss();
 //                    if (success) {

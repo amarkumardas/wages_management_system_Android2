@@ -30,16 +30,16 @@
             android:layout_height="match_parent"
             android:layout_alignParentEnd="false"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="55dp"
+            android:layout_marginEnd="58dp"
             android:text=""
             android:layout_alignParentRight="true"/>
 
         <TextView
             android:id="@+id/history_share_pdf_or_textfile_Icon"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/baseline_file_open_24"
-            android:layout_marginEnd="14dp"
+            android:layout_marginEnd="18dp"
             android:layout_marginTop="11dp"
             android:layout_gravity="center_vertical"
             android:layout_alignParentEnd="true" />

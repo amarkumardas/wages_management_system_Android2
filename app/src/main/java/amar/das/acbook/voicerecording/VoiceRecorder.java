@@ -34,10 +34,14 @@ public class VoiceRecorder{
            }
    }
     public static void stopRecording() {
-      if(mediaRecorder!=null) {
-          mediaRecorder.stop();
-          mediaRecorder.release();
-          mediaRecorder = null;//to know audio is saved successfully which was started
+      try {
+          if (mediaRecorder != null) {
+              mediaRecorder.stop();
+              mediaRecorder.release();
+              mediaRecorder = null;//to know audio is saved successfully which was started
+          }
+      }catch (Exception x){
+          x.printStackTrace();
       }
     }
     public static boolean audioPlayer(String audioAbsolutePath){

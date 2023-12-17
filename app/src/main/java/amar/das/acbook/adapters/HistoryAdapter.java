@@ -31,7 +31,7 @@ import amar.das.acbook.utility.MyUtility;
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
     Context context;
     ArrayList<HistoryModel> dataList;//because more operation is retrieving
-    String updatedStatus="3";
+   // String updatedStatus="3";
     public HistoryAdapter(Context context, ArrayList<HistoryModel> arrayList){
         this.context =context;
         this.dataList =arrayList;
@@ -52,16 +52,17 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         if(data.isShared()){
             holder.shareIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
         }else{
-            holder.shareIcon.setBackgroundResource(R.drawable.baseline_share_24);
+            holder.shareIcon.setBackgroundResource(R.drawable.baseline_whatsapp_24);
         }
 
-        if(data.getSubtractedAdvanceOrBal() != null && data.getStatus().equals(updatedStatus)){//if user update previous day amount then show the information so make it visible and 3 indicate updated previously
+        if(data.getStatus().equals(HistoryFragment.previousRecordUpdated)){//if user update previous day amount then show the information so make it visible and 3 indicate updated previously
             holder.subtractedAmount.setVisibility(View.VISIBLE);//hide
-            if(Integer.parseInt(data.getSubtractedAdvanceOrBal()) < 0){//means amount payment
+            int subtractedAdvanceOrBal=(data.getSubtractedAdvanceOrBal() != null)? Integer.parseInt(data.getSubtractedAdvanceOrBal()) : 0;//0 will occur when user update previous record but changes remain same eg. if user update 1 to 1 then her no changes in vaLUE SO I have to set value to 0
+            if(subtractedAdvanceOrBal <= 0){//means amount payment minus
                 holder.subtractedAmount.setTextColor(context.getColor(R.color.black));
-                holder.subtractedAmount.setText(context.getResources().getString(R.string.updated_payment)+" "+MyUtility.convertToIndianNumberSystem(Math.abs(Integer.parseInt(data.getSubtractedAdvanceOrBal()))));
-            }else if(Integer.parseInt(data.getSubtractedAdvanceOrBal()) > 0){//amount received
-                holder.subtractedAmount.setText(context.getResources().getString(R.string.updated_amount_received)+" "+MyUtility.convertToIndianNumberSystem(Integer.parseInt(data.getSubtractedAdvanceOrBal())));
+                holder.subtractedAmount.setText(context.getResources().getString(R.string.updated_payment)+" "+MyUtility.convertToIndianNumberSystem(Math.abs(Integer.parseInt(String.valueOf(subtractedAdvanceOrBal)))));
+            }else if(subtractedAdvanceOrBal >= 0){//amount received
+                holder.subtractedAmount.setText(context.getResources().getString(R.string.updated_amount_received)+" "+MyUtility.convertToIndianNumberSystem(Integer.parseInt(String.valueOf(subtractedAdvanceOrBal))));
                 holder.subtractedAmount.setTextColor(context.getColor(R.color.green));
             }
         }else{
@@ -73,7 +74,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         }else{
             holder.wagesOrDeposit.setTextColor(Color.BLACK);
         }
-        holder.wagesOrDeposit.setText(MyUtility.convertToIndianNumberSystem(data.getWagesOrDeposit()));//we want to show 0 so no if condition
+
+        if(!data.getStatus().equals(HistoryFragment.automaticInserted)){
+            holder.wagesOrDeposit.setText(MyUtility.convertToIndianNumberSystem(data.getWagesOrDeposit()));//we want to show 0 so no if condition
+        }else {
+            holder.wagesOrDeposit.setTextColor(Color.BLACK);//calculate text should be in black to avoid confusion
+            holder.wagesOrDeposit.setText(R.string.calculated);//we want to show 0 so no if condition
+        }
 
         holder.p1Skill.setText((data.getP1Skill()!=null)?data.getP1Skill():null);
         holder.p1Work.setText((data.getP1Work()!=0)?data.getP1Work()+"":null);
@@ -122,30 +129,31 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
         holder.shareIcon.setOnClickListener(view -> {
            if(HistoryFragment.shareingToggle){//send to phone number if no then open any app
-               if(MyUtility.sendMessageToContact(data.getId(), generateRecordeMessageToSend(data),context)){//if false then open any app
+               //if(MyUtility.sendMessageToContact(data.getId(), generateRecordeMessageToSend(data),context)){//if false then open any app
+               if(MyUtility.sendMessageToContact(data.getId(), MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context)){
                    try(Database db=Database.getInstance(context)){//update table as shared.if data send to contact number or whatsapp
                         db.updateAsSharedToHistory(data.getId(),data.getSystemTimeDate() );
                    }catch (Exception x){
                        x.printStackTrace();
                    }
                }else{
-                   MyUtility.shareShortMessageToAnyApp(generateRecordeMessageToSend(data),context);//open any app
+                   MyUtility.shareShortMessageToAnyApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context);//open any app
                }
            }else{//send to whatsapp.if no contact then open any app
                String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(data.getId(),context);
                if(phoneNumber!=null){
-                   if (MyUtility.shareMessageDirectlyToWhatsApp(generateRecordeMessageToSend(data), phoneNumber, context)){//if false then open any app
+                   if (MyUtility.shareMessageDirectlyToWhatsApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()), phoneNumber, context)){//if false then open any app
                        try(Database db=Database.getInstance(context)){//update table as shared.if data send to contact number or whatsapp
                            db.updateAsSharedToHistory(data.getId(),data.getSystemTimeDate() );
                        }catch (Exception x){
                            x.printStackTrace();
                        }
                    }else{
-                       MyUtility.shareShortMessageToAnyApp(generateRecordeMessageToSend(data),context);//open any app
+                       MyUtility.shareShortMessageToAnyApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context);//open any app
                    }
                }else{
                    Toast.makeText(context,context.getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();//snack-bar not using because its get hide
-                   MyUtility.shareShortMessageToAnyApp(generateRecordeMessageToSend(data),context);//open any app
+                   MyUtility.shareShortMessageToAnyApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context);//open any app
                }
            }
         });
@@ -173,31 +181,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 //            return false;
 //        }
 //    }
-    private String generateRecordeMessageToSend(HistoryModel data){
-        StringBuilder sb=new StringBuilder();
-        sb.append("ID: ").append(data.getId()).append("\n")
-                .append("DATE: ").append(data.getUserDate()).append("\n");
-                if(data.getIsDeposit()==false){
-                  sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(data.getWagesOrDeposit())).append("\n");
-                }else{
-                    sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(data.getWagesOrDeposit())).append("\n");
-                }
-            if(data.getP1Skill()!=null){
-            sb.append(data.getP1Skill()).append(": ").append(data.getP1Work()).append("  ");
-            }
-                if(data.getP2Skill()!=null){
-                    sb.append(data.getP2Skill()).append(": ").append(data.getP2Work()).append("  ");
-                    if(data.getP3Skill()!=null){
-                        sb.append(data.getP3Skill()).append(": ").append(data.getP3Work()).append("  ");
-                        if(data.getP4Skill()!=null){
-                            sb.append(data.getP4Skill()).append(": ").append(data.getP4Work());
-                        }
-                    }
-                }
-                sb.append("\n");
-                sb.append("REMARKS: ").append(data.getRemarks());
-             return sb.toString();
-    }
     private String getMicPathFromDb(String id,String systemDateTime){//String id,String systemDateTime this two variables act as primary key
         try(Database db=Database.getInstance(context)){
          return db.getMicPath(id,systemDateTime);

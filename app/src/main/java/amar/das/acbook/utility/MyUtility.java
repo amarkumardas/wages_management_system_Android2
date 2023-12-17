@@ -529,7 +529,7 @@ public class MyUtility {
         Database db = Database.getInstance(context);
         try(
             //Cursor depositCursor=db.getData("SELECT "+Database.COL_2__DATE +" ,"+Database.COL_7__DEPOSIT +" ,"+Database.COL_5__DESCRIPTION +" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_1__ID +"='" + id + "'" + " AND "+Database.COL_12__ISDEPOSITED +"='1'"))
-            Cursor depositCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+ db.columnNameOutOf4Table(id, (byte) 6) +" ,"+ db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.columnNameOutOf4Table(id, (byte) 11) +"='1'")){
+            Cursor depositCursor=db.getData("SELECT "+db.getColumnNameOutOf4Table(id, (byte) 2) +" ,"+ db.getColumnNameOutOf4Table(id, (byte) 5) +" ,"+ db.getColumnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+ db.getColumnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+ db.getColumnNameOutOf4Table(id, (byte) 10) +"='1'")){
             String[][] recyclerViewDepositData =null;
             if(depositCursor!= null && depositCursor.getCount()!=0){
                 recyclerViewDepositData= new String[depositCursor.getCount()][depositCursor.getColumnCount()];
@@ -558,10 +558,10 @@ public class MyUtility {
         try{
             Cursor wagesCursor = null;
             switch(indicator){
-                case 1:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
-                case 2:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
-                case 3:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
-                case 4:wagesCursor=db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 2) +" ,"+db.columnNameOutOf4Table(id, (byte) 5) +" ,"+db.columnNameOutOf4Table(id, (byte) 7) +" ,"+db.columnNameOutOf4Table(id, (byte) 8) +" ,"+db.columnNameOutOf4Table(id, (byte) 9) +" ,"+db.columnNameOutOf4Table(id, (byte) 10) +" ,"+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.columnNameOutOf4Table(id, (byte) 11) +"='0'");break;
+                case 1:wagesCursor=db.getData("SELECT "+db.getColumnNameOutOf4Table(id, (byte) 2) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 5) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 6) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.getColumnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.getColumnNameOutOf4Table(id, (byte) 10) +"='0'");break;
+                case 2:wagesCursor=db.getData("SELECT "+db.getColumnNameOutOf4Table(id, (byte) 2) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 5) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 6) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 7) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.getColumnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.getColumnNameOutOf4Table(id, (byte) 10) +"='0'");break;
+                case 3:wagesCursor=db.getData("SELECT "+db.getColumnNameOutOf4Table(id, (byte) 2) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 5) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 6) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 7) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 8) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.getColumnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.getColumnNameOutOf4Table(id, (byte) 10) +"='0'");break;
+                case 4:wagesCursor=db.getData("SELECT "+db.getColumnNameOutOf4Table(id, (byte) 2) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 5) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 6) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 7) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 8) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 9) +" ,"+db.getColumnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.getColumnNameOutOf4Table(id, (byte) 1) +"='" + id + "'" + " AND "+db.getColumnNameOutOf4Table(id, (byte) 10) +"='0'");break;
             }
             String[][] recyclerViewWagesData =null;
             if(wagesCursor!=null&&wagesCursor.getCount()!= 0) {
@@ -626,31 +626,38 @@ public class MyUtility {
     public static int[] getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(Context context,String id, byte indicator, boolean[] errorDetection) {//important method return arr with value but if error return arr with 0 value and errorDetection set to true;.it index value is sensitive.according to indicator it store date in particular index
         if(!(indicator >= 1 && indicator <=4)) return new int[2*(indicator+1)];//if indicator is not in range 1 to 4 then return exception all value will be 0
 
-        Cursor sumDepositWagesCursor =null,rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
+        Cursor rateCursor=null;//return data in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
+        int sumDepositWages[]=null;
         Database db = Database.getInstance(context);
         try{
             switch(indicator){
-                case 1:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 1:{ sumDepositWages=getSumDepositWages(db,id,indicator,context);
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 2:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
-                    rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
+                case 2:{ sumDepositWages=getSumDepositWages(db,id,indicator,context);
+                       rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 3:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +") FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 3:{ sumDepositWages=getSumDepositWages(db,id,indicator,context);
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
-                case 4:{sumDepositWagesCursor=db.getData("SELECT SUM("+db.columnNameOutOf4Table(id, (byte) 5) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 7) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 8) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 9) +"),SUM("+db.columnNameOutOf4Table(id, (byte) 10) +"), SUM("+db.columnNameOutOf4Table(id, (byte) 6) +")  FROM "+db.tableNameOutOf4Table(id)+" WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '"+id +"'");
+                case 4:{ sumDepositWages=getSumDepositWages(db,id,indicator,context);
                     rateCursor=db.getData("SELECT  "+Database.COL_32_R1+", "+Database.COL_33_R2+", "+Database.COL_34_R3+", "+Database.COL_35_R4+" FROM "+ Database.TABLE_NAME_RATE_SKILL +" WHERE "+Database.COL_31_ID+"= '" + id +"'");
                 }break;
             }
             int[] arr=new int[2*(indicator+1)];//size will change according to indicator to get exact size.like indicator 1 need 4 space in array so formula is [2*(indicator+1)]
             int col=0;
-            if (sumDepositWagesCursor !=null && sumDepositWagesCursor.getCount()!=0) {
-                sumDepositWagesCursor.moveToFirst();
-                for (int i = 0; i < sumDepositWagesCursor.getColumnCount(); i++) {//retrieving data from cursor
-                    arr[col++]=sumDepositWagesCursor.getInt(i);
+//            if (sumDepositWagesCursor !=null && sumDepositWagesCursor.getCount()!=0) {
+//                sumDepositWagesCursor.moveToFirst();
+//                for (int i = 0; i < sumDepositWagesCursor.getColumnCount(); i++) {//retrieving data from cursor
+//                    arr[col++]=sumDepositWagesCursor.getInt(i);
+//                }
+//            }
+            if (sumDepositWages !=null) {
+                for (int i = 0; i < sumDepositWages.length; i++) {//retrieving data from cursor
+                    arr[col++]=sumDepositWages[i];
                 }
             }
+
             if (rateCursor !=null && rateCursor.getCount()!=0){
                 rateCursor.moveToFirst();
                 for (int i = 0; i < rateCursor.getColumnCount(); i++){//retrieving data from cursor
@@ -663,12 +670,99 @@ public class MyUtility {
             errorDetection[0]=true;//indicate error has occur
             return new int[2*(indicator+1)];//if exception occur 0 value will be return
         }finally {//since there is return statement in try and catch block so finally needed
-            if(sumDepositWagesCursor!=null&& rateCursor !=null) {
-                sumDepositWagesCursor.close();
+            if( rateCursor !=null) {
                 rateCursor.close();
             }
         }
     }
+    private static int[] getSumDepositWages(Database db, String id, byte indicator,Context context){//return array in format [wages,p1,p2,p3,p4,deposit,r1,r2,r3,r4]
+        if(!(indicator >= 1 && indicator <=4)) return new int[2*(indicator+1)];//if indicator is not in range 1 to 4 then return exception all value will be 0
+        Cursor sumDepositWagesCursor=null;
+        ArrayList<Integer> result=new ArrayList<>(10);
+       try {
+           switch (indicator) {
+
+               case 1: {
+                   sumDepositWagesCursor = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(id, (byte) 6) +") FROM " + db.tableNameOutOf4Table(id) + " WHERE " + db.getColumnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'");
+                   sumDepositWagesCursor.moveToFirst();
+                   result.add(getTotalWagesAmount(id,context));
+                   result.add(sumDepositWagesCursor.getInt(0));
+                   result.add(getTotalDepositAmount(id,context));
+               }
+               break;
+               case 2: {
+                   sumDepositWagesCursor = db.getData("SELECT  SUM(" + db.getColumnNameOutOf4Table(id, (byte) 6) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 7) +") FROM " + db.tableNameOutOf4Table(id) + " WHERE " + db.getColumnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'");
+                   sumDepositWagesCursor.moveToFirst();
+                   result.add(getTotalWagesAmount(id,context));
+                   result.add(sumDepositWagesCursor.getInt(0));
+                   result.add(sumDepositWagesCursor.getInt(1));
+                   result.add(getTotalDepositAmount(id,context));
+               }
+               break;
+               case 3: {
+                   sumDepositWagesCursor = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(id, (byte) 6) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 7) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 8) +") FROM " + db.tableNameOutOf4Table(id) + " WHERE " + db.getColumnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'");
+                   sumDepositWagesCursor.moveToFirst();
+                   result.add(getTotalWagesAmount(id,context));
+                   result.add(sumDepositWagesCursor.getInt(0));
+                   result.add(sumDepositWagesCursor.getInt(1));
+                   result.add(sumDepositWagesCursor.getInt(2));
+                   result.add(getTotalDepositAmount(id,context));
+               }
+               break;
+               case 4: {
+                   sumDepositWagesCursor = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(id, (byte) 6) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 7) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 8) + "),SUM(" + db.getColumnNameOutOf4Table(id, (byte) 9) +")  FROM " + db.tableNameOutOf4Table(id) + " WHERE " + db.getColumnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'");
+                   sumDepositWagesCursor.moveToFirst();
+                   result.add(getTotalWagesAmount(id,context));
+                   result.add(sumDepositWagesCursor.getInt(0));
+                   result.add(sumDepositWagesCursor.getInt(1));
+                   result.add(sumDepositWagesCursor.getInt(2));
+                   result.add(sumDepositWagesCursor.getInt(3));
+                   result.add(getTotalDepositAmount(id,context));
+               }
+               break;
+           }
+//           int[] intArray = new int[result.size()];
+//           for (int i = 0; i < result.size(); i++) {
+//               intArray[i] = result.get(i);
+//           }
+          // return  result.stream().mapToInt(i -> i).toArray();
+           return result.stream().mapToInt(Integer::intValue).toArray();//Convert the ArrayList to an int array
+
+       }catch (Exception x){
+           x.printStackTrace();
+           return null;//returning null is important coz it indicate error
+       }finally {
+           if (sumDepositWagesCursor != null) {
+               sumDepositWagesCursor.close();
+           }
+       }
+    }
+
+    public static Integer getTotalDepositAmount(String id, Context context){//return null if error
+        Database db = Database.getInstance(context);
+        try {
+           Cursor cursor=db.getData("SELECT SUM("+ db.getColumnNameOutOf4Table(id, (byte) 5)+") FROM " + db.tableNameOutOf4Table(id) + " WHERE " +db.getColumnNameOutOf4Table(id, (byte) 10) + "='1' AND "+ db.getColumnNameOutOf4Table(id, (byte) 1) + "= '"+id+"'");
+                  if(cursor.getCount()==0) return null;
+                  cursor.moveToFirst();
+                  return cursor.getInt(0);
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
+    public static Integer getTotalWagesAmount(String id, Context context){//return null if error
+        Database db = Database.getInstance(context);
+        try {
+            Cursor cursor=db.getData("SELECT SUM("+ db.getColumnNameOutOf4Table(id, (byte) 5)+") FROM " + db.tableNameOutOf4Table(id) + " WHERE " +db.getColumnNameOutOf4Table(id, (byte) 10) + "='0' AND "+ db.getColumnNameOutOf4Table(id, (byte) 1) + "= '"+id+"'");
+            if(cursor.getCount()==0) return null;
+            cursor.moveToFirst();
+            return cursor.getInt(0);
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
+
     public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.indicator value start from 1
         Database db=Database.getInstance(context);
         try(//Database db=new Database(context);//to this database automatically
@@ -1026,17 +1120,19 @@ public class MyUtility {
                  if(data !=null){//best code
                      try(Database db=Database.getInstance(context)){//share to whats app if not contact open any app to share
                          String phoneNumber = MyUtility.getActivePhoneNumbersFromDb(data.getId(), context);
+                        String[] skillArr=db.getAllSkill(data.getId());
                          if (phoneNumber != null) {
-                             if (MyUtility.shareMessageDirectlyToWhatsApp(generateRecordMessageToSend(data,db.getAllSkill(data.getId())), phoneNumber, context)) {//if false then open any app
+
+                             if (MyUtility.shareMessageDirectlyToWhatsApp(generateRecordMessageToSend(data.getId(),data.getUserGivenDate(),data.getWagesOrDeposit(),data.getIsdeposited(),skillArr[0],data.getP1(),skillArr[1],data.getP2(),skillArr[2],data.getP3(),skillArr[3],data.getP4(),data.getRemarks()), phoneNumber, context)) {//if false then open any app
 
                                  db.updateAsSharedToHistory(data.getId(), data.getSystemDateAndTime());//update table as shared.if data send to contact number or whatsapp
 
                              }else{
-                                  shareShortMessageToAnyApp(generateRecordMessageToSend(data, db.getAllSkill(data.getId())), context);//open any app
+                                  shareShortMessageToAnyApp(generateRecordMessageToSend(data.getId(),data.getUserGivenDate(),data.getWagesOrDeposit(),data.getIsdeposited(),skillArr[0],data.getP1(),skillArr[1],data.getP2(),skillArr[2],data.getP3(),skillArr[3],data.getP4(),data.getRemarks()), context);//open any app
                              }
                          }else{
                              Toast.makeText(context, context.getResources().getString(R.string.no_phone_number), Toast.LENGTH_LONG).show();//snack-bar not using because its get hide
-                              shareShortMessageToAnyApp(generateRecordMessageToSend(data, db.getAllSkill(data.getId())), context);//open any app
+                              shareShortMessageToAnyApp(generateRecordMessageToSend(data.getId(),data.getUserGivenDate(),data.getWagesOrDeposit(),data.getIsdeposited(),skillArr[0],data.getP1(),skillArr[1],data.getP2(),skillArr[2],data.getP3(),skillArr[3],data.getP4(),data.getRemarks()), context);//open any app
                          }
                      }catch (Exception x) {
                          x.printStackTrace();
@@ -1045,30 +1141,55 @@ public class MyUtility {
             }break;
         }
     }
-    private static String generateRecordMessageToSend(WagesDetailsModel data,String[] skills){
-        if(data == null || skills==null) return null;
+//    public static String generateRecordMessageToSend(WagesDetailsModel data,String[] skills){
+//        if(data == null || skills==null) return null;
+//        StringBuilder sb=new StringBuilder();
+//        sb.append("ID: ").append(data.getId()).append("\n")
+//                .append("DATE: ").append(data.getUserGivenDate()).append("\n");
+//        if(data.getIsdeposited().equals("0")){
+//            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
+//        }else{
+//            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
+//        }
+//        if(skills[0]!=null){
+//            sb.append(skills[0]).append(": ").append(data.getP1()).append("  ");
+//        }
+//        if(skills[1]!=null){
+//            sb.append(skills[1]).append(": ").append(data.getP2()).append("  ");
+//            if(skills[2]!=null){
+//                sb.append(skills[2]).append(": ").append(data.getP3()).append("  ");
+//                if(skills[3]!=null){
+//                    sb.append(skills[3]).append(": ").append(data.getP4());
+//                }
+//            }
+//        }
+//        sb.append("\n");
+//        sb.append("REMARKS: ").append(data.getRemarks());
+//        return sb.toString();
+//    }
+    public static String generateRecordMessageToSend(String id, String date, int wagesOrDeposit, boolean isDeposited, String skill1, short p1, String skill2, short p2, String skill3, short p3, String skill4, short p4, String remarks){
         StringBuilder sb=new StringBuilder();
-        sb.append("ID: ").append(data.getId()).append("\n")
-                .append("DATE: ").append(data.getUserGivenDate()).append("\n");
-        if(data.getIsdeposited().equals("0")){
-            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
+        sb.append("ID: ").append(id).append("\n")
+                .append("DATE: ").append(date).append("\n");
+        if(isDeposited){
+            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
         }else{
-            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(data.getDeposit())).append("\n");
+            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
         }
-        if(skills[0]!=null){
-            sb.append(skills[0]).append(": ").append(data.getP1()).append("  ");
+        if(skill1!=null){
+            sb.append(skill1).append(": ").append(p1).append("  ");
         }
-        if(skills[1]!=null){
-            sb.append(skills[1]).append(": ").append(data.getP2()).append("  ");
-            if(skills[2]!=null){
-                sb.append(skills[2]).append(": ").append(data.getP3()).append("  ");
-                if(skills[3]!=null){
-                    sb.append(skills[3]).append(": ").append(data.getP4());
+        if(skill2!=null){
+            sb.append(skill2).append(": ").append(p2).append("  ");
+            if(skill3!=null){
+                sb.append(skill3).append(": ").append(p3).append("  ");
+                if(skill4!=null){
+                    sb.append(skill4).append(": ").append(p4);
                 }
             }
         }
         sb.append("\n");
-        sb.append("REMARKS: ").append(data.getRemarks());
+        sb.append("REMARKS: ").append(remarks);
         return sb.toString();
     }
     public static boolean shareShortMessageToAnyApp(String message,Context context){

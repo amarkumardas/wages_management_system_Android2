@@ -417,14 +417,14 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    private boolean insertWagesOrDepositToActiveTableDirectly(SQLiteDatabase db,String systemDateTime,String skill, String id, String date, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
+    private boolean insertWagesOrDepositToActiveTableDirectly(SQLiteDatabase db,String systemDateTime,String skill, String id, String userGivenDate, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
                 ContentValues cv = new ContentValues();//to enter data at once it is like hash map
                 if(skill.equals(context.getResources().getString(R.string.laber)) || skill.equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
                     if (id != null) {
                         cv.put(COL_1_ID_ALG, id);
                     }
-                    if (date != null) {
-                        cv.put(COL_2_DATE_ALG, date);
+                    if (userGivenDate != null) {
+                        cv.put(COL_2_DATE_ALG, userGivenDate);
                     }
 
                     if (micPath != null) {
@@ -436,9 +436,7 @@ public class Database extends SQLiteOpenHelper {
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_ALG, wages);
                     }
-//                    if (deposit != 0) {
-//                        cv.put(COL_7_DEPOSIT_ALG, deposit);
-//                    }
+
                     if (p1 != 0) {
                         cv.put(COL_8_P1_ALG, p1);
                     }
@@ -465,8 +463,8 @@ public class Database extends SQLiteOpenHelper {
                     if (id != null) {
                         cv.put(COL_1_ID_AM, id);
                     }
-                    if (date != null) {
-                        cv.put(COL_2_DATE_AM, date);
+                    if (userGivenDate != null) {
+                        cv.put(COL_2_DATE_AM, userGivenDate);
                     }
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_AM, micPath);
@@ -503,7 +501,7 @@ public class Database extends SQLiteOpenHelper {
                 }
           return false;//any error return false
     }
-    private boolean insertWagesOrDepositToInActiveTableDirectly(SQLiteDatabase db,String systemDateTime, String skill, String id, String date, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
+    private boolean insertWagesOrDepositToInActiveTableDirectly(SQLiteDatabase db,String systemDateTime, String skill, String id, String date, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
         ContentValues cv = new ContentValues();//to enter data at once it is like hash map
         if(skill.equals(context.getResources().getString(R.string.laber)) || skill.equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
             if (id != null) {
@@ -512,9 +510,7 @@ public class Database extends SQLiteOpenHelper {
             if (date != null) {
                 cv.put(COL_2_DATE_ALG, date);
             }
-//            if (time != null) {
-//                cv.put(COL_3_TIME_ALG, time);
-//            }
+
             if (micPath != null) {
                 cv.put(COL_4_MICPATH_ALG, micPath);
             }
@@ -524,9 +520,9 @@ public class Database extends SQLiteOpenHelper {
             if (wages != 0) {
                 cv.put(COL_6_WAGES_ALG, wages);
             }
-            if (deposit != 0) {
-                cv.put(COL_7_DEPOSIT_ALG, deposit);
-            }
+//            if (deposit != 0) {
+//                cv.put(COL_7_DEPOSIT_ALG, deposit);
+//            }
             if (p1 != 0) {
                 cv.put(COL_8_P1_ALG, p1);
             }
@@ -556,9 +552,6 @@ public class Database extends SQLiteOpenHelper {
             if (date != null) {
                 cv.put(COL_2_DATE_AM, date);
             }
-//            if (time != null) {
-//                cv.put(COL_3_TIME_AM, time);
-//            }
             if (micPath != null) {
                 cv.put(COL_4_MICPATH_AM, micPath);
             }
@@ -568,9 +561,9 @@ public class Database extends SQLiteOpenHelper {
             if (wages != 0) {
                 cv.put(COL_6_WAGES_AM, wages);
             }
-            if (deposit != 0) {
-                cv.put(COL_7_DEPOSIT_AM, deposit);
-            }
+//            if (deposit != 0) {
+//                cv.put(COL_7_DEPOSIT_AM, deposit);
+//            }
             if (p1 != 0) {
                 cv.put(COL_8_P1_AM, p1);
             }
@@ -595,7 +588,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return false;
     }
-    public boolean insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String id, String systemCurrentDate24hrTime, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
+    public boolean insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String id, String systemCurrentDate24hrTime, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
       /**Before inserting first 1. make id active because only(INSERTION,UPDATION,AND PRESSING ACTIVE RADIO BUTTON) would make id active so since it is insertion method so make it active
        * 2. check for duplicate data then
        * 3.insert into active table*/
@@ -626,9 +619,7 @@ public class Database extends SQLiteOpenHelper {
                     if (date != null) {
                         cv.put(COL_2_DATE_ALG, date);
                     }
-//                    if (time != null) {
-//                        cv.put(COL_3_TIME_ALG, time);
-//                    }
+
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_ALG, micPath);
                     }
@@ -637,9 +628,6 @@ public class Database extends SQLiteOpenHelper {
                     }
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_ALG, wages);
-                    }
-                    if (deposit != 0) {
-                        cv.put(COL_7_DEPOSIT_ALG, deposit);
                     }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_ALG, p1);
@@ -678,9 +666,6 @@ public class Database extends SQLiteOpenHelper {
                    if (date != null) {
                        cv.put(COL_2_DATE_AM, date);
                    }
-//                   if (time != null) {
-//                       cv.put(COL_3_TIME_AM, time);
-//                   }
                    if (micPath != null) {
                        cv.put(COL_4_MICPATH_AM, micPath);
                    }
@@ -689,9 +674,6 @@ public class Database extends SQLiteOpenHelper {
                    }
                    if (wages != 0) {
                        cv.put(COL_6_WAGES_AM, wages);
-                   }
-                   if (deposit != 0) {
-                       cv.put(COL_7_DEPOSIT_AM, deposit);
                    }
                    if (p1 != 0) {
                        cv.put(COL_8_P1_AM, p1);
@@ -767,7 +749,7 @@ public class Database extends SQLiteOpenHelper {
             }
         }
     }
-    public boolean updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String date, String newSystemTimeDate, String time, String remarks, String micPath, int wages, int deposit, int p1 , int p2, int p3, int p4, String id , String previousSystemTimeDate){
+    public boolean updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String date, String newSystemTimeDate, String time, String remarks, String micPath, int wages, int p1 , int p2, int p3, int p4, String id , String previousSystemTimeDate){
         /**Before updating first make id active because only(INSERTION,UPDATION,AND PRESSING ACTIVE RADIO BUTTON) would make id active so since it is updation method so make it active
          *  second check for duplicate data then update into active table*/
 
@@ -800,9 +782,7 @@ public class Database extends SQLiteOpenHelper {
                     if (date != null) {
                         cv.put(COL_2_DATE_ALG, date);
                     }
-//                    if (time != null) {
-//                        cv.put(COL_3_TIME_ALG, time);
-//                    }
+
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_ALG, micPath);
                     }
@@ -813,11 +793,6 @@ public class Database extends SQLiteOpenHelper {
                         cv.put(COL_6_WAGES_ALG, wages);
                     }else{
                         cv.put(COL_6_WAGES_ALG, (String) null);
-                    }
-                    if (deposit != 0) {
-                        cv.put(COL_7_DEPOSIT_ALG, deposit);
-                    }else{
-                        cv.put(COL_7_DEPOSIT_ALG, (String) null);
                     }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_ALG, p1);
@@ -851,9 +826,6 @@ public class Database extends SQLiteOpenHelper {
                     if (date != null) {
                         cv.put(COL_2_DATE_AM, date);
                     }
-//                    if (time != null) {
-//                        cv.put(COL_3_TIME_AM, time);
-//                    }
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_AM, micPath);
                     }
@@ -864,11 +836,6 @@ public class Database extends SQLiteOpenHelper {
                         cv.put(COL_6_WAGES_AM, wages);
                     }else{
                         cv.put(COL_6_WAGES_AM, (String) null);
-                    }
-                    if (deposit != 0) {
-                        cv.put(COL_7_DEPOSIT_AM, deposit);
-                    }else{
-                        cv.put(COL_7_DEPOSIT_AM, (String) null);
                     }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_AM, p1);
@@ -945,7 +912,7 @@ public class Database extends SQLiteOpenHelper {
                     Boolean  bool= isThisRecordOfPreviousDateInHistoryTable(id,prevSystemDateTime);
                     if(bool == null) return false;//means error will
                     if(bool){//if record is of previous date then update its only column COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H to get exact amount after subtraction.
-                        cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H,calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2), updatedDataFromActiveTableCursor.getString(3), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(8), getPrevSubtractedAdvanceOrBalanceFromHistoryTable(id,prevSystemDateTime)));
+                        cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H,calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2),(updatedDataFromActiveTableCursor.getString(7).equals("1")?updatedDataFromActiveTableCursor.getString(2):null), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(7),getPrevSubtractedAdvanceOrBalanceFromHistoryTable(id,prevSystemDateTime)));
                         cv.put(COL_19_STATUS_H,HistoryFragment.previousRecordUpdated);//UPDATing BECAUSE DEFAult value is set.since cv is like hashmap then it will replace the value so necessary
                     }
 
@@ -958,7 +925,7 @@ public class Database extends SQLiteOpenHelper {
                     return (dB.update(TABLE_HISTORY,cv,Database.COL_1_ID_H +"= '"+id+"'"+" AND "+Database.COL_13_SYSTEM_DATETIME_H +"= '"+prevSystemDateTime+"'",null) !=1 )? false :true;//at a time only 1 row should be updated so if 1 row is updated then update method will return 1. and if update method return value is more than 1 then there is duplicate row so checking with value 1
                 }else{//if user update previous record then first insert in history table by updating subtracted amount in column COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H
 
-                    cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H, calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2), updatedDataFromActiveTableCursor.getString(3), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(8),null));
+                    cv.put(COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H, calculateNewAdvanceOrBalanceForHistory(updatedDataFromActiveTableCursor.getString(2),(updatedDataFromActiveTableCursor.getString(7).equals("1")?updatedDataFromActiveTableCursor.getString(2):null), previousWagesAndDepositArray, updatedDataFromActiveTableCursor.getString(7),null));
                     cv.put(COL_19_STATUS_H,HistoryFragment.previousRecordUpdated);///UPDATing BECAUSE DEFAult value is set.since cv is like hashmap then it will replace the value
                     return(dB.insert(TABLE_HISTORY, null, cv) == -1)? false :true;//if updation happen on different date then insert in history table because different date data not present in history table on same day so insert it.if data not inserted return -1
 
@@ -1009,7 +976,7 @@ public class Database extends SQLiteOpenHelper {
                    }
         return null;
     }
-    public boolean insertWagesOrDepositOnlyToInActiveTableTransaction(String id, String date,String micPath, String remarks, int wages, int p1, int p2, int p3, int p4, int deposit, String isDeposited) {
+    public boolean insertWagesOrDepositOnlyToInActiveTableTransaction(String id, String date,String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
        //this code is not used since we are not inserting recording to inactive table
         boolean success=false;
         SQLiteDatabase dB=null;
@@ -1029,9 +996,6 @@ public class Database extends SQLiteOpenHelper {
                     if (date != null) {
                         cv.put(COL_2_DATE_IALG, date);
                     }
-//                    if (time != null) {
-//                        cv.put(COL_3_TIME_IALG, time);
-//                    }
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_IALG, micPath);
                     }
@@ -1041,9 +1005,9 @@ public class Database extends SQLiteOpenHelper {
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_IALG, wages);
                     }
-                    if (deposit != 0) {
-                        cv.put(COL_7_DEPOSIT_IALG, deposit);
-                    }
+//                    if (deposit != 0) {
+//                        cv.put(COL_7_DEPOSIT_IALG, deposit);
+//                    }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_IALG, p1);
                     }
@@ -1070,9 +1034,6 @@ public class Database extends SQLiteOpenHelper {
                     if (date != null) {
                         cv.put(COL_2_DATE_IAM, date);
                     }
-//                    if (time != null) {
-//                        cv.put(COL_3_TIME_IAM, time);
-//                    }
                     if (micPath != null) {
                         cv.put(COL_4_MICPATH_IAM, micPath);
                     }
@@ -1082,9 +1043,9 @@ public class Database extends SQLiteOpenHelper {
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_IAM, wages);
                     }
-                    if (deposit != 0) {
-                        cv.put(COL_7_DEPOSIT_IAM, deposit);
-                    }
+//                    if (deposit != 0) {
+//                        cv.put(COL_7_DEPOSIT_IAM, deposit);
+//                    }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_IAM, p1);
                     }
@@ -1130,22 +1091,22 @@ public class Database extends SQLiteOpenHelper {
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
 
-                    return  getData("SELECT "+Database.COL_2_DATE_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_7_DEPOSIT_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_1_ID_ALG +","+Database.COL_12_ISDEPOSITED_ALG +","+Database.COL_13_SYSTEM_DATETIME_ALG+" FROM "+Database.TABLE1_ACTIVE_LG +" WHERE "+Database.COL_1_ID_ALG +"='"+id+"'");
+                    return  getData("SELECT "+Database.COL_2_DATE_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_1_ID_ALG +","+Database.COL_12_ISDEPOSITED_ALG +","+Database.COL_13_SYSTEM_DATETIME_ALG+" FROM "+Database.TABLE1_ACTIVE_LG +" WHERE "+Database.COL_1_ID_ALG +"='"+id+"'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                    return  getData("SELECT "+Database.COL_2_DATE_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_7_DEPOSIT_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_1_ID_AM +","+Database.COL_12_ISDEPOSITED_AM +","+Database.COL_13_SYSTEM_DATETIME_AM+" FROM "+Database.TABLE0_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_AM +"='"+id+"'");
+                    return  getData("SELECT "+Database.COL_2_DATE_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_1_ID_AM +","+Database.COL_12_ISDEPOSITED_AM +","+Database.COL_13_SYSTEM_DATETIME_AM+" FROM "+Database.TABLE0_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_AM +"='"+id+"'");
 
                 }
             }else if(activeInactiveSkill[0].equals("0")){//if person is inactive
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
 
-                    return  getData("SELECT "+Database.COL_2_DATE_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_7_DEPOSIT_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_1_ID_IALG +","+Database.COL_12_ISDEPOSITED_IALG+","+Database.COL_13_SYSTEM_DATETIME_IALG+" FROM "+Database.TABLE3_IN_ACTIVE_LG +" WHERE "+Database.COL_1_ID_IALG +"='"+id+"'");
+                    return  getData("SELECT "+Database.COL_2_DATE_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_1_ID_IALG +","+Database.COL_12_ISDEPOSITED_IALG+","+Database.COL_13_SYSTEM_DATETIME_IALG+" FROM "+Database.TABLE3_IN_ACTIVE_LG +" WHERE "+Database.COL_1_ID_IALG +"='"+id+"'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                    return  getData("SELECT "+Database.COL_2_DATE_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_7_DEPOSIT_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_1_ID_IAM +","+Database.COL_12_ISDEPOSITED_IAM +","+Database.COL_13_SYSTEM_DATETIME_IAM+" FROM "+Database.TABLE2_IN_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_IAM +"='"+id+"'");
+                    return  getData("SELECT "+Database.COL_2_DATE_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_1_ID_IAM +","+Database.COL_12_ISDEPOSITED_IAM +","+Database.COL_13_SYSTEM_DATETIME_IAM+" FROM "+Database.TABLE2_IN_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_IAM +"='"+id+"'");
 
                 }
             }
@@ -1155,30 +1116,30 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
-    public Cursor getSumOfWagesP1P2P3P4Deposit(String id){
+    public Integer[] getSumOfWagesP1P2P3P4Deposit(String id){
         try{
             String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
 
             if(activeInactiveSkill[0].equals("1")){//if person is active
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
-
-                    return  getData("SELECT SUM("+Database.COL_6_WAGES_ALG +"),SUM("+Database.COL_8_P1_ALG +"),SUM("+Database.COL_9_P2_ALG +"),SUM("+Database.COL_10_P3_ALG +"),SUM("+Database.COL_11_P4_ALG +"),SUM("+Database.COL_7_DEPOSIT_ALG +") FROM "+Database.TABLE1_ACTIVE_LG+" WHERE "+Database.COL_1_ID_ALG +"= '"+id +"'");
+                    return getTotalOfWagesP1P2P3P4Deposit(id,getColumnName((byte) 1, (byte) 6),getColumnName((byte) 1, (byte) 7),getColumnName((byte) 1, (byte) 8),getColumnName((byte) 1, (byte) 9),getTableName((byte) 1),getColumnName((byte) 1, (byte) 1));
+                   //return  getData("SELECT SUM("+Database.COL_6_WAGES_ALG +"),SUM("+Database.COL_8_P1_ALG +"),SUM("+Database.COL_9_P2_ALG +"),SUM("+Database.COL_10_P3_ALG +"),SUM("+Database.COL_11_P4_ALG +"),SUM("+Database.COL_7_DEPOSIT_ALG +") FROM "+Database.TABLE1_ACTIVE_LG+" WHERE "+Database.COL_1_ID_ALG +"= '"+id +"'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
-
-                    return getData("SELECT SUM("+Database.COL_6_WAGES_AM +"),SUM("+Database.COL_8_P1_AM +"),SUM("+Database.COL_9_P2_AM +"),SUM("+Database.COL_10_P3_AM +"),SUM("+Database.COL_11_P4_AM +"),SUM("+Database.COL_7_DEPOSIT_AM +") FROM "+Database.TABLE0_ACTIVE_MESTRE+" WHERE "+Database.COL_1_ID_AM +"= '"+id +"'");
+                    return getTotalOfWagesP1P2P3P4Deposit(id,getColumnName((byte) 0, (byte) 6),getColumnName((byte) 0, (byte) 7),getColumnName((byte) 0, (byte) 8),getColumnName((byte) 0, (byte) 9),getTableName((byte) 0),getColumnName((byte) 0, (byte) 1));
+                   //return getData("SELECT SUM("+Database.COL_6_WAGES_AM +"),SUM("+Database.COL_8_P1_AM +"),SUM("+Database.COL_9_P2_AM +"),SUM("+Database.COL_10_P3_AM +"),SUM("+Database.COL_11_P4_AM +"),SUM("+Database.COL_7_DEPOSIT_AM +") FROM "+Database.TABLE0_ACTIVE_MESTRE+" WHERE "+Database.COL_1_ID_AM +"= '"+id +"'");
 
                 }
             }else if(activeInactiveSkill[0].equals("0")){//if person is inactive
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
-
-                    return getData("SELECT SUM("+Database.COL_6_WAGES_IALG +"),SUM("+Database.COL_8_P1_IALG +"),SUM("+Database.COL_9_P2_IALG +"),SUM("+Database.COL_10_P3_IALG +"),SUM("+Database.COL_11_P4_IALG +"),SUM("+Database.COL_7_DEPOSIT_IALG +") FROM "+Database.TABLE3_IN_ACTIVE_LG+" WHERE "+Database.COL_1_ID_IALG +"= '"+id +"'");
+                    return getTotalOfWagesP1P2P3P4Deposit(id,getColumnName((byte) 3, (byte) 6),getColumnName((byte) 3, (byte) 7),getColumnName((byte) 3, (byte) 8),getColumnName((byte) 3, (byte) 9),getTableName((byte) 3),getColumnName((byte) 3, (byte) 1));
+                    //return getData("SELECT SUM("+Database.COL_6_WAGES_IALG +"),SUM("+Database.COL_8_P1_IALG +"),SUM("+Database.COL_9_P2_IALG +"),SUM("+Database.COL_10_P3_IALG +"),SUM("+Database.COL_11_P4_IALG +"),SUM("+Database.COL_7_DEPOSIT_IALG +") FROM "+Database.TABLE3_IN_ACTIVE_LG+" WHERE "+Database.COL_1_ID_IALG +"= '"+id +"'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
-
-                    return  getData("SELECT SUM("+Database.COL_6_WAGES_IAM +"),SUM("+Database.COL_8_P1_IAM +"),SUM("+Database.COL_9_P2_IAM +"),SUM("+Database.COL_10_P3_IAM +"),SUM("+Database.COL_11_P4_IAM +"),SUM("+Database.COL_7_DEPOSIT_IAM +") FROM "+Database.TABLE2_IN_ACTIVE_MESTRE+" WHERE "+Database.COL_1_ID_IAM +"= '"+id +"'");
+                    return getTotalOfWagesP1P2P3P4Deposit(id,getColumnName((byte) 2, (byte) 6),getColumnName((byte) 2, (byte) 7),getColumnName((byte) 2, (byte) 8),getColumnName((byte) 2, (byte) 9),getTableName((byte) 2),getColumnName((byte) 2, (byte) 1));
+                   // return  getData("SELECT SUM("+Database.COL_6_WAGES_IAM +"),SUM("+Database.COL_8_P1_IAM +"),SUM("+Database.COL_9_P2_IAM +"),SUM("+Database.COL_10_P3_IAM +"),SUM("+Database.COL_11_P4_IAM +"),SUM("+Database.COL_7_DEPOSIT_IAM +") FROM "+Database.TABLE2_IN_ACTIVE_MESTRE+" WHERE "+Database.COL_1_ID_IAM +"= '"+id +"'");
 
                 }
             }
@@ -1188,6 +1149,25 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
+
+    private Integer[] getTotalOfWagesP1P2P3P4Deposit(String id,String columnNameOfP1, String columnNameOfP2, String columnNameOfP3, String columnNameOfP4,String tableName,String idColumnName) {//if error return null
+        Integer[] arr=new Integer[6];
+        arr[0]=MyUtility.getTotalWagesAmount(id,context);
+
+        try(Cursor cursor=getData("SELECT SUM("+columnNameOfP1+"),SUM("+columnNameOfP2+"),SUM("+columnNameOfP3+"),SUM("+columnNameOfP4+") FROM "+tableName+" WHERE "+idColumnName+"= '"+id +"'")){
+            cursor.moveToFirst();
+            arr[1]=cursor.getInt(0);
+            arr[2]=cursor.getInt(1);
+            arr[3]=cursor.getInt(2);
+            arr[4]=cursor.getInt(3);
+        }catch(Exception x){
+            x.printStackTrace();
+            return null;
+        }
+        arr[5]=MyUtility.getTotalDepositAmount(id,context);
+        return arr;
+    }
+
     public Cursor getWagesForUpdate(String id, String previousSystemDateTime){
         try{
             String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
@@ -1196,22 +1176,22 @@ public class Database extends SQLiteOpenHelper {
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
 
-                   return getData("SELECT "+Database.COL_1_ID_ALG +","+Database.COL_2_DATE_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_13_SYSTEM_DATETIME_ALG +" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE "+Database.COL_1_ID_ALG +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_ALG +"= '"+previousSystemDateTime + "'");
+                   return getData("SELECT "+Database.COL_1_ID_ALG +","+Database.COL_2_DATE_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_13_SYSTEM_DATETIME_ALG +" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE "+Database.COL_1_ID_ALG +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_ALG +"= '"+previousSystemDateTime + "'AND "+Database.COL_12_ISDEPOSITED_ALG+"='0'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                    return getData("SELECT "+Database.COL_1_ID_AM +","+Database.COL_2_DATE_AM + ","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_13_SYSTEM_DATETIME_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_AM +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_AM +"= '"+previousSystemDateTime+ "'");
+                    return getData("SELECT "+Database.COL_1_ID_AM +","+Database.COL_2_DATE_AM + ","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_13_SYSTEM_DATETIME_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_AM +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_AM +"= '"+previousSystemDateTime+"'AND "+Database.COL_12_ISDEPOSITED_AM+"='0'");
 
                 }
             }else if(activeInactiveSkill[0].equals("0")){//if person is inactive
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
 
-                    return getData("SELECT "+Database.COL_1_ID_IALG +","+Database.COL_2_DATE_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_13_SYSTEM_DATETIME_IALG +" FROM " + Database.TABLE3_IN_ACTIVE_LG + " WHERE "+Database.COL_1_ID_IALG +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_IALG +"= '" + previousSystemDateTime +"'");
+                    return getData("SELECT "+Database.COL_1_ID_IALG +","+Database.COL_2_DATE_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_13_SYSTEM_DATETIME_IALG +" FROM " + Database.TABLE3_IN_ACTIVE_LG + " WHERE "+Database.COL_1_ID_IALG +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_IALG +"= '" + previousSystemDateTime +"'AND "+Database.COL_12_ISDEPOSITED_IALG+"='0'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                    return getData("SELECT "+Database.COL_1_ID_IAM +","+Database.COL_2_DATE_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_13_SYSTEM_DATETIME_IAM +" FROM " + Database.TABLE2_IN_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_IAM +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_IAM +"= '" + previousSystemDateTime+ "'");
+                    return getData("SELECT "+Database.COL_1_ID_IAM +","+Database.COL_2_DATE_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_13_SYSTEM_DATETIME_IAM +" FROM " + Database.TABLE2_IN_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_IAM +"= '" + id + "'" + " AND "+Database.COL_13_SYSTEM_DATETIME_IAM +"= '" +previousSystemDateTime+"'AND "+Database.COL_12_ISDEPOSITED_IAM+"='0'");
 
                 }
             }
@@ -1229,22 +1209,22 @@ public class Database extends SQLiteOpenHelper {
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
 
-                     return getData("SELECT  "+Database.COL_5_REMARKS_ALG +","+Database.COL_7_DEPOSIT_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_2_DATE_ALG +" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE "+Database.COL_1_ID_ALG +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_ALG +"= '" + systemDateTime+ "'");
+                     return getData("SELECT  "+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_4_MICPATH_ALG +","+Database.COL_2_DATE_ALG +" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE "+Database.COL_1_ID_ALG +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_ALG +"= '" + systemDateTime+ "' AND "+Database.COL_12_ISDEPOSITED_ALG+"='1'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                     return getData("SELECT  "+Database.COL_5_REMARKS_AM +","+Database.COL_7_DEPOSIT_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_2_DATE_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_AM +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_AM +"= '" + systemDateTime+ "'");
+                     return getData("SELECT  "+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_2_DATE_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_AM +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_AM +"= '" + systemDateTime+ "' AND "+Database.COL_12_ISDEPOSITED_AM+"='1'");
 
                 }
             }else if(activeInactiveSkill[0].equals("0")){//if person is inactive
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
 
-                     return getData("SELECT  "+Database.COL_5_REMARKS_IALG +","+Database.COL_7_DEPOSIT_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_2_DATE_IALG +" FROM " + Database.TABLE3_IN_ACTIVE_LG + " WHERE "+Database.COL_1_ID_IALG +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_IALG +"= '" + systemDateTime+ "'");
+                     return getData("SELECT  "+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_4_MICPATH_IALG +","+Database.COL_2_DATE_IALG +" FROM " + Database.TABLE3_IN_ACTIVE_LG + " WHERE "+Database.COL_1_ID_IALG +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_IALG +"= '" + systemDateTime+ "' AND "+Database.COL_12_ISDEPOSITED_IALG+"='1'");
 
                 }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
 
-                     return getData("SELECT  "+Database.COL_5_REMARKS_IAM +","+Database.COL_7_DEPOSIT_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_2_DATE_IAM +" FROM " + Database.TABLE2_IN_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_IAM +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_IAM +"= '" + systemDateTime +"'");
+                     return getData("SELECT  "+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_4_MICPATH_IAM +","+Database.COL_2_DATE_IAM +" FROM " + Database.TABLE2_IN_ACTIVE_MESTRE + " WHERE "+Database.COL_1_ID_IAM +"= '" + id + "' AND "+Database.COL_13_SYSTEM_DATETIME_IAM +"= '" + systemDateTime + "' AND "+Database.COL_12_ISDEPOSITED_IAM+"='1'");
 
                 }
             }
@@ -1320,7 +1300,7 @@ public class Database extends SQLiteOpenHelper {
             byte currentTableNumber=getTableNumber(activeAndSkill);
             boolean tables[]=getInWhichTableRedundantDataIsPresent(id,currentTableNumber);//return 5 size of table and last index indicate duplicate data is present or not
 
-            if(tables[4]){//if true then execute
+            if(tables[4]){//4th index indicate duplicate data is present or not
                 for (byte otherTable = 0; otherTable < 4; otherTable++){//since only 4 otherTable so 4
                     if (tables[otherTable] && otherTable != currentTableNumber){//otherTable != currentTableNumber because in current table data will be present so stoping that.
                         isRedundantDataPresent = true;//means duplicate data is present
@@ -1348,13 +1328,14 @@ public class Database extends SQLiteOpenHelper {
             Cursor otherTableDataCursor= getDataFromOtherTable(duplicateDataPresentTableNumber,id);
             //StringBuilder remarks=new StringBuilder(formatCursorDataToText(otherTableDataCursor)).append("\n\nALL "+otherTableDataCursor.getCount()+" ENTRIES TOTAL SUM").append(MyUtility.getMessageOnlyTotalWagesAndDeposit(id,context));
             String  remarks= formatCursorDataToText(otherTableDataCursor);
+            String systemCurrentDate24hrTime=MyUtility.systemCurrentDate24hrTime();
 
             if(activeAndSkill[0].equals("1")){//insert remarks in current active table
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), activeAndSkill[1], id, MyUtility.getOnlyCurrentDate() , null, remarks, 0, 0, 0, 0, 0,"0")){
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,systemCurrentDate24hrTime, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate() , null, remarks, 0, 0, 0, 0, 0,"0")){
                     return false;
                 }
             }else if (activeAndSkill[0].equals("0")){//insert remarks in current inactive table
-               if(!insertWagesOrDepositToInActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(),activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(),   null, remarks, 0, 0, 0, 0, 0, 0, "0")){
+               if(!insertWagesOrDepositToInActiveTableDirectly(dB,systemCurrentDate24hrTime,activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(),   null, remarks, 0, 0, 0, 0, 0,"0")){
                    return false;
                }
             }
@@ -1401,24 +1382,24 @@ public class Database extends SQLiteOpenHelper {
 
         while(otherTableDataCursor.moveToNext()){//sequence number cant be used because it will not be in sequence order
             
-            if(otherTableDataCursor.getString(8).equals("0")) {//IF wages
+            if(otherTableDataCursor.getString(7).equals("0")) {//IF wages
                wagesSb.append("\n\n").append("-> ").append(otherTableDataCursor.getString(0)).append(" WAGES=").append(otherTableDataCursor.getString(2)).append("  ");
                
-               if(otherTableDataCursor.getString(4) != null) {
-                   wagesSb.append(otherTableDataCursor.getString(4)).append(" ");
+               if(otherTableDataCursor.getString(3) != null) {
+                   wagesSb.append(otherTableDataCursor.getString(3)).append(" ");
                }
+                if(otherTableDataCursor.getString(4) != null) {
+                    wagesSb.append(otherTableDataCursor.getString(4)).append(" ");
+                }
                 if(otherTableDataCursor.getString(5) != null) {
                     wagesSb.append(otherTableDataCursor.getString(5)).append(" ");
                 }
                 if(otherTableDataCursor.getString(6) != null) {
                     wagesSb.append(otherTableDataCursor.getString(6)).append(" ");
                 }
-                if(otherTableDataCursor.getString(7) != null) {
-                    wagesSb.append(otherTableDataCursor.getString(7)).append(" ");
-                }
                 wagesSb.append("\n").append(otherTableDataCursor.getString(1));//remarks
-            }else if (otherTableDataCursor.getString(8).equals("1")) {//if deposit
-                depositSb.append("\n\n").append("-> ").append(otherTableDataCursor.getString(0)).append(" DEPOSITED=").append(otherTableDataCursor.getString(3)).append("\n").append(otherTableDataCursor.getString(1));
+            }else if (otherTableDataCursor.getString(7).equals("1")) {//if deposit
+                depositSb.append("\n\n").append("-> ").append(otherTableDataCursor.getString(0)).append(" DEPOSITED=").append(otherTableDataCursor.getString(2)).append("\n").append(otherTableDataCursor.getString(1));
             }
          }
         return depositSb.append(wagesSb).append("\n\n----------FINISH----------").toString();
@@ -1427,10 +1408,10 @@ public class Database extends SQLiteOpenHelper {
         if(tableNumber == -1) return null;//if incorrect table number
         try{
             switch (tableNumber){
-                case 0: return getData("SELECT "+Database.COL_2_DATE_AM +","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_7_DEPOSIT_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_12_ISDEPOSITED_AM+","+Database.COL_13_SYSTEM_DATETIME_AM +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_AM +"='"+id+"'");
-                case 1: return getData("SELECT "+Database.COL_2_DATE_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_7_DEPOSIT_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_12_ISDEPOSITED_ALG +","+Database.COL_13_SYSTEM_DATETIME_ALG +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_ALG +"='"+id+"'");
-                case 2: return getData("SELECT "+Database.COL_2_DATE_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_7_DEPOSIT_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_12_ISDEPOSITED_IAM +","+Database.COL_13_SYSTEM_DATETIME_IAM +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_IAM +"='"+id+"'");
-                case 3: return getData("SELECT "+Database.COL_2_DATE_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_7_DEPOSIT_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_12_ISDEPOSITED_IALG +","+Database.COL_13_SYSTEM_DATETIME_IALG +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_IALG +"='"+id+"'");
+                case 0: return getData("SELECT "+Database.COL_2_DATE_AM +","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_12_ISDEPOSITED_AM+" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_AM +"='"+id+"'");
+                case 1: return getData("SELECT "+Database.COL_2_DATE_ALG +","+Database.COL_5_REMARKS_ALG +","+Database.COL_6_WAGES_ALG +","+Database.COL_8_P1_ALG +","+Database.COL_9_P2_ALG +","+Database.COL_10_P3_ALG +","+Database.COL_11_P4_ALG +","+Database.COL_12_ISDEPOSITED_ALG +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_ALG +"='"+id+"'");
+                case 2: return getData("SELECT "+Database.COL_2_DATE_IAM +","+Database.COL_5_REMARKS_IAM +","+Database.COL_6_WAGES_IAM +","+Database.COL_8_P1_IAM +","+Database.COL_9_P2_IAM +","+Database.COL_10_P3_IAM +","+Database.COL_11_P4_IAM +","+Database.COL_12_ISDEPOSITED_IAM +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_IAM +"='"+id+"'");
+                case 3: return getData("SELECT "+Database.COL_2_DATE_IALG +","+Database.COL_5_REMARKS_IALG +","+Database.COL_6_WAGES_IALG +","+Database.COL_8_P1_IALG +","+Database.COL_9_P2_IALG +","+Database.COL_10_P3_IALG +","+Database.COL_11_P4_IALG +","+Database.COL_12_ISDEPOSITED_IALG +" FROM "+getTableName(tableNumber)+" WHERE "+Database.COL_1_ID_IALG +"='"+id+"'");
             }
         }catch (Exception x){
             x.printStackTrace();
@@ -1472,7 +1453,7 @@ public class Database extends SQLiteOpenHelper {
 
             if (dataFromTableCursor != null) {
                 while (dataFromTableCursor.moveToNext()){
-                   if(!insertWagesOrDepositToActiveTableDirectly(dB,dataFromTableCursor.getString(11),insertAccordingToSkillIntoActiveTable,dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(10))){
+                   if(!insertWagesOrDepositToActiveTableDirectly(dB,dataFromTableCursor.getString(10),insertAccordingToSkillIntoActiveTable,dataFromTableCursor.getString(8), dataFromTableCursor.getString(0), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(4), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getString(9))){
                        return false;
                    }
                 }
@@ -1505,7 +1486,7 @@ public class Database extends SQLiteOpenHelper {
 
             if (dataFromTableCursor != null) {
                 while (dataFromTableCursor.moveToNext()) {
-                    if(!insertWagesOrDepositToInActiveTableDirectly(dB,dataFromTableCursor.getString(11),skill, dataFromTableCursor.getString(9), dataFromTableCursor.getString(0), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7), dataFromTableCursor.getInt(8), dataFromTableCursor.getInt(4), dataFromTableCursor.getString(10))){
+                    if(!insertWagesOrDepositToInActiveTableDirectly(dB,dataFromTableCursor.getString(10),skill, dataFromTableCursor.getString(8), dataFromTableCursor.getString(0), dataFromTableCursor.getString(1), dataFromTableCursor.getString(2), dataFromTableCursor.getInt(3), dataFromTableCursor.getInt(4), dataFromTableCursor.getInt(5), dataFromTableCursor.getInt(6), dataFromTableCursor.getInt(7),dataFromTableCursor.getString(9))){
                         return false;
                     }
                 }
@@ -1617,7 +1598,7 @@ public class Database extends SQLiteOpenHelper {
             return false;
         }
     }
-    public String columnNameOutOf4Table(String id, byte columnIndex){//this method will take more time
+    public String getColumnNameOutOf4Table(String id, byte columnIndex){//this method will take more time
         try{
              return getColumnName(getTableNumber(getActiveOrInactiveAndSkill(id)),columnIndex);
         }catch (Exception x){
@@ -1633,8 +1614,8 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
-    private String getColumnName(byte tableNumber, byte columnIndex) {
-        switch (tableNumber){//hardcoded
+    public String getColumnName(byte tableNumberStartsWith0, byte columnIndex) {
+        switch (tableNumberStartsWith0){//hardcoded
             case 0: return columnNameOfTableActiveMestre(columnIndex);
             case 1: return columnNameOfTableActiveLaberAndG(columnIndex);
             case 2: return columnNameOfTableInActiveMestre(columnIndex);
@@ -1646,17 +1627,17 @@ public class Database extends SQLiteOpenHelper {
         switch (columnIndex){
             case 1: return Database.COL_1_ID_AM;
             case 2: return Database.COL_2_DATE_AM;
-           // case 3: return Database.COL_3_TIME_AM;
+
             case 3: return Database.COL_4_MICPATH_AM;
             case 4: return Database.COL_5_REMARKS_AM;
             case 5: return Database.COL_6_WAGES_AM;
-            case 6: return Database.COL_7_DEPOSIT_AM;
-            case 7: return Database.COL_8_P1_AM;
-            case 8: return Database.COL_9_P2_AM;
-            case 9: return Database.COL_10_P3_AM;
-            case 10: return Database.COL_11_P4_AM;
-            case 11: return Database.COL_12_ISDEPOSITED_AM;
-            case 12: return Database.COL_13_SYSTEM_DATETIME_AM;
+          //  case 6: return Database.COL_7_DEPOSIT_AM;
+            case 6: return Database.COL_8_P1_AM;
+            case 7: return Database.COL_9_P2_AM;
+            case 8: return Database.COL_10_P3_AM;
+            case 9: return Database.COL_11_P4_AM;
+            case 10: return Database.COL_12_ISDEPOSITED_AM;
+            case 11: return Database.COL_13_SYSTEM_DATETIME_AM;
         }
         return null;
     }
@@ -1664,17 +1645,16 @@ public class Database extends SQLiteOpenHelper {
         switch (columnIndex){
             case 1: return Database.COL_1_ID_ALG;
             case 2: return Database.COL_2_DATE_ALG;
-           // case 3: return Database.COL_3_TIME_ALG;
             case 3: return Database.COL_4_MICPATH_ALG;
             case 4: return Database.COL_5_REMARKS_ALG;
             case 5: return Database.COL_6_WAGES_ALG;
-            case 6: return Database.COL_7_DEPOSIT_ALG;
-            case 7: return Database.COL_8_P1_ALG;
-            case 8: return Database.COL_9_P2_ALG;
-            case 9: return Database.COL_10_P3_ALG;
-            case 10: return Database.COL_11_P4_ALG;
-            case 11: return Database.COL_12_ISDEPOSITED_ALG;
-            case 12: return Database.COL_13_SYSTEM_DATETIME_ALG;
+          //  case 6: return Database.COL_7_DEPOSIT_ALG;
+            case 6: return Database.COL_8_P1_ALG;
+            case 7: return Database.COL_9_P2_ALG;
+            case 8: return Database.COL_10_P3_ALG;
+            case 9: return Database.COL_11_P4_ALG;
+            case 10: return Database.COL_12_ISDEPOSITED_ALG;
+            case 11: return Database.COL_13_SYSTEM_DATETIME_ALG;
         }
         return null;
     }
@@ -1682,17 +1662,16 @@ public class Database extends SQLiteOpenHelper {
         switch (columnIndex){
             case 1: return Database.COL_1_ID_IAM;
             case 2: return Database.COL_2_DATE_IAM;
-           // case 3: return Database.COL_3_TIME_IAM;
             case 3: return Database.COL_4_MICPATH_IAM;
             case 4: return Database.COL_5_REMARKS_IAM;
             case 5: return Database.COL_6_WAGES_IAM;
-            case 6: return Database.COL_7_DEPOSIT_IAM;
-            case 7: return Database.COL_8_P1_IAM;
-            case 8: return Database.COL_9_P2_IAM;
-            case 9: return Database.COL_10_P3_IAM;
-            case 10: return Database.COL_11_P4_IAM;
-            case 11: return Database.COL_12_ISDEPOSITED_IAM;
-            case 12: return Database.COL_13_SYSTEM_DATETIME_IAM;
+           // case 6: return Database.COL_7_DEPOSIT_IAM;
+            case 6: return Database.COL_8_P1_IAM;
+            case 7: return Database.COL_9_P2_IAM;
+            case 8: return Database.COL_10_P3_IAM;
+            case 9: return Database.COL_11_P4_IAM;
+            case 10: return Database.COL_12_ISDEPOSITED_IAM;
+            case 11: return Database.COL_13_SYSTEM_DATETIME_IAM;
         }
         return null;
     }
@@ -1700,17 +1679,16 @@ public class Database extends SQLiteOpenHelper {
         switch (columnIndex){
             case 1: return Database.COL_1_ID_IALG;
             case 2: return Database.COL_2_DATE_IALG;
-            //case 3: return Database.COL_3_TIME_IALG;
             case 3: return Database.COL_4_MICPATH_IALG;
             case 4: return Database.COL_5_REMARKS_IALG;
             case 5: return Database.COL_6_WAGES_IALG;
-            case 6: return Database.COL_7_DEPOSIT_IALG;
-            case 7: return Database.COL_8_P1_IALG;
-            case 8: return Database.COL_9_P2_IALG;
-            case 9: return Database.COL_10_P3_IALG;
-            case 10: return Database.COL_11_P4_IALG;
+            //case 6: return Database.COL_7_DEPOSIT_IALG;
+            case 6: return Database.COL_8_P1_IALG;
+            case 7: return Database.COL_9_P2_IALG;
+            case 8: return Database.COL_10_P3_IALG;
+            case 9: return Database.COL_11_P4_IALG;
+            case 10: return Database.COL_12_ISDEPOSITED_IALG;
             case 11: return Database.COL_12_ISDEPOSITED_IALG;
-            case 12: return Database.COL_12_ISDEPOSITED_IALG;
         }
         return null;
     }
@@ -1730,8 +1708,8 @@ public class Database extends SQLiteOpenHelper {
                 }
         }
     }
-    private String getTableName(byte tableNumber){
-        switch (tableNumber){//hardcoded
+    private String getTableName(byte tableNumberStartWith0){
+        switch (tableNumberStartWith0){//hardcoded
             case 0: return Database.TABLE0_ACTIVE_MESTRE;
             case 1: return Database.TABLE1_ACTIVE_LG;
             case 2: return Database.TABLE2_IN_ACTIVE_MESTRE;
@@ -1887,7 +1865,7 @@ public class Database extends SQLiteOpenHelper {
 //                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
 //            }//toast will not work while doing background task
 
-            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDate(),null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDate(),null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
             success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){
@@ -2236,24 +2214,27 @@ public class Database extends SQLiteOpenHelper {
        }
        return true;
     }
-    private boolean  addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
+    private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
         try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned
 
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,"0")) return false;
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",cursor.getInt(1),0,0,0,0,"1")) return false;
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
 
-                return insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,0,"0");
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,"0")) return false;
 
             }
-            return false;
+            //HISTORY TABLE
+            if(!insertWagesOrDepositToHistoryTable(dB,id,MyUtility.systemCurrentDate24hrTime(),HistoryFragment.automaticInserted)) return false;//after inserting add to history table using primary key
+
+            return true;
         }catch (Exception ex){
             ex.printStackTrace();
             return false;
@@ -2283,7 +2264,7 @@ public class Database extends SQLiteOpenHelper {
     private ArrayList<String> getAllAudioPathFromDb(String id,String tableName){//may return null when exception occur
         ArrayList<String> audiosPathAl=new ArrayList<>();
         if(isSingleRowPresentInTable(id)){//if data present in table then execute
-            try (Cursor cursor = getData("SELECT " + columnNameOutOf4Table(id, (byte) 3) + " FROM " + tableName + " WHERE " + columnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'")) {//so that object close automatically
+            try (Cursor cursor = getData("SELECT " + getColumnNameOutOf4Table(id, (byte) 3) + " FROM " + tableName + " WHERE " + getColumnNameOutOf4Table(id, (byte) 1) + "= '" + id + "'")) {//so that object close automatically
                 while (cursor.moveToNext()) {
                     if (cursor.getString(0) != null) {//checking path may be null
                         audiosPathAl.add(cursor.getString(0));
@@ -2321,11 +2302,11 @@ public class Database extends SQLiteOpenHelper {
 
                 if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))) {//check for M OR lG
 
-                    return getData("SELECT " + Database.COL_2_DATE_ALG + "," + Database.COL_5_REMARKS_ALG + "," + Database.COL_6_WAGES_ALG + "," + Database.COL_7_DEPOSIT_ALG + "," + Database.COL_8_P1_ALG + "," + Database.COL_9_P2_ALG + "," + Database.COL_10_P3_ALG + "," + Database.COL_11_P4_ALG + "," + Database.COL_12_ISDEPOSITED_ALG + " FROM " + Database.TABLE1_ACTIVE_LG + " WHERE " + Database.COL_1_ID_ALG + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_ALG + "='" + systemCurrentDate24hrTime + "'");
+                    return getData("SELECT " + Database.COL_2_DATE_ALG + "," + Database.COL_5_REMARKS_ALG + "," + Database.COL_6_WAGES_ALG +","+ Database.COL_8_P1_ALG + "," + Database.COL_9_P2_ALG + "," + Database.COL_10_P3_ALG + "," + Database.COL_11_P4_ALG + "," + Database.COL_12_ISDEPOSITED_ALG + " FROM " + Database.TABLE1_ACTIVE_LG + " WHERE " + Database.COL_1_ID_ALG + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_ALG + "='" + systemCurrentDate24hrTime + "'");
 
                 } else if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))) {//check for mestre
 
-                    return getData("SELECT " + Database.COL_2_DATE_AM + "," + Database.COL_5_REMARKS_AM + "," + Database.COL_6_WAGES_AM + "," + Database.COL_7_DEPOSIT_AM + "," + Database.COL_8_P1_AM + "," + Database.COL_9_P2_AM + "," + Database.COL_10_P3_AM + "," + Database.COL_11_P4_AM + "," + Database.COL_12_ISDEPOSITED_AM + " FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE " + Database.COL_1_ID_AM + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_AM + "='" + systemCurrentDate24hrTime + "'");
+                    return getData("SELECT " + Database.COL_2_DATE_AM + "," + Database.COL_5_REMARKS_AM + "," + Database.COL_6_WAGES_AM +","+ Database.COL_8_P1_AM + "," + Database.COL_9_P2_AM + "," + Database.COL_10_P3_AM + "," + Database.COL_11_P4_AM + "," + Database.COL_12_ISDEPOSITED_AM + " FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE " + Database.COL_1_ID_AM + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_AM + "='" + systemCurrentDate24hrTime + "'");
 
                 }
             }
@@ -2335,28 +2316,28 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
-    private Integer[] getPreviousOnlyWagesAndDepositFromActiveTable(String id, String previousSystemTimeDate) {//if error return null
+    private Integer[] getPreviousOnlyWagesAndDepositFromActiveTable(String id, String previousSystemTimeDate) {//if error return null and if in db value is null then Integer array should contain null not 0 mandatory
        //this method should be called before updating the data to get previous data
         try {
-            Integer[] arr=new Integer[2];
+            Integer[] arr=new Integer[2];//index1 wages index2 deposit
             Cursor cursor=null;
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
             if (activeInactiveSkill[0].equals("1")) {//if person is active at 0th position and 1st position is person skill
 
                 if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))) {//check for M OR lG
 
-                    cursor=getData("SELECT " +Database.COL_6_WAGES_ALG + "," + Database.COL_7_DEPOSIT_ALG+" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE " + Database.COL_1_ID_ALG + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_ALG + "='" + previousSystemTimeDate + "'");
+                    cursor=getData("SELECT " +Database.COL_6_WAGES_ALG + "," + Database.COL_12_ISDEPOSITED_ALG+" FROM " + Database.TABLE1_ACTIVE_LG + " WHERE " + Database.COL_1_ID_ALG + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_ALG + "='" + previousSystemTimeDate + "'");
 
                 } else if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))) {//check for mestre
 
-                    cursor=getData("SELECT " +Database.COL_6_WAGES_AM + "," +Database.COL_7_DEPOSIT_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE " + Database.COL_1_ID_AM + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_AM + "='" + previousSystemTimeDate + "'");
+                    cursor=getData("SELECT " +Database.COL_6_WAGES_AM + "," +Database.COL_12_ISDEPOSITED_AM +" FROM " + Database.TABLE0_ACTIVE_MESTRE + " WHERE " + Database.COL_1_ID_AM + "='" + id + "' AND " + Database.COL_13_SYSTEM_DATETIME_AM + "='" + previousSystemTimeDate + "'");
 
                 }
                 if(cursor!=null) cursor.moveToFirst();
 
-                if(cursor.getString(0) != null) arr[0]=cursor.getInt(0);//if in db this column has null value then directly accessing by cursor.getInt(0) gives value as 0 but we dont want 0 we need null.so checking cursor.getString(0) != null.and cursor.getString(0) return null if db has null value. if not follow this then in history table would get wrong meaning because we take null value has nothing happen and 0 value as something happen
+                if(cursor.getString(0) != null && cursor.getString(1).equals("0")) arr[0]=cursor.getInt(0);//if in db this column has null value then directly accessing by cursor.getInt(0) gives value as 0 but we dont want 0 we need null.so checking cursor.getString(0) != null.and cursor.getString(0) return null if db has null value. if not follow this then in history table would get wrong meaning because we take null value has nothing happen and 0 value as something happen
 
-                if(cursor.getString(1)!= null)  arr[1]=cursor.getInt(1);
+                if(cursor.getString(0)!= null && cursor.getString(1).equals("1"))  arr[1]=cursor.getInt(0);
 
                 if(cursor!=null)cursor.close();
                 return arr;
@@ -2376,15 +2357,15 @@ public class Database extends SQLiteOpenHelper {
         //AT A TIME cursor.getString(2) and cursor.getString(3) will contain value
         if(cursor.getString(2)!=null)
             cv.put(COL_6_WAGES_H,cursor.getString(2));
-        if(cursor.getString(3)!=null)
-            cv.put(COL_6_WAGES_H,cursor.getString(3));
+//        if(cursor.getString(3)!=null)
+//            cv.put(COL_6_WAGES_H,cursor.getString(3));
 
-        if(cursor.getString(4)!=null)cv.put(COL_8_P1_H, cursor.getString(4));
-        if(cursor.getString(5)!=null)cv.put(COL_9_P2_H, cursor.getString(5));
-        if(cursor.getString(6)!=null)cv.put(COL_10_P3_H, cursor.getString(6));
-        if(cursor.getString(7)!=null)cv.put(COL_11_P4_H, cursor.getString(7));
-        if (cursor.getString(8) != null){//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
-            cv.put(COL_12_ISDEPOSITED_H, cursor.getString(8));
+        if(cursor.getString(3)!=null)cv.put(COL_8_P1_H, cursor.getString(3));
+        if(cursor.getString(4)!=null)cv.put(COL_9_P2_H, cursor.getString(4));
+        if(cursor.getString(5)!=null)cv.put(COL_10_P3_H, cursor.getString(5));
+        if(cursor.getString(6)!=null)cv.put(COL_11_P4_H, cursor.getString(6));
+        if (cursor.getString(7) != null){//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
+            cv.put(COL_12_ISDEPOSITED_H, cursor.getString(7));
         }else{
             Toast.makeText(context, "IS DEPOSITED VALUE CANNOT BE NULL", Toast.LENGTH_LONG).show();
             return null;
@@ -2420,19 +2401,21 @@ public class Database extends SQLiteOpenHelper {
         //AT A TIME cursor.getString(2) and cursor.getString(3) will contain value
         if(cursor.getString(2)!=null)
             cv.put(COL_6_WAGES_H,cursor.getString(2));
-        else if(cursor.getString(3)!=null)
-            cv.put(COL_6_WAGES_H,cursor.getString(3));
+
+//        else if(cursor.getString(3)!=null)
+//            cv.put(COL_6_WAGES_H,cursor.getString(3));
+//
         else{
             cv.put(COL_6_WAGES_H,0);
         }
 
-         cv.put(COL_8_P1_H, cursor.getString(4));//if condition not required otherwise data will not be updated
-         cv.put(COL_9_P2_H, cursor.getString(5));
-         cv.put(COL_10_P3_H, cursor.getString(6));
-         cv.put(COL_11_P4_H, cursor.getString(7));
+         cv.put(COL_8_P1_H, cursor.getString(3));//if condition not required otherwise data will not be updated
+         cv.put(COL_9_P2_H, cursor.getString(4));
+         cv.put(COL_10_P3_H, cursor.getString(5));
+         cv.put(COL_11_P4_H, cursor.getString(6));
 
-        if (cursor.getString(8) != null){//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
-            cv.put(COL_12_ISDEPOSITED_H, cursor.getString(8));
+        if (cursor.getString(7) != null){//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide edit
+            cv.put(COL_12_ISDEPOSITED_H, cursor.getString(7));
         }else{
             Toast.makeText(context, "IS DEPOSITED VALUE CANNOT BE NULL", Toast.LENGTH_LONG).show();
             return null;
@@ -2531,7 +2514,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     public String getMicPath(String id,String systemDateTime){//String id,String systemDateTime this two variables act as primary key
-       try(Cursor cursor=getData("SELECT "+columnNameOutOf4Table(id, (byte) 3) +" FROM " + tableNameOutOf4Table(id) + " WHERE "+columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'" + " AND "+columnNameOutOf4Table(id, (byte) 12) +"= '"+systemDateTime+ "'")){
+       try(Cursor cursor=getData("SELECT "+ getColumnNameOutOf4Table(id, (byte) 3) +" FROM " + tableNameOutOf4Table(id) + " WHERE "+ getColumnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'" + " AND "+ getColumnNameOutOf4Table(id, (byte) 11) +"= '"+systemDateTime+ "'")){
             if(cursor.getCount() == 0) return null;//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
             cursor.moveToFirst();
             return cursor.getString(0);

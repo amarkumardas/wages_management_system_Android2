@@ -69,7 +69,6 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         setContentView(R.layout.activity_insert_data);
 
-
         //database created
         db =new Database(this);
         //set ids

@@ -22,9 +22,7 @@
         <TextView
             android:layout_marginStart="6dp"
             android:layout_height="29dp"
-
-          android:layout_marginRight="2dp"
-
+            android:layout_marginRight="2dp"
             android:layout_weight="2"
             android:layout_width="0dp"
             android:foreground="?android:attr/selectableItemBackground"
@@ -60,7 +58,6 @@
     </LinearLayout>
 
     <LinearLayout
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -82,7 +79,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="12sp"
                 android:gravity="start"
@@ -92,7 +88,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="13dp"
                 android:textColor="@color/black"
@@ -140,7 +135,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="12dp"
                 android:gravity="start"
@@ -150,7 +144,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="12dp"
                 android:gravity="start"
@@ -160,7 +153,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="12dp"
                 android:gravity="start"
@@ -698,7 +690,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/deposit_amount"
-
                 android:textAlignment="textEnd"
                 android:textSize="10dp" />
             <TextView

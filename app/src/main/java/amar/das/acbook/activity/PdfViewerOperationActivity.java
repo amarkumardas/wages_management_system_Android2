@@ -11,14 +11,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteBlobTooBigException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,9 +44,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import amar.das.acbook.R;
-import amar.das.acbook.databinding.ActivityPdfViewerBinding;
 import amar.das.acbook.Database;
 
+import amar.das.acbook.databinding.ActivityPdfViewerBinding;
 import amar.das.acbook.pdfgenerator.MakePdf;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -482,15 +479,16 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             dialogBuilder.setTitle(getResources().getString(R.string.message));
             dialogBuilder.setMessage(message);
 
-            dialogBuilder.setNegativeButton(getResources().getString(R.string.send_only_total_to_contact), (dialogInterface, i) -> {
+            dialogBuilder.setNegativeButton(getResources().getString(R.string.send_summary_to_contact), (dialogInterface, i) -> {
                 success[0]=MyUtility.sendMessageToContact(id,getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(id),getBaseContext());//sending only total wages and deposit due to long text cannot send as sms
                       if(!success[0]){//if no contact then send full txt file message to any app
                           success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                       }
                 dialogInterface.dismiss();
             });
-            dialogBuilder.setPositiveButtonIcon(AppCompatResources.getDrawable(getBaseContext(),R.drawable.baseline_whatsapp_24));
-            dialogBuilder.setPositiveButton( "", (dialogInterface, i) -> {
+           // dialogBuilder.setPositiveButtonIcon(AppCompatResources.getDrawable(getBaseContext(),R.drawable.baseline_whatsapp_24));
+           // dialogBuilder.setPositiveButtonIcon(AppCompatResources.getDrawable(getBaseContext(),R.drawable.baseline_share_24));
+            dialogBuilder.setPositiveButton( getResources().getString(R.string.share), (dialogInterface, i) -> {
                 if(defaultTrueForOpenAnyAppAndFalseForWhatsApp) {
                     success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                 }else{
@@ -615,7 +613,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
             if(!errorDetection[0]){//if(errorDetection[0]==false){
 
-                sb.append("-----------").append(getResources().getString(R.string.total_sum)).append("-----------");
+                sb.append("-----------").append(getResources().getString(R.string.summary)).append("-----------");
                 sb.append(MyUtility.getTotalWagesDepositAndWorkingAccordingToIndicator(indicator,header,arrayOfTotalWagesDepositRateBasedOnIndicator,recyclerViewDepositData!=null));
 
 

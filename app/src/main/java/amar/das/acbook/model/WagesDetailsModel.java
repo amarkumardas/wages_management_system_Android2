@@ -16,27 +16,27 @@ public class WagesDetailsModel implements Serializable {
 
     private String systemDateAndTime;
 
-    public String getIsdeposited() {
+    public boolean getIsdeposited() {
         return isdeposited;
     }
 
-    public void setIsdeposited(String isdeposited) {
+    public void setIsdeposited(boolean isdeposited) {
         this.isdeposited = isdeposited;
     }
 
-    private String isdeposited;
+    private boolean isdeposited;
 
 
 
     private String micPath;
     private String remarks;
     private String id;
-    private int p1;
-    private int p2;
-    private int p3;
-    private int p4;
-    private int wages;
-    private int deposit;
+    private short p1;
+    private short p2;
+    private short p3;
+    private short p4;
+    private int wagesOrDeposit;
+
 
     public int getPdfSequence() {
         return pdfSequence;
@@ -78,51 +78,44 @@ public class WagesDetailsModel implements Serializable {
         this.remarks = remarks;
     }
 
-    public int getP1() {
+    public short getP1() {
         return p1;
     }
 
-    public void setP1(int p1) {
+    public void setP1(short p1) {
         this.p1 = p1;
     }
 
-    public int getP2() {
+    public short getP2() {
         return p2;
     }
 
-    public void setP2(int p2) {
+    public void setP2(short p2) {
         this.p2 = p2;
     }
 
-    public int getP3() {
+    public short getP3() {
         return p3;
     }
 
-    public void setP3(int p3) {
+    public void setP3(short p3) {
         this.p3 = p3;
     }
 
-    public int getP4() {
+    public short getP4() {
         return p4;
     }
 
-    public void setP4(int p4) {
+    public void setP4(short p4) {
         this.p4 = p4;
     }
 
-    public int getWages() {
-        return wages;
+    public int getWagesOrDeposit() {
+        return wagesOrDeposit;
     }
 
-    public void setWages(int wages) {
-        this.wages = wages;
+    public void setWagesOrDeposit(int wagesOrDeposit) {
+        this.wagesOrDeposit = wagesOrDeposit;
     }
 
-    public int getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(int deposit) {
-        this.deposit = deposit;
-    }
 }

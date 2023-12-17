@@ -89,6 +89,12 @@ public class HistoryFragment extends Fragment {
                    MyUtility.snackBar(view,getResources().getString(R.string.sharing_to_whatsapp_enabled));
                }
         });
+
+        binding.historySharePdfOrTextfileIcon.setOnClickListener(view -> {
+//            SELECT *
+//                    FROM history_table
+//            WHERE system_datetime BETWEEN '2023-12-16 00:00:00' AND '2023-12-17 23:59:59';
+        });
         return root;
     }
     private long getTotalPayment(int year,byte month,byte dayOfMonth){
@@ -132,17 +138,17 @@ public class HistoryFragment extends Fragment {
                 model.setUserDate(cursor.getString(1));
                 model.setRemarks(cursor.getString(2));
                 model.setWagesOrDeposit(cursor.getInt(3));
-                model.setP1Work((short) cursor.getInt(4));
-                model.setP2Work((short) cursor.getInt(5));
-                model.setP3Work((short) cursor.getInt(6));
-                model.setP4Work((short) cursor.getInt(7));
-                model.setIsDeposit((cursor.getString(8).equals("1"))? true:false);
+                model.setP1Work(cursor.getShort(4));
+                model.setP2Work(cursor.getShort(5));
+                model.setP3Work(cursor.getShort(6));
+                model.setP4Work(cursor.getShort(7));
+                model.setIsDeposit(cursor.getString(8).equals("1"));
                 model.setSystemTimeDate(cursor.getString(9));
                 model.setP1Skill( cursor.getString(10) );
                 model.setP2Skill( cursor.getString(11) );
                 model.setP3Skill(  cursor.getString(12) );
                 model.setP4Skill( cursor.getString(13) );
-                model.setShared((cursor.getString(14) != null)?true:false);
+                model.setShared( cursor.getString(14) != null);
                 model.setStatus(cursor.getString(15));
                 model.setSubtractedAdvanceOrBal(cursor.getString(16));
                 model.setName(cursor.getString(17));

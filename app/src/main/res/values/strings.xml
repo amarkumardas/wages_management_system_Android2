@@ -29,11 +29,11 @@
     <string name="remarks">REMARKS</string>
     <string name="message_copied">MESSAGE COPIED</string>
     <string name="share">SHARE</string>
-    <string name="send_only_total_to_contact">SEND ONLY TOTAL TO CONTACT</string>
+    <string name="send_summary_to_contact">SEND SUMMARY TO CONTACT</string>
     <string name="total_no_of_deposit_entries">*TOTAL N0. OF DEPOSIT ENTRIES:</string>
     <string name="total_no_of_wages_entries">*TOTAL N0. OF WAGES ENTRIES:</string>
     <string name="message">MESSAGE</string>
-    <string name="total_sum">TOTAL SUM</string>
+    <string name="summary">SUMMARY</string>
     <string name="share_message_using">SHARE MESSAGE USING</string>
     <string name="please_wait_a_few_seconds">PLEASE WAIT A FEW SECONDS</string>
     <string name="share_image_using">SHARE IMAGE USING</string>
@@ -73,6 +73,7 @@
     <!--History adapter-->
     <string name="updated_payment">UPDATED PAYMENT:</string>
     <string name="updated_amount_received">UPDATED AMOUNT RECEIVED:</string>
+    <string name="calculated">CALCULATED</string>
 
     <!--history fragment-->
     <string name="history_not_available">HISTORY NOT AVAILABLE</string>
@@ -324,6 +325,7 @@
     <string name="action_select_all">SELECT ALL</string>
     <string name="total_amount_received">TOTAL AMOUNT RECEIVED</string>
     <string name="total_payment">TOTAL PAYMENT</string>
+
 
 
 </resources>

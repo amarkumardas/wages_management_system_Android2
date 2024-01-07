@@ -28,8 +28,7 @@
             android:background="@drawable/baseline_arrow_goback"
             android:layout_marginLeft="5dp"
             android:onClick="go_back"
-            android:foreground="?android:attr/selectableItemBackground"
-            />
+            android:foreground="?android:attr/selectableItemBackground"/>
 
         <TextView
             android:layout_width="wrap_content"

@@ -29,7 +29,7 @@ public class MakePdf{
     private static final byte gabBetweenComponents=3;//gabBetweenComponents ensure gab between components
     public  float currentHeightOfDataOfPage;//this variable cant be static otherwise produce wrong result and better not to initialize .IT KEEP TRACK TILL HOW MUCH height data is written SO THAT WE CAN MOVE TO NEXT PAGE IF PAGE IS FULL.it is updated when all content is written
     public MakePdf(){
-       myPdfDocument= new PdfDocument();
+        myPdfDocument= new PdfDocument();
         myPaint= new Paint();
     }
     public boolean makeTopHeaderOrganizationDetails(String headerOrgName, String extraString, String contact, String whatsappNumber, String email, boolean forAttachTrue){
@@ -259,7 +259,6 @@ public class MakePdf{
             return false;
         }
     }
-
     public boolean singleCustomRow(String[] stringArray, float[] columnWidths,int column1TextColorDefaultValue0,int column2TextColorDefaultValue0,int column3TextColorDefaultValue0,int column4TextColorDefaultValue0,boolean forAttachTrue,byte leftSideGabDefault0,byte rightSideGabDefault0){
         try {
             attachOrDetachToComponentsAndUpdateCurrentHeightOfDataOfPage(forAttachTrue);
@@ -337,10 +336,16 @@ public class MakePdf{
             return false;
         }
     }
-    public boolean writeSentenceWithoutLines(String[] stringArray, float[] columnWidths ,boolean forAttachTrue,byte leftSideGabDefault0,byte rightSideGabDefault0){
+    public boolean writeSentenceWithoutLines(String[] stringArray, float[] columnWidths ,boolean forAttachTrue,byte leftSideGabDefault0,byte rightSideGabDefault0,boolean sentenceTrueForCenterFalseForRightByDefaultTrue){
+        if(stringArray==null) return false;
         try {
             attachOrDetachToComponentsAndUpdateCurrentHeightOfDataOfPage(forAttachTrue);
-            myPaint.setTextAlign(Paint.Align.CENTER);
+            if(sentenceTrueForCenterFalseForRightByDefaultTrue){
+                myPaint.setTextAlign(Paint.Align.CENTER);
+            }else{
+                myPaint.setTextAlign(Paint.Align.LEFT);
+            }
+
             myPaint.setStyle(Paint.Style.FILL);
             myPaint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.NORMAL));
             myPaint.setColor(Color.BLACK);
@@ -396,19 +401,20 @@ public class MakePdf{
             return false;
         }
     }
-    public void attachOrDetachToComponentsAndUpdateCurrentHeightOfDataOfPage(boolean forAttachTrue){//it will attach or detach to components
+
+    private void attachOrDetachToComponentsAndUpdateCurrentHeightOfDataOfPage(boolean forAttachTrue){//it will attach or detach to components
         if(forAttachTrue && currentHeightOfDataOfPage!= 0f){//since we are subtracting so checking currentHeightOfDataOfPage is 0 or not
             currentHeightOfDataOfPage=currentHeightOfDataOfPage-gabBetweenComponents;//if attach then we have to minus gabBetweenComponents so that it will attach.because currentHeightOfDataOfPage has already added value of gabBetweenComponents
         }
     }
-    public boolean checkToAddNewPageAndUpdateCurrentHeightOfDataOfPage(float currentHeightOfData){//here currentHeightOfDataOfPage static variable is updated
+    private boolean checkToAddNewPageAndUpdateCurrentHeightOfDataOfPage(float currentHeightOfData){//here currentHeightOfDataOfPage static variable is updated
         if(currentHeightOfData > defaultPageHeight) {
             currentHeightOfDataOfPage=addNewPageReturnValueOfYToStartWrite();//if the table goes beyond the bottom of the page, start a new page
            return true;
         }
         return false;
     }
-   public float addNewPageReturnValueOfYToStartWrite() {
+    private float addNewPageReturnValueOfYToStartWrite() {
        //canvas.finishPage(page);
        myPdfDocument.finishPage(myPage);//to add new page to existing pdf then first we have to finish the page
 
@@ -518,7 +524,6 @@ public class MakePdf{
          (metrics.descent - metrics.ascent) * lines.length + metrics.leading * (lines.length - 1): This adds together the total height of all the lines and
          the total height of all the gaps to get the total height of the block of text.*/
     }
-
     public  File createFileToSavePdfDocumentAndReturnFile(String externalFileDir, String fileName){//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
 //            File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
@@ -566,8 +571,7 @@ public class MakePdf{
         try {
             myPdfDocument.finishPage(myPage);
         }catch (Exception ex){
-           // System.out.println("after page finish call you cannot write error*******************");
-            ex.printStackTrace();
+             ex.printStackTrace();// System.out.println("after page finish call you cannot write error*******************");
             return false;
         }
         return true;
@@ -576,8 +580,7 @@ public class MakePdf{
       try {
            myPdfDocument.close();
       }catch (Exception ex){
-          ex.printStackTrace();
-         // System.out.println("document is closed but trying to write error************************");
+          ex.printStackTrace(); // System.out.println("document is closed but trying to write error************************");
           return false;
       }
         return true;

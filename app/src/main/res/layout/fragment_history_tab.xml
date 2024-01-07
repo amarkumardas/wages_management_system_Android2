@@ -15,7 +15,7 @@
             android:id="@+id/historyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="HISTORY"
+            android:text="@string/history"
             android:paddingStart="6dp"
             android:layout_marginTop="11dp"
             android:textSize="20sp"
@@ -95,7 +95,6 @@
         android:layout_height="wrap_content"
         android:background="@drawable/white_detailsbg"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="5dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:padding="0dp"
@@ -155,6 +154,19 @@
             android:id="@+id/history_total_amount_received"/>
     </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:textSize="12sp"
+        android:background="@drawable/white_detailsbg"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:paddingTop="4dp"
+        android:paddingStart="5dp"
+        android:id="@+id/history_total_worked_people"
+        android:layout_marginBottom="5dp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/history_recyclerview"
         android:layout_width="match_parent"

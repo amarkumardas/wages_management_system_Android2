@@ -37,6 +37,7 @@ import java.util.List;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
+import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -1141,32 +1142,6 @@ public class MyUtility {
             }break;
         }
     }
-//    public static String generateRecordMessageToSend(WagesDetailsModel data,String[] skills){
-//        if(data == null || skills==null) return null;
-//        StringBuilder sb=new StringBuilder();
-//        sb.append("ID: ").append(data.getId()).append("\n")
-//                .append("DATE: ").append(data.getUserGivenDate()).append("\n");
-//        if(data.getIsdeposited().equals("0")){
-//            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
-//        }else{
-//            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(data.getWages())).append("\n");
-//        }
-//        if(skills[0]!=null){
-//            sb.append(skills[0]).append(": ").append(data.getP1()).append("  ");
-//        }
-//        if(skills[1]!=null){
-//            sb.append(skills[1]).append(": ").append(data.getP2()).append("  ");
-//            if(skills[2]!=null){
-//                sb.append(skills[2]).append(": ").append(data.getP3()).append("  ");
-//                if(skills[3]!=null){
-//                    sb.append(skills[3]).append(": ").append(data.getP4());
-//                }
-//            }
-//        }
-//        sb.append("\n");
-//        sb.append("REMARKS: ").append(data.getRemarks());
-//        return sb.toString();
-//    }
     public static String generateRecordMessageToSend(String id, String date, int wagesOrDeposit, boolean isDeposited, String skill1, short p1, String skill2, short p2, String skill3, short p3, String skill4, short p4, String remarks){
         StringBuilder sb=new StringBuilder();
         sb.append("ID: ").append(id).append("\n")
@@ -1286,5 +1261,39 @@ public class MyUtility {
     }
     public static boolean checkPermissionForSMS(Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+    }
+    public static boolean deleteFolderAllFiles(String folderName,boolean trueForExternalFileDirAndFalseForCacheFileDir,Context context){
+        try{
+            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){//checking permission
+                File folder;
+                if(trueForExternalFileDirAndFalseForCacheFileDir){
+                    folder= new File(context.getExternalFilesDir(null) + "/" + folderName);//File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
+                }else{
+                    folder=context.getExternalCacheDir();//getting cache directory to delete all files
+                }
+                if (folder.exists() && folder.isDirectory()) {//if folder exist and if it is directory then delete all file present in this folder
+
+                    File[] listOfFiles = folder.listFiles();//getting all files present in folder
+                    if (listOfFiles != null && listOfFiles.length > 0) {
+                        for (File file : listOfFiles){
+
+                            if (file.isFile()) {//file.isFile() is a method call on the File object, specifically the isFile() method. This method returns true if the File object refers to a regular file and false if it refers to a directory, a symbolic link, or if the file doesn't exist.
+                                if (!file.delete()) {// File deleted successfully
+                                    return false; // Failed to delete the file
+                                }
+                            }
+                        }
+                    }
+                }
+            }else{
+                Toast.makeText(context, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                return false;
+            }
+            return true;
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
     }
 }

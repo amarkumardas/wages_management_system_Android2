@@ -79,6 +79,22 @@
     <string name="history_not_available">HISTORY NOT AVAILABLE</string>
     <string name="sharing_to_active_phone_number_enabled">SHARING TO ACTIVE PHONE NUMBER ENABLED</string>
     <string name="sharing_to_whatsapp_enabled">SHARING TO WHATSAPP ENABLED</string>
+    <string name="total_amount_received">TOTAL AMOUNT RECEIVED</string>
+    <string name="total_payment">TOTAL PAYMENT</string>
+    <string name="generate_history_pdf">GENERATE HISTORY PDF</string>
+    <string name="start_date">START DATE</string>
+    <string name="end_date">END DATE</string>
+    <string name="share_pdf">SHARE PDF</string>
+    <string name="ensure_the_start_date_is_before_the_end_date">ENSURE THE START DATE IS BEFORE THE END DATE</string>
+    <string name="enter_date">ENTER DATE</string>
+    <string name="given_date_is_out_of_history_date_range">GIVEN DATE IS OUT OF HISTORY DATE RANGE</string>
+    <string name="inserted">INSERTED</string>
+    <string name="inserted_plus">INSERTED+</string>
+    <string name="updated">UPDATED</string>
+    <string name="automatic">AUTOMATIC</string>
+    <string name="failed_to_create_pdf">FAILED TO CREATE PDF</string>
+<!--    <string name="total_people_worked">TOTAL PEOPLE WORKED</string>-->
+    <string name="history">HISTORY</string>
 
     <!--IndividualPersonDetailActivity-->
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
@@ -120,6 +136,7 @@
     <string name="failed_to_make_id_active">FAILED TO MAKE ID ACTIVE</string>
     <string name="failed_to_make_id_inactive">FAILED TO MAKE ID INACTIVE</string>
     <string name="summary_of_previous_invoice_number_dot">SUMMARY OF PREVIOUS INVOICE NO.</string>
+    <string name="star_total_width_star">****TOTAL DEPOSIT****</string>
 
     <!--InactiveFragment-->
     <string name="please_wait_loading">PLEASE WAIT LOADING</string>
@@ -323,8 +340,6 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
-    <string name="total_amount_received">TOTAL AMOUNT RECEIVED</string>
-    <string name="total_payment">TOTAL PAYMENT</string>
 
 
 

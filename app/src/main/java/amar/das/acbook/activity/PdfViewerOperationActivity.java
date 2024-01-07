@@ -1097,10 +1097,10 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
             String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id, errorDetection);//it amy return null   when no data
 
-            if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0))
+            if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true))
                 return null;//just for space
 
-            if (!makePdf.writeSentenceWithoutLines(getPersonDetailsForCurrentInvoice(id), new float[]{40f, 10f, 20f, 30f}, true, (byte) 0, (byte) 0))
+            if (!makePdf.writeSentenceWithoutLines(getPersonDetailsForCurrentInvoice(id), new float[]{40f, 10f, 20f, 30f}, true, (byte) 0, (byte) 0,true))
                 return null;//name,id,date,future invoice number
 
             if (errorDetection[0] == false) {
@@ -1147,7 +1147,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
         }catch (Exception ex){
             ex.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
             errorDetection[0]=true;//indicate error has occur
             return new float[]{1f,1f,1f};//to avoid error
         }
@@ -1278,48 +1277,48 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                }
 //            }
 //        }
-       if(!deleteFolderAllFiles(pdfFolderName,true)){//delete external file
+       if(!MyUtility.deleteFolderAllFiles(pdfFolderName,true,getBaseContext())){//delete external file
            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!deleteFolderAllFiles(null,false)){//delete cache file
+        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
     }
 
-    private boolean deleteFolderAllFiles(String folderName,boolean trueForExternalFileDirAndFalseForCacheFileDir){
-        try{
-            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())){//checking permission
-                File folder;
-                if(trueForExternalFileDirAndFalseForCacheFileDir){
-                    folder= new File(getExternalFilesDir(null) + "/" + folderName);//File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
-                }else{
-                   folder=getExternalCacheDir();//getting cache directory to delete all files
-                }
-                    if (folder.exists() && folder.isDirectory()) {//if folder exist and if it is directory then delete all file present in this folder
-
-                    File[] listOfFiles = folder.listFiles();//getting all files present in folder
-                       if (listOfFiles != null && listOfFiles.length > 0) {
-                        for (File file : listOfFiles){
-
-                            if (file.isFile()) {//file.isFile() is a method call on the File object, specifically the isFile() method. This method returns true if the File object refers to a regular file and false if it refers to a directory, a symbolic link, or if the file doesn't exist.
-                                 if (!file.delete()) {// File deleted successfully
-                                    return false; // Failed to delete the file
-                                }
-                            }
-                        }
-                    }
-                }
-            }else{
-                Toast.makeText(PdfViewerOperationActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
-                return false;
-            }
-            return true;
-        }catch (Exception x){
-            x.printStackTrace();
-            return false;
-        }
-    }
+//    private boolean deleteFolderAllFiles(String folderName,boolean trueForExternalFileDirAndFalseForCacheFileDir){
+//        try{
+//            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())){//checking permission
+//                File folder;
+//                if(trueForExternalFileDirAndFalseForCacheFileDir){
+//                    folder= new File(getExternalFilesDir(null) + "/" + folderName);//File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
+//                }else{
+//                   folder=getExternalCacheDir();//getting cache directory to delete all files
+//                }
+//                    if (folder.exists() && folder.isDirectory()) {//if folder exist and if it is directory then delete all file present in this folder
+//
+//                    File[] listOfFiles = folder.listFiles();//getting all files present in folder
+//                       if (listOfFiles != null && listOfFiles.length > 0) {
+//                        for (File file : listOfFiles){
+//
+//                            if (file.isFile()) {//file.isFile() is a method call on the File object, specifically the isFile() method. This method returns true if the File object refers to a regular file and false if it refers to a directory, a symbolic link, or if the file doesn't exist.
+//                                 if (!file.delete()) {// File deleted successfully
+//                                    return false; // Failed to delete the file
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }else{
+//                Toast.makeText(PdfViewerOperationActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+//                return false;
+//            }
+//            return true;
+//        }catch (Exception x){
+//            x.printStackTrace();
+//            return false;
+//        }
+//    }
 
     @Override
     public void onBackPressed() {

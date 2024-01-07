@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import amar.das.acbook.pdfgenerator.MakePdf;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -176,7 +177,6 @@ public class Database extends SQLiteOpenHelper {
             instance = null; // Set the instance to null to indicate it's closed
         }
     }
-
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {//it will execute only once        //NOT NULL OR DEFAULT NOT WORKING AND VARCHAR GIVEN VALUE NOT WORKING HOLDING MORE THAN GIVEN VALUE
      try {//if some error occur it will handle
@@ -1627,11 +1627,9 @@ public class Database extends SQLiteOpenHelper {
         switch (columnIndex){
             case 1: return Database.COL_1_ID_AM;
             case 2: return Database.COL_2_DATE_AM;
-
             case 3: return Database.COL_4_MICPATH_AM;
             case 4: return Database.COL_5_REMARKS_AM;
             case 5: return Database.COL_6_WAGES_AM;
-          //  case 6: return Database.COL_7_DEPOSIT_AM;
             case 6: return Database.COL_8_P1_AM;
             case 7: return Database.COL_9_P2_AM;
             case 8: return Database.COL_10_P3_AM;
@@ -1648,7 +1646,6 @@ public class Database extends SQLiteOpenHelper {
             case 3: return Database.COL_4_MICPATH_ALG;
             case 4: return Database.COL_5_REMARKS_ALG;
             case 5: return Database.COL_6_WAGES_ALG;
-          //  case 6: return Database.COL_7_DEPOSIT_ALG;
             case 6: return Database.COL_8_P1_ALG;
             case 7: return Database.COL_9_P2_ALG;
             case 8: return Database.COL_10_P3_ALG;
@@ -1665,7 +1662,6 @@ public class Database extends SQLiteOpenHelper {
             case 3: return Database.COL_4_MICPATH_IAM;
             case 4: return Database.COL_5_REMARKS_IAM;
             case 5: return Database.COL_6_WAGES_IAM;
-           // case 6: return Database.COL_7_DEPOSIT_IAM;
             case 6: return Database.COL_8_P1_IAM;
             case 7: return Database.COL_9_P2_IAM;
             case 8: return Database.COL_10_P3_IAM;
@@ -1682,7 +1678,6 @@ public class Database extends SQLiteOpenHelper {
             case 3: return Database.COL_4_MICPATH_IALG;
             case 4: return Database.COL_5_REMARKS_IALG;
             case 5: return Database.COL_6_WAGES_IALG;
-            //case 6: return Database.COL_7_DEPOSIT_IALG;
             case 6: return Database.COL_8_P1_IALG;
             case 7: return Database.COL_9_P2_IALG;
             case 8: return Database.COL_10_P3_IALG;
@@ -1984,7 +1979,7 @@ public class Database extends SQLiteOpenHelper {
             String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(context,id,errorDetection);//it amy return null   when no data
             if(errorDetection[0]==false){
                 if(!makeSummaryAndWriteToPDFBasedOnIndicator(context,indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
-                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
+                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50,true)) return false;//just for 1 space
 
                 if (recyclerViewWagesData != null){//null means data not present
                     if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
@@ -1997,7 +1992,7 @@ public class Database extends SQLiteOpenHelper {
 
                 if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
                     if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
-                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]),context.getResources().getString(R.string.star_total_width_star)}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
                             return false;
                         }
                     }else return false;
@@ -2031,7 +2026,7 @@ public class Database extends SQLiteOpenHelper {
     }
     private boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
         try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
-            if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50,true)) return false;
 
             cursor.moveToFirst();//means only one row is returned
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
@@ -2474,8 +2469,45 @@ public class Database extends SQLiteOpenHelper {
         }
        return null;
     }
-    public Cursor getSpecificDateHistory(int year,byte month,byte day){//"2023-11-06"
-        return getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC");
+    public Cursor getSpecificDateHistoryForRecyclerView(int year, byte month, byte day){//"2023-11-06"
+        StringBuilder query=new StringBuilder(300).append("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC");
+        return getData(query.toString());
+
+        //String.format("%04d-%02d-%02d", year, month, day)Let's break down the format pattern:
+        //%04d: This is a placeholder for an integer (d stands for decimal). The 4 specifies the minimum width of the field, and the 0 indicates that leading zeros should be used to pad the number if it has fewer than four digits. This is used for formatting the year.
+        //-%02d: This is another integer placeholder with a minimum width of 2, and again, it uses leading zeros for padding. The hyphen (-) is a literal character in the pattern. This is used for formatting the month.
+        //-%02d: Similar to the previous placeholder, it's used for formatting the day.
+    }
+    public String[][] getSpecificDataHistoryForPdf(int year, byte month, byte day){//"2023-11-06" if error return null.and if no history then 2d string size will be 1
+        //IF STRING[][] IS REDUCE OR INCREASE THEN IT WILL EFFECT TO OTHER CODE
+         StringBuilder query=new StringBuilder(300).append("SELECT "+Database.COL_19_STATUS_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_1_ID_H+","+Database.COL_21_NAME_H+","
+                 +Database.COL_6_WAGES_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","
+                 +Database.COL_17_P4_SKILL_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_5_REMARKS_H+","
+                 +Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+" FROM "+Database.TABLE_HISTORY+" WHERE "+Database.COL_13_SYSTEM_DATETIME_H+
+                 " BETWEEN '"+String.format("%04d-%02d-%02d", year, month, day)+" 00:00:00' AND '"+
+                 String.format("%04d-%02d-%02d", year, month, day)+" 23:59:59'");
+
+         try(Cursor cursor=getData(query.toString())){
+
+             String[][] data = null;
+             if (cursor != null && cursor.getCount() != 0){
+                 data = new String[cursor.getCount()][cursor.getColumnCount()];
+                 int row = 0;
+                 while (cursor.moveToNext()){
+                     for (int col = 0; col < cursor.getColumnCount(); col++) {
+                         data[row][col]=cursor.getString(col);//storing all data in 2d string
+                     }
+                     row++;
+                 }
+                 return data;
+             }else{
+                 return new String[][]{{"NO HISTORY AVAILABLE"}};//RETURN STRING SIZE 1 if no history available
+             }
+
+             }catch(Exception x){
+                 x.printStackTrace();
+                 return null;
+             }
 
         //String.format("%04d-%02d-%02d", year, month, day)Let's break down the format pattern:
         //%04d: This is a placeholder for an integer (d stands for decimal). The 4 specifies the minimum width of the field, and the 0 indicates that leading zeros should be used to pad the number if it has fewer than four digits. This is used for formatting the year.
@@ -2488,7 +2520,7 @@ public class Database extends SQLiteOpenHelper {
             cursor1.moveToFirst();
             cursor2.moveToFirst();
             return String.valueOf(cursor1.getInt(0)+Math.abs(cursor2.getInt(0)));
-        } catch (Exception x) {
+        }catch(Exception x) {
             x.printStackTrace();
             return "error";
         }
@@ -2530,9 +2562,47 @@ public class Database extends SQLiteOpenHelper {
             x.printStackTrace();
             return false;
         }
-        }
-}
+    }
+    public HashMap<Character,Integer> getTotalPeopleWorked(int year,byte month,byte day,String skillMLGColumnName,String p1p2p3p4workDaysColumnName){//return format M 6 L 0 G 3. if error return null
+        HashMap<Character,Integer> data=new HashMap<>();
+         StringBuilder query = new StringBuilder(300)
+                .append("SELECT people.skill , COALESCE(COUNT(")
+                .append(Database.TABLE_HISTORY).append(".").append(skillMLGColumnName).append("), 0) AS COUNT FROM (SELECT '")
+                .append(context.getResources().getString(R.string.mestre)).append("' AS skill UNION SELECT '")
+                .append(context.getResources().getString(R.string.laber)).append("' UNION SELECT '")
+                .append(context.getResources().getString(R.string.women_laber)).append("') AS people LEFT JOIN ")
+                .append(Database.TABLE_HISTORY).append(" ON people.skill = ")
+                .append(Database.TABLE_HISTORY).append(".").append(skillMLGColumnName)
+                .append(" AND ").append(Database.TABLE_HISTORY).append(".").append(p1p2p3p4workDaysColumnName)
+                .append(" IS NOT NULL AND ").append(Database.TABLE_HISTORY).append(".")
+                .append(Database.COL_13_SYSTEM_DATETIME_H).append(" BETWEEN '")
+                .append(String.format("%04d-%02d-%02d", year, month, day)).append(" 00:00:00' AND '")
+                .append(String.format("%04d-%02d-%02d", year, month, day)).append(" 23:59:59' GROUP BY people.skill");
 
+        try(Cursor cursor=getData(query.toString())){
+           while(cursor.moveToNext()){
+               data.put(cursor.getString(0).charAt(0),cursor.getInt(1));
+           }
+           return data;
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+        //for query reference
+        // SELECT
+        //    skills.p1_skill,
+        //    COALESCE(COUNT(history_table.p1_skill), 0) AS count
+        //FROM
+        //    (SELECT 'M' AS p1_skill UNION SELECT 'L' UNION SELECT 'G') AS skills
+        //LEFT JOIN
+        //    history_table ON skills.p1_skill = history_table.p1_skill
+        //                 AND history_table.P1 IS NOT NULL
+        //                 AND history_table.system_datetime BETWEEN '2023-12-10 00:00:00' AND '2023-12-10 23:59:59'
+        //GROUP BY
+        //    skills.p1_skill;
+    }
+
+}
 //    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it
 //        ChatGPT
 //        Your statement is generally correct, but there's a slight clarification needed. SQLiteOpenHelper is typically used in Android applications to manage database connections and database version management. It's important to use a single instance of SQLiteOpenHelper throughout your application's lifecycle to prevent issues with database locking and maintain a consistent database state. Here's a more detailed explanation:

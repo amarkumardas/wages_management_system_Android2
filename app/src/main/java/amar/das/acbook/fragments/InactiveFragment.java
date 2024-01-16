@@ -33,12 +33,13 @@ import amar.das.acbook.databinding.FragmentInactiveBinding;
 public class InactiveFragment extends Fragment {
     private FragmentInactiveBinding binding;
     ArrayList<MestreLaberGModel> inactiveArraylist;
-    RecyclerView inactiveRecyclerView;
+
     InactiveAdapter inactiveAdapter;
     Database db;
-    Boolean isScrolling1 =false,loadOrNot=true;
+    boolean isScrolling1 =false,loadOrNot=true;
     TextView advance,balance;
     byte initialDataToLoad=29;//byte range from -128 to 127
+    final byte eachTimeDataToLoad=40;//recycler view will load 40 data when initial data is finish
     LinearLayoutManager layoutManager;
     int currentItem1, totalItem1, scrollOutItems1, totalNumberOfLoadedData,totalSpecificInactiveRecord;
     //char skillIndicator='M';//for loading initial data
@@ -53,7 +54,6 @@ public class InactiveFragment extends Fragment {
         binding= FragmentInactiveBinding.inflate(inflater, container, false);
          View root=binding.getRoot();
         //ids
-        inactiveRecyclerView =root.findViewById(R.id.recycleview_inactive);
         progressBar=binding.progressBarInactive;
         progressBar.setVisibility(View.GONE);//initially visibility will be not there only when data is loading then visibility set visible
 
@@ -88,7 +88,7 @@ public class InactiveFragment extends Fragment {
 //                }
 //            }
         });
-        inactiveRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        binding.recycleviewInactive.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override//this method is called when we start scrolling recyclerview
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if(loadOrNot) {
@@ -112,9 +112,9 @@ public class InactiveFragment extends Fragment {
                         progressBar.setVisibility(View.VISIBLE);//progressbar
 
                         Toast.makeText(getContext(), getResources().getString(R.string.please_wait_loading), Toast.LENGTH_SHORT).show();
-                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + 40, inactiveArraylist);
+                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + eachTimeDataToLoad, inactiveArraylist);
 
-                        totalNumberOfLoadedData = totalNumberOfLoadedData + 40;//40 data will be loaded and this variable represents total data already loaded
+                        totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
                         if (totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when all record loaded then remove scroll listener
                             //inactiveRecyclerView.clearOnScrollListeners();//this will remove scrollListener so we wont be able to scroll after loading all data and finished scrolling to last
                             loadOrNot = false;//alternative way to remove inactiveRecyclerView.clearOnScrollListeners()
@@ -132,7 +132,6 @@ public class InactiveFragment extends Fragment {
 
         return root;
     }
-
     public ArrayList<MestreLaberGModel> loadInitialDataHavingTotalAdvanceNBalanceOfInactive(TextView advance,TextView balance,String skill,int limit,ArrayList<MestreLaberGModel> arraylist) {
         db=new Database(getContext());//on start only database should be create
 
@@ -157,7 +156,6 @@ public class InactiveFragment extends Fragment {
         db.close();
         return arraylist;
     }
-
     public void loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(String skill, int loadDataInitially) {
         skillIndicator=skill;
         totalNumberOfLoadedData=loadDataInitially;//default no of data to load initially
@@ -166,11 +164,11 @@ public class InactiveFragment extends Fragment {
         inactiveArraylist=loadInitialDataHavingTotalAdvanceNBalanceOfInactive(advance,balance,skill, totalNumberOfLoadedData,inactiveArraylist);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
 
         inactiveAdapter =new InactiveAdapter(getContext(), inactiveArraylist);//this common code should be there otherwise adapter will not be updated
-        inactiveRecyclerView.setAdapter(inactiveAdapter);
+        binding.recycleviewInactive.setAdapter(inactiveAdapter);
        //binding.recycleViewInactive.scrollToPosition(0);//not working
         layoutManager =new GridLayoutManager(getContext(),4);//grid layout
-        inactiveRecyclerView.setLayoutManager(layoutManager);
-        inactiveRecyclerView.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
+        binding.recycleviewInactive.setLayoutManager(layoutManager);
+        binding.recycleviewInactive.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
     }
 
     public int getCountOfSpecificInactiveTotalRecord(String skill) {

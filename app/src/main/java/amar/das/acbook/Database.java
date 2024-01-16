@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -706,7 +707,7 @@ public class Database extends SQLiteOpenHelper {
                //testing success=(dB.insert(TABLE2_IN_ACTIVE_MESTRE, null,cv) == -1)? false :true; //if data not inserted return -1
            }
              //HISTORY TABLE
-            if(!(success=insertWagesOrDepositToHistoryTable(dB,id,systemCurrentDate24hrTime, HistoryFragment.sameDayinserted))) return false;//after inserting add to history table
+            if(!(success=insertWagesOrDepositToHistoryTable(dB,id,systemCurrentDate24hrTime, HistoryFragment.sameDayInserted))) return false;//after inserting add to history table
 
         }else {
             Toast.makeText(context, "insertion only happens in active table but its inactive", Toast.LENGTH_LONG).show();
@@ -2469,8 +2470,8 @@ public class Database extends SQLiteOpenHelper {
         }
        return null;
     }
-    public Cursor getSpecificDateHistoryForRecyclerView(int year, byte month, byte day){//"2023-11-06"
-        StringBuilder query=new StringBuilder(300).append("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC");
+    public Cursor getSpecificDateHistoryForRecyclerView(int year, byte month, byte day,int limit){//"2023-11-06"
+        StringBuilder query=new StringBuilder(300).append("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+limit);
         return getData(query.toString());
 
         //String.format("%04d-%02d-%02d", year, month, day)Let's break down the format pattern:
@@ -2501,7 +2502,7 @@ public class Database extends SQLiteOpenHelper {
                  }
                  return data;
              }else{
-                 return new String[][]{{"NO HISTORY AVAILABLE"}};//RETURN STRING SIZE 1 if no history available
+                 return new String[][]{{"NO HISTORY AVAILABLE"}};//RETURN STRING length 1 if no history available
              }
 
              }catch(Exception x){
@@ -2566,7 +2567,7 @@ public class Database extends SQLiteOpenHelper {
     public HashMap<Character,Integer> getTotalPeopleWorked(int year,byte month,byte day,String skillMLGColumnName,String p1p2p3p4workDaysColumnName){//return format M 6 L 0 G 3. if error return null
         HashMap<Character,Integer> data=new HashMap<>();
          StringBuilder query = new StringBuilder(300)
-                .append("SELECT people.skill , COALESCE(COUNT(")
+                .append("SELECT people.skill, COALESCE(COUNT(")
                 .append(Database.TABLE_HISTORY).append(".").append(skillMLGColumnName).append("), 0) AS COUNT FROM (SELECT '")
                 .append(context.getResources().getString(R.string.mestre)).append("' AS skill UNION SELECT '")
                 .append(context.getResources().getString(R.string.laber)).append("' UNION SELECT '")
@@ -2577,7 +2578,9 @@ public class Database extends SQLiteOpenHelper {
                 .append(" IS NOT NULL AND ").append(Database.TABLE_HISTORY).append(".")
                 .append(Database.COL_13_SYSTEM_DATETIME_H).append(" BETWEEN '")
                 .append(String.format("%04d-%02d-%02d", year, month, day)).append(" 00:00:00' AND '")
-                .append(String.format("%04d-%02d-%02d", year, month, day)).append(" 23:59:59' GROUP BY people.skill");
+                .append(String.format("%04d-%02d-%02d", year, month, day)).append(" 23:59:59'")
+                .append(" AND ").append(Database.TABLE_HISTORY).append("."+Database.COL_19_STATUS_H+" IN (1, 2)")  // if status code is 1 or 2 that means to worked person only
+                .append(" GROUP BY people.skill");
 
         try(Cursor cursor=getData(query.toString())){
            while(cursor.moveToNext()){
@@ -2589,19 +2592,45 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
         //for query reference
-        // SELECT
-        //    skills.p1_skill,
-        //    COALESCE(COUNT(history_table.p1_skill), 0) AS count
-        //FROM
-        //    (SELECT 'M' AS p1_skill UNION SELECT 'L' UNION SELECT 'G') AS skills
-        //LEFT JOIN
-        //    history_table ON skills.p1_skill = history_table.p1_skill
-        //                 AND history_table.P1 IS NOT NULL
-        //                 AND history_table.system_datetime BETWEEN '2023-12-10 00:00:00' AND '2023-12-10 23:59:59'
-        //GROUP BY
-        //    skills.p1_skill;
-    }
+//        SELECT
+//        skills.p1_skill,
+//                COALESCE(COUNT(history_table.p1_skill), 0) AS count
+//        FROM
+//                (
+//                        SELECT 'M' AS p1_skill
+//        UNION
+//        SELECT 'L'
+//        UNION
+//        SELECT 'G'
+//    ) AS skills
+//        LEFT JOIN
+//        history_table
+//        ON skills.p1_skill = history_table.p1_skill
+//        AND history_table.P1 IS NOT NULL
+//        AND history_table.system_datetime BETWEEN '2023-12-10 00:00:00' AND '2023-12-10 23:59:59'
+//        AND history_table.status IN (1, 2) -- Add the condition for status being 1 or 2
+//        GROUP BY
+//        skills.p1_skill;
 
+    }
+    public boolean deleteHistoryRecord(int year,byte month,byte day){//delete the data which is not in between given date
+        try{
+            LocalDate now=LocalDate.now();//its end date
+            return updateTable(new StringBuilder().append("DELETE FROM "+Database.TABLE_HISTORY+" WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" NOT BETWEEN '"+String.format("%04d-%02d-%02d", year, month, day)+" 00:00:00' AND '"+String.format("%04d-%02d-%02d",now.getYear(),now.getMonthValue(),now.getDayOfMonth())+" 23:59:59'").toString());
+        }catch(Exception x){
+           x.printStackTrace();
+           return false;
+        }
+    }
+    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
+        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
+            cursor.moveToFirst();
+            return (cursor.getShort(0) == 1)? true:false;//if getShort(0) is 1 that means data is present in table.
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+    }
 }
 //    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it
 //        ChatGPT

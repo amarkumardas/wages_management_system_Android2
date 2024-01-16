@@ -4,6 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SharedPreferencesHelper {
+
+    public enum Keys { // Enum declaration inside the class for keys
+        HISTORY_KEEPING_DAYS
+    }
+
     //Common types of data that can be stored include boolean, int, long, float, and String.
     //SharedPreferences in Android is a mechanism to store and retrieve simple data in key-value pairs persistently. It's often used to store small pieces of information such as user preferences, settings, and other application-specific configurations. SharedPreferences are private to the application, meaning that other applications cannot access or modify the preferences of your app.
     private static final String PREFERENCE_NAME = "MyPreferences";
@@ -12,7 +17,7 @@ public class SharedPreferencesHelper {
         return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 
-    public static void saveString(Context context, String key, String value) {
+    public static void setString(Context context, String key, String value) {
         SharedPreferences.Editor editor = getSharedPreferences(context).edit();
         editor.putString(key, value);
         editor.apply();
@@ -22,7 +27,7 @@ public class SharedPreferencesHelper {
         return getSharedPreferences(context).getString(key, defaultValue);
     }
 
-    public static void saveInt(Context context, String key, int value) {
+    public static void setInt(Context context, String key, int value) {
         SharedPreferences.Editor editor = getSharedPreferences(context).edit();
         editor.putInt(key, value);
         editor.apply();

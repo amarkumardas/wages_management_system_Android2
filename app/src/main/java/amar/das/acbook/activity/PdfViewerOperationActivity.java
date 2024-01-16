@@ -2,7 +2,7 @@ package amar.das.acbook.activity;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
@@ -57,9 +57,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     byte whichPdfIndicatorChangesDynamically;
     String fromIntentPersonId;
     public static String pdfFolderName="acBookPDF";
-    String currentInvoiceFileName="currentInvoice";
+    String runningInvoiceFileName ="running_invoice";
 
-    String invoiceFileName="invoice";
+    String calculatedInvoiceFileName ="calculated_invoice";
     //ActivityResultLauncher<Intent> sharePdfLauncher;
     //String[] absolutePathArrayToDelete=new String[4];//index 0 may contain path of pdf1 or 2 and index 1 may contain path of pdf3 , and both string array index may contain pdf1orpdf2 and pdf3.INDEX 2 contain  the path of image.index 3 is for text file to delete
 
@@ -91,7 +91,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             changeButtonColorBackgroundAsSelected(whichPdfIndicatorChangesDynamically);//set by default button as selected
         }else if (largeFileSizeIndicat[0]){
           //  displayDialogMessage("LARGE PDF SIZE", "CAN'T VIEW");
-            displayDialogMessage("LARGE PDF SIZE CAN'T VIEW", "CHECK BACKUP INVOICE\nNAME (id"+fromIntentPersonId+"invoice"+MyUtility.getPdfSequence(fromIntentPersonId,getBaseContext())+")");
+            displayDialogMessage("LARGE PDF SIZE CAN'T VIEW", "CHECK BACKUP INVOICE\nNAME (id "+fromIntentPersonId+" calculated invoice"+MyUtility.getPdfSequence(fromIntentPersonId,getBaseContext())+")");
         }
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();//StrictMode is a developer tool which detects things you might be doing by accident and brings them to your attention so you can fix them.
@@ -108,7 +108,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 boolean largeFileSizeIndicator[]={false};//by default no error
                 //directly taking pdfByte SO THAT we don't need to create extra file and deleted
                 if(downloadPdfUsingAbsPathOrByte(null,getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator),fromIntentPersonId)){
-                    displayDialogMessage("DOWNLOADED","INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
+                    displayDialogMessage("DOWNLOADED","CALCULATED INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
                 }else{
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
@@ -123,9 +123,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                    absolutePathArrayToDelete[1]=null; //after file deleted set null
 //                }
 
-                String pdfAbsolutePath=createCurrentInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
+                String pdfAbsolutePath= createRunningInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
                 if(downloadPdfUsingAbsPathOrByte(pdfAbsolutePath,null,fromIntentPersonId)){
-                    displayDialogMessage("DOWNLOADED","CURRENT INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
+                    displayDialogMessage("DOWNLOADED","RUNNING INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
                 }else{
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
@@ -152,15 +152,15 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
                     if(whichPdfIndicatorChangesDynamically == (byte) 1 || whichPdfIndicatorChangesDynamically == (byte) 2){//1 or 2
                         boolean largeFileSizeIndicator[]={false};
-                        pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator),invoiceFileName, fromIntentPersonId);
+                        pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator), calculatedInvoiceFileName, fromIntentPersonId);
                        // absolutePathArrayToDelete[0]=pdfFile.getAbsolutePath();
                     }else if(whichPdfIndicatorChangesDynamically == (byte) 3){
-                        pdfFile= createCurrentInvoiceAndReturnFile(fromIntentPersonId);
+                        pdfFile= createRunningInvoiceAndReturnFile(fromIntentPersonId);
                        // absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();
                     }
                     /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
                     if(whichPdfIndicatorChangesDynamically <=(byte)3){// this will only execute when value is 1,2 or 3
-                        if (!shareFileToAnyApp(pdfFile,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING")) {//open intent to share
+                        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING",getBaseContext())) {//open intent to share
                             runOnUiThread(() -> displayDialogMessage("CANNOT","SHARE PDF"));
                         }
                     }else if(whichPdfIndicatorChangesDynamically==(byte)4){//4 represent blank
@@ -201,9 +201,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                                 displayDialogMessage("",getResources().getString(R.string.no_phone_number));
                              }
                         }break;
-                        case "CURRENT INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
+                        case "RUNNING INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
                             //MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
-                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true),currentInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
+                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true), runningInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                              }
                         }break;
@@ -294,12 +294,12 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 return false;
             }
             if(pdfByte!=null){
-               return downloadPdfUsingByteInDownloadFolder("DOWNLOADED"+ MyUtility.generateUniqueFileNameByTakingDateTime(id,invoiceFileName)+".pdf",pdfByte);
+               return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, calculatedInvoiceFileName)+".pdf",pdfByte);
             }
 
             if(absolutePath!= null){
                 byte[] convertedBytes = Files.readAllBytes(Paths.get(absolutePath));// This code uses the Files.readAllBytes() method from the java.nio.file package to read all the bytes from the file specified by the absolute path into a byte array. This method is more concise and efficient .
-                return downloadPdfUsingByteInDownloadFolder("DOWNLOADED"+MyUtility.generateUniqueFileNameByTakingDateTime(id,currentInvoiceFileName)+".pdf",convertedBytes);
+                return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, runningInvoiceFileName)+".pdf",convertedBytes);
             }
             return false;
         }catch(Exception x){
@@ -877,7 +877,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 outputStream.write(message.getBytes());
                 outputStream.close();
               // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
-                if (!shareFileToAnyApp(file , mimeType, title)) {//open intent to share
+                if (!MyUtility.shareFileToAnyApp(file , mimeType, title,getBaseContext())) {//open intent to share
                     Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
                     return false;
                 }
@@ -909,38 +909,38 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    public boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title){// ActivityResultLauncher<Intent> sharePdfLauncher
-       // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
-        if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
-            return false;
-        }
-        try {
-            //this code is used when sharePdfLauncher
+//    public boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title){// ActivityResultLauncher<Intent> sharePdfLauncher
+//       // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+//        if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+//            return false;
+//        }
+//        try {
+//            //this code is used when sharePdfLauncher
+////            Intent intent = new Intent(Intent.ACTION_SEND);
+////            intent.setType(mimeType);
+////           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+////
+////            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+////            intent.putExtra(Intent.EXTRA_STREAM, uri);
+////            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
+////            sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
+//
+//
 //            Intent intent = new Intent(Intent.ACTION_SEND);
 //            intent.setType(mimeType);
-//           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
-//
-//            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+//            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
+//            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
 //            intent.putExtra(Intent.EXTRA_STREAM, uri);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
-//            sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
-
-
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType(mimeType);
-            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
-            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            Intent chooser = Intent.createChooser(intent, title);
-            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(chooser);// Start the chooser dialog
-
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-             return false;
-        }
-    }
+//            Intent chooser = Intent.createChooser(intent, title);
+//            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(chooser);// Start the chooser dialog
+//
+//            return true;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//             return false;
+//        }
+//    }
 //    public boolean isApplicationInstalled(String packageName){
 //        try {
 //        PackageManager packageManager = getApplicationContext().getPackageManager();//in manifest <query>.. </query> permission added
@@ -1072,7 +1072,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //            }
 
         try {//optimised code
-            File pdfFile= createCurrentInvoiceAndReturnFile(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
+            File pdfFile= createRunningInvoiceAndReturnFile(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
             if (pdfFile != null) {
                // absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();//update to delete
                 binding.pdfView.fromFile(pdfFile).load();
@@ -1084,7 +1084,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    public File createCurrentInvoiceAndReturnFile(String id) {//return null when error
+    public File createRunningInvoiceAndReturnFile(String id) {//return null when error
         try {
             byte indicator =  MyUtility.get_indicator(getBaseContext(),id);
             boolean[] errorDetection = {false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
@@ -1124,7 +1124,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     return null;//after finish page we cannot write to it
 
                 //while creating current pdf then its file name should be same because if user click on current PDF button repeatedly then many file will be create in device which is useless.so to avoid that file name is kept same so that whenever user click current pdf button then new file will be replaced with old file so it is necessary to keep same file name.if file name is unique then many file will be created in device
-                pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), "id" + id +currentInvoiceFileName);//we have to return filename  view pdf using file path
+                 pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), MyUtility.generateUniqueFileNameByTakingDateTime(id,runningInvoiceFileName));//we have to return filename  view pdf using file path
                 if (!makePdf.closeDocumentLastOperation4()) return null;
             }
             return pdfFile;

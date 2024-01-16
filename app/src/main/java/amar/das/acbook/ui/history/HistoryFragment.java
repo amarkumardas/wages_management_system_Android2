@@ -3,11 +3,15 @@ package amar.das.acbook.ui.history;
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,12 +20,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -30,37 +39,46 @@ import amar.das.acbook.adapters.HistoryAdapter;
 import amar.das.acbook.databinding.FragmentHistoryTabBinding;
 import amar.das.acbook.model.HistoryModel;
 import amar.das.acbook.pdfgenerator.MakePdf;
+
+import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
-
 public class HistoryFragment extends Fragment {
-    public static final String sameDayinserted ="1";//means inserted on same day or same day payment
+    public static final String sameDayInserted ="1";//means inserted on same day or same day payment
     public static final String sameDayUpdated ="2";//means inserted and updated on same day or same day updated payment
     public static final String previousRecordUpdated ="3";//means updated previous day record or previous day payment updated
     public static final String automaticInserted="4";//means automatic inserted by application
     public static boolean shareingToggle=false;
-    private byte defaultHistoryKeepingDays=21;
     private LocalDate currentDate=LocalDate.now();
-
     int year=currentDate.getYear();//for date change by 1
     byte dayOfMonth= (byte)currentDate.getDayOfMonth(),month= (byte)currentDate.getMonthValue();//for date change by 1
-
     int startYear=currentDate.getYear(),endYear=currentDate.getYear();//for pdf generation use in lamda expression because local variable need to be final but class variable need not to be final
     byte startDayOfMonth=(byte)currentDate.getDayOfMonth(),startMonth=(byte)currentDate.getMonthValue(),endDayOfMonth=(byte)currentDate.getDayOfMonth(),endMonth=(byte)currentDate.getMonthValue();//for pdf generation use in lamda expression because local variable need to be final but class variable need not to be final
 
+    int currentItem1, totalItem1, scrollOutItems1, totalNumberOfLoadedData,totalSpecificInactiveRecord;
+    boolean isScrolling1 =false,loadOrNot=true;
+    LinearLayoutManager layoutManager;
+    HistoryAdapter historyAdapter;
+    ArrayList<HistoryModel> historyArraylist;
+    byte initialDataToLoad=15;//rows byte range from -128 to 127
+    final byte eachTimeDataToLoad=40;//recycler view will load data when initial data is finish
+    ProgressDialogHelper progressDialogHelper;
+    final byte defaultHistoryStoringForOneWeek =7,twoWeek=14,threeWeek=21;
     private FragmentHistoryTabBinding binding;
-
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState){
         binding = FragmentHistoryTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        progressDialogHelper=new ProgressDialogHelper(getContext());
+        binding.historyTotalWorkedPeople.setText(getTotalWorkedPeopleMessage(year,month,dayOfMonth));//initially message of total worked people
+        binding.historyDateViewTv.setText(getDateAndDayName(year,month,dayOfMonth));//initially set this
+        binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));//initially
+        binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));//initially
 
-        binding.historyTotalWorkedPeople.setText(getTotalWorkedPeopleMessage(year,month,dayOfMonth));//message of total worked people
-        binding.historyDateViewTv.setText(getDateAndDayName(this.year,this.month,this.dayOfMonth));//initially set this
-        binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));
-        binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));
-        fetchData(container);//initially fetch today's date data
 
+        deleteHistoryPreviousData(); //initially set values and perform operations
+
+        loadHistoryDataInitially(year,month,dayOfMonth,initialDataToLoad,container);//initially fetch today's date data
         binding.historyDateViewTv.setOnClickListener(view -> {
             DatePickerDialog datePickerDialog=new DatePickerDialog(getContext(), (datePicker, year, month, dayOfMonth) -> { //To show calendar dialog
                 this.dayOfMonth=(byte)dayOfMonth;
@@ -80,20 +98,16 @@ public class HistoryFragment extends Fragment {
                 binding.historyTotalWorkedPeople.setText(getTotalWorkedPeopleMessage(year,month,dayOfMonth));//message of total worked people
                 binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));
                 binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));
-                fetchData(container);
+                loadHistoryDataInitially(year,month,dayOfMonth,initialDataToLoad,container);
             }
             @Override
             public void afterTextChanged(Editable editable) {
 
             }
         });
-        binding.historyPlusOneTv.setOnClickListener(view -> {
-            setDate((byte)1);
-        });
-        binding.historyMinusOneTv.setOnClickListener(view -> {
-           setDate((byte)-1);
-       });
-        binding.historyToggleToShare.setChecked((shareingToggle)?true:false);//due to static variable
+        binding.historyPlusOneTv.setOnClickListener(view -> setDate((byte)1));
+        binding.historyMinusOneTv.setOnClickListener(view -> setDate((byte)-1));
+        binding.historyToggleToShare.setChecked(shareingToggle);//due to static variable
         binding.historyToggleToShare.setOnClickListener(view -> {
                if(binding.historyToggleToShare.isChecked()){
                    shareingToggle=true;
@@ -103,7 +117,6 @@ public class HistoryFragment extends Fragment {
                    MyUtility.snackBar(view,getResources().getString(R.string.sharing_to_whatsapp_enabled));
                }
         });
-
         binding.historySharePdfOrTextfileIcon.setOnClickListener(view -> {
             AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(getContext());
             LayoutInflater inflate=LayoutInflater.from(getContext());
@@ -150,12 +163,12 @@ public class HistoryFragment extends Fragment {
 
                 String userStartDateDayOfMonthMonthYear=startDate.getText().toString().trim();
                 String userEndDateDayOfMonthMonthYear=endDate.getText().toString().trim();
-                if(userStartDateDayOfMonthMonthYear.isEmpty() || userEndDateDayOfMonthMonthYear.isEmpty()){
+               if(userStartDateDayOfMonthMonthYear.isEmpty() || userEndDateDayOfMonthMonthYear.isEmpty()){
                     MyUtility.snackBar(view12, getResources().getString(R.string.enter_date));
                     return;
                 }
 
-                if(!isStartDateLessThenEndDate(userStartDateDayOfMonthMonthYear, userEndDateDayOfMonthMonthYear)){
+               if(!isStartDateLessThenEndDate(userStartDateDayOfMonthMonthYear, userEndDateDayOfMonthMonthYear)){
                     MyUtility.snackBar(view12,getResources().getString(R.string.ensure_the_start_date_is_before_the_end_date));
                     return;
                 }
@@ -165,9 +178,26 @@ public class HistoryFragment extends Fragment {
                    return;
                }
 
-              String pdfAndReturnAbsolutePath=generateHistoryPdfAndReturnAbsolutePath(userStartDateDayOfMonthMonthYear,userEndDateDayOfMonthMonthYear);
+               if(userStartDateDayOfMonthMonthYear.equals(userEndDateDayOfMonthMonthYear)){//if start and end date is equal then we would check that date data is present or not.if present do nothing else display message to user and return
+                   if(!isDataPresentInHistoryTable(userStartDateDayOfMonthMonthYear)){
+                       MyUtility.snackBar(view12,getResources().getString(R.string.history_not_available));
+                       return;
+                   }
+               }
+
+               String pdfAndReturnAbsolutePath=generateHistoryPdfAndReturnAbsolutePath(userStartDateDayOfMonthMonthYear,userEndDateDayOfMonthMonthYear);
                if(pdfAndReturnAbsolutePath !=null){
-                   MyUtility.snackBar(view12,"created0");
+
+                   ExecutorService backgroundTask= Executors.newSingleThreadExecutor();
+                   backgroundTask.execute(()->{
+                    //background task
+                     /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
+                     if(!MyUtility.shareFileToAnyApp(new File(pdfAndReturnAbsolutePath),"application/pdf",historyFileName(userStartDateDayOfMonthMonthYear,userEndDateDayOfMonthMonthYear),getContext())) {//open intent to share
+                         MyUtility.snackBar(view12,getResources().getString(R.string.failed_to_create_pdf));//this will not create error even though we dont use runOnUiThread() method
+                     }
+
+                   });backgroundTask.shutdown();//when all task completed then only shutdown
+
                }else{
                    MyUtility.snackBar(view12,getResources().getString(R.string.failed_to_create_pdf));
                }
@@ -176,22 +206,161 @@ public class HistoryFragment extends Fragment {
 
             customDialog.show();
         });
+        binding.historyRecyclerview.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override//this method is called when we start scrolling recyclerview
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if(loadOrNot) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    //this will tell the state of scrolling if user is scrolling then isScrolling variable will become true
+                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL && loadOrNot) {
+                        isScrolling1 = true;//when user start to scroll then this variable will be true
+                    }
+                }
+            }
+            @Override//after scrolling finished then this method will be called
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (loadOrNot){//when all data is loaded then don't load anything
+                    super.onScrolled(recyclerView, dx, dy);
+                    currentItem1 = layoutManager.getChildCount();
+                    totalItem1 = historyAdapter.getItemCount();// totalItem=manager.getItemCount();
+                    scrollOutItems1 = layoutManager.findFirstVisibleItemPosition();
 
+                    if (isScrolling1 && ((currentItem1 + scrollOutItems1) == totalItem1)) {
+                        isScrolling1 = false;
+                        progressDialogHelper.showProgressBar();
+
+                        //Toast.makeText(getContext(), getResources().getString(R.string.please_wait_loading), Toast.LENGTH_SHORT).show();
+                        fetchData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month,dayOfMonth)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ totalNumberOfLoadedData + "," + eachTimeDataToLoad, historyArraylist);
+
+                        totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
+                        if (totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when all record loaded then remove scroll listener
+                            //inactiveRecyclerView.clearOnScrollListeners();//this will remove scrollListener so we wont be able to scroll after loading all data and finished scrolling to last
+                            loadOrNot = false;//alternative way to remove inactiveRecyclerView.clearOnScrollListeners()
+                        }
+                    }else{                    //29 > 23
+                        if(totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when data is very less then totalNumberOfLoadedData it should not load and progress should not be visible
+                            loadOrNot = false;
+                            progressDialogHelper.hideProgressBar();
+                        }
+                    }
+                }
+            }
+        });
+
+        String[] historyKeepingOptions = getResources().getStringArray(R.array.historyKeepingWeeks);
+        ArrayAdapter<String> shareOptionsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, historyKeepingOptions);
+        binding.historySettingSpinner.setAdapter(shareOptionsAdapter);
+        binding.historySettingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                   String itemName = adapterView.getItemAtPosition(i).toString();
+
+                    switch (itemName) {
+                        case "FOR 1 WEEK": {
+                         SharedPreferencesHelper.setInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek);
+                         MyUtility.snackBar(view,"HISTORY WILL BE STORED "+itemName);
+                        }break;
+                        case "FOR 2 WEEK": {
+                            SharedPreferencesHelper.setInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS),twoWeek);
+                            MyUtility.snackBar(view,"HISTORY WILL BE STORED "+itemName);
+                        }break;
+                        case "FOR 3 WEEK": {
+                            SharedPreferencesHelper.setInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS),threeWeek);
+                            MyUtility.snackBar(view,"HISTORY WILL BE STORED "+itemName);
+                        }break;
+                    }
+                    //after selecting second time any option data is not shown so 0 is set so that when second time click it will show data
+                    //int initialposition = holder.spinnerdescAudioIcon.getSelectedItemPosition();
+                    binding.historySettingSpinner.setSelection(0, false);//clearing auto selected or if we remove this line then only one time we would be able to select
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         return root;
     }
+    private boolean isDataPresentInHistoryTable(String userStartDateDayOfMonthMonthYear){
+      Database db=Database.getInstance(getContext());
+      int[] date=convertStringDateToDayOfMonthMonthYear(userStartDateDayOfMonthMonthYear);
+      return db.isDataOfDatePresentInHistoryTable(date[2],(byte) date[1], (byte) date[0]);
+    }
+    private void deleteHistoryPreviousData() {//delete the data which is not in between given date
+        int[]  dateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        Database db=Database.getInstance(getContext());
+        if(!db.deleteHistoryRecord(dateArray[0], (byte) dateArray[1], (byte) dateArray[2])){
+            Toast.makeText(getContext(), "FAILED TO DELETE HISTORY", Toast.LENGTH_LONG).show();
+        }
+    }
+    public void loadHistoryDataInitially(int year, byte month, byte dayOfMonth, int loadDataInitially, ViewGroup container) {
+        totalNumberOfLoadedData=loadDataInitially;//act like limit
+        loadOrNot=true;
+        totalSpecificInactiveRecord= getCountOfSpecificDateHistory(year,month,dayOfMonth);
+        historyArraylist = getInitialHistoryData(year,month,dayOfMonth,totalNumberOfLoadedData, historyArraylist,container);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
+        historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
+        binding.historyRecyclerview.setAdapter(historyAdapter);
+        layoutManager=new LinearLayoutManager( getContext(), LinearLayoutManager.VERTICAL, false);
+        binding.historyRecyclerview.setLayoutManager(layoutManager);
+        binding.historyRecyclerview.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
+    }
+    private ArrayList<HistoryModel> getInitialHistoryData(int year, byte month, byte dayOfMonth, int limit, ArrayList<HistoryModel> arraylist, ViewGroup container) {
+        Database db=Database.getInstance(getContext());
+        try(Cursor cursor = db.getSpecificDateHistoryForRecyclerView(year,month,dayOfMonth,limit)) {//data is sorted in desc order
+            arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much
+            while (cursor.moveToNext()) {
+                HistoryModel model = new HistoryModel();
+                model.setId(cursor.getString(0));
+                model.setUserDate(cursor.getString(1));
+                model.setRemarks(cursor.getString(2));
+                model.setWagesOrDeposit(cursor.getInt(3));
+                model.setP1Work(cursor.getShort(4));
+                model.setP2Work(cursor.getShort(5));
+                model.setP3Work(cursor.getShort(6));
+                model.setP4Work(cursor.getShort(7));
+                model.setIsDeposit(cursor.getString(8).equals("1"));
+                model.setSystemTimeDate(cursor.getString(9));
+                model.setP1Skill(cursor.getString(10));
+                model.setP2Skill(cursor.getString(11));
+                model.setP3Skill(cursor.getString(12));
+                model.setP4Skill(cursor.getString(13));
+                model.setShared(cursor.getString(14) != null);
+                model.setStatus(cursor.getString(15));
+                model.setSubtractedAdvanceOrBal(cursor.getString(16));
+                model.setName(cursor.getString(17));
+                arraylist.add(model);
+            }
+        }
+            if(arraylist.size()==0){
+                MyUtility.snackBar(container,getResources().getString(R.string.history_not_available));
+            }
+            arraylist.trimToSize();//to free space
+            return arraylist;
+    }
+    public int getCountOfSpecificDateHistory(int year, byte month, byte day) {
+        Database db=Database.getInstance(getContext());
+        Cursor  cursor=db.getData("SELECT COUNT()  FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%'");
+        cursor.moveToFirst();
+        int count=cursor.getInt(0);
+        cursor.close();
+        db.close();
+        return count;
+    }
     private String historyKeepingRangeMessage() {
-        int settingStartDateArray[]= getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),"HISTORY_KEEPING_DAYS",defaultHistoryKeepingDays),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
-        StringBuilder sb=new StringBuilder().append((SharedPreferencesHelper.getInt(getContext(),"HISTORY_KEEPING_DAYS",defaultHistoryKeepingDays)+1)+" DAYS HISTORY AVAILABLE FROM DATE "+settingStartDateArray[2]+"-"+settingStartDateArray[1]+"-"+settingStartDateArray[0]+"  TO  "+LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear());//1 is added to get exact equal to data
+        int[] settingStartDateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        byte week=0;
+        int days=SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek);
+        week= (byte) ((days== defaultHistoryStoringForOneWeek)?1:(days==twoWeek)? 2: (days==threeWeek)? 3:0);
+        StringBuilder sb=new StringBuilder(50).append( week+" WEEK HISTORY PRESENT FROM DATE  "+settingStartDateArray[2]+"-"+settingStartDateArray[1]+"-"+settingStartDateArray[0]+"  TO  "+LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear());//actually it store extra 1 day and it is important
         return sb.toString();
     }
     private boolean userDateRangeChecker(String userStartDateDayOfMonthMonthYear, String userEndDateDayOfMonthMonthYear) {
-        int startDate[]=convertStringDateToDayOfMonthMonthYear(userStartDateDayOfMonthMonthYear);
-        int endDate[]=convertStringDateToDayOfMonthMonthYear(userEndDateDayOfMonthMonthYear);
+        int[] startDate =convertStringDateToDayOfMonthMonthYear(userStartDateDayOfMonthMonthYear);
+        int[] endDate =convertStringDateToDayOfMonthMonthYear(userEndDateDayOfMonthMonthYear);
 
         LocalDate userStartDate=LocalDate.of(startDate[2],startDate[1],startDate[0]);//this is better for taking date instead of using date pattern like dd-mm--yy this give erro when 0 is not present
         LocalDate userEndDate=LocalDate.of(endDate[2],endDate[1],endDate[0]);
 
-        int startDateArray[]= getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),"HISTORY_KEEPING_DAYS",defaultHistoryKeepingDays),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        int startDateArray[]= getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
 
         LocalDate settingStartDate=LocalDate.of(startDateArray[0],startDateArray[1],startDateArray[2]);
         LocalDate settingEndDate=LocalDate.now();
@@ -199,29 +368,30 @@ public class HistoryFragment extends Fragment {
         //checking user and setting date range
         return (userStartDate.isEqual(settingStartDate) || userStartDate.isAfter(settingStartDate))
                 && (userEndDate.isEqual(settingEndDate) || userEndDate.isBefore(settingEndDate));
-
     }
     private String generateHistoryPdfAndReturnAbsolutePath(String startDate, String endDate) {//if error return null
         try{
             String fileAbsolutePath;
             MakePdf makePdf = new MakePdf();
-            if(!makePdf.createPage1(400, MakePdf.defaultPageHeight, 1)) return null;//created page 1
+            if(!makePdf.createPage1(450, MakePdf.defaultPageHeight, 1)) return null;//created page 1
 
             if(!fetchDateAndCreateHistoryPdf(startDate,endDate,makePdf)) return null;
 
             if(!makePdf.createdPageFinish2()) return null;
 
-            fileAbsolutePath=makePdf.createFileToSavePdfDocumentAndReturnFile(getContext().getExternalFilesDir(null).toString(),"History_"+startDate+"_to_"+endDate).getAbsolutePath();
+            fileAbsolutePath=makePdf.createFileToSavePdfDocumentAndReturnFile(getContext().getExternalFilesDir(null).toString(),historyFileName(startDate,endDate)).getAbsolutePath();
 
             if(!makePdf.closeDocumentLastOperation4())return null;
 
             return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and if needed then convert to byteArray to store in db
 
         }catch (Exception ex){
-            Toast.makeText(getContext(), "FAILED TO GENERATE PDF", Toast.LENGTH_LONG).show();
             ex.printStackTrace();
             return null;
         }
+    }
+    private String historyFileName(String startDate, String endDate) {
+        return "HISTORY "+startDate+" TO "+endDate;
     }
     private boolean fetchDateAndCreateHistoryPdf(String startDayOfMonthMonthYear, String endDayOfMonthMonthYear, MakePdf makePdf) {
         try(Database db = Database.getInstance(getContext())){
@@ -237,12 +407,12 @@ public class HistoryFragment extends Fragment {
                 return false;
 
            // if (!makePdf.writeSentenceWithoutLines(new String[]{"History Instructions."} , new float[]{100f}, false, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"History Details Are In Sequential Order."} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"If Status Is:"} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"INSERTED : User Has Inserted Data On Same Day."} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"INSERTED+ : User Has Inserted And Updated Data On Same Day."} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"UPDATED : User Has Updated Previous Day Data."} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{"AUTOMATIC : Data Is Inserted Automatically By System."} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.history_details_are_in_sequential_order)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.if_status_is_colon)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_colon_user_has_inserted_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_plus_user_has_inserted_and_updated_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.updated_user_has_updated_previous_day_data)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
 
             // Iterate over the range of dates
                 LocalDate startingDate = startDate;
@@ -266,7 +436,7 @@ public class HistoryFragment extends Fragment {
         }
     }
     private String[] getHeaderOfSpecificHistoryDate(LocalDate startsDate,String[][] origionalHistoryData) {
-        if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then return no history available
+        if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then length would be 1 so return no history available
              return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()+" - "+origionalHistoryData[0][0]};
         }
         return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()};
@@ -277,7 +447,7 @@ public class HistoryFragment extends Fragment {
     private boolean createSpecifiedDateHistoryPdf(MakePdf makePdf, String origionalHistoryData[][],LocalDate date) {
         if(makePdf == null || origionalHistoryData==null) return false;
 
-        if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then return true because message no history available is already set in history header
+        if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then return true because message no history available is already set in history header.so no need to create header
           // if(!makePdf.writeSentenceWithoutLines(new String[]{origionalHistoryData[0][0]},new float[]{100f}, true, (byte) 0, (byte) 0)) return false;
            return true;
         }
@@ -308,17 +478,15 @@ public class HistoryFragment extends Fragment {
 
         return true;
     }
-
     private String getHistorySummary(LocalDate date) {
         StringBuilder sb=new StringBuilder(200)
-                .append(getResources().getString(R.string.total_payment)).append(" ").append(MyUtility.convertToIndianNumberSystem(getTotalPayment(date.getYear(), (byte) date.getMonthValue(), (byte) date.getDayOfMonth()))).append("   ")
-                .append(getResources().getString(R.string.total_amount_received)).append(" ").append(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(date.getYear(), (byte) date.getMonthValue(), (byte) date.getDayOfMonth()))).append("   ")
+                .append(getResources().getString(R.string.total_payment)).append(" ").append(MyUtility.convertToIndianNumberSystem(getTotalPayment(date.getYear(), (byte) date.getMonthValue(), (byte) date.getDayOfMonth()))).append("   , ")
+                .append(getResources().getString(R.string.total_amount_received)).append(" ").append(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(date.getYear(), (byte) date.getMonthValue(), (byte) date.getDayOfMonth()))).append("   , ")
                 .append(getTotalWorkedPeopleMessage(date.getYear(), (byte) date.getMonthValue(), (byte) date.getDayOfMonth()));
         return sb.toString();
     }
-
     private float[] getColumnWidth() {
-        return new float[]{11f,11f,7f,23f,11f,7f,16f,7f,7f};
+        return new float[]{11f,10f,7f,27f,11f,6f,14f,7f,7f};
     }
     private String[][] formateHistoryDataAccordingToColumn(String[][] origionalData){//if error return null
         //column origional Data received in this order-"STATUS","DATE","ID","NAME","2000","0","M","L","S3","S4","6",null,"P3","P4","REMARKS","100"
@@ -333,14 +501,14 @@ public class HistoryFragment extends Fragment {
                      if(j==4 || (j>=7 && j<=13)) continue;//skip unnecessary column
                     if(j==0 && origionalData[i][j] != null){//process cloumn 0 STATUS
 
-                        if(origionalData[i][j].equals(HistoryFragment.sameDayinserted)){
+                        if(origionalData[i][j].equals(HistoryFragment.sameDayInserted)){
                             modifiedData=getResources().getString(R.string.inserted);
                         }else if (origionalData[i][j].equals(HistoryFragment.sameDayUpdated)) {
                             modifiedData=getResources().getString(R.string.inserted_plus);
                         } else if (origionalData[i][j].equals(HistoryFragment.previousRecordUpdated)) {
                             modifiedData=getResources().getString(R.string.updated);
                         }else if (origionalData[i][j].equals(HistoryFragment.automaticInserted)) {
-                            modifiedData=getResources().getString(R.string.automatic);
+                            modifiedData=getResources().getString(R.string.calculated);
                         }
 
                     }else if (j == 5 && origionalData[i][j] != null) {//process cloumn 5 ISDEPOSIT
@@ -394,7 +562,7 @@ public class HistoryFragment extends Fragment {
     }
     private String getTotalWorkedPeopleMessage(int year, byte month, byte day){
         Database db=Database.getInstance(getContext());
-        char M='M',L='L',G='G';
+        char M=getResources().getString(R.string.mestre).charAt(0),L=getResources().getString(R.string.laber).charAt(0),G=getResources().getString(R.string.women_laber).charAt(0);
         int sumM=0,sumL=0,sumG=0;
 
         HashMap<Character,Integer> skill1data=db.getTotalPeopleWorked(year,month,day,Database.COL_14_P1_SKILL_H,Database.COL_8_P1_H);
@@ -446,7 +614,7 @@ public class HistoryFragment extends Fragment {
                 sumM=sumM+skill4data.get(M);
             }
 
-         return new StringBuilder().append("TOTAL  ").append(sumM+sumL+sumG).append("  PEOPLE WORKED").append("  ").append(M).append(": ").append(sumM).append("   ").append(L).append(": ").append(sumL).append("   ").append(G).append(": ").append(sumG).toString();
+         return new StringBuilder().append("TOTAL  ").append(sumM+sumL+sumG).append("  PEOPLE  WORKED").append("  ").append(M).append(": ").append(sumM).append("   ").append(L).append(": ").append(sumL).append("   ").append(G).append(": ").append(sumG).toString();
     }
     private boolean isStartDateLessThenEndDate(String startDayOfMonthMonthYear,String endDayOfMonthMonthYear) {
         if(startDayOfMonthMonthYear==null || endDayOfMonthMonthYear==null) return false;
@@ -501,46 +669,43 @@ public class HistoryFragment extends Fragment {
         StringBuilder sb=new StringBuilder(25).append(dayOfMonth+"-"+(month)+"-"+year+" , "+currentDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()).toUpperCase());
         return sb.toString();
     }
-    boolean fetchData(ViewGroup container){
+    private void fetchData(String query, ArrayList<HistoryModel> arraylist) {
+        new Handler().postDelayed(() -> {
+            dataLoad(query,arraylist);
+            progressDialogHelper.hideProgressBar();//after data loading progressbar disabled
+        }, 1000);//wait for 3 seconds
+    }
+    private void dataLoad(String query,ArrayList<HistoryModel> arraylist){//dynamically
         Database db=Database.getInstance(getContext());
-        try(Cursor cursor = db.getSpecificDateHistoryForRecyclerView(year,month,dayOfMonth)){//data is sorted in desc order
-            ArrayList<HistoryModel> historyData = new ArrayList<>();
-            while(cursor.moveToNext()){
-                HistoryModel model = new HistoryModel();
-                model.setId(cursor.getString(0));
-                model.setUserDate(cursor.getString(1));
-                model.setRemarks(cursor.getString(2));
-                model.setWagesOrDeposit(cursor.getInt(3));
-                model.setP1Work(cursor.getShort(4));
-                model.setP2Work(cursor.getShort(5));
-                model.setP3Work(cursor.getShort(6));
-                model.setP4Work(cursor.getShort(7));
-                model.setIsDeposit(cursor.getString(8).equals("1"));
-                model.setSystemTimeDate(cursor.getString(9));
-                model.setP1Skill( cursor.getString(10) );
-                model.setP2Skill( cursor.getString(11) );
-                model.setP3Skill(  cursor.getString(12) );
-                model.setP4Skill( cursor.getString(13) );
-                model.setShared( cursor.getString(14) != null);
-                model.setStatus(cursor.getString(15));
-                model.setSubtractedAdvanceOrBal(cursor.getString(16));
-                model.setName(cursor.getString(17));
-                historyData.add(model);
-            }
-            if(historyData.size()==0){
-                MyUtility.snackBar(container,getResources().getString(R.string.history_not_available));
-            }
-            HistoryAdapter historyAdapter = new HistoryAdapter(getContext(), historyData);
-            binding.historyRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-            binding.historyRecyclerview.setHasFixedSize(true);
-            binding.historyRecyclerview.setAdapter(historyAdapter);
-        }catch(Exception x){
-            x.printStackTrace();
-            return false;
-        }finally{
-            if(db!=null) db.close();
+        Cursor cursor = db.getData(query);//getting image from database
+        if(arraylist.size()>=100){//when arraylist size is greater then 100 then free space but ensure capacity will be as mention during declaration ie.150
+            arraylist.clear();
         }
-        return true;
+        while(cursor.moveToNext()){
+            HistoryModel model = new HistoryModel();
+            model.setId(cursor.getString(0));
+            model.setUserDate(cursor.getString(1));
+            model.setRemarks(cursor.getString(2));
+            model.setWagesOrDeposit(cursor.getInt(3));
+            model.setP1Work(cursor.getShort(4));
+            model.setP2Work(cursor.getShort(5));
+            model.setP3Work(cursor.getShort(6));
+            model.setP4Work(cursor.getShort(7));
+            model.setIsDeposit(cursor.getString(8).equals("1"));
+            model.setSystemTimeDate(cursor.getString(9));
+            model.setP1Skill( cursor.getString(10) );
+            model.setP2Skill( cursor.getString(11) );
+            model.setP3Skill(  cursor.getString(12) );
+            model.setP4Skill( cursor.getString(13) );
+            model.setShared( cursor.getString(14) != null);
+            model.setStatus(cursor.getString(15));
+            model.setSubtractedAdvanceOrBal(cursor.getString(16));
+            model.setName(cursor.getString(17));
+            arraylist.add(model);
+        }
+        historyAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() every time the list is updated,or inserted or deleted
+        arraylist.trimToSize();//If the size of the ArrayList is increased, the ensureCapacity() method will not have any effect. The ensureCapacity() method is used to ensure that the ArrayList has enough room to store the specified number of elements. If the size of the ArrayList is increased, the ensureCapacity() method will not be triggered.
+        cursor.close();
     }
     public int[] getBeforeOrForwardDateYearMonthDayOfMonth(byte forForwardDaysPlusAndPreviousDayMinus, int year, byte month, byte daysOfMonth){//if error return null
         try {//if 0 is passed then current date is return.if -1 then previous day +1 forward days

@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -738,7 +739,6 @@ public class MyUtility {
            }
        }
     }
-
     public static Integer getTotalDepositAmount(String id, Context context){//return null if error
         Database db = Database.getInstance(context);
         try {
@@ -763,7 +763,6 @@ public class MyUtility {
             return null;
         }
     }
-
     public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.indicator value start from 1
         Database db=Database.getInstance(context);
         try(//Database db=new Database(context);//to this database automatically
@@ -948,7 +947,6 @@ public class MyUtility {
 //            return false;
 //        }
 //    }
-
     public static String getActivePhoneNumbersFromDb(String id,Context context){//if no data return null..it return first phone number if first not available then send second phone number will be return
         Database db = Database.getInstance(context);
         try (
@@ -1293,6 +1291,38 @@ public class MyUtility {
             return true;
         }catch (Exception x){
             x.printStackTrace();
+            return false;
+        }
+    }
+    public static boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title,Context context){// ActivityResultLauncher<Intent> sharePdfLauncher
+        // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+        if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+            return false;
+        }
+        try {
+            //this code is used when sharePdfLauncher
+//            Intent intent = new Intent(Intent.ACTION_SEND);
+//            intent.setType(mimeType);
+//           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+//
+//            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+//            intent.putExtra(Intent.EXTRA_STREAM, uri);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
+//            sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
+
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType(mimeType);
+            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
+            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            Intent chooser = Intent.createChooser(intent, title);
+            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+           context.startActivity(chooser);// Start the chooser dialog
+
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
             return false;
         }
     }

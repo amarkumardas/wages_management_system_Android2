@@ -52,7 +52,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         if(data.isShared()){
             holder.shareIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
         }else{
-            holder.shareIcon.setBackgroundResource(R.drawable.baseline_whatsapp_24);
+            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(data.getId(),context);
+            if(phoneNumber!=null){//if there is phone number
+                holder.shareIcon.setBackgroundResource(R.drawable.baseline_whatsapp_24);
+            }else{//if no phone number
+                holder.shareIcon.setBackgroundResource(R.drawable.baseline_phone_disabled_24);
+            }
+
         }
 
         if(data.getStatus().equals(HistoryFragment.previousRecordUpdated)){//if user update previous day amount then show the information so make it visible and 3 indicate updated previously

@@ -31,13 +31,12 @@
             android:textSize="15sp"
             android:id="@+id/search_click_tv"/>
         <Button
-            android:layout_width="0dp"
+            android:id="@+id/verticledotsmenu_Click"
+            android:layout_width="12dp"
             android:layout_height="35dp"
             android:layout_weight="1"
-            android:background="@drawable/ic_baseline_more_verticledots_24"
-            android:id="@+id/verticledotsmenu_Click"
-
-            />
+            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/ic_baseline_more_verticledots_24" />
     </LinearLayout>
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"

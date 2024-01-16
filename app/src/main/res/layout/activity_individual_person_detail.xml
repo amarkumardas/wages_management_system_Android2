@@ -115,7 +115,7 @@
                     android:layout_weight="2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ic_baseline_phone_black_20"
+                    android:background="@drawable/baseline_phone_disabled_24"
                     android:gravity="center"
                     android:id="@+id/call_tv"
                     android:foreground="?android:attr/selectableItemBackground"/>

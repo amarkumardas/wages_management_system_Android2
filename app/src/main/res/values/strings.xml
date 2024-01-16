@@ -91,10 +91,17 @@
     <string name="inserted">INSERTED</string>
     <string name="inserted_plus">INSERTED+</string>
     <string name="updated">UPDATED</string>
-    <string name="automatic">AUTOMATIC</string>
+<!--    <string name="automatic">AUTOMATIC</string>-->
     <string name="failed_to_create_pdf">FAILED TO CREATE PDF</string>
 <!--    <string name="total_people_worked">TOTAL PEOPLE WORKED</string>-->
     <string name="history">HISTORY</string>
+    <string name="history_details_are_in_sequential_order">History Details Are In Sequential Order.</string>
+    <string name="if_status_is_colon">If Status Is:</string>
+    <string name="inserted_colon_user_has_inserted_data_on_same_day">INSERTED : User Has Inserted Data On Same Day.</string>
+    <string name="inserted_plus_user_has_inserted_and_updated_data_on_same_day">INSERTED+ : User Has Inserted And Updated Data On Same Day.</string>
+    <string name="updated_user_has_updated_previous_day_data">UPDATED : User Has Updated Previous Day Data.</string>
+    <string name="calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically">CALCULATED : User Has Calculated All Wages. And Data Is Inserted Automatically.</string><!-- Data Inserted Automatically By System.By Calculating All Wages/ CALCULATED : Data Is Inserted Automatically After Calculating All Wages-->
+
 
     <!--IndividualPersonDetailActivity-->
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
@@ -162,11 +169,18 @@
         <item>SHARE</item>
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
+    <string-array name="historyKeepingWeeks">
+        <item>STORE HISTORY</item>
+        <item>FOR 1 WEEK</item>
+        <item>FOR 2 WEEK</item>
+        <item>FOR 3 WEEK</item>
+    </string-array>
+    <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="sharingOptions">
         <item>TEXT</item>
         <item>A/C</item>
         <item>PHONE NUMBER</item>
-        <item>CURRENT INVOICE</item>
+        <item>RUNNING INVOICE</item>
         <item>IMAGE</item>
         <item>SHARE ALL</item>
     </string-array>

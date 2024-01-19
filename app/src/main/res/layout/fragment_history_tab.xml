@@ -144,12 +144,12 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="30dp"
-
             android:textAlignment="center"
             android:paddingTop="4dp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:textSize="13sp"/>
+            android:textSize="13sp"
+            android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
             android:background="@drawable/grey_line_bg_forlayout"
             android:layout_weight="1"
@@ -161,7 +161,8 @@
             android:layout_height="30dp"
             android:textColor="@color/green"
             android:textSize="13sp"
-            android:id="@+id/history_total_amount_received"/>
+            android:id="@+id/history_total_amount_received"
+            android:foreground="?android:attr/selectableItemBackground"/>
     </LinearLayout>
     </LinearLayout>
 

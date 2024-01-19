@@ -3,6 +3,7 @@ package amar.das.acbook;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.database.sqlite.SQLiteBlobTooBigException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -2470,15 +2471,6 @@ public class Database extends SQLiteOpenHelper {
         }
        return null;
     }
-    public Cursor getSpecificDateHistoryForRecyclerView(int year, byte month, byte day,int limit){//"2023-11-06"
-        StringBuilder query=new StringBuilder(300).append("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+limit);
-        return getData(query.toString());
-
-        //String.format("%04d-%02d-%02d", year, month, day)Let's break down the format pattern:
-        //%04d: This is a placeholder for an integer (d stands for decimal). The 4 specifies the minimum width of the field, and the 0 indicates that leading zeros should be used to pad the number if it has fewer than four digits. This is used for formatting the year.
-        //-%02d: This is another integer placeholder with a minimum width of 2, and again, it uses leading zeros for padding. The hyphen (-) is a literal character in the pattern. This is used for formatting the month.
-        //-%02d: Similar to the previous placeholder, it's used for formatting the day.
-    }
     public String[][] getSpecificDataHistoryForPdf(int year, byte month, byte day){//"2023-11-06" if error return null.and if no history then 2d string size will be 1
         //IF STRING[][] IS REDUCE OR INCREASE THEN IT WILL EFFECT TO OTHER CODE
          StringBuilder query=new StringBuilder(300).append("SELECT "+Database.COL_19_STATUS_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_1_ID_H+","+Database.COL_21_NAME_H+","
@@ -2515,10 +2507,79 @@ public class Database extends SQLiteOpenHelper {
         //-%02d: This is another integer placeholder with a minimum width of 2, and again, it uses leading zeros for padding. The hyphen (-) is a literal character in the pattern. This is used for formatting the month.
         //-%02d: Similar to the previous placeholder, it's used for formatting the day.
     }
+    public int getRowsCountOfSpecificDateHistory(int year, byte month, byte day) {
+        try(Cursor  cursor=getData("SELECT COUNT()  FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%'")){
+            cursor.moveToFirst();
+            return cursor.getInt(0);
+        }catch(Exception x){
+            x.printStackTrace();
+            return 0;
+        }
+    }
+    public int getRowsCountOfOnlyTotalPaymentHistory(int year, byte month, byte day) {
+        try(Cursor cursor1 = getData("SELECT COUNT() FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='0' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT COUNT() FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " < 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")) {//if subtracted column value is less then 0 that means today payment done
+            //we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
+            cursor1.moveToFirst();
+            cursor2.moveToFirst();
+            return cursor1.getInt(0)+cursor2.getInt(0);
+        }catch(Exception x){
+           x.printStackTrace();
+           return 0;
+        }
+    }
+    public int getRowsCountOfOnlyTotalPaymentReceivedHistory(int year, byte month, byte day) {
+        try(Cursor cursor1 = getData("SELECT COUNT() FROM " + Database.TABLE_HISTORY +" WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='1' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT COUNT() FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " > 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")) {//if subtracted column value is less then 0 that means today payment done
+            //we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
+            cursor1.moveToFirst();
+            cursor2.moveToFirst();
+            return cursor1.getInt(0)+cursor2.getInt(0);
+        }catch(Exception x){
+            x.printStackTrace();
+            return 0;
+        }
+    }
+    public Cursor getALLDataHistoryForRecyclerView(int year, byte month, byte day, int skip,int fetch){//"2023-11-06"
+        //it will fetch all data from history table
+        StringBuilder query=new StringBuilder(300).append("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE " +Database.COL_13_SYSTEM_DATETIME_H + " LIKE '"+String.format("%04d-%02d-%02d", year, month,day)+"%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ skip + "," + fetch);
+        return getData(query.toString());//if cursor closed gives error
+
+        //String.format("%04d-%02d-%02d", year, month, day)Let's break down the format pattern:
+        //%04d: This is a placeholder for an integer (d stands for decimal). The 4 specifies the minimum width of the field, and the 0 indicates that leading zeros should be used to pad the number if it has fewer than four digits. This is used for formatting the year.
+        //-%02d: This is another integer placeholder with a minimum width of 2, and again, it uses leading zeros for padding. The hyphen (-) is a literal character in the pattern. This is used for formatting the month.
+        //-%02d: Similar to the previous placeholder, it's used for formatting the day.
+    }
+    public Cursor getOnlyTotalPaymentHistoryForRecyclerView(int year, byte month, byte day, int skip, int fetch){//return null if error
+        /*if user has updated wages/deposit but wages/deposit amount is same after updation then that record will not be fetch due to same data because nothing changed*/
+        Cursor[] arr=new Cursor[2];//if cursor closed gives error
+        try{ Cursor cursor1 = getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H + " FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='0' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ skip + "," + fetch);//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " < 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ skip + "," + fetch);//if subtracted column value is less then 0 that means today payment done
+            arr[0]=cursor1;//we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
+            arr[1]=cursor2;
+            return new MergeCursor(arr);
+        }catch(Exception x) {
+            x.printStackTrace();
+            return null;
+        }
+    }
+    public Cursor getOnlyTotalReceivedPaymentHistoryForRecyclerView(int year, byte month, byte day, int skip, int fetch){//return null if error
+      /*if user has updated wages/deposit but wages/deposit amount is same after updation then that record will not be fetch due to same data because nothing changed*/
+        Cursor[] arr=new Cursor[2];//if cursor closed gives error
+        try{ Cursor cursor1 = getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H + " FROM " + Database.TABLE_HISTORY +" WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='1' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ skip + "," + fetch);//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
+            Cursor cursor2 = getData("SELECT " + Database.COL_1_ID_H+","+Database.COL_2_USER_DATE_H+","+Database.COL_5_REMARKS_H+","+Database.COL_6_WAGES_H+","+Database.COL_8_P1_H+","+Database.COL_9_P2_H+","+Database.COL_10_P3_H+","+Database.COL_11_P4_H+","+Database.COL_12_ISDEPOSITED_H+","+Database.COL_13_SYSTEM_DATETIME_H+","+Database.COL_14_P1_SKILL_H+","+Database.COL_15_P2_SKILL_H+","+Database.COL_16_P3_SKILL_H+","+Database.COL_17_P4_SKILL_H+","+Database.COL_18_IS_SHARED_H+","+Database.COL_19_STATUS_H+","+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H+","+Database.COL_21_NAME_H+ " FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " > 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_H+" DESC LIMIT "+ skip + "," + fetch);//if subtracted column value is less then 0 that means today payment done
+            arr[0]=cursor1;//we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
+            arr[1]=cursor2;
+            return new MergeCursor(arr);
+        }catch(Exception x) {
+            x.printStackTrace();
+            return null;
+        }
+    }
     public String getTotalPaymentHistory(int year,byte month,byte day){
         try(Cursor cursor1 = getData("SELECT SUM(" + Database.COL_6_WAGES_H + ") FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='0' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
             Cursor cursor2 = getData("SELECT SUM(" + Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + ") FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " < 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")){//if subtracted column value is less then 0 that means today payment done
-            cursor1.moveToFirst();
+            cursor1.moveToFirst();//we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
             cursor2.moveToFirst();
             return String.valueOf(cursor1.getInt(0)+Math.abs(cursor2.getInt(0)));
         }catch(Exception x) {
@@ -2529,7 +2590,7 @@ public class Database extends SQLiteOpenHelper {
     public String getTotalReceivedPaymentHistory(int year,byte month,byte day){
         try(Cursor cursor1 = getData("SELECT SUM(" + Database.COL_6_WAGES_H + ") FROM " + Database.TABLE_HISTORY + " WHERE (" + Database.COL_19_STATUS_H + "='1' OR " + Database.COL_19_STATUS_H + "='2') AND "+Database.COL_12_ISDEPOSITED_H+" ='1' AND "+Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'");//status code 1 or 2 means user has entered today and updated so directly taking sum from wages
             Cursor cursor2 = getData("SELECT SUM(" + Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + ") FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_19_STATUS_H+" ='3' AND "+Database.COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H + " > 0 AND " + Database.COL_13_SYSTEM_DATETIME_H + " LIKE '" + String.format("%04d-%02d-%02d", year, month, day) + "%'")){//if subtracted column value is less then 0 that means today payment done
-            cursor1.moveToFirst();
+            cursor1.moveToFirst();//we cant combine this two query or else incorrect result strictly not possible because there is condition where both query becomes true if user update wages but kept same wages amount
             cursor2.moveToFirst();
             return String.valueOf(cursor1.getInt(0)+Math.abs(cursor2.getInt(0)));
         } catch (Exception x) {

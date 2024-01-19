@@ -168,7 +168,7 @@
         <item>REMARKS</item>
         <item>SHARE</item>
     </string-array>
-    <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
+    <!--dynamically coded -->
     <string-array name="historyKeepingWeeks">
         <item>STORE HISTORY</item>
         <item>FOR 1 WEEK</item>

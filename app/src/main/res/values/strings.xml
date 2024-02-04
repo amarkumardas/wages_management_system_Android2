@@ -52,7 +52,7 @@
     <string name="deposited">[DEPOSITED]</string>
     <string name="audio_playing">AUDIO PLAYING</string>
     <string name="hyphen_edited">-EDITED]</string>
-    <string name="previous_details_were_hyphen">PREVIOUS DETAILS WERE-</string>
+    <string name="previous_details_were_colon">PREVIOUS DETAILS WERE:</string>
     <!--    <string name="recording">RECORDING</string>-->
     <!--<string name="ok">OK</string>-->
 
@@ -65,7 +65,7 @@
     <string name="ok">OK</string>
     <string name="no_remarks">NO REMARKS</string>
     <string name="you_are_updating">YOU ARE UPDATING</string>
-    <string name="click_to_update_deposit">CLICK TO UPDATE DEPOSIT</string>
+    <string name="to_update">TO UPDATE</string>
     <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND MAY BE DELETED</string>
     <string name="failed_to_update">FAILED TO UPDATE</string>
     <string name="correct_the_data_or_cancel_and_enter_again">CORRECT THE DATA OR CANCEL AND ENTER AGAIN</string>
@@ -115,7 +115,7 @@
     <string name="value_out_of_range_please_check_total_work_amount">VALUE OUT OF RANGE PLEASE CHECK TOTAL WORK AMOUNT</string>
     <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
     <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
-    <string name="status_cant_add_more">STATUS: CAN\'T ADD MORE-</string>
+    <string name="status_cant_add_more">STATUS: CAN\'T ADD MORE:</string>
     <string name="cant_remove_default_skill">CAN\'T REMOVE DEFAULT SKILL</string>
     <string name="cant_remove">CAN\'T REMOVE</string>
     <string name="status_colon_failed">STATUS: FAILED</string>
@@ -138,6 +138,11 @@
     <string name="rate">RATE</string>
     <string name="x">X</string>
 
+    <!--recycler view input data-->
+    <string name="days_required_to_work">DAYS REQUIRED TO WORK =</string>
+    <string name="work_amount">WORK AMOUNT =</string>
+    <string name="write_remarks">WRITE REMARKS</string>
+
     <!-- Database.java-->
     <string name="check_last_remarks">CHECK LAST REMARKS</string>
     <string name="failed_to_make_id_active">FAILED TO MAKE ID ACTIVE</string>
@@ -151,6 +156,19 @@
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
     <string name="delete">DELETE</string>
+
+    <!--info data or meta data -->
+    <string name="add_remove_m_l_g">ADD/REMOVE M L G</string>
+    <string name="total_worked_days">TOTAL WORKED DAYS</string>
+    <string name="star">STAR</string>
+    <string name="location">LOCATION</string>
+    <string name="religion">RELIGION</string>
+    <string name="leaving_date">LEAVING DATE</string>
+    <string name="returning_date">RETURNING DATE</string>
+    <string name="activate">ACTIVATE</string>
+    <string name="person_info">PERSON INFO</string>
+    <string name="edit">EDIT</string>
+    <string name="rate_equal">RATE =</string>
 
     <string-array name="addOrRemoveMlG">
         <item>SELECT</item>
@@ -260,7 +278,7 @@
     <string name="total_equal">TOTAL =</string>
     <string name="final_calculation">FINAL CALCULATION</string>
     <string name="long_press_to_save">LONG PRESS TO SAVE</string>
-    <string name="long_press_to_deposit">LONG PRESS TO DEPOSIT</string>
+    <string name="to_deposit">TO DEPOSIT</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
@@ -354,7 +372,5 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
-
-
 
 </resources>

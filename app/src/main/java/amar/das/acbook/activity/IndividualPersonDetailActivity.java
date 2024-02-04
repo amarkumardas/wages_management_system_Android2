@@ -60,12 +60,14 @@ import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-     ActivityIndividualPersonDetailBinding binding;
+    ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
     String audioPath;
     boolean toggleToStartRecording=false;
     private String fromIntentPersonId;
     Database db;
+    int cYear;
+    byte cMonth,cDayOfMonth;
     int []arr=new int[7];
     String active ="0";
     byte redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
@@ -230,7 +232,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              // Cursor allDataCursor=db.getData("SELECT "+Database.COL_22_DATE+","+Database.COL_24_MICPATH+","+Database.COL_25_DESCRIPTION+","+Database.COL_26_WAGES+","+Database.COL_27_DEPOSIT+","+Database.COL_28_P1+","+Database.COL_29_P2+","+Database.COL_291_P3+","+Database.COL_292_P4+","+Database.COL_21_ID+","+Database.COL_23_TIME+","+Database.COL_293_ISDEPOSITED+" FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"='"+fromIntentPersonId+"'");
              Cursor allDataCursor=db.getWagesDepositDataForRecyclerView(fromIntentPersonId);
               dataList=new ArrayList<>();
-              if(allDataCursor!=null) {
+              if(allDataCursor!=null){
                   while (allDataCursor.moveToNext()) {
                       WagesDetailsModel model = new WagesDetailsModel();
                       model.setUserGivenDate(allDataCursor.getString(0));
@@ -253,7 +255,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                   binding.singleRecordRecy.setAdapter(wagesDetailsAdapter);
                   binding.singleRecordRecy.scrollToPosition(dataList.size() - 1);//this will scroll recycler view to last position automatically
               }else {
-                  Toast.makeText(this, "NO DATA IN allDataCursor CURSOR", Toast.LENGTH_LONG).show();
+                  Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
               }
             //*******************done Recycler view********************************************
             //retrieving data from db
@@ -1073,176 +1075,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     return true;
                 }
-                //if((checkInternalStorageAvailability()*1000) >= 50){//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-//                        if (MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){//Take permission
-//                            if (updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase()) {//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
-//                                if (MyUtility.createTextFileInvoice(fromIntentPersonId,getBaseContext(),getExternalFilesDir(null).toString())){
-//                                    if (savePdfToDatabaseAndDeleteFromDevice(generatePDFAndReturnFileAbsolutePath(fromIntentPersonId))) {//first pdf is generated then saved in db in bytes
-//                                        if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
-//                                            finalDialog.dismiss();
-//                                        }
-//                                        if (viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
-//                                            if (deleteDataFromDB(fromIntentPersonId)){
-//                                                Toast.makeText(IndividualPersonDetailActivity.this, "successfully created", Toast.LENGTH_SHORT).show();
-//                                            } else {
-//                                                Toast.makeText(IndividualPersonDetailActivity.this, "check remarks\n in recyclerview", Toast.LENGTH_LONG).show();
-//                                            }
-//                                        } else {
-//                                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-//                                        }
-//                                    } else {
-//                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE PDF IN DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-//                                    }
-//                            }else{
-//                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO CREATE TEXT FILE IN DEVICE\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-//                                }
-//                            } else {
-//                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE OR BALANCE TO DB\n(NOTHING LOST)", Toast.LENGTH_LONG).show();
-//                            }
-//                        }else {//request for permission
-//                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-//                            ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
-//                       }
-
-//                private boolean deleteDataFromDB(String id) {
-//                    try(Database db=new Database(getApplicationContext())){//so that object close automatically
-//                       return db.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(id);
-//                    }catch(Exception ex){
-//                        Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
-//                        ex.printStackTrace();
-//                        return false;
-//                    }
-//                }
-//                private boolean updateInvoiceNumberBy1ToDb(String id) {
-//                    try(Database db=new Database(getApplicationContext());
-//                        Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
-//                        cursor.moveToFirst();//means only one row is returned
-////                       if(!db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'")){
-////                          return false;
-////                       }
-//                        return db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET  "+Database.COL_396_PDFSEQUENCE +" ='" + (cursor.getInt(0)+1) +"' WHERE "+Database.COL_31_ID+"='" + id + "'");
-//
-//                       // cursor.close();
-//                    }catch (Exception ex){
-//                        ex.printStackTrace();
-//                        return false;
-//                    }
-////                    return true;
-//                }
-//                private boolean beforeDeletingWagesAudiosShouldBeDeletedFirst(String id) {//deleting all audios
-//                    try(Database personDb=new Database(getApplicationContext());
-//                        Cursor cursor = personDb.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 4) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
-//                         while(cursor.moveToNext()){
-//                             if(cursor.getString(0) != null) {//checking path may be null
-//                                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(cursor.getString(0))) {
-//                                      return false;
-//                                 }
-//                             }
-//                         }
-//                        return true;
-//                    }
-//                }
-//                private boolean deleteAudioFirstThenWagesAndDepositFromDBorRecyclerView(String id) {//If audio failed to delete then recycler view data will not be deleted
-//                  try(Database db=new Database(getBaseContext());
-//                        Cursor cursor=db.getData("SELECT EXISTS (SELECT 1 FROM " + db.tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){ //SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
-//                        cursor.moveToFirst();
-//                        if (cursor.getShort(0) != 1){//if getShort(0) is 1 that means data is present in table.
-//                            return true;//if already no single record present then return true so if != 1 means no data present in table.
-//                        }
-//                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(id)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
-//                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-//                            if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE SO YOURSELF DELETE ALL AUDIO HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE. BETTER TO DELETE AUDIO THEN TRY TO DO FINAL CALCULATION)",0,0,0,0,0,0,"0")){
-//                                Toast.makeText(IndividualPersonDetailActivity.this, "DELETE ALL AUDIO ID: "+id+" \nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
-//                            }
-//                          return false;//because audio failed to delete so don't perform any operation else this message in recyclerview will be deleted if we delete all rows
-//                         }
-//
-//                        return db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id));//delete all rows from recycler view
-//                    }catch(Exception x){
-//                        x.printStackTrace();
-//                        return false;
-//                    }
-//
-//                    //-----------------------------------------------------------
-////                    try(Database db=new Database(getBaseContext());
-////                        // Cursor cursor = db.getData("SELECT "+db.columnNameOutOf4Table(id, (byte) 1) +" FROM " + db.tableNameOutOf4Table(id) + " WHERE "+db.columnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'")){//so that object close automatically
-////
-////                        Cursor cursor=db.g etData("SELECT EXISTS (SELECT 1 FROM " + db.tableNameOutOf4Table(id) + " WHERE ID = '" + id + "')")){ //SELECT EXISTS (SELECT 1 FROM active_l_g_wages_table WHERE ID = '9'); This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
-////                        cursor.moveToFirst();
-////                        if (cursor.getShort(0) != 1){//if getShort(0) is 1 that means data is present in table.
-////                            return true;//if already no single record present then return true so if != 1 means no data present in table.
-////                        }
-////                        if(!beforeDeletingWagesAudiosShouldBeDeletedFirst(id)){//deleting audio first before deleting wages otherwise audio will not be deleted because deleting wages row first will delete path on mic so it is important to delete audio first
-//////                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE AUDIOS SO MANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-//////                                        if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-DELETE AUDIOS MANUALLY HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE)",0,0,0,0,0,0,"0")){
-//////                                           Toast.makeText(IndividualPersonDetailActivity.this, "OPTIONAL TO DO \nMANUALLY DELETE BY YOURSELF FROM YOUR DEVICE AUDIO ID: "+id, Toast.LENGTH_LONG).show();
-//////                                       }
-////                            Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO DELETE ALL AUDIOS FROM YOUR DEVICE AUDIO ID: "+id+"\n\n\ncheck remarks in recycler view", Toast.LENGTH_LONG).show();
-////                            if(!db.insertWagesOrDepositOnlyToActiveTableTransaction(id,MyUtility.getOnlyCurrentDate(), MyUtility.getOnlyTime(),null,"[AUTOMATIC ENTERED-FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE SO YOURSELF DELETE ALL AUDIO HAVING ID:"+id+" (IF NOT DELETED THEN IT WILL BE IN DEVICE STORAGE WHICH IS NO USE. BETTER TO DELETE AUDIO THEN TRY TO DO FINAL CALCULATION)",0,0,0,0,0,0,"0")){
-////                                Toast.makeText(IndividualPersonDetailActivity.this, "DELETE ALL AUDIO ID: "+id+" \nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
-////                            }
-////                            return false;//because audio failed to delete so don't perform any operation else this message in recyclerview will be deleted if we delete all rows
-////                        }
-////
-//////                        if(!db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id))){
-//////                            return false;//if failed to deleted
-//////                        }
-////                        return db.deleteAllRowsTransaction(id,db.tableNameOutOf4Table(id));//delete all rows from recycler view
-////                    }catch(Exception x){
-////                        x.printStackTrace();
-////                        return false;
-////                    }
-//                }
-//                private boolean addMessageAfterFinalCalculationToRecyclerview(String id) {
-//                    try(Database db = new Database(getApplicationContext());
-//                        Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
-//                    {
-//                        String date=MyUtility.getOnlyCurrentDate();
-//                        String onlyTime = MyUtility.getOnlyTime();
-//                        cursor.moveToFirst();//means only one row is returned
-//                        if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
-//
-//                            return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,0,"0");
-//
-//                        }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
-//
-//                            return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date,onlyTime,null, "[" +onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",0,0,0,0,0,cursor.getInt(1),"1");
-//
-//                        }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
-//
-//                             return db.insertWagesOrDepositOnlyToActiveTableTransaction(id,date, onlyTime,null, "[" + onlyTime +getResources().getString(R.string.hyphen_automatic_entered)+"\n\n" + "[After calculation all cleared  Rs. 0 ]",0,0,0,0,0,0,"0");
-//
-//                        }
-//                        return false;
-//                    }catch (Exception ex){
-//                        ex.printStackTrace();
-//                        return false;
-//                    }
-//                }
-               // private boolean savePdfToDatabaseAndDeleteFromDevice(String pdfAbsolutePath) {//deleting from device because it is stored in database
-//                    if(pdfAbsolutePath != null) {
-//                        try (Database db = new Database(getApplicationContext());
-//                             Cursor cursor = db.getData("SELECT "+Database.COL_395_INVOICE2+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'")){//so that object close automatically
-//                             cursor.moveToFirst();
-//                            byte[] newPDF = Files.readAllBytes(Paths.get(pdfAbsolutePath));//CONVERTED pdf file to byte array if path is not found then catch block execute
-//
-//                            if (cursor.getBlob(0) == null) {//if pdf2 is null then store in pdf2
-//                                return db.insertPdf(fromIntentPersonId, newPDF, 2);
-//                            }
-//                            //if pdf1 is not null then store in pdf 2
-//                            if (db.insertPdf(fromIntentPersonId, cursor.getBlob(0), 1)) {//store pdf2 in pdf1
-//                                return db.insertPdf(fromIntentPersonId, newPDF, 2);//store new pdf in pdf2
-//                            }
-//                            return false;
-//                        }catch (Exception ex){
-//                            Toast.makeText(IndividualPersonDetailActivity.this, "File not Found Exception", Toast.LENGTH_LONG).show();
-//                            ex.printStackTrace();
-//                            return false;
-//                        }finally{
-//                            MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
-//                        }
-//                    }else return false;
- //               }
                 private boolean viewPDFFromDb(byte whichPdf,String fromIntentPersonId) {
                     try {//to view pdf
                         finish();//while going to other activity so destroy this current activity(individualPersonDetailActivity) so that while coming back we will see refresh activity
@@ -1257,34 +1089,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         return false;
                     }
                 }
-//                public String generatePDFAndReturnFileAbsolutePath(String id) {//if error return null otherwise file path
-//                    try{
-//                        String fileAbsolutePath;
-//                        MakePdf makePdf = new MakePdf(); //create PDF
-//                       if(!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
-//
-//                       if(!fetchOrganizationDetailsAndWriteToPDF(makePdf)) return null;//org details
-//
-//                       if(!fetchPersonDetailAndWriteToPDF(id,makePdf))return null;//personal detail
-//
-//                      if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return null;//calculation
-//
-//                        if(!makePdf.createdPageFinish2()) return null;
-//
-//                        fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFileAbsolutePath3(getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(getBaseContext(),id));
-//
-//                        if(!makePdf.closeDocumentLastOperation4())return null;
-//
-//                       if(fileAbsolutePath !=null){
-//                           return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
-//                       }else return null;
-//
-//                    }catch (Exception ex){
-//                        Toast.makeText(IndividualPersonDetailActivity.this, "PDF GENERATION ERROR", Toast.LENGTH_LONG).show();
-//                        ex.printStackTrace();
-//                        return null;
-//                    }
-//                }
 //                private void displayFinalResult(String title,String message) {
 //                    AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
 //                    showDataFromDataBase.setCancelable(false);
@@ -1320,76 +1124,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                     return 0;
                 }
-//                private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(){
-//                        Cursor cursor = db.getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId + "'");
-//                        cursor.moveToFirst();//means only one row is returned
-//
-//                    //updating rate and total worked days
-//                    boolean success = db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_32_R1+"='"+r1+"' , "+Database.COL_33_R2+"='"+r2+"' , "+Database.COL_34_R3+"='"+r3+"' , "+Database.COL_35_R4+"='"+r4+"' , "+Database.COL_397_TOTAL_WORKED_DAYS+" ='" +(cursor.getInt(0)+p1)+"' WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
-//                    cursor.close();
-//
-//                    if(success){//if rate is updated then proceed
-//                       if (!MyUtility.isEnterDataIsWrong(innerArray)){//if data is right then only change fields.This condition is already checked but checking again
-//                           if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
-//                               //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
-//
-//                               if(((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)){//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
-//                                   Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
-//                                   return false;
-//                               }else if((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages){
-//                                   //updating Advance to db
-//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-//                                   if(!success){
-//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-//                                       return false;
-//                                   }
-//                                   //if there is advance then balance  column should be 0
-//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-//                                   if (!success) {
-//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-//                                       return false;
-//                                      }
-//                               }else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
-//
-//                                   //updating balance to db if greater then 0
-//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-//                                   if (!success) {
-//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE BALANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-//                                       return false;
-//                                   }
-//                                   //if there is balance then update advance column should be 0
-//                                   success = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-//                                   if (!success) {
-//                                       Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE ADVANCE AMOUNT TO DB", Toast.LENGTH_LONG).show();
-//                                       return false;
-//                                   }
-//                               }
-//                           }else{
-//                               Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
-//                               return false;
-//                           }
-//                       }else{
-//                           Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
-//                           return false;
-//                       }
-//                   }else{
-//                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO UPDATE RATE AND TOTAL WORKED DAYS", Toast.LENGTH_LONG).show();
-//                        return false;
-//                    }
-//                    return true;
-//                }
-//                public boolean isp1p2p3p4PresentAndRateNotPresenth(int r1,int r2,int r3,int r4,int p1,int p2,int p3,int p4,int indicator){
-//                    if(indicator==1 && (p1 !=0 && r1==0)){
-//                        return true;
-//                    }else if(indicator==2 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0))){
-//                        return true;
-//                    }else if(indicator==3 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0))){
-//                        return true;
-//                    }else if(indicator==4 && ((p1 !=0 && r1==0) || (p2 !=0 && r2==0) || (p3 !=0 && r3==0) || (p4 !=0 && r4==0))){
-//                        return true;
-//                    }
-//                    return false;
-//                }
                 private void updateTotalWorkAmountAndAdvanceOrBalanceTv() {
                     if(!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields
                         workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4) + totalDeposit));
@@ -1763,228 +1497,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-//    public boolean fetchWorkDetailsCalculationAndWriteToPDF(String id, MakePdf makePdf) {
-//        try{
-//            byte indicator= MyUtility.get_indicator(getBaseContext(),id);
-//            boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
-//            String[] skillHeader = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateAccordingToIndicator   TO AVOID INDEX EXCEPTION
-//            float[] columnWidth=getColumnWidthBasedOnIndicator(indicator,errorDetection);
-//            int[] arrayOfTotalWagesDepositRateAccordingToIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
-//            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
-//            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id,errorDetection);//it amy return null   when no data
-//            if(errorDetection[0]==false){
-//                if(!makeSummaryAndWriteToPDFBasedOnIndicator(getBaseContext(),indicator,id,makePdf,arrayOfTotalWagesDepositRateAccordingToIndicator)) return false;//summary
-//                if(!makePdf.writeSentenceWithoutLines(new String[]{""},new float[]{100f},true, (byte) 50,(byte)50)) return false;//just for 1 space
-//
-//                           if (recyclerViewWagesData != null){//null means data not present
-//                                if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
-//                                                               //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
-//                                    if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
-//                                        return false;
-//                                    }
-//                                }else return false;
-//                             }
-//
-//                if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
-//                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
-//                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]), "****TOTAL DEPOSIT****"}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
-//                            return false;
-//                        }
-//                    }else return false;
-//                }
-//                if(!addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(indicator, arrayOfTotalWagesDepositRateAccordingToIndicator, makePdf, skillHeader)) {return false;}
-//            }else return false;//means error has occurred
-//
-//            return true;
-//        }catch(Exception ex){
-//            ex.printStackTrace();
-//             return false;
-//        }
-//    }
-//    public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
-//        try{
-//            switch (indicator) {
-//                case 1: return new float[]{12f, 12f, 5f, 71f};
-//
-//                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
-//
-//                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
-//
-//                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
-//            }
-//            return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-//            errorDetection[0]=true;//indicate error has occur
-//            return new float[]{1f,1f,1f};//to avoid error
-//        }
-//    }
-//    public boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
-//        Database db = Database.getInstance(context);
-//        try(//Database db = new Database(getApplicationContext());
-//            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'"))
-//         {
-//             if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50)) return false;
-//
-//            cursor.moveToFirst();//means only one row is returned
-//            if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
-//
-//               if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
-//                                                                                                                                                                                                                                          //yellow                               green
-//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
-//                if(!makePdf.singleCustomRow(new String[]{ " *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
-//
-//            }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
-//
-//                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
-//                //                                                                                                                                                                                                                      yellow                               green                                    green
-//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
-//                if(!makePdf.singleCustomRow(new String[]{ " *After calculation balance Rs. " +MyUtility.convertToIndianNumberSystem(cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
-//
-//            }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-//                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
-//                                                                                                                                                                                                                                            // yellow                               green                                green
-//                if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
-//                if(!makePdf.singleCustomRow(new String[]{ " * After calculation all cleared Rs. 0"},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
-//
-//            }
-//            return true;
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//             return false;
-//        }
-//    }
-//    public boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
-//        try{
-//            switch(indicator){
-//                case 1: {
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false, (byte) 88, (byte) 88);
-//                    if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
-//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    } else {//when there is deposit then add deposit
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                         //                                                                                                                                                                                                                                                                           green color
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",  MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3]) + sumArrayAccordingToIndicator[2])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }
-//                }break;
-//                case 2: {
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                    if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
-//                        //                                                                                                                                      P1*R1                              +                             P2*R2
-//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }else{//when there is deposit then add deposit
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                        //                       P1*R1                             +                             P2*R2                             +  DEPOSIT
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]) + sumArrayAccordingToIndicator[3])}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }
-//                }break;
-//                case 3:{
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//
-//                    if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
-//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}, new float[]{67f, 33f}, 0, Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }else{ //when there is deposit then add deposit
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                              +  DEPOSIT
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])) + sumArrayAccordingToIndicator[4])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }
-//                }break;
-//                case 4:{
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, false,(byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//                    makePdf.singleCustomRow(new String[]{skillAccordingToindicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}, new float[]{15f, 20f, 12f, 20f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88);
-//
-//                    if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
-//                        makePdf.singleCustomRow(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }else{//when there is deposit then add deposit
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT =",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0, 0, 0, 0, true, (byte) 88, (byte) 88 );
-//                        //                                                                                P1*R1                             +                                P2*R2                                                           P3*R3                                                                           P4*R4                                  +  DEPOSIT
-//                        makePdf.singleCustomRow(new String[]{"TOTAL DEPOSIT+WORK AMOUNT=",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7] + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])) + sumArrayAccordingToIndicator[5])}, new float[]{67f, 33f}, 0,Color.rgb(26,145,12), 0, 0, true, (byte) 88, (byte) 88);
-//                    }
-//                }break;
-//            }
-//            return true;
-//    }catch(Exception ex){
-//        ex.printStackTrace();
-//        return false;
-//    }
-//    }
-//    public String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
-//        try{
-//                switch (indicator) {
-//                    case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,"****TOTAL****"};
-//
-//                    case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,"****TOTAL****"};
-//
-//                    case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,"****TOTAL****"};
-//
-//                    case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,"****TOTAL****"};
-//                }
-//                return new String[]{"no indicator"};//this code will not execute due to return in switch block just using to avoid error
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//            errorDetection[0]=true;//indicate error has occur
-//            return new String[]{"error occurred"};//to avoid error
-//        }
-//    }
-//    public boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
-//        try{
-//            makePdf.makeTopHeaderOrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
-//            return true;
-//        }catch(Exception ex){
-//            ex.printStackTrace();
-//           return false;
-//        }
-//    }
-//    public boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-//        try (Database db=new Database(getApplicationContext());
-//             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-//             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
-//            if (cursor1 != null){
-//                cursor1.moveToFirst();
-//                String bankAccount, aadhaar;
-//                int pdfSequenceNo;
-//
-//                if (cursor1.getString(1).length() > 4) {
-//                    bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
-//                } else {
-//                    bankAccount = "";
-//                }
-//                if (cursor1.getString(2).length() > 5) {
-//                    aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
-//                } else {
-//                    aadhaar = "";
-//                }
-//
-//                if (cursor2 != null) {//this make filename unique
-//                    cursor2.moveToFirst();
-//                    pdfSequenceNo = (cursor2.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually NOT UPDATING so that if pdf generation is failed sequence should not be updated in db*/
-//                } else {
-//                    pdfSequenceNo = -1;//if error
-//                }
-//
-//                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
-//                if(activePhoneNumber != null){
-//                    activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
-//                }else{
-//                    activePhoneNumber="";
-//                }
-//                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
-//            }else{
-//                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
-//                makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]","[NULL NO DATA IN CURSOR]",false);
-//            }
-//            return true;
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//             return false;
-//        }
-//    }
     private void indicator1234CalculateAndUpdate(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
         boolean bool;
         int  totalDeposit,totalWages;
@@ -2035,6 +1547,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
     }
     private void insertDataToRecyclerView_AlertDialogBox(int indicator) {
+        final boolean[] editOrNot = {false,false};//for spinner to close dialogbox
         AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
         LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
 
@@ -2047,17 +1560,16 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         mediaRecorder=null;//so that it not take previous VALUE
         audioPath=null;//so that it not take previous VALUE
 
+        Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.info_spinner_add_lmg_or_remove);
         TextView deposit_btn_tv=myView.findViewById(R.id.to_deposit_tv);
         TextView hardcodedP1=myView.findViewById(R.id.hardcoded_p1_tv);
         TextView hardcodedP2=myView.findViewById(R.id.hardcoded_p2_tv);
         TextView hardcodedP3=myView.findViewById(R.id.hardcoded_p3_tv);
         TextView hardcodedP4=myView.findViewById(R.id.hardcoded_p4_tv);
         TextView micIcon=myView.findViewById(R.id.mic_tv);
-       // TextView dateIcon=myView.findViewById(R.id.date_icon_tv);
         TextView advanceOrBalanceWarring=myView.findViewById(R.id.advance_or_balance_amount_warring_tv);
         TextView noOfDaysToWork=myView.findViewById(R.id.no_of_days);
         TextView inputDate=myView.findViewById(R.id.input_date_tv);
-       // TextView inputTime=myView.findViewById(R.id.input_time_tv);
         TextView saveAudio=myView.findViewById(R.id.save_audio_tv);
 
         Chronometer playAudioChronometer =myView.findViewById(R.id.chronometer);
@@ -2077,6 +1589,134 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         Button save=myView.findViewById(R.id.save_btn);
         save.setVisibility(View.GONE);//initially save button is disabled it is enabled when user enter any data and its important otherwise app crash
         Button cancel=myView.findViewById(R.id.cancel_btn);
+
+
+        //****************************************************setting adapter for addOrRemoveMLG spinner*****************************************
+        String[] addOrRemoveMLG = getResources().getStringArray(R.array.addOrRemoveMlG);
+        addOrRemoveMLG[0]="ADD/REMOVE";//changing the value of array to show to user
+        customSpinnerRemoveOrAddMlg.setAdapter(new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, addOrRemoveMLG));
+        // when activity is loaded spinner item is selected automatically so to avoid this we are using customSpinnerSetting.setSelection(initialPosition, false);
+//            int initialposition = binding.customSpinnerSetting.getSelectedItemPosition();
+//            binding.customSpinnerSetting.setSelection(initialposition, false);//clearing auto selected item
+        customSpinnerRemoveOrAddMlg.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {//**Spinner OnItemSelectedListener event will execute twice:1.Spinner initializationUser 2.selected manually Try to differentiate those two by using flag variable.that's the reason boolean array is used
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
+                String data = adapterView.getItemAtPosition(pos).toString();
+                try(Database db=new Database(getBaseContext());
+                    Cursor cursor =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                    cursor.moveToFirst();//skill which is null there skill is updated
+                    switch (data) {
+                        case "ADD L": //adding L means p2
+                        {
+                            editOrNot[1] = true;//indicate user has selected option
+
+                            if (cursor.getString(0) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(1) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(2) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
+
+                            } else
+                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
+                        }break;
+                        case "ADD M": //adding M p3
+                        {
+                            editOrNot[1] = true;//indicate user has selected option
+                            if (cursor.getString(0) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(1) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(2) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
+
+                            } else
+                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
+                        }break;
+                        case "ADD G": //adding G p4
+                        {
+                            editOrNot[1] = true;//indicate user has selected option
+
+                            if (cursor.getString(0) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(1) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+
+                            } else if (cursor.getString(2) == null) {
+                                showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
+
+                            } else
+                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
+                        }break;
+                        case "REMOVE M/L/G": //removing
+                        {
+                            editOrNot[1] = true;//indicate user has selected option
+                            //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
+                            Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
+                            if (cursorIndicator != null) {
+                                cursorIndicator.moveToFirst();
+                                if (cursorIndicator.getString(0) == null) {//person1
+                                    displayResult(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
+
+                                } else if (cursorIndicator.getString(0).equals("2")) {//person2
+                                     Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                    result.moveToFirst();
+                                    if (result.getInt(0) == 0) {//Means no data IN P2 so set null
+                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                        }else{
+                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                        }
+                                    } else if (result.getInt(0) >= 1) {
+                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                    }
+
+                                } else if (cursorIndicator.getString(0).equals("3")) {//person3
+                                    Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                    result.moveToFirst();
+                                    if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
+                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                        }else{
+                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                        }
+                                    } else if (result.getInt(0) >= 1) {
+                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                    }
+                                } else if (cursorIndicator.getString(0).equals("4")) {//person4
+                                    Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                    result.moveToFirst();
+                                    if (result.getInt(0) == 0) {//Means no data IN P2
+                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                        }else{
+                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                        }
+                                    } else if (result.getInt(0) >= 1) {
+                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                    }
+                                } else
+                                    displayResult(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
+                            } else
+                                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                        }break;
+                    }
+                }catch (Exception x){
+                    x.printStackTrace();
+                }
+                if(editOrNot[1]) {
+                    customDialog.dismiss();//closing dialog to prevent window leak.whenever user select any option then editOrNot[1]=true; will be set.so if it is true then dismiss dialog before going to IndividualPersonDetailActivity.java from displayResult method
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) { }
+        });
+        //****************************************************done setting adapter for addOrRemoveMLG spinner*****************************************
 
         //***********************setting no of days and warning Total advance amount********************************************
         Cursor  advanceAmountCursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" , "+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");
@@ -2118,26 +1758,28 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         advanceAmountCursor.close();
         //***********************done setting no of days and warring Total advance amount********************************************
 
-        deposit_btn_tv.setOnLongClickListener(view -> {
+        deposit_btn_tv.setOnClickListener(view -> {
             Intent intent=new Intent(IndividualPersonDetailActivity.this,CustomizeLayoutOrDepositAmount.class);
             intent.putExtra("ID",fromIntentPersonId);
             customDialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
             finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
             startActivity(intent);
-            return false;
         });
 
         //to automatically set date to textView
         final Calendar current=Calendar.getInstance();//to get current date and time
-        //int cYear=current.get(Calendar.YEAR);
-       // int cMonth=current.get(Calendar.MONTH);
-       // int cDayOfMonth=current.get(Calendar.DAY_OF_MONTH);
+          cYear=current.get(Calendar.YEAR);
+          cMonth= (byte) current.get(Calendar.MONTH);
+          cDayOfMonth= (byte) current.get(Calendar.DAY_OF_MONTH);
         inputDate.setText(current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR));
         inputDate.setOnClickListener(view -> {
             //To show calendar dialog
             DatePickerDialog datePickerDialog=new DatePickerDialog(IndividualPersonDetailActivity.this, (datePicker, year, month, dayOfMonth) -> {
                 inputDate.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
-            },current.get(Calendar.YEAR),current.get(Calendar.MONTH),current.get(Calendar.DAY_OF_MONTH));//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
+                cYear=year;
+                cMonth= (byte) month;
+                cDayOfMonth= (byte) dayOfMonth;
+            },cYear,cMonth,cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
             datePickerDialog.show();
         });
 
@@ -2207,27 +1849,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             String date=inputDate.getText().toString();//date will be inserted automatically
 
             //To get exact time so write code in save button
-//            Date d=Calendar.getInstance().getTime();
-//            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-//            String onlyTime = sdf.format(d);
-
-//            String onlyTime = MyUtility.getOnlyTime();
-//            inputTime.setText(onlyTime);//setting time to take time and store in db
-//            String time=inputTime.getText().toString();//time will be inserted automatically
-
             String time = MyUtility.getOnlyTime();
 
-           // final Calendar current=Calendar.getInstance();//to get current date
-           // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
-            //db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" +" WHERE ID='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date not user entered date
-           // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + Calendar.getInstance().get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR) + "' , "+Database.COL_16_TIME+"='"+onlyTime+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
-
-           // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'"+" , "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"='"+time+"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");////when ever user insert its wages or deposit or update then latest date will be updated to current date
-
-
-//            if(!db.activateIdWithLatestDate(fromIntentPersonId,time)){
-//                Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
-//            }
 
             if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
@@ -2257,8 +1880,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
             }
             //*********************************  all the upper code are common to all indicator 1,2,3,4*******************
-           //  db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET ACTIVE='" + 1 + "'" +" WHERE ID='" + fromIntentPersonId + "'");//when ever user insert data then that person will become active.It will work for all
-            if(indicator==1){
+             if(indicator==1){
                 if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                     //insert to database
                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0,  "0")) {
@@ -2355,7 +1977,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     playAudioChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
                     saveAudio.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
                     micIcon.setEnabled(false);
-                    micIcon.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
+                    micIcon.setBackgroundResource(R.drawable.baseline_record_voice_over_24);//change color when user click
 
                     VoiceRecorder voiceRecorder=new VoiceRecorder(fromIntentPersonId,getExternalFilesDir(null).toString());
 
@@ -2555,7 +2177,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
         startActivity(intent);
     }
-
     private void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1,p2,p3,p4;
         p1 = inputP1.getText().toString().trim();

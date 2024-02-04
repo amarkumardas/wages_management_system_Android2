@@ -31,17 +31,17 @@ import amar.das.acbook.utility.MyUtility;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
 public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
-     ActivityCustomizeLayoutOrDepositAmountBinding binding;
+    ActivityCustomizeLayoutOrDepositAmountBinding  binding;
     Database db;
     private  String fromIntentPersonId;
     //for recording variable declaration
     MediaRecorder mediaRecorder;
     String audioPath;
     boolean toggleToStartRecording =false;
-
     int []arr=new int[3];//to give information which field is empty or contain data
     String []previousDataHold=new String[3];
-    int cYear,cMonth,cDayOfMonth;
+    int cYear;
+    byte cMonth,cDayOfMonth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +99,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     binding.customChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
                     binding.customSaveAudioIconTv.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
                     binding.customMicIconTv.setEnabled(false);
-                    binding.customMicIconTv.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
+                    binding.customMicIconTv.setBackgroundResource(R.drawable.baseline_record_voice_over_24);//change color when user click
 
                     VoiceRecorder voiceRecorder=new VoiceRecorder(fromIntentPersonId,getExternalFilesDir(null).toString());//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
                     if(voiceRecorder.startRecording()){
@@ -144,12 +144,15 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 
           final Calendar current=Calendar.getInstance();//to get current date and time
           cYear=current.get(Calendar.YEAR);
-          cMonth=current.get(Calendar.MONTH);
-          cDayOfMonth=current.get(Calendar.DAY_OF_MONTH);
+          cMonth= (byte) current.get(Calendar.MONTH);
+          cDayOfMonth= (byte) current.get(Calendar.DAY_OF_MONTH);
         binding.customDateTv.setOnClickListener(view -> {//to automatically set date to textView
             //To show calendar dialog
             DatePickerDialog datePickerDialog=new DatePickerDialog(CustomizeLayoutOrDepositAmount.this, (datePicker, year, month, dayOfMonth) -> {
                 binding.customDateTv.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
+                cYear=year;
+                cMonth= (byte) month;
+                cDayOfMonth= (byte) dayOfMonth;
             },cYear,cMonth,cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
             datePickerDialog.show();
         });
@@ -193,25 +196,15 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                   isWrongData=MyUtility.isEnterDataIsWrong(arr);//it should be here to get updated result
                   isDataPresent= MyUtility.isDataPresent(arr);
                 if(isDataPresent==true && isWrongData==false ) {  //means if data is present then check is it right data or not
-                    //db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 + "'" +" WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user update then that person will become active
-//                    if(!db.activateIdWithLatestDate(fromIntentPersonId,onlyTime)){
-//                        Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
-//                    }
 
                     if(binding.customDepositEt.getText().toString().trim().length() >= 1) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
-
-                    //success = db.insert_Deposit_Table2(fromIntentPersonId,binding.customDateTv.getText().toString(),binding.customTimeTv.getText().toString(),micPath,remarks,depositAmount,"1");
                     success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,depositAmount,0,0,0,0,"1");
                     if(!success){
                         Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                     }
                     goBackToIndividualPersonActivity(fromIntentPersonId);
-//                    if (success){
-//                        showResult("DEPOSIT - "+depositAmount,"\nDATE-  "+binding.customDateTv.getText().toString()+"\n\nREMARKS- "+remarks+"\n\nMICPATH- "+micPath);
-//                    } else
-//                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO INSERT", Toast.LENGTH_LONG).show();
 
                 }else
                     Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
@@ -231,21 +224,12 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             });
 
             //while updating this will execute else statement
-        //}else if(getIntent().hasExtra("ID") &&  getIntent().hasExtra("DATE") &&  getIntent().hasExtra("TIME")){
         }else if(getIntent().hasExtra("ID") &&  getIntent().hasExtra("SYSTEM_DATETIME")){
 
             binding.customDepositAmountTv.setText(getResources().getString(R.string.update_deposit_amount));
             binding.customSaveBtn.setText(getResources().getString(R.string.long_press_to_update));
 
-//            String recycleDate= getIntent().getStringExtra("DATE");
-//              cDayOfMonth = extractData(0,recycleDate);
-//              cMonth = extractData(1, recycleDate);
-//              cYear = extractData(2, recycleDate);
-//            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
-
             db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
-            //Cursor cursorData = db.getData("SELECT  "+Database.COL_25_DESCRIPTION+","+Database.COL_27_DEPOSIT+","+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + getIntent().getStringExtra("ID") + "'" + " AND "+Database.COL_22_DATE+"= '" + getIntent().getStringExtra("DATE") + "'" + " AND "+Database.COL_23_TIME+"='" + getIntent().getStringExtra("TIME") + "'");
-           // Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
             Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
             cursorData.moveToFirst();//this cursor is not closed
             String cDescription,cDeposit,cMicPath;
@@ -253,26 +237,16 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             cDeposit=cursorData.getString(1);
             cMicPath=cursorData.getString(2);
 
-//            String userGivenDate= cursorData.getString(3);
-//            cDayOfMonth = extractData(0,userGivenDate);
-//            cMonth = extractData(1, userGivenDate);
-//            cYear = extractData(2, userGivenDate);
-//            binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
-
             String[] userGivenDate= cursorData.getString(3).split("-");
-            cDayOfMonth = Integer.parseInt(userGivenDate[0]);
-            cMonth = Integer.parseInt(userGivenDate[1])-1;//-1 because it is global variable updated to when user click date button
+            cDayOfMonth = (byte) Integer.parseInt(userGivenDate[0]);
+            cMonth = (byte) (Integer.parseInt(userGivenDate[1])-1);//-1 because it is global variable updated to when user click date button
             cYear = Integer.parseInt(userGivenDate[2]);
             binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);//date set
 
             binding.customDepositEt.setText(cDeposit);//fetching deposit
 
-//             previousDataHold[0]="DATE- "+getIntent().getStringExtra("DATE");
-//             previousDataHold[1]="TIME- "+getIntent().getStringExtra("TIME");
-
-             previousDataHold[0]="DATE: "+cursorData.getString(3);
-//             previousDataHold[1]="TIME- "+MyUtility.extractTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME"));
-             previousDataHold[1]="DEPOSIT: "+cDeposit;
+             previousDataHold[0]="DATE: "+cursorData.getString(3)+" ("+MyUtility.getTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME"))+")";
+             previousDataHold[1]="DEPOSIT: "+(cDeposit!=null?MyUtility.convertToIndianNumberSystem(Long.parseLong(cDeposit)):0);
              previousDataHold[2]="REMARKS: "+cDescription;
             cursorData.close();
 
@@ -317,32 +291,15 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 String remarks;
 
                 //To get exact onlyTime so write code in save button
-//                Date d=Calendar.getInstance().getTime();
-//                SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for AM or PM
-
-                //String onlyTime = MyUtility.getOnlyTime();
-               // binding.customTimeTv.setText(onlyTime);//setting onlyTime to take onlyTime and store in db
-               // String onlyTime=binding.customTimeTv.getText().toString();
                 String onlyTime=MyUtility.getOnlyTime();
                 String userDate=binding.customDateTv.getText().toString();
-
-                //this will store latest date by taking current date
-//                final Calendar current1 =Calendar.getInstance();//to get current date
-//                String curreentDate = current1.get(Calendar.DAY_OF_MONTH)+"-"+(current1.get(Calendar.MONTH)+1)+"-"+ current1.get(Calendar.YEAR);
-
-//                if(date.equals(currentDate)) {//if it is true then store
-//                    db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" +date + "'" +" WHERE ID='" + getIntent().getStringExtra("ID") + "'");
-//                }
-
-
-                //db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its  deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
 
                 if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                     micPath= audioPath ;
                  }
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[0] + "  " + "TIME: "+MyUtility.getTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME")) + "\n" + previousDataHold[1] + "\n" + previousDataHold[2] ;//onlyTime is set automatically to remarks if user enter any remarks;
+                remarks = "[" + onlyTime + getResources().getString(R.string.hyphen_edited)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim()+"\n\n"+getResources().getString(R.string.previous_details_were_colon)+"\n" + previousDataHold[0] +"\n" + previousDataHold[1] + "\n" + previousDataHold[2] ;//onlyTime is set automatically to remarks if user enter any remarks;
                 arr[1] = 1;//this is important because when user do not enter any data while updating then least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 boolean isWrongData,isDataPresent,success;
@@ -390,19 +347,6 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         }else
             Toast.makeText(this, "No ID from other Intent", Toast.LENGTH_SHORT).show();
     }
-//    private int extractData(int i,String date) {
-//        int data=0;
-//        String[] str=date.split("-");//converting using String.split() method with "-" as a delimiter
-//        if(i==0){//0 is for day of month
-//            return Integer.parseInt(str[0]);
-//        }else if(i==1){//1 is for month
-//            return (Integer.parseInt(str[1])-1);//month-1 to get right result
-//        }else if(i==2){//2 is for year
-//            return Integer.parseInt(str[2]);
-//        }
-//        return data;
-//    }
-
 //    private void showResult(String title, String message) {
 //        AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(CustomizeLayoutOrDepositAmount.this);
 //        showDataFromDataBase.setCancelable(false);

@@ -103,6 +103,8 @@ public class HistoryFragment extends Fragment {
                 binding.historyTotalWorkedPeople.setText(getTotalWorkedPeopleMessage(year,month,dayOfMonth));//message of total worked people
                 binding.historyTotalPayment.setText(MyUtility.convertToIndianNumberSystem(getTotalPayment(year,month,dayOfMonth)));
                 binding.historyTotalAmountReceived.setText(MyUtility.convertToIndianNumberSystem(getTotalReceivedPayment(year,month,dayOfMonth)));
+                binding.historyTotalAmountReceived.setBackgroundResource(R.drawable.grey_line_bg_forlayout);
+                binding.historyTotalPayment.setBackgroundResource(R.drawable.grey_line_bg_forlayout);
                 loadALLMixedHistoryDataInitially(year,month,dayOfMonth,initialDataToLoad,container);
             }
             @Override
@@ -310,6 +312,8 @@ public class HistoryFragment extends Fragment {
         binding.historyRecyclerview.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
     }
     public void loadTotalPaymentDataInitially(int year, byte month, byte dayOfMonth, int loadDataInitially, ViewGroup container) {
+        binding.historyTotalPayment.setBackgroundResource(R.drawable.graycolor_bg);
+        binding.historyTotalAmountReceived.setBackgroundResource(R.drawable.white_detailsbg);
         whichOneTwoFetch=2;
         totalNumberOfLoadedData=loadDataInitially;//act like limit
         loadOrNot=true;
@@ -324,7 +328,8 @@ public class HistoryFragment extends Fragment {
         binding.historyRecyclerview.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
     }
     public void loadTotalPaymentReceivedDataInitially(int year, byte month, byte dayOfMonth, int loadDataInitially, ViewGroup container) {
-        /*if user has updated wages/deposit but wages/deposit amount is same after updation then that record will not be shown in recycler view due to same because nothing changes*/
+        binding.historyTotalAmountReceived.setBackgroundResource(R.drawable.graycolor_bg);
+        binding.historyTotalPayment.setBackgroundResource(R.drawable.white_detailsbg);
         whichOneTwoFetch=3;
         totalNumberOfLoadedData=loadDataInitially;//act like limit
         loadOrNot=true;

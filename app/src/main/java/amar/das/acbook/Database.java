@@ -1920,9 +1920,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     private boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-            // Cursor cursor2 = getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")
-             ){
+        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -1993,8 +1991,8 @@ public class Database extends SQLiteOpenHelper {
                 }
 
                 if (recyclerViewDepositData != null) {//if deposit there then draw in pdf
-                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, false)) {//[indicator + 1] is index of deposit
-                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]),context.getResources().getString(R.string.star_total_width_star)}, new float[]{12f, 12f, 76f}, 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
+                    if(makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, depositColumn(), 9, false)) {//[indicator + 1] is index of deposit
+                        if(!makePdf.singleCustomRow(new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[indicator + 1]),context.getResources().getString(R.string.star_total_width_star)},depositColumn(), 0, 0, 0, 0, true, (byte) 0, (byte) 0)) {
                             return false;
                         }
                     }else return false;
@@ -2008,16 +2006,21 @@ public class Database extends SQLiteOpenHelper {
             return false;
         }
     }
+
+    private float[] depositColumn() {
+        return  new float[]{10f, 12f, 78f};
+    }
+
     private float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
         try{
             switch (indicator) {
-                case 1: return new float[]{12f, 12f, 5f, 71f};
+                case 1: return new float[]{10f, 12f, 5f, 73f};
 
-                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
+                case 2: return new float[]{10f, 12f, 5f, 5f, 68f};
 
-                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
+                case 3: return new float[]{10f, 12f, 5f, 5f, 5f, 63f};
 
-                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
+                case 4: return new float[]{10f, 12f, 5f, 5f, 5f, 5f, 58f};
             }
             return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
         }catch (Exception ex){

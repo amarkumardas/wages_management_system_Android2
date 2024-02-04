@@ -46,7 +46,6 @@ public class InactiveFragment extends Fragment {
     String skillIndicator;//for not loading initial data
     ProgressBar progressBar;
 
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,21 +71,6 @@ public class InactiveFragment extends Fragment {
             } else if (checkedIdOfRadioBtn==R.id.g_total_inactive_radiogroup) {
                 loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.women_laber),initialDataToLoad);
             }
-
-           // switch(checkedIdOfRadioBtn){
-//                case R.id.mestre_total_inactive_radiogroup:{//M
-//                    loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.mestre),29);
-//                    break;
-//                }
-//                case R.id.laber_total_inactive_radiogroup:{//L
-//                    loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.laber),29);
-//                    break;
-//                }
-//                case R.id.g_total_inactive_radiogroup:{//G
-//                    loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(getResources().getString(R.string.women_laber),29);
-//                    break;
-//                }
-//            }
         });
         binding.recycleviewInactive.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override//this method is called when we start scrolling recyclerview

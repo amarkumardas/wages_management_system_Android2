@@ -41,7 +41,7 @@ import amar.das.acbook.R;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.utility.MyUtility;
 
-public class CalculatedTextFileAdapter extends RecyclerView.Adapter<CalculatedTextFileAdapter.ViewHolder> implements Filterable {
+public class BackUpCalculatedTextFileAdapter extends RecyclerView.Adapter<BackUpCalculatedTextFileAdapter.ViewHolder> implements Filterable {
     Context context;
     LinkedList<TextFileModel> dataList;//LinkedList because more operation is deleting
     LinkedList<TextFileModel> backupData;//this data will not be changed
@@ -60,21 +60,21 @@ public class CalculatedTextFileAdapter extends RecyclerView.Adapter<CalculatedTe
     public void RecyclerViewListener(RecyclerViewListener listener){//callback
         this.listener=listener;
     }
-    public CalculatedTextFileAdapter(Context context, LinkedList<TextFileModel> list){
+    public BackUpCalculatedTextFileAdapter(Context context, LinkedList<TextFileModel> list){
         this.context =context;
         this.dataList =list;
         backupData =new LinkedList<>(dataList);//storing object to backup for search view
     }
     @NonNull
     @Override
-    public CalculatedTextFileAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BackUpCalculatedTextFileAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater=LayoutInflater.from(parent.getContext());
         View view=inflater.inflate(R.layout.text_file_single_row,parent,false);
-        return new CalculatedTextFileAdapter.ViewHolder(view);//constructor  public ViewHolder(@NonNull View itemView)
+        return new BackUpCalculatedTextFileAdapter.ViewHolder(view);//constructor  public ViewHolder(@NonNull View itemView)
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CalculatedTextFileAdapter.ViewHolder holder, int position) {//to fill data on every view filed
+    public void onBindViewHolder(@NonNull BackUpCalculatedTextFileAdapter.ViewHolder holder, int position) {//to fill data on every view filed
        TextFileModel data= dataList.get(position);
        holder.fileName.setText(data.getFileName());
 

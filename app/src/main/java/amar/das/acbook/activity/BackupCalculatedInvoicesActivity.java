@@ -17,14 +17,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 import amar.das.acbook.R;
-import amar.das.acbook.adapters.CalculatedTextFileAdapter;
+import amar.das.acbook.adapters.BackUpCalculatedTextFileAdapter;
 import amar.das.acbook.databinding.AllCalculatedInvoicesBinding;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.ui.ml.MLFragment;
 import amar.das.acbook.utility.MyUtility;
 
-public class AllCalculatedInvoicesActivity extends AppCompatActivity {
+public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
       AllCalculatedInvoicesBinding binding;
       byte toDeleteOldInvoiceIndicator=100;
     @Override
@@ -54,11 +54,11 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
 
             Collections.sort(pathList);//in ascending order
 
-            CalculatedTextFileAdapter textFileAdapter=new CalculatedTextFileAdapter(this,pathList);
+            BackUpCalculatedTextFileAdapter textFileAdapter=new BackUpCalculatedTextFileAdapter(this,pathList);
             binding.textFileRecyclerview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             binding.textFileRecyclerview.setAdapter(textFileAdapter);
             binding.textFileRecyclerview.setHasFixedSize(true);
-            textFileAdapter.RecyclerViewListener(new CalculatedTextFileAdapter.RecyclerViewListener() {//this is automatically triggered when in adapter class any event or click happen
+            textFileAdapter.RecyclerViewListener(new BackUpCalculatedTextFileAdapter.RecyclerViewListener() {//this is automatically triggered when in adapter class any event or click happen
                 @Override
                 public void updatedCount(int count) {
                     if(count == 0){
@@ -122,8 +122,8 @@ public class AllCalculatedInvoicesActivity extends AppCompatActivity {
                     }
                 }
             }else{
-                Toast.makeText(AllCalculatedInvoicesActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(AllCalculatedInvoicesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                Toast.makeText(BackupCalculatedInvoicesActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(BackupCalculatedInvoicesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
              }
             return absolutePathList;
         }catch (Exception x){

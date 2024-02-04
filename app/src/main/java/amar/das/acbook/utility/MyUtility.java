@@ -346,7 +346,7 @@ public class MyUtility {
             ArrayList<String> al = new ArrayList<>();
             switch(indicator){
                 case 1: {
-                      al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}));
+                      al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X","RATE ="+sumArrayAccordingToIndicator[3]+" = ", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}));
 
                      if (sumArrayAccordingToIndicator[2] == 0) {//DEPOSIT AMOUNT checking there or not or can be use (indicator+1) to get index of deposit
                         al.add(Arrays.toString(new String[]{"TOTAL WORK AMOUNT =",  MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[3])}));
@@ -360,9 +360,9 @@ public class MyUtility {
                      }
                 }break;
                 case 2: {
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X","RATE ="+sumArrayAccordingToIndicator[4]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X","RATE ="+sumArrayAccordingToIndicator[5]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5])}));
                      if (sumArrayAccordingToIndicator[3] == 0) {//DEPOSIT AMOUNT checking there or not
                         al.add(Arrays.toString(new String[]{"TOTAL WORK AMOUNT =", MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[4]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[5]))}));
                         //                                                                                                                                      P1*R1                              +                             P2*R2
@@ -374,11 +374,11 @@ public class MyUtility {
                      }
                 }break;
                 case 3:{
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X","RATE ="+sumArrayAccordingToIndicator[5]+" = ", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X","RATE ="+sumArrayAccordingToIndicator[6]+" = ", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X","RATE ="+sumArrayAccordingToIndicator[7]+" = ", MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7])}));
 
                     if (sumArrayAccordingToIndicator[4] == 0) {//DEPOSIT AMOUNT checking there or not
                         al.add(Arrays.toString(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[5]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[7]))}));
@@ -390,13 +390,13 @@ public class MyUtility {
                      }
                 }break;
                 case 4:{
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[2] + " =", sumArrayAccordingToIndicator[1] + "", "X", "RATE ="+sumArrayAccordingToIndicator[6]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[3] + " =", sumArrayAccordingToIndicator[2] + "", "X", "RATE ="+sumArrayAccordingToIndicator[7]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[4] + " =", sumArrayAccordingToIndicator[3] + "", "X", "RATE ="+sumArrayAccordingToIndicator[8]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8])}));
 
-                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}));
+                    al.add(Arrays.toString(new String[]{skillAccordingToIndicator[5] + " =", sumArrayAccordingToIndicator[4] + "", "X", "RATE ="+sumArrayAccordingToIndicator[9]+" = ",MyUtility.convertToIndianNumberSystem(sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9])}));
 
                     if(sumArrayAccordingToIndicator[5] == 0) {//DEPOSIT AMOUNT checking there or not
                         al.add(Arrays.toString(new String[]{"TOTAL WORK AMOUNT =",MyUtility.convertToIndianNumberSystem((sumArrayAccordingToIndicator[1] * sumArrayAccordingToIndicator[6]) + (sumArrayAccordingToIndicator[2] * sumArrayAccordingToIndicator[7]) + (sumArrayAccordingToIndicator[3] * sumArrayAccordingToIndicator[8]) + (sumArrayAccordingToIndicator[4] * sumArrayAccordingToIndicator[9]))}));
@@ -422,7 +422,7 @@ public class MyUtility {
     public static String getAllDepositAndWagesDetailsAsText(Context context,String id){
         StringBuilder sb=new StringBuilder();
         try{
-            byte indicator=(byte)get_indicator(context,id);
+            byte indicator=get_indicator(context,id);
             if(!(indicator >= 1 && indicator <=4)) return "error";//if indicator is not in range 1 to 4 then return error
 
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
@@ -453,18 +453,18 @@ public class MyUtility {
                     int rowLength=recyclerViewWagesData.length;
                     int columnLength=recyclerViewWagesData[0].length;
 
-                    if (recyclerViewDepositData == null) {
+                    if(recyclerViewDepositData == null){
                         sb.append("\n-------------------------------");//add space when deposit is null for better readability.because space is not added when recyclerViewDepositData is null
                     }else{
                         sb.append("-------------------------------");
                     }
                     sb.append("\n*TOTAL N0. OF WAGES ENTRIES: ").append(rowLength).append("\n\n");
 
-                    for (int row = 0; row < rowLength; row++) {
+                    for(int row = 0; row < rowLength; row++){
                         sb.append(row + 1).append("-> ");
                         for (int col = 0; col < columnLength; col++){
 
-                            if((columnLength-1)!=col) sb.append(recyclerViewWagesData[row][col]).append("  "); else sb.append("\n").append(recyclerViewWagesData[row][col]);
+                            if((columnLength-1)!=col) sb.append((recyclerViewWagesData[row][col]!=null?recyclerViewWagesData[row][col]:0)).append("  "); else sb.append("\n").append(recyclerViewWagesData[row][col]);
 
                         }
                         sb.append("\n\n");
@@ -765,7 +765,7 @@ public class MyUtility {
     }
     public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.indicator value start from 1
         Database db=Database.getInstance(context);
-        try(//Database db=new Database(context);//to this database automatically
+        try(
             Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -1144,11 +1144,7 @@ public class MyUtility {
         StringBuilder sb=new StringBuilder();
         sb.append("ID: ").append(id).append("\n")
                 .append("DATE: ").append(date).append("\n");
-        if(isDeposited){
-            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
-        }else{
-            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
-        }
+
         if(skill1!=null){
             sb.append(skill1).append(": ").append(p1).append("  ");
         }
@@ -1162,6 +1158,11 @@ public class MyUtility {
             }
         }
         sb.append("\n");
+        if(isDeposited){
+            sb.append("DEPOSIT: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
+        }else{
+            sb.append("WAGES: ").append(MyUtility.convertToIndianNumberSystem(wagesOrDeposit)).append("\n");
+        }
         sb.append("REMARKS: ").append(remarks);
         return sb.toString();
     }

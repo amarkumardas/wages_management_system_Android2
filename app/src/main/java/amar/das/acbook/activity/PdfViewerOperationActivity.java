@@ -266,7 +266,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             }
             });
 
-        binding.currentPdfBtn.setOnClickListener(view -> {
+        binding.runningPdfBtn.setOnClickListener(view -> {
             ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
             backgroundTask.execute(() -> {
                 runOnUiThread(() -> progressBar.showProgressBar());//pre execute
@@ -650,7 +650,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                         sb.append(row + 1).append("-> ");
                         for (int col = 0; col < columnLength; col++){
 
-                            if((columnLength-1)!=col) sb.append(recyclerViewWagesData[row][col]).append("  "); else sb.append("\n").append(recyclerViewWagesData[row][col]);
+                            if((columnLength-1)!=col) sb.append((recyclerViewWagesData[row][col] !=null? recyclerViewWagesData[row][col]: 0)).append("  "); else sb.append("\n").append(recyclerViewWagesData[row][col]);//else is for remarks
 
                         }
                         sb.append("\n\n");
@@ -977,17 +977,17 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                case 1: {
                    binding.pdf1Btn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf2Btn.setBackgroundResource(R.drawable.white_detailsbg);
-                   binding.currentPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
+                   binding.runningPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
                }
                break;
                case 2: {
                    binding.pdf2Btn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf1Btn.setBackgroundResource(R.drawable.white_detailsbg);
-                   binding.currentPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
+                   binding.runningPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
                }
                break;
                case 3: {
-                   binding.currentPdfBtn.setBackgroundResource(R.drawable.graycolor_bg);
+                   binding.runningPdfBtn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf2Btn.setBackgroundResource(R.drawable.white_detailsbg);
                    binding.pdf1Btn.setBackgroundResource(R.drawable.white_detailsbg);
                }
@@ -1106,7 +1106,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if (errorDetection[0] == false) {
 
                 if (recyclerViewDepositData != null) {//null means data not present
-                    if (!makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{12f, 12f, 76f}, 9, true))
+                    if (!makePdf.makeTable(new String[]{"DATE", "DEPOSIT", "REMARKS"}, recyclerViewDepositData, new float[]{10f, 12f, 78f}, 9, true))
                         return null;
                 }
 
@@ -1118,7 +1118,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                         return null;
                 }
 
-                if (!addRowsAndWriteToPDF(indicator, makePdf, 38)) return null;
+                if (!addRowsAndWriteToPDF(indicator, makePdf, 38,columnWidth)) return null;
 
                 if (!makePdf.createdPageFinish2())
                     return null;//after finish page we cannot write to it
@@ -1136,13 +1136,13 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
         try{
             switch (indicator) {
-                case 1: return new float[]{12f, 12f, 5f, 71f};
+                case 1: return new float[]{10f, 12f, 5f, 73f};
 
-                case 2: return new float[]{12f, 12f, 5f, 5f, 66f};
+                case 2: return new float[]{10f, 12f, 5f, 5f, 68f};
 
-                case 3: return new float[]{12f, 12f, 5f, 5f, 5f, 61f};
+                case 3: return new float[]{10f, 12f, 5f, 5f, 5f, 63f};
 
-                case 4: return new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f};
+                case 4: return new float[]{10f, 12f, 5f, 5f, 5f, 5f, 58f};
             }
             return new float[]{1f,1f,1f};//this code will not execute due to return in switch block just using to avoid error
         }catch (Exception ex){
@@ -1151,19 +1151,19 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return new float[]{1f,1f,1f};//to avoid error
         }
     }
-    public boolean addRowsAndWriteToPDF(byte indicator, MakePdf makePdf, int numberOfRows) {
+    public boolean addRowsAndWriteToPDF(byte indicator, MakePdf makePdf, int numberOfRows,float[] columnWidth) {
         switch(indicator){
             case 1:{for (int i = 0; i < numberOfRows; i++) {
-                    if(!makePdf.singleCustomRow(new String[]{"","","",""}, new float[]{12f, 12f, 5f, 71f},0,0,0,0,true, (byte) 0, (byte) 0))return false;}
+                    if(!makePdf.singleCustomRow(new String[]{"","","",""}, columnWidth,0,0,0,0,true, (byte) 0, (byte) 0))return false;}
                    }break;
             case 2:{for (int i = 0; i < numberOfRows; i++) {
-                     if(!makePdf.singleCustomRow(new String[]{"","","","",""},new float[]{12f, 12f, 5f, 5f, 66f},0,0,0,0,true, (byte) 0, (byte) 0))return false;}
+                     if(!makePdf.singleCustomRow(new String[]{"","","","",""},columnWidth,0,0,0,0,true, (byte) 0, (byte) 0))return false;}
                    }break;
             case 3:{for (int i = 0; i < numberOfRows; i++) {
-                     if(!makePdf.singleCustomRow(new String[]{"","","","","",""}, new float[]{12f, 12f, 5f, 5f, 5f, 61f},0,0,0,0,true, (byte) 0, (byte) 0))return false;}
+                     if(!makePdf.singleCustomRow(new String[]{"","","","","",""},columnWidth,0,0,0,0,true, (byte) 0, (byte) 0))return false;}
                    }break;
             case 4:{for (int i = 0; i < numberOfRows; i++) {
-                     if(!makePdf.singleCustomRow(new String[]{"","","","","","",""},new float[]{12f, 12f, 5f, 5f, 5f, 5f, 56f},0,0,0,0,true, (byte) 0, (byte) 0))return false;}
+                     if(!makePdf.singleCustomRow(new String[]{"","","","","","",""},columnWidth,0,0,0,0,true, (byte) 0, (byte) 0))return false;}
                    }break;
         }
         return true;

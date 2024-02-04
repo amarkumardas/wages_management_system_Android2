@@ -47,16 +47,18 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     Context context;
     ArrayList<WagesDetailsModel> arrayList;
     Database db;
-    int indicator;
+    byte indicator;
    // boolean bool;
     int []arr=new int[6];
-    String []previousDataHold=new String[8];
-    String fromIntentPersonId;
+    String []previousDataHold=new String[7];
+   // String fromIntentPersonId;
     //for recording variable declaration
     MediaRecorder mediaRecorder;
     String audioPath;
+    int cYear;
+    byte cMonth,cDayOfMonth;
     boolean toggleToStartRecording=false;
-      String currentDate =MyUtility.getOnlyCurrentDate();
+     //String currentDate =MyUtility.getOnlyCurrentDate();
     public WagesDetailsAdapter(Context context, ArrayList<WagesDetailsModel> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
@@ -195,7 +197,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             audioPath=null;//so that it not take previous VALUE
 
             TextView deposit_btn_tv = myView.findViewById(R.id.to_deposit_tv);
+            Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.info_spinner_add_lmg_or_remove);
             deposit_btn_tv.setVisibility(View.GONE);//initially no deposit button because we are updating only wages p1,p2...etc
+            customSpinnerRemoveOrAddMlg.setVisibility(View.GONE);
             TextView hardcodedP1 = myView.findViewById(R.id.hardcoded_p1_tv);
             TextView hardcodedP2 = myView.findViewById(R.id.hardcoded_p2_tv);
             TextView hardcodedP3 = myView.findViewById(R.id.hardcoded_p3_tv);
@@ -227,8 +231,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             save.setText(view.getContext().getResources().getString(R.string.long_press_to_update));
 
             db = new Database(holder.wages.getContext());//we can take any field context
-           // Cursor cursorData = db.getData("SELECT "+Database.COL_21_ID+" , "+Database.COL_22_DATE+" , "+Database.COL_23_TIME+" , "+Database.COL_25_DESCRIPTION+" , "+Database.COL_26_WAGES+" , "+Database.COL_28_P1+" , "+Database.COL_29_P2+" , "+Database.COL_291_P3+" , "+Database.COL_292_P4+" , "+Database.COL_24_MICPATH+" FROM " + Database.TABLE_NAME2 + " WHERE "+Database.COL_21_ID+"= '" + data.getId() + "'" + " AND "+Database.COL_22_DATE+"= '" + data.getDate() + "'" + " AND "+Database.COL_23_TIME+"='" + data.getTime() + "'");
-                //Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getUserGivenDate(),data.getTime());
+
                 Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getSystemDateAndTime());
                 cursorData.moveToFirst();//this cursor is not closed
 
@@ -246,7 +249,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
-            previousDataHold[0] = cursorDefault.getString(0) + ": " + cursorData.getString(4);//to write previous record in description
+            previousDataHold[0] = cursorDefault.getString(0) + ": " + (cursorData.getString(4)!= null?cursorData.getString(4):0);//to write previous record in description
             toGive_Amount.setText(String.valueOf(cursorData.getInt(3)));//setting wages
             inputP1.setText(String.valueOf(cursorData.getInt(4)));//setting same data to p1
             cursorDefault.close();
@@ -259,19 +262,19 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + (cursorData.getString(5)!= null?cursorData.getString(5):0);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
                 } else if (indicator == 3) {//three person
                     //hardcodedP1,inputP1 by default visible so no need to mention
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + (cursorData.getString(5)!= null?cursorData.getString(5):0);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(6);//to write previous record in description
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + (cursorData.getString(6)!= null?cursorData.getString(6):0);//to write previous record in description
                     inputP3.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p3
                     inputP3.setVisibility(View.VISIBLE);
                 } else if (indicator == 4) {////two person
@@ -279,18 +282,18 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     hardcodedP2.setVisibility(View.VISIBLE);
                     inputP2.setVisibility(View.VISIBLE);
                     hardcodedP2.setText(skillsCursor.getString(0));
-                    previousDataHold[1] = skillsCursor.getString(0) + ": " + cursorData.getString(5);//to write previous record in description
+                    previousDataHold[1] = skillsCursor.getString(0) + ": " + (cursorData.getString(5)!= null?cursorData.getString(5):0);//to write previous record in description
                     inputP2.setText(String.valueOf(cursorData.getInt(5)));//setting same data to p2
 
                     hardcodedP3.setVisibility(View.VISIBLE);
                     hardcodedP3.setText(skillsCursor.getString(1));
-                    previousDataHold[2] = skillsCursor.getString(1) + ": " + cursorData.getString(6);//to write previous record in description
+                    previousDataHold[2] = skillsCursor.getString(1) + ": " + (cursorData.getString(6)!= null?cursorData.getString(6):0);//to write previous record in description
                     inputP3.setVisibility(View.VISIBLE);
                     inputP3.setText(String.valueOf(cursorData.getInt(6)));//setting same data to p3
 
                     hardcodedP4.setVisibility(View.VISIBLE);
                     hardcodedP4.setText(skillsCursor.getString(2));
-                    previousDataHold[3] = skillsCursor.getString(2) + ": " + cursorData.getString(7);//to write previous record in description
+                    previousDataHold[3] = skillsCursor.getString(2) + ": " + (cursorData.getString(7)!= null?cursorData.getString(7):0);//to write previous record in description
                     inputP4.setText(String.valueOf(cursorData.getInt(7)));//setting same data to p3
                     inputP4.setVisibility(View.VISIBLE);
                 }
@@ -301,20 +304,22 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     skillsCursor.close();
                 }
 //********************************Done CUSTOMIZATION*******************************************************************************************
-            previousDataHold[4] = "WAGES: " + cursorData.getString(3);//wages to write previous record in description
-            previousDataHold[5] = "DATE: " + cursorData.getString(1);//date to write previous record in description
-            previousDataHold[6] = "TIME: " +MyUtility.getTime12hr(cursorData.getString(9));//time to write previous record in description
-            previousDataHold[7] = "REMARKS: " + cursorData.getString(2);//description or remarks
+            previousDataHold[4] = "WAGES: " + (cursorData.getString(3)!=null?MyUtility.convertToIndianNumberSystem(Long.parseLong(cursorData.getString(3))):0);//wages to write previous record in description
+            previousDataHold[5] = "DATE: " + cursorData.getString(1)+" ("+MyUtility.getTime12hr(cursorData.getString(9))+")";//date to write previous record in description
+            previousDataHold[6] = "REMARKS: " + cursorData.getString(2);//description or remarks
 
                 String [] dateArray =cursorData.getString(1).split("-");
                 cursorData.close();
-                int cDayOfMonth=Integer.parseInt(dateArray[0]);
-                int cMonth=Integer.parseInt(dateArray[1]);
-                int cYear=Integer.parseInt(dateArray[2]);
-                inputDate.setText(cDayOfMonth + "-" + (cMonth) + "-" + cYear);
+                cDayOfMonth= (byte) Integer.parseInt(dateArray[0]);
+                cMonth= (byte) Integer.parseInt(dateArray[1]);
+                cYear=Integer.parseInt(dateArray[2]);
+                inputDate.setText(Integer.parseInt(dateArray[0]) + "-" + (Integer.parseInt(dateArray[1])) + "-" + Integer.parseInt(dateArray[2]));
                 inputDate.setOnClickListener(view1 -> {
                     DatePickerDialog datePickerDialog = new DatePickerDialog(myView.getContext(), (datePicker, year, month, dayOfMonth) -> { //To show calendar dialog
                         inputDate.setText(dayOfMonth + "-" + (month + 1) + "-" + year);//month start from 0 so 1 is added to get right month like 12
+                        cDayOfMonth= (byte) dayOfMonth;
+                        cMonth= (byte) (month+1);
+                        cYear=year;
                     }, cYear, (cMonth-1), cDayOfMonth);//This variable should be ordered this variable will set date day month to calendar to datePickerDialog so passing it
                     datePickerDialog.show();
                 });
@@ -334,31 +339,14 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 String micPath=data.getMicPath();//default value if we don't fetch previous data then null will be inserted and previous voice will be deleted when we try to update only wages so it is important
 
-                 //To get exact onlyTime so write code in save button
-//                Date d = Calendar.getInstance().getTime();
-//                SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");//a stands for is AM or PM
-//                String onlyTime = MyUtility.getOnlyTime();
-//                inputTime.setText(onlyTime);//setting onlyTime to take onlyTime and store in db
-//                String onlyTime = inputTime.getText().toString();//onlyTime will be inserted automatically
-
                 String onlyTime =MyUtility.getOnlyTime();
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
-                String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
+               // String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
+                String remarks =getUpdatedRemarks(indicator,onlyTime,view12,description.getText().toString().trim());
                 arr[5] = 1;//this is important because when user do not enter any data while updating then at least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 String userDate = inputDate.getText().toString();//date will be inserted automatically
-
-                //this will store latest date in db if that date is current date
-//                         final Calendar current=Calendar.getInstance();//to get current date
-//                       // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
-//                         if(date.equals(currentDate)) {//if it is true then store
-//                             db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + date + "'" + " WHERE ID='" + data.getId() + "'");
-//                         }
-
-               // Can outer Java classes access inner class?
-               // You can access any field of outer class from inner class directly. Even Outer class can access any field of Inner class but through object of inner class.
-               // db.updateTable("UPDATE " + db.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" + " WHERE ID='" + data.getId() + "'");//when ever user insert its wages or deposit then latest date will be updated to current date not user entered date
 
                 if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                     micPath= audioPath;
@@ -379,10 +367,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     Toast.makeText(context, context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
 
                 //*********************************all the upper code are common to all indicator 1,2,3,4*******************
-//                if(!db.activateIdWithLatestDate(data.getId(),onlyTime)){
-//                    Toast.makeText(context, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
-//                }
-
 
                 if (indicator == 1) {
                     if (isDataPresent && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
@@ -674,7 +658,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         playAudioChronometer.setEnabled(false);//when user press save button then set to true playAudioChronometer.setEnabled(true);
                         saveAudio.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);//changing tick color to green so that user can feel to press to save
                         micIcon.setEnabled(false);
-                        micIcon.setBackgroundResource(R.drawable.black_sharp_mic_24);//change color when user click
+                        micIcon.setBackgroundResource(R.drawable.baseline_record_voice_over_24);//change color when user click
 
                         VoiceRecorder voiceRecorder=new VoiceRecorder(data.getId(),context.getExternalFilesDir(null).toString());
                         if(voiceRecorder.startRecording()) {
@@ -762,7 +746,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 l5.setVisibility(View.GONE);
 
                  deposit_btn_tv.setVisibility(View.VISIBLE);
-                 deposit_btn_tv.setText(view.getContext().getString(R.string.click_to_update_deposit));
+                 deposit_btn_tv.setText(view.getContext().getString(R.string.to_update));
                 //not opening directly because user sometime click on wages instead of deposit so to let user think he has click on right filed then only he can update
                 deposit_btn_tv.setOnClickListener(view14 -> {//sending date,time and id to update deposit
                     Intent intent=new Intent(context,CustomizeLayoutOrDepositAmount.class);
@@ -779,6 +763,17 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             return false;
         });
     }
+
+    private String getUpdatedRemarks(byte indicator, String onlyTime, View view12,String description) {
+        switch (indicator){
+            case 1: return  "[" + onlyTime +view12.getContext().getString(R.string.hyphen_edited)+"\n\n"+description+"\n\n"+view12.getContext().getString(R.string.previous_details_were_colon)+"\n" + previousDataHold[5] +"\n" + previousDataHold[0] +"\n" + previousDataHold[4] + "\n" + previousDataHold[6];//onlyTime is set automatically to remarks if user enter any remarks;
+            case 2: return  "[" + onlyTime +view12.getContext().getString(R.string.hyphen_edited)+"\n\n"+description+"\n\n"+view12.getContext().getString(R.string.previous_details_were_colon)+"\n" + previousDataHold[5] +"\n" + previousDataHold[0] + " " + previousDataHold[1] + "\n" + previousDataHold[4] + "\n" + previousDataHold[6];//onlyTime is set automatically to remarks if user enter any remarks;
+            case 3: return  "[" + onlyTime +view12.getContext().getString(R.string.hyphen_edited)+"\n\n"+description+"\n\n"+view12.getContext().getString(R.string.previous_details_were_colon)+"\n" + previousDataHold[5] +"\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] +"\n" + previousDataHold[4] + "\n" + previousDataHold[6];//onlyTime is set automatically to remarks if user enter any remarks;
+            case 4: return  "[" + onlyTime +view12.getContext().getString(R.string.hyphen_edited)+"\n\n"+description+"\n\n"+view12.getContext().getString(R.string.previous_details_were_colon)+"\n" + previousDataHold[5] +"\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[6];//onlyTime is set automatically to remarks if user enter any remarks;
+        }
+        return "error";
+    }
+
     public void refreshCurrentActivity(String id) {
         Intent intent1=new Intent(context,IndividualPersonDetailActivity.class);
         intent1.putExtra("ID",id);

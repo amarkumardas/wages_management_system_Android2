@@ -50,7 +50,7 @@ public class ActiveMFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
          binding=FragmentActiveMBinding.inflate(inflater,container,false);
          View root=binding.getRoot();
-         db=new Database(getContext());
+         db=Database.getInstance(getContext());
          //ids
          mestreRecyclerView=root.findViewById(R.id.recycle_active_mestre);
          progressBar=binding.progressBarActiveM;
@@ -107,7 +107,8 @@ public class ActiveMFragment extends Fragment {
         mestreActiveArrayList.trimToSize();//to release free space
         MyUtility.sortArrayList(mestreActiveArrayList);//if list latest date is null then at index 0 ,1..should contain null object then non null object that y two while loop is taken
         cursorMestre.close();//closing cursor after finish
-        db.close();//closing database to prevent data leak
+        //db.close();//closing database to prevent data leak
+        Database.closeDatabase();
         mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), mestreActiveArrayList);
         mestreRecyclerView.setAdapter(mestreLaberGAdapter);
         mestreRecyclerView.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
@@ -157,16 +158,22 @@ public class ActiveMFragment extends Fragment {
 
     public int getCountOfTotalRecordFromDb() {
         int count;
-        Database db=new Database(getContext());
+        // Database db=new Database(getContext());
+        try(Database db = Database.getInstance(getContext())){
         Cursor cursor;
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursor = db.getData("SELECT COUNT() FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.mestre) + "' AND " + Database.COL_12_ACTIVE + "='1' AND " + Database.COL_15_LATESTDATE + " IS NULL");
         cursor.moveToFirst();
-        count=cursor.getInt(0);
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+        count = cursor.getInt(0);
+        cursor = db.getData("SELECT COUNT() FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.mestre) + "' AND " + Database.COL_12_ACTIVE + "='1' AND " + Database.COL_15_LATESTDATE + " IS NOT NULL");
         cursor.moveToFirst();
-        count=count+cursor.getInt(0);
-        db.close();
+        count = count + cursor.getInt(0);
         return count;
+        //db.close();
+        }catch (Exception x){
+            x.printStackTrace();
+            return  0;
+        }
+
     }
 
     private void fetchData(String query, ArrayList<MestreLaberGModel> arraylist) {
@@ -177,7 +184,7 @@ public class ActiveMFragment extends Fragment {
     }
 
     private void loadData(String querys, ArrayList<MestreLaberGModel> arraylist) {
-        db=new Database(getContext());//this should be first statement to load data from db
+        db=Database.getInstance(getContext());//this should be first statement to load data from db
         Cursor cursorMestre;
         arraylist.clear();//clearing the previous object which is there
         arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
@@ -215,12 +222,14 @@ public class ActiveMFragment extends Fragment {
         arraylist.trimToSize();//to release free space
         MyUtility.sortArrayList(arraylist);
         cursorMestre.close();
-        db.close();//closing database
+        //db.close();//closing database
+        Database.closeDatabase();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        Database.closeDatabase();
     }
 }

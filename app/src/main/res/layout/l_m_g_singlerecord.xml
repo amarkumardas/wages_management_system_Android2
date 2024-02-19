@@ -9,7 +9,8 @@
     android:weightSum="20"
     android:padding="5dp"
     android:id="@+id/single_record_layout_of_inactive_and_active"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <TextView
         android:layout_weight="15"

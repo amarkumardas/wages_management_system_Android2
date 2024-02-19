@@ -3,7 +3,30 @@ package amar.das.acbook.model;
 import java.io.Serializable;
 
 public class SearchModel implements Serializable {
-   private String name,id,account,aadhar,father;
+   private String name;
+    private String id;
+    private String account;
+    private String aadhaar;
+    private String skill;
+
+    public boolean isActive() {
+        return activeOrInactive;
+    }
+
+    public void setActive(boolean activeOrInactive) {
+        this.activeOrInactive = activeOrInactive;
+    }
+
+    private boolean activeOrInactive;
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    private String phoneNumber;
     private static final long serialVersionUID = 4234L;
     public String getName() {
         return name;
@@ -29,20 +52,20 @@ public class SearchModel implements Serializable {
         this.account = account;
     }
 
-    public String getAadhar() {
-        return aadhar;
+    public String getAadhaar() {
+        return aadhaar;
     }
 
-    public void setAadhar(String aadhar) {
-        this.aadhar = aadhar;
+    public void setAadhaar(String aadhaar) {
+        this.aadhaar = aadhaar;
     }
 
-    public String getFather() {
-        return father;
+    public String getSkill() {
+        return skill;
     }
 
-    public void setFather(String father) {
-        this.father = father;
+    public void setSkill(String skill) {
+        this.skill = skill;
     }
 
 }

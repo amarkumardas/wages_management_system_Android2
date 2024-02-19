@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -38,7 +40,6 @@ import java.util.List;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
-import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -116,7 +117,8 @@ public class MyUtility {
         return false;
     }
     public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
-        try(Database db=new Database (context);
+      //  try(Database db=new Database (context);
+          try(Database db=Database.getInstance(context);
             Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
             if (cursor2.getCount() == 0) { return false; }// or throw an exception this will occur when there is no id in db or no data in db or table
 
@@ -150,8 +152,9 @@ public class MyUtility {
     public static boolean isEnterDataIsWrong(int[] arr) {
         int wrongData=0;
         for(int i=0 ;i <arr.length;i++) {
-            if (arr[i] == 2)//value 2 represents wrong data
+            if (arr[i] == 2) {//value 2 represents wrong data
                 wrongData++;
+            }
         }
         return wrongData >= 1;
     }
@@ -763,10 +766,9 @@ public class MyUtility {
             return null;
         }
     }
-    public static byte get_indicator(Context context,String PersonId) {//in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.indicator value start from 1
+    public static byte get_indicator(Context context,String PersonId) {//indicator value start from 1.in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.
         Database db=Database.getInstance(context);
-        try(
-            Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
+        try(Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getString(0) == null) {//if null then indicator should be 1
@@ -792,19 +794,19 @@ public class MyUtility {
             String[] header =null,totalCalculationForSummary =null,finalMessage =null;
 
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
-                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE");
+                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.advance_due));
                 totalCalculationForSummary=totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0));
-                finalMessage=new String[]{" *After calculation advance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))};
+                finalMessage=new String[]{ context.getResources().getString(R.string.star_after_calculation_advance_rs_dot) + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))};
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
-                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE");
+                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.balance));
                 totalCalculationForSummary=totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1));
-                finalMessage=new String[]{" *After calculation balance Rs. " + MyUtility.convertToIndianNumberSystem(cursor.getInt(1))};
+                finalMessage=new String[]{context.getResources().getString(R.string.star_after_calculation_balance_rs_dot) + MyUtility.convertToIndianNumberSystem(cursor.getInt(1))};
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED");
+                header=headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.all_cleared));
                 totalCalculationForSummary=totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0);
-                finalMessage=new String[]{" *After calculation all cleared Rs. 0"};
+                finalMessage=new String[]{context.getResources().getString(R.string.star_after_calculation_no_dues_dot)};
              }
             return new String[][]{header,totalCalculationForSummary,finalMessage};
         }catch (Exception ex){
@@ -1325,6 +1327,114 @@ public class MyUtility {
         }catch (Exception e){
             e.printStackTrace();
             return false;
+        }
+    }
+    public static int[] getRateArray(String id,Context context){
+        Database db=Database.getInstance(context);
+        try(Cursor cursor =db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id +"'")){
+            cursor.moveToFirst();
+            return new int[]{cursor.getInt(0),cursor.getInt(1),cursor.getInt(2),cursor.getInt(3)};
+        }catch (Exception x){
+            x.printStackTrace();
+            return new int[4];//if error return array with 0 value
+        }
+    }
+    public static void p1_p2_p3_p4_Change_Tracker(int correctInput[],int [] cursorRate, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
+        String p1, p2, p3, p4;
+        p1 = inputP1.getText().toString().trim();
+        try {
+            //all 15 combination
+            //only p1
+            if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] != 1 && correctInput[3] != 1) {
+                runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[0] * Integer.parseInt(p1)));//this will execute only when correctInput[] is 1
+            }
+            //only p1 p2
+            else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] != 1) {
+                p2 = inputP2.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2))));
+            }
+            //only p1 p2,p3
+            else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] != 1) {
+                p2 = inputP2.getText().toString().trim();
+                p3 = inputP3.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3))));
+            }
+            //only p1 p2,p3,p4
+            else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] == 1) {
+                p2 = inputP2.getText().toString().trim();
+                p3 = inputP3.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //only p1 p3 p4
+            else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] == 1) {
+                p3 = inputP3.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //only p1 p2 p4
+            else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] == 1) {
+                p2 = inputP2.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //only p2 p3 p4
+            else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] == 1) {
+                p2 = inputP2.getText().toString().trim();
+                p3 = inputP3.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //only p1 P4
+            else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] != 1 && correctInput[3] == 1) {
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //only p1 P3
+            else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] != 1) {
+                p3 = inputP3.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[2] * Integer.parseInt(p3))));
+            }
+            //Only p3,p4
+            else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] == 1) {
+                p3 = inputP3.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //Only p2,p4
+            else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] == 1) {
+                p2 = inputP2.getText().toString().trim();
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[3] * Integer.parseInt(p4))));
+            }
+            //Only p2,p3
+            else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] != 1) {
+                p2 = inputP2.getText().toString().trim();
+                p3 = inputP3.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3))));
+            }
+            //only p2
+            else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] != 1) {
+                p2 = inputP2.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[1] * Integer.parseInt(p2)));
+            }
+            //only p3
+            else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] != 1) {
+                p3 = inputP3.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[2] * Integer.parseInt(p3)));
+            }
+            //only p4
+            else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] != 1 && correctInput[3] == 1) {
+                p4 = inputP4.getText().toString().trim();
+                runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[3] * Integer.parseInt(p4)));
+            }
+            //if any wrong data then this will execute
+            if (correctInput[0] == 2 || correctInput[1] == 2 || correctInput[2] == 2 || correctInput[3] == 2) {
+                runtimeSuggestionAmountToGive.setText("0");
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            runtimeSuggestionAmountToGive.setText("0");
         }
     }
 }

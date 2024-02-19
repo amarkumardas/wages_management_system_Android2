@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginLeft="2dp"
     android:layout_marginRight="2dp"
-    android:layout_margin="2dp">
+    android:layout_margin="2dp"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/single_row_cartview"
@@ -20,18 +21,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
             <TextView
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="60dp"
                 android:id="@+id/search_id_tv"
-                android:layout_width="142dp"
+                android:layout_width="130dp"
+                android:paddingStart="2dp"
                 android:layout_height="wrap_content"
                 android:text="ID: 12345678910"
                 android:textSize="16sp"
                 android:layout_marginRight="2dp"
                 android:layout_gravity="end"
-                android:background="#FFE928"
+                android:background="@drawable/yellow_background"
                 android:textColor="#000000"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold"/>
+                <TextView
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:textSize="12dp"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/search_inactive_or_active_tv"/>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/search_name_tv"
@@ -42,10 +61,10 @@
                 android:textColor="@color/black"
                 android:layout_marginLeft="2dp"/>
             <TextView
-                android:id="@+id/search_father_tv"
+                android:id="@+id/search_skill_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="A/C HOLDER NAME:"
+                android:text="SKILL: "
                 android:textSize="15sp"
                 android:padding="2dp"
                 android:layout_marginTop="2dp"
@@ -54,29 +73,35 @@
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
                 android:orientation="horizontal"
-                android:weightSum="6"
+                android:weightSum="12"
                 android:layout_marginTop="2dp"
-                android:layout_marginBottom="4dp"
-                >
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:id="@+id/search_phone_tv"
+                    android:layout_weight="5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="PHONE: 123456"
+                    android:textSize="15sp"
+                    android:textColor="@color/black"
+                    android:layout_marginLeft="2dp"/>
                 <TextView
                     android:id="@+id/search_ac_tv"
                     android:layout_weight="3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="A/C:     123456 "
+                    android:text="A/C: 1234 "
                     android:textSize="15sp"
                     android:textColor="@color/black"
-                    android:layout_marginLeft="2dp"
-                    />
+                    android:layout_marginLeft="2dp"/>
                 <TextView
                     android:id="@+id/search_aadhar_tv"
-                    android:layout_weight="3"
+                    android:layout_weight="4"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="AADHAR:     12345"
+                    android:text="AADHAR: 12345"
                     android:textColor="@color/black"
-                    android:textSize="15sp"
-                     />
+                    android:textSize="15sp"/>
             </LinearLayout>
 
 

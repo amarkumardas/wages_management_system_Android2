@@ -182,7 +182,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 else
                     arr[1]=0;
 
-                if(binding.customDescriptionEt.getText().toString().length() >=1){//to prevent null pointer exception.it execute when user enter date
+                if(binding.customDescriptionEt.getText().toString().trim().length() >=1){//to prevent null pointer exception.it execute when user enter date
                     remarks="["+onlyTime+getResources().getString(R.string.hyphen_entered)+"\n\n"+getResources().getString(R.string.deposited_with_hyphen)+binding.customDescriptionEt.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
                     //arr[2]=1;
                 }

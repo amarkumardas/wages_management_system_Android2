@@ -42,7 +42,6 @@
                 android:text="@string/to_deposit"
                 android:textAlignment="center"
                 android:paddingTop="5dp"
-                android:textStyle="bold"
                 android:textColor="@color/white"
                 android:layout_margin="4dp"
                 android:background="@drawable/green_color_bg"

@@ -2,7 +2,6 @@ package amar.das.acbook.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MLGAllRecordModel;
 import amar.das.acbook.utility.MyUtility;
 
@@ -37,7 +37,8 @@ public class SeparateAllMLGRecordAdapter extends RecyclerView.Adapter<SeparateAl
     public SeparateAllMLGRecordAdapter(Context context, ArrayList<MLGAllRecordModel> data){
         this.arrayList=data;
         this.context=context;
-        db=new Database(context);//we cant give this at class level
+//        db=new Database(context);//we cant give this at class level
+        db=Database.getInstance(context);//we cant give this at class level
     }
 
     @NonNull
@@ -51,8 +52,8 @@ public class SeparateAllMLGRecordAdapter extends RecyclerView.Adapter<SeparateAl
     public void onBindViewHolder(@NonNull SeparateAllMLGRecordAdapter.ViewHolder holder, int position) {
         MLGAllRecordModel data=arrayList.get(position);
         holder.name.setText(data.getName());
-        holder.inactiveDuration.setText("ACTIVE");//when user is active then it show active
-        if(data.getActive().equals("0")) { //if account is not active then view will be in red color which indicate inactive
+        holder.inactiveDuration.setText(GlobalConstants.ACTIVE.name());//when user is active then it show active
+        if(!data.isActive()) { //if account is not active then view will be in red color which indicate inactive
            // holder.name.setTextColor(Color.RED);
            //if they are not active then only it will show months
             if(data.getLatestDate() !=null) {//https://www.youtube.com/watch?v=VmhcvoenUl0

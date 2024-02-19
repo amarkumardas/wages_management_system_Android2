@@ -18,9 +18,11 @@ import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.SeparateAllMLGRecordAdapter;
 import amar.das.acbook.adapters.SearchAdapter;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MLGAllRecordModel;
 import amar.das.acbook.model.SearchModel;
 import amar.das.acbook.ui.ml.MLFragment;
+import amar.das.acbook.utility.MyUtility;
 
 public class FindActivity extends AppCompatActivity {
 SearchView searchView;
@@ -37,7 +39,8 @@ boolean bool=false;
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.This can be applied only on activity
         setContentView(R.layout.activity_find);
 
-        db=new Database(this);//on start only database should be create
+//        db=new Database(this);//on start only database should be create
+        db=Database.getInstance(this);//on start only database should be create
         //ids
         searchView=findViewById(R.id.serach_view);
         searchRecycler=findViewById(R.id.search_recyclerview);
@@ -49,16 +52,18 @@ boolean bool=false;
         searchRecycler.setHasFixedSize(true);
 
         //getting all data
-        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_9_ACCOUNT_HOLDER_NAME+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_12_ACTIVE+"='1' OR "+Database.COL_12_ACTIVE+"='0'");
+        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_8_MAINSKILL1+" , "+Database.COL_12_ACTIVE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_12_ACTIVE+"='1' OR "+Database.COL_12_ACTIVE+"='0'");
         dataList =new ArrayList<>();
 
         while(cursor.moveToNext()){
             SearchModel model=new SearchModel();
-            model.setId(""+cursor.getString(0));
-            model.setName(""+cursor.getString(1));
-            model.setAccount(""+cursor.getString(2));
-            model.setAadhar(""+cursor.getString(3));
-            model.setFather(""+cursor.getString(4));
+            model.setPhoneNumber(MyUtility.getActivePhoneNumbersFromDb(cursor.getString(0),getBaseContext()));
+            model.setId(cursor.getString(0));
+            model.setName(cursor.getString(1));
+            model.setAccount(cursor.getString(2));
+            model.setAadhaar(cursor.getString(3));
+            model.setSkill(cursor.getString(4));
+            model.setActive(cursor.getString(5).equals(GlobalConstants.ACTIVE.getValue())?true:false);
             dataList.add(model);
         }
         cursor.close();
@@ -66,7 +71,8 @@ boolean bool=false;
 
         searchRecycler.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         searchRecycler.setAdapter(searchAdapter);
-        db.close();//closing database to prevent data leak
+        //db.close();//closing database to prevent data leak
+        Database.closeDatabase();
 
        // searchView.setQuery("I",true); //to set default text to search box
 
@@ -117,7 +123,6 @@ boolean bool=false;
         btn2.setBackgroundResource(R.drawable.white_detailsbg);
         btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"'");
     }
-
     public void maleLaberButton(View view) {
         //setting back ground color
 //        view.setBackgroundColor(getColor(R.color.background));
@@ -130,8 +135,7 @@ boolean bool=false;
         btn1.setBackgroundResource(R.drawable.white_detailsbg);
         btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"'");
     }
-
-    public void femaleLaberButton(View view) {
+    public void womenLaberButton(View view) {
         //setting back ground color
 //        view.setBackgroundColor(getColor(R.color.background));
 //        btn1.setBackgroundColor(Color.WHITE);
@@ -153,7 +157,7 @@ boolean bool=false;
             MLGAllRecordModel model=new MLGAllRecordModel();
             model.setId(cursor2.getString(0));
             model.setName(cursor2.getString(1));
-            model.setActive(cursor2.getString(2));//to set view red if inactive
+            model.setActive(cursor2.getString(2).equals(GlobalConstants.ACTIVE.getValue())?true:false);//to set view red if inactive
             model.setLatestDate(cursor2.getString(3));//to display inactive duration
             allMLGList.add(model);
         }
@@ -166,7 +170,8 @@ boolean bool=false;
         searchRecycler.setHasFixedSize(true);
         searchRecycler.setAdapter(allMLGRecordAdapter);
         bool=true;//to set adapter recycler view on onQueryTextChange method
-        db.close();//closing database to prevent data leak
+        Database.closeDatabase();
+        //db.close();//closing database to prevent data leak
        // Toast.makeText(FindActivity.this, "TOTAL: "+allMLGRecordAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
     }
 
@@ -192,4 +197,9 @@ boolean bool=false;
 //        //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.This can be done only in activity
 //    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Database.closeDatabase();
+    }
 }

@@ -48,17 +48,15 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     ArrayList<WagesDetailsModel> arrayList;
     Database db;
     byte indicator;
-   // boolean bool;
-    int []arr=new int[6];
+
+    int [] correctInputArray =new int[6];//value 2 means wrong data and 1 means correct
     String []previousDataHold=new String[7];
-   // String fromIntentPersonId;
-    //for recording variable declaration
+
     MediaRecorder mediaRecorder;
-    String audioPath;
+   // String audioPath;
     int cYear;
     byte cMonth,cDayOfMonth;
     boolean toggleToStartRecording=false;
-     //String currentDate =MyUtility.getOnlyCurrentDate();
     public WagesDetailsAdapter(Context context, ArrayList<WagesDetailsModel> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
@@ -191,10 +189,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             updateCustomDialog.setView(myView);//set custom layout to alert dialog
             updateCustomDialog.setCancelable(false);//if user touch to other place then dialog will be close
 
-            final AlertDialog dialog = updateCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
+            IndividualPersonDetailActivity.adapterDialog= updateCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
 
             mediaRecorder=null;//so that it not take previous VALUE
-            audioPath=null;//so that it not take previous VALUE
+            IndividualPersonDetailActivity.audioPath=null;//so that it not take previous VALUE
 
             TextView deposit_btn_tv = myView.findViewById(R.id.to_deposit_tv);
             Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.info_spinner_add_lmg_or_remove);
@@ -222,16 +220,16 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             Button cancel = myView.findViewById(R.id.cancel_btn);
             cancel.setOnClickListener(view13 -> {
                 VoiceRecorder.stopAudioPlayer();//when audio is playing and   user clock  cancel then stop audio also
-                MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
-                dialog.dismiss();
+                MyUtility.deletePdfOrRecordingUsingPathFromDevice(IndividualPersonDetailActivity.audioPath);//delete Audio If Not user Saved
+                IndividualPersonDetailActivity.adapterDialog.dismiss();
             });
 
             if (!data.getIsdeposited()) {// 0 means not deposited it is important because it will open window to enter deposit or wages.wrong window should not be opened.
             message_tv.setText(view.getContext().getResources().getString(R.string.you_are_updating));
             save.setText(view.getContext().getResources().getString(R.string.long_press_to_update));
 
-            db = new Database(holder.wages.getContext());//we can take any field context
-
+           // db = new Database(holder.wages.getContext());//we can take any field context
+               db=Database.getInstance(holder.wages.getContext());
                 Cursor cursorData = db.getWagesForUpdate(data.getId(),data.getSystemDateAndTime());
                 cursorData.moveToFirst();//this cursor is not closed
 
@@ -325,7 +323,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 });
 
             //description.setText(cursorData.getString(3));//don't set previous data because if the data is more then update button or cancel button will hide due to large data
-            dialog.show();
+                IndividualPersonDetailActivity.adapterDialog.show();
             //*************************************SAVING*****************************************************************************************************
             save.setOnLongClickListener(view12 -> {
                 save.setVisibility(View.GONE);//to avoid when user click multiple times
@@ -344,23 +342,23 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
                // String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
                 String remarks =getUpdatedRemarks(indicator,onlyTime,view12,description.getText().toString().trim());
-                arr[5] = 1;//this is important because when user do not enter any data while updating then at least 1 field should be filled with data so this field will sure be filled automatically so this is important.
+                correctInputArray[5] = 1;//this is important because when user do not enter any data while updating then at least 1 field should be filled with data so this field will sure be filled automatically so this is important.
 
                 String userDate = inputDate.getText().toString();//date will be inserted automatically
 
-                if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
-                    micPath= audioPath;
+                if(IndividualPersonDetailActivity.audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
+                    micPath= IndividualPersonDetailActivity.audioPath;
                  }
 
                 boolean success, isWrongData, isDataPresent;
-                isWrongData = MyUtility.isEnterDataIsWrong(arr);
-                isDataPresent = MyUtility.isDataPresent(arr);
+                isWrongData = MyUtility.isEnterDataIsWrong(correctInputArray);
+                isDataPresent = MyUtility.isDataPresent(correctInputArray);
                 if (isDataPresent == true && isWrongData == false) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
-                    if (toGive_Amount.getText().toString().length() >= 1) {//to prevent null pointer exception
+                    if (toGive_Amount.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                         wages = Integer.parseInt(toGive_Amount.getText().toString().trim());
                     }
                     //>= if user enter only one digit then >= is important otherwise default value will be set
-                    if (inputP1.getText().toString().length() >= 1) {//to prevent null pointer exception
+                    if (inputP1.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                         p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                     }
                 }else
@@ -384,8 +382,8 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                          if(!success){
                              Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                          }
-                         refreshCurrentActivity(data.getId());
-                         dialog.dismiss();//dialog will be dismiss after saved automatically
+                        IndividualPersonDetailActivity.adapterDialog.dismiss();//dialog will be dismiss after saved automatically
+                        refreshCurrentActivity(data.getId());
 
 //                         if (success) {
 //                            displayResultAndRefresh(wages + "          " + p1, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
@@ -399,7 +397,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 } else if (indicator == 2) {
                     //p1 is automatically added
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
+                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
                         //UPDATE to database
@@ -416,8 +414,8 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(!success){
                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                         }
+                        IndividualPersonDetailActivity.adapterDialog.dismiss();//dialog will be dismiss after saved automatically
                         refreshCurrentActivity(data.getId());
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
 //                        if (success) {
 //                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
 //                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
@@ -429,10 +427,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 } else if (indicator == 3) {
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception
+                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
-                        if (inputP3.getText().toString().length() >= 1) {//to prevent null pointer exception
+                        if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                             p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                         }
                         //UPDATE to database
@@ -450,8 +448,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(!success){
                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                         }
+                        IndividualPersonDetailActivity.adapterDialog.dismiss();//dialog will be dismiss after saved automatically
                         refreshCurrentActivity(data.getId());
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+
 //                        if (success) {
 //                            displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
 //                            fromIntentPersonId = data.getId();//update to send to other intent for refresh
@@ -463,13 +462,13 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 } else if (indicator == 4) {
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that onlyTime it will save from crashing app.So due to this condition if field is empty then default value will be taken
+                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that onlyTime it will save from crashing app.So due to this condition if field is empty then default value will be taken
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to INT and stored
                         }
-                        if (inputP3.getText().toString().length() >= 1) {//to prevent null pointer exception
+                        if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                             p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to INT and stored
                         }
-                        if (inputP4.getText().toString().length() >= 1) {//to prevent null pointer exception
+                        if (inputP4.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
                             p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to INT and stored
                         }
                         //UPDATE to database
@@ -487,8 +486,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(!success){
                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                         }
+                        IndividualPersonDetailActivity.adapterDialog.dismiss();//dialog will be dismiss after saved automatically
                         refreshCurrentActivity(data.getId());
-                        dialog.dismiss();//dialog will be dismiss after saved automatically
+
 //                            if (success) {
 //                                displayResultAndRefresh(wages + "          " + p1 + "     " + p2 + "     " + p3 + "     " + p4, "\nDATE- " + date + "\n\n" + "REMARKS- " + remarks+"\n\n"+"MICPATH- "+micPath);
 //                                fromIntentPersonId = data.getId();//update to send to other intent for refresh
@@ -499,7 +499,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         MyUtility.snackBar(view12,context.getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again));
                  }
 
-                audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
+                IndividualPersonDetailActivity.audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
 
                 return false;
             });
@@ -513,140 +513,260 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String amount = toGive_Amount.getText().toString().trim();
                     toGive_Amount.setTextColor(Color.BLACK);
-                    arr[4] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
-                    if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    correctInputArray[4] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                    if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
                     if (!amount.matches("[0-9]+")) {//no space or . or ,
                        // Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                         toGive_Amount.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
-                        arr[4] = 2;//means wrong data
+                        correctInputArray[4] = 2;//means wrong data
                     }
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
                 }
             });
-            inputP1.addTextChangedListener(new TextWatcher() {
-                Cursor result = db.getData("SELECT  "+Database.COL_32_R1+" , "+Database.COL_33_R2+" , "+Database.COL_34_R3+" , "+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
 
+            int rateArray[]=MyUtility.getRateArray(data.getId(),context);
+            inputP1.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                }
+                    //we are not making correctInputArray[0] = 1; because user is editing and may enter incorrect data
+                    //before making correct input manually checking if correctInputArray[] has correct data or not.if not checked wrong data would be inserted like space,.
+                    if (indicator==2){
+                        if(correctInputArray[1]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[1] = 1;//if indicator is 2 then take value of user inputp1 and inputp1.this will be done inside method p1_p2_p3_p4_Change_Tracker
+                        }
 
+                   }else if (indicator==3) {
+                        if(correctInputArray[1]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[1] = 1;
+                        }
+
+                        if(correctInputArray[2]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[2] = 1;
+                        }
+
+                   } else if (indicator==4) {
+                        if(correctInputArray[1]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[1] = 1;
+                        }
+
+                        if(correctInputArray[2]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[2] = 1;
+                        }
+
+                        if(correctInputArray[3]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[3] = 1;
+                        }
+                   }
+                }
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String p11 = inputP1.getText().toString().trim();
                     inputP1.setTextColor(Color.BLACK);
-                    arr[0] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
-                    if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    correctInputArray[0] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                    if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
                     if (!p11.matches("[0-9]+")) {//"[.]?[0-9]+[.]?[0-9]*" for float
                         inputP1.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
-                        arr[0] = 2;//means wrong data
+                        correctInputArray[0] = 2;//means wrong data
                         //Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                     }
                 }
-
                 @Override
-                public void afterTextChanged(Editable editable) {//after text changed for suggestion calculate based on previous rate
-                    result.moveToFirst();
-                    p1_p2_p3_p4_Change_Tracker(result, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                public void afterTextChanged(Editable editable){//after text changed for suggestion calculate based on previous rate
+
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
                 }
             });
             inputP2.addTextChangedListener(new TextWatcher() {
-               // Cursor result = db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + data.getId() + "'");
-                Cursor result = db.getData("SELECT  "+Database.COL_32_R1+" , "+Database.COL_33_R2+" , "+Database.COL_34_R3+" , "+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
-
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                }
+                    //here manually making user input as correct because we are updating.and  data is fetch  from db.p1_p2_p3_p4_Change_Tracker() method would take value of other input.
+                    //before making correct input manually checking if correctInputArray[] has correct data or not.if not checked wrong data would be inserted like space,.
+                    if (indicator==2) {
+                        if(correctInputArray[0]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[0] = 1;
+                        }
 
+                    } else if (indicator==3) {
+                        if(correctInputArray[0]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[0] = 1;
+                        }
+
+                        if(correctInputArray[2]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[2] = 1;
+                        }
+
+                    }else if (indicator==4) {
+                        if(correctInputArray[0]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[0] = 1;
+                        }
+
+                        if(correctInputArray[2]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[2] = 1;
+                        }
+
+                        if(correctInputArray[3]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[3] = 1;
+                        }
+                    }
+                }
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String p11 = inputP2.getText().toString().trim();
                     inputP2.setTextColor(Color.BLACK);
-                    arr[1] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
-                    if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    correctInputArray[1] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                    if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
                     if (!p11.matches("[0-9]+")) {// "[.]?[0-9]+[.]?[0-9]*"
                         inputP2.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
-                        arr[1] = 2;//means wrong data
+                        correctInputArray[1] = 2;//means wrong data
                        // Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    result.moveToFirst();
-                    p1_p2_p3_p4_Change_Tracker(result, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
                 }
             });
             inputP3.addTextChangedListener(new TextWatcher() {
-                //Cursor result = db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + data.getId() + "'");
-                Cursor result = db.getData("SELECT  "+Database.COL_32_R1+" , "+Database.COL_33_R2+" , "+Database.COL_34_R3+" , "+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
-
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                }
+                    //here manually making user input as correct because we are updating.and data is fetch from db.p1_p2_p3_p4_Change_Tracker() method would take value of other input.
+                    //before making correct input manually 1 checking if correctInputArray[] has correct data or not.if not checked wrong data would be inserted like space,.
+                    if(indicator==3){
+                        if(correctInputArray[1]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[1] = 1;
+                        }
 
+                        if(correctInputArray[0]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[0] = 1;
+                        }
+
+                    }else if (indicator==4) {
+                        if(correctInputArray[1]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[1] = 1;
+                        }
+
+                        if(correctInputArray[0]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[0] = 1;
+                        }
+
+                        if(correctInputArray[3]==2){
+                            save.setVisibility(View.GONE);
+                        }else {
+                            correctInputArray[3] = 1;
+                        }
+                    }
+                }
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String p11 = inputP3.getText().toString().trim();
                     inputP3.setTextColor(Color.BLACK);
-                    arr[2] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
-                    if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    correctInputArray[2] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                    if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
                     if (!p11.matches("[0-9]+")) {//space or , or - is restricted
                         inputP3.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
-                        arr[2] = 2;//means wrong data
+                        correctInputArray[2] = 2;//means wrong data
                        // Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                     }
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    result.moveToFirst();
-                    p1_p2_p3_p4_Change_Tracker(result, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+
+                   MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
                 }
             });
             inputP4.addTextChangedListener(new TextWatcher() {
-               // Cursor result = db.getData("SELECT  R1,R2,R3,R4  FROM " + db.TABLE_NAME3 + " WHERE ID= '" + data.getId() + "'");
-                Cursor result = db.getData("SELECT  "+Database.COL_32_R1+" , "+Database.COL_33_R2+" , "+Database.COL_34_R3+" , "+Database.COL_35_R4+"  FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
-
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    //here manually making user input as correct because we are updating.and data is fetch from db.p1_p2_p3_p4_Change_Tracker() method would take value of other input.
+                    //before making correct input manually checking if correctInputArray[] has correct data or not.if not checked wrong data would be inserted like space,.
+                   if(indicator==4) {
+                       if(correctInputArray[1]==2){
+                           save.setVisibility(View.GONE);
+                       }else {
+                           correctInputArray[1] = 1;
+                       }
+
+                       if(correctInputArray[2]==2){
+                           save.setVisibility(View.GONE);
+                       }else {
+                           correctInputArray[2] = 1;
+                       }
+
+                       if(correctInputArray[0]==2){
+                           save.setVisibility(View.GONE);
+                       }else {
+                           correctInputArray[0] = 1;
+                       }
+                    }
                 }
 
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String p11 = inputP4.getText().toString().trim();
                     inputP4.setTextColor(Color.BLACK);
-                    arr[3] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                    correctInputArray[3] = 1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
-                    if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
                     if (!p11.matches("[0-9]+")) {//space or , or - is restricted
                         inputP4.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
-                        arr[3] = 2;//means wrong data
+                        correctInputArray[3] = 2;//means wrong data
                         //Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                     }
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    result.moveToFirst();
-                    p1_p2_p3_p4_Change_Tracker(result, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
                 }
             });
 
@@ -666,7 +786,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                             playAudioChronometer.start();
                             Toast.makeText(context, view15.getContext().getResources().getString(R.string.recording_started), Toast.LENGTH_LONG).show();
 
-                            audioPath=voiceRecorder.getAudioAbsolutePath();//updating audioPath for further use otherwise it will be null
+                            IndividualPersonDetailActivity.audioPath=voiceRecorder.getAudioAbsolutePath();//updating audioPath for further use otherwise it will be null
                             mediaRecorder=voiceRecorder.getMediaRecorder();//updating mediaRecorder for further use  otherwise it will be null
                         }else{
                             Toast.makeText(context,context.getResources().getString(R.string.failed_to_start_recording), Toast.LENGTH_SHORT).show();
@@ -695,10 +815,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     playAudioChronometer.setTypeface(null,Typeface.BOLD);//changing text to bold
                 }
                 playAudioChronometer.setOnClickListener(view16 -> {
-                    if (data.getMicPath() != null || audioPath != null) {//checking audio is present or not
+                    if (data.getMicPath() != null || IndividualPersonDetailActivity.audioPath != null) {//checking audio is present or not
 
-                            if(audioPath != null){//if new audio is set then file will contain audio and data.getMicPath() will contain null
-                                if(VoiceRecorder.audioPlayer(audioPath)){
+                            if(IndividualPersonDetailActivity.audioPath != null){//if new audio is set then file will contain audio and data.getMicPath() will contain null
+                                if(VoiceRecorder.audioPlayer(IndividualPersonDetailActivity.audioPath)){
                                     Toast.makeText(view16.getContext(), view16.getContext().getResources().getString(R.string.audio_playing), Toast.LENGTH_LONG).show();
                                 }else{
                                     Toast.makeText(view16.getContext(), view16.getResources().getString(R.string.audio_not_found_may_be_deleted), Toast.LENGTH_LONG).show();
@@ -716,7 +836,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 saveAudio.setOnClickListener(view17 -> { //after clicking save audio then setEnabled to true so that user can enter data to fields
                     if(mediaRecorder !=null){
 
-                        if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                        if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                             save.setVisibility(View.VISIBLE);
                          }
 
@@ -754,11 +874,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     intent.putExtra("SYSTEM_DATETIME",data.getSystemDateAndTime());
 //                    intent.putExtra("DATE",data.getUserGivenDate());
 //                    intent.putExtra("TIME",data.getTime());
-                    dialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
+                    IndividualPersonDetailActivity.adapterDialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
                     ((Activity)context).finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
                    context.startActivity(intent);
                 });
-                dialog.show();
+                IndividualPersonDetailActivity.adapterDialog.show();
             }
             return false;
         });
@@ -780,100 +900,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         ((Activity)context).finish();//destroying this current activity typecast to activity
         context.startActivity(intent1);
     }
-    public void p1_p2_p3_p4_Change_Tracker(Cursor result, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
-        String p1,p2,p3,p4;
-        p1 = inputP1.getText().toString().trim();
-        //all 15 combination
-        //only p1
-        if (arr[0] == 1 && arr[1] != 1 && arr[2] != 1 && arr[3] != 1) {
-            runtimeSuggestionAmountToGive.setText(String.valueOf (result.getInt(0) * Integer.parseInt(p1)));
-        }
-        //only p1 p2
-        else if (arr[0] == 1 && arr[1] == 1 && arr[2] != 1 && arr[3] != 1) {
-            p2 = inputP2.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf(((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)))));
-        }
-        //only p1 p2,p3
-        else if (arr[0] == 1 && arr[1] == 1 && arr[2] == 1 && arr[3] != 1) {
-            p2 = inputP2.getText().toString().trim();
-            p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)))));
-        }
-        //only p1 p2,p3,p4
-        else if (arr[0] == 1 && arr[1] == 1 && arr[2] == 1 && arr[3] == 1) {
-            p2 = inputP2.getText().toString().trim();
-            p3 = inputP3.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //only p1 p3 p4
-        else if (arr[0] == 1 && arr[1] != 1 && arr[2] == 1 && arr[3] == 1) {
-            p3 = inputP3.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf(((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //only p1 p2 p4
-        else if (arr[0] == 1 && arr[1] == 1 && arr[2] != 1 && arr[3] == 1) {
-            p2 = inputP2.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf(((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //only p2 p3 p4
-        else if (arr[0] != 1 && arr[1] == 1 && arr[2] == 1 && arr[3] == 1) {
-            p2 = inputP2.getText().toString().trim();
-            p3 = inputP3.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //only p1 P4
-        else if (arr[0] == 1 && arr[1] != 1 && arr[2] != 1 && arr[3] == 1) {
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //only p1 P3
-        else if (arr[0] == 1 && arr[1] != 1 && arr[2] == 1 && arr[3] != 1) {
-            p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(0) * Integer.parseInt(p1)) + (result.getInt(2) * Integer.parseInt(p3)))));
-        }
-        //Only p3,p4
-        else if (arr[0] != 1 && arr[1] != 1 && arr[2] == 1 && arr[3] == 1) {
-            p3 = inputP3.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(2) * Integer.parseInt(p3)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //Only p2,p4
-        else if (arr[0] != 1 && arr[1] == 1 && arr[2] != 1 && arr[3] == 1) {
-            p2 = inputP2.getText().toString().trim();
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //Only p2,p3
-        else if (arr[0] != 1 && arr[1] == 1 && arr[2] == 1 && arr[3] != 1) {
-            p2 = inputP2.getText().toString().trim();
-            p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(1) * Integer.parseInt(p2)) + (result.getInt(2) * Integer.parseInt(p3)))));
-        }
-        //only p2
-        else if (arr[0] != 1 && arr[1] == 1 && arr[2] != 1 && arr[3] != 1) {
-            p2 = inputP2.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(1) * Integer.parseInt(p2)))));
-        }
-        //only p3
-        else if (arr[0] != 1 && arr[1] != 1 && arr[2] == 1 && arr[3] != 1) {
-            p3 = inputP3.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf (((result.getInt(2) * Integer.parseInt(p3)))));
-        }
-        //only p4
-        else if (arr[0] != 1 && arr[1] != 1 && arr[2] != 1 && arr[3] == 1) {
-            p4 = inputP4.getText().toString().trim();
-            runtimeSuggestionAmountToGive.setText(String.valueOf(((result.getInt(3) * Integer.parseInt(p4)))));
-        }
-        //if any wrong data then this will execute
-        if(arr[0] == 2 || arr[1] == 2 || arr[2] == 2 || arr[3] == 2) {
-            runtimeSuggestionAmountToGive.setText("0");
-            // Toast.makeText(this, "ENTER 0 DON'T LEFT M L G EMPTY", Toast.LENGTH_SHORT).show();
-        }
-    }
+
     @Override
     public int getItemCount() {
         return arrayList.size();
@@ -906,4 +933,5 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
         return null;
     }
   }
+
 }

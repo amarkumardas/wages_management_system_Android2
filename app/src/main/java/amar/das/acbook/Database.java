@@ -2036,20 +2036,20 @@ public class Database extends SQLiteOpenHelper {
             cursor.moveToFirst();//means only one row is returned
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {
 
-                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ADVANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
+                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.advance_due)),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50)) return false;
                 //yellow                               green
                 if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(0)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.RED,0,true,(byte)50,(byte)50)) return false;
                 if(!makePdf.singleCustomRow(new String[]{ context.getResources().getString(R.string.star_after_calculation_advance_rs_dot) + MyUtility.convertToIndianNumberSystem(cursor.getInt(0))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50)) return false;
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {
 
-                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"BALANCE"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.balance)),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
                 //                                                                                                                                                                                                                      yellow                               green                                    green
                 if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,cursor.getInt(1)),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12) ,Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
                 if(!makePdf.singleCustomRow(new String[]{ context.getResources().getString(R.string.star_after_calculation_balance_rs_dot) +MyUtility.convertToIndianNumberSystem(cursor.getInt(1))},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){
-                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,"ALL CLEARED"),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
+                if(!makePdf.singleCustomRow(MyUtility.headersForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context.getResources().getString(R.string.all_cleared)),new float[]{25f, 50f, 25f},0,0,0,0,true,(byte)50,(byte)50))return false;
                 // yellow                               green                                green
                 if(!makePdf.singleCustomRow(MyUtility.totalWagesWorkAmountDepositAdvanceOrBalanceForSummaryBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,0),new float[]{25f, 50f, 25f},Color.rgb(221, 133, 3),Color.rgb(26,145,12),Color.rgb(26,145,12),0,true,(byte)50,(byte)50))return false;
                 if(!makePdf.singleCustomRow(new String[]{context.getResources().getString(R.string.star_after_calculation_no_dues_dot)},new float[]{100f},0,0 ,0,0,true,(byte)50,(byte)50))return false;

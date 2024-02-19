@@ -42,7 +42,8 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     public MestreLaberGAdapter(Context context, ArrayList<MestreLaberGModel> arrayList){
         this.context =context;
         this.arrayList=arrayList;
-        db=new Database(this.context);//we cant give this at class level
+       // db=new Database(this.context);//we cant give this at class level
+        db=Database.getInstance(this.context);
     }
     @NonNull
     @Override
@@ -87,7 +88,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
                 if(db.isActiveOrInactive(data.getId())){//to make id inactive change to false if(!db.isActiveOrInactive(data.getId())){
                     db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
                  }else{
-                    //for testing make if condition false
+                    //for testing make if condition false and next if comment it
 //                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
@@ -149,7 +150,6 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             yellowBg =itemView.findViewById(R.id.yellow_layout);
         }
     }
-
 }
     //***************For setting or showing different layout to recycler view***********************************************************************************
 //    //This adapter will decide which person is active or not.Person will become inactive if its leaving duration is 1 month.if user enter any data in current date then that person become active.

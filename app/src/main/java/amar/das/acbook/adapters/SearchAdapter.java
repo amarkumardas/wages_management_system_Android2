@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -19,15 +18,13 @@ import java.util.ArrayList;
 
 import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.SearchModel;
-import amar.das.acbook.model.TextFileModel;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> implements Filterable {
     Context context;
     ArrayList<SearchModel> dataList;
     ArrayList<SearchModel> backup  ;
-
-
     public SearchAdapter(Context context, ArrayList<SearchModel> dataList) {
         this.context = context;
         this.dataList = dataList;
@@ -40,29 +37,41 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.single_search_row,parent,false);
         return new ViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
        SearchModel data= dataList.get(position);
 
+       holder.id.setText("ID: "+data.getId());
+       holder.name.setText(HtmlCompat.fromHtml("NAME: "+"<b>"+data.getName()+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+       holder.acHolderName.setText("SKILL: "+data.getSkill());
 
-       holder.id.setText("ID- "+data.getId());
-       holder.name.setText(HtmlCompat.fromHtml("NAME-"+"<b>"+data.getName()+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-       holder.acHolderName.setText("A/C HOLDER NAME-"+data.getFather());
+       if(data.isActive()){
+           holder.inactiveOrActive.setText(GlobalConstants.ACTIVE.name());
+           holder.inactiveOrActive.setBackgroundResource(R.drawable.green_color_bg);
+       }else {
+           holder.inactiveOrActive.setText(GlobalConstants.INACTIVE.name());
+           holder.inactiveOrActive.setBackgroundResource(R.drawable.red_color_background);
+       }
 
        //user may enter only account no or AADHAAR so if else is use separately
        //account and aadhaar length should be greater than 4 or 5 otherwise string out of bound exception because we r using this method (data.getAccount().length() - 4 or 5)so checking in if statement.we are viewing last 4 and 5 letters to user
         if(data.getAccount().length()>4  ) {
-            holder.account.setText(HtmlCompat.fromHtml("A/C:____" +"<b>"+ data.getAccount().substring(data.getAccount().length() - 4)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 4 letters
+            holder.account.setText(HtmlCompat.fromHtml("A/C: " +"<b>"+ data.getAccount().substring(data.getAccount().length() - 4)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 4 letters
         }else {/*when data is not there in Db than set account  to - otherwise others people value is been showed in place of account To check just comment next line and see.Default null in database is not working only empty data is set if user don't enter data.*/
             holder.account.setText("A/C:    -");
           }
 
-        if(data.getAadhar().length()>5){
-            holder.aadhaar.setText(HtmlCompat.fromHtml("AADHAAR:____" +"<b>"+ data.getAadhar().substring(data.getAadhar().length() - 5)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 5 letters
+        if(data.getAadhaar().length()>5){
+            holder.aadhaar.setText(HtmlCompat.fromHtml("AADHAAR: " +"<b>"+ data.getAadhaar().substring(data.getAadhaar().length() - 5)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 5 letters
         }else{/*when data is not there in Db than set  aadhaar to - otherwise others people value is been showed in place of aadhaar .Default null in database is not working only empty data is set if user don't enter data*/
             holder.aadhaar.setText("AADHAAR:    -");
-         }
+        }
+
+        if(data.getPhoneNumber() != null && data.getPhoneNumber().length()>6){
+            holder.phoneNumber.setText(HtmlCompat.fromHtml("PHONE: " +"<b>"+ data.getPhoneNumber().substring(data.getPhoneNumber().length() - 6)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 5 letters
+        }else{/*when data is not there in Db than set  aadhaar to - otherwise others people value is been showed in place of aadhaar .Default null in database is not working only empty data is set if user don't enter data*/
+            holder.phoneNumber.setText("PHONE:    -");
+        }
 
        holder.singleRowCartView.setOnClickListener(view -> {
            Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
@@ -71,12 +80,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
            //((Activity)context).finish();//syntax to destroy activity from adapter
        });
     }
-
     @Override
     public int getItemCount() {
         return  dataList.size();
     }
-
     @Override
     public Filter getFilter() {
           return filter;//we have to create anonymous filter class
@@ -84,7 +91,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     //it works background can be called as child thread
     Filter filter=new Filter() {//anonymous filter class
-
+//        String query = "SELECT * FROM your_table WHERE " +
+//                "(account_number LIKE '%" + keyword + "%' OR " +
+//                "aadhaar_number LIKE '%" + keyword + "%' OR " +
+//                "name LIKE '%" + keyword + "%')";
         @Override
         protected FilterResults performFiltering(CharSequence keyword) {//charSequence change to keyword
             ArrayList<SearchModel> filteredData=new ArrayList<>();//whatever data is filtered will be store here
@@ -107,9 +117,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 else if (str.length() == 5) {
                     // if (obj.getAadhaar().substring(obj.getAadhaar().length()-5).equals(str))//not working while using only this statement no idea
                     for (SearchModel obj : backup) {
-                        if (obj.getAadhar().contains(str)) {//if it matches then store in filter data ie. arraylist
+                        if (obj.getAadhaar().contains(str)) {//if it matches then store in filter data ie. arraylist
                             //here already length is checked so no exception obj.getAadhaar().length()-5
-                            if (obj.getAadhar().substring(obj.getAadhar().length()-5).equals(str))//boilerplate code but its working
+                            if (obj.getAadhaar().substring(obj.getAadhaar().length()-5).equals(str))//boilerplate code but its working
                                filteredData.add(obj);//equals method check  by content
                         }
                     }
@@ -122,8 +132,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                         filteredData.add(obj);
                     }
                 }
-
-
             }else if(keyword.toString().matches("[\\s*[a-zA-Z][0-9]+\\s*]+")){//to search with id user have to type any letter then id
 
                 String str=keyword.toString().replaceAll("[\\s*[a-zA-Z]+\\s]","");//replacing all spaces and alphabet with ""
@@ -160,7 +168,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     };//it is like statement so ; is necessary
 
     public class ViewHolder extends  RecyclerView.ViewHolder{
-        TextView name,id, aadhaar,account, acHolderName;
+        TextView name,id, aadhaar,account, acHolderName,phoneNumber,inactiveOrActive;
         CardView singleRowCartView;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -168,9 +176,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
            id=itemView.findViewById(R.id.search_id_tv);
            aadhaar =itemView.findViewById(R.id.search_aadhar_tv);
            account=itemView.findViewById(R.id.search_ac_tv);
-           acHolderName =itemView.findViewById(R.id.search_father_tv);
+           acHolderName =itemView.findViewById(R.id.search_skill_tv);
            singleRowCartView=itemView.findViewById(R.id.single_row_cartview);
-
+           phoneNumber=itemView.findViewById(R.id.search_phone_tv);
+           inactiveOrActive=itemView.findViewById(R.id.search_inactive_or_active_tv);
         }
     }
 }

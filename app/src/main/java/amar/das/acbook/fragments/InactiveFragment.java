@@ -117,8 +117,8 @@ public class InactiveFragment extends Fragment {
         return root;
     }
     public ArrayList<MestreLaberGModel> loadInitialDataHavingTotalAdvanceNBalanceOfInactive(TextView advance,TextView balance,String skill,int limit,ArrayList<MestreLaberGModel> arraylist) {
-        db=new Database(getContext());//on start only database should be create
-
+        //db=new Database(getContext());//on start only database should be create
+        Database db=  Database.getInstance(getContext());
         Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE +"+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND ("+Database.COL_12_ACTIVE+"='0')");
         advanceBalanceCursor.moveToFirst();
         advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+advanceBalanceCursor.getLong(0)+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -137,7 +137,8 @@ public class InactiveFragment extends Fragment {
         }
         arraylist.trimToSize();//to free space
         dataCursorMLG.close();
-        db.close();
+       // db.close();
+        Database.closeDatabase();
         return arraylist;
     }
     public void loadDataByTakingSkillAndDefaultNoOfDataToLoadInitially(String skill, int loadDataInitially) {
@@ -156,12 +157,14 @@ public class InactiveFragment extends Fragment {
     }
 
     public int getCountOfSpecificInactiveTotalRecord(String skill) {
-        Database db=new Database(getContext());
+        //Database db=new Database(getContext());
+        Database db=  Database.getInstance(getContext());
         Cursor  cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0'");
         cursor.moveToFirst();
         int count=cursor.getInt(0);
         cursor.close();
-        db.close();
+        //db.close();
+        Database.closeDatabase();
         return count;
     }
 
@@ -173,7 +176,8 @@ public class InactiveFragment extends Fragment {
     }
 
     private void dataLoad(String querys,ArrayList<MestreLaberGModel> arraylist){
-        db=new Database(getContext());
+       // db=new Database(getContext());
+        db=Database.getInstance(getContext());
         Cursor cursorMestre = db.getData(querys);//getting image from database
         if(arraylist.size()>=100){//when arraylist size is greater then 100 then free space but ensure capacity will be as mention during declaration ie.150
             arraylist.clear();
@@ -190,12 +194,14 @@ public class InactiveFragment extends Fragment {
 
         arraylist.trimToSize();//If the size of the ArrayList is increased, the ensureCapacity() method will not have any effect. The ensureCapacity() method is used to ensure that the ArrayList has enough room to store the specified number of elements. If the size of the ArrayList is increased, the ensureCapacity() method will not be triggered.
         cursorMestre.close();
-        db.close();//closing database
+        //db.close();//closing database
+        Database.closeDatabase();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        Database.closeDatabase();
     }
 }

@@ -4,14 +4,15 @@ import java.io.Serializable;
 
 public class MLGAllRecordModel implements Serializable {
     private static final long serialVersionUID = 423L;
-   private String name, latestDate,id,active;
+   private String name, latestDate,id;
+          private boolean activeOrInactive;
 
-    public String getActive() {
-        return active;
+    public boolean isActive() {
+        return activeOrInactive;
     }
 
-    public void setActive(String active) {
-        this.active = active;
+    public void setActive(boolean activeOrInactive) {
+        this.activeOrInactive = activeOrInactive;
     }
 
     public String getId() {

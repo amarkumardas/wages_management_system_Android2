@@ -46,7 +46,8 @@ public class ActiveLGFragment extends Fragment {
                              Bundle savedInstanceState) {
          binding=FragmentActiveLGBinding.inflate(inflater,container,false);
          View root=binding.getRoot();
-         db=new Database(getContext());//this should be first statement to load data from db
+        // db=new Database(getContext());//this should be first statement to load data from db
+        db=  Database.getInstance(getContext());//this should be first statement to load data from db
         //ids
         lGRecyclerView=root.findViewById(R.id.recycle_active_l_g);
         progressBar=binding.progressBarActiveLG;
@@ -106,7 +107,8 @@ public class ActiveLGFragment extends Fragment {
         lGArrayList.trimToSize();
         MyUtility.sortArrayList(lGArrayList);
         cursorGL.close();//closing cursor after finish
-        db.close();//closing database to prevent data leak
+        ///db.close();//closing database to prevent data leak
+        Database.closeDatabase();
         mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), lGArrayList);
         //activeMestreCount.setText(""+madapter.getItemCount());
         lGRecyclerView.setAdapter(mestreLaberGAdapter);
@@ -145,16 +147,21 @@ public class ActiveLGFragment extends Fragment {
     }
     public int getCountOfTotalRecordFromDb() {
         int count;
-        Database db=new Database(getContext());
-        Cursor cursor;
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NULL");
-        cursor.moveToFirst();
-        count=cursor.getInt(0);
-        cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1') AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
-        cursor.moveToFirst();
-        count=count+cursor.getInt(0);
-        db.close();
-        return count;
+        // Database db=new Database(getContext());
+        try(Database db = Database.getInstance(getContext())) {
+            Cursor cursor;
+            cursor = db.getData("SELECT COUNT() FROM " + Database.TABLE_NAME1 + " WHERE (" + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.laber) + "' OR " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.women_laber) + "') AND (" + Database.COL_12_ACTIVE + "='1')  AND " + Database.COL_15_LATESTDATE + " IS NULL");
+            cursor.moveToFirst();
+            count = cursor.getInt(0);
+            cursor = db.getData("SELECT COUNT() FROM " + Database.TABLE_NAME1 + " WHERE (" + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.laber) + "' OR " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.women_laber) + "') AND (" + Database.COL_12_ACTIVE + "='1') AND " + Database.COL_15_LATESTDATE + " IS NOT NULL ORDER BY " + Database.COL_15_LATESTDATE + " DESC");
+            cursor.moveToFirst();
+            count = count + cursor.getInt(0);
+           // db.close();
+            return count;
+        }catch (Exception x){
+            x.printStackTrace();
+            return 0;
+        }
     }
     private void fetchData(String query, ArrayList<MestreLaberGModel> arraylist) {
         new Handler().postDelayed(() -> {
@@ -164,7 +171,8 @@ public class ActiveLGFragment extends Fragment {
     }
 
     private void dataLoad(String querys,ArrayList<MestreLaberGModel> arraylist){
-        db=new Database(getContext());//this should be first statement to load data from db
+//        db=new Database(getContext());//this should be first statement to load data from db
+        db=Database.getInstance(getContext());//this should be first statement to load data from db
         Cursor cursorMestre;
         arraylist.clear();//clearing the previous object which is there ie.initial data
         arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
@@ -201,12 +209,14 @@ public class ActiveLGFragment extends Fragment {
         arraylist.trimToSize();//to free space
         MyUtility.sortArrayList(arraylist);
         cursorMestre.close();
-        db.close();//closing database
+        //db.close();//closing database
+        Database.closeDatabase();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        Database.closeDatabase();
     }
 }

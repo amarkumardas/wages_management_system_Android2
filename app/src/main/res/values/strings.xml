@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">AC Book</string>
     <string name="update">UPDATE</string>
-    <string name="search_by_name_or_id_or_last_4_digit_of_a_c">Search by Name  or  ID  or  A/C  or  Aadhaar</string>
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name">NAME</string>
     <!--    <string name="enter_a_c_number">A/C number</string>-->
@@ -55,6 +54,13 @@
     <string name="previous_details_were_colon">PREVIOUS DETAILS WERE:</string>
     <!--    <string name="recording">RECORDING</string>-->
     <!--<string name="ok">OK</string>-->
+
+    <!--find all activity and fragment ml-->
+    <string name="serch_view_hint">Enter Ac(4),Aadhaar(5),Phone(6),ID Followed By Any One Letter,Name</string>
+    <string name="search_by_name_phone_id_ac_aadhaar">Search by Name, Phone, ID, A/C, Aadhaar</string>
+    <string name="searching_tips">SEARCHING TIPS</string>
+    <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter ID Followed By Any One Letter.</string>
+
 
     <!--InsertDataActivity-->
     <string name="updated_successfully">UPDATED SUCCESSFULLY</string>
@@ -154,7 +160,7 @@
     <string name="balance">BALANCE</string>
 
     <!--InactiveFragment-->
-    <string name="please_wait_loading">PLEASE WAIT LOADING</string>
+<!--    <string name="please_wait_loading">PLEASE WAIT LOADING</string>-->
 
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
@@ -375,5 +381,6 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
+
 
 </resources>

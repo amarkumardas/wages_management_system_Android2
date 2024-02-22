@@ -301,7 +301,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean insertDataTable3(String id,int r1,int r2,int r3,int r4,String skill1,String skill2,String skill3,String indicator ) {
+    public boolean insertDataTable3(String id,String r1,String r2,String r3,String r4,String skill1,String skill2,String skill3,String indicator ) {
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -1540,7 +1540,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean update_Rating_TABLE_NAME3(String star,String remarks,String leavingDate,String returningDate,int r1,int r2,int r3,int r4,String id,int indicator){
+    public boolean update_Rating_TABLE_NAME3(String star,String remarks,String leavingDate,String returningDate,String r1,String r2,String r3,String r4,String id,int indicator){
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -2170,32 +2170,31 @@ public class Database extends SQLiteOpenHelper {
             return false;
         }
     }
-    private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(SQLiteDatabase dB,String id,int totalDeposit,int totalWages,int p1,int p2,int p3,int p4,int r1,int r2,int r3,int r4,byte indicate,int []innerArray){
+    private boolean updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(SQLiteDatabase dB,String id,int totalDeposit,int totalWages,int p1work,int p2work,int p3work,int p4work,int rate1,int rate2,int rate3,int rate4,byte indicator,int []innerArray){
        try(Cursor cursor = getData("SELECT "+Database.COL_397_TOTAL_WORKED_DAYS +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")) {
            cursor.moveToFirst();//means only one row is returned
 
-           //updating rate and total worked days
-           dB.execSQL("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_32_R1 + "='" + r1 + "' , " + Database.COL_33_R2 + "='" + r2 + "' , " + Database.COL_34_R3 + "='" + r3 + "' , " + Database.COL_35_R4 + "='" + r4 + "' , " + Database.COL_397_TOTAL_WORKED_DAYS + " ='" + (cursor.getInt(0) + p1) + "' WHERE " + Database.COL_31_ID + "='" + id + "'");
+           updateRateAccordingToIndicator(dB,rate1,rate2,rate3,rate4,cursor,p1work,id);
 
            if (!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields.This condition is already checked but checking again
-               if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(r1, r2, r3, r4, p1, p2, p3, p4, indicate)) {//This condition is already checked but checking again
+               if (!MyUtility.isp1p2p3p4PresentAndRateNotPresent(rate1, rate2, rate3, rate4, p1work, p2work, p3work, p4work, indicator)) {//This condition is already checked but checking again
                    //if both wages and total work amount is less then 0 then don't save.This condition already checked but checking again
 
-                   if (((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < 0) || (totalWages < 0)) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
+                   if (((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) < 0) || (totalWages < 0)) {//user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
                        Toast.makeText(context, "FAILED TO SAVE DUE TO WRONG DATA", Toast.LENGTH_LONG).show();
                        return false;
                    }
-                   if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) < totalWages) {
+                   if ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) < totalWages) {
                        //updating Advance to db
-                        dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + (totalWages - (totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4)))) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                        dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + (totalWages - (totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4)))) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
                        //if there is advance then balance  column should be 0
                         dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
-                   } else if ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
+                   } else if ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
 
                        //updating balance to db if greater then 0
-                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + ((totalDeposit + ((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4))) - totalWages) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) - totalWages) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
                        //if there is balance then update advance column should be 0
                         dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
@@ -2214,6 +2213,26 @@ public class Database extends SQLiteOpenHelper {
        }
        return true;
     }
+
+    private void updateRateAccordingToIndicator(SQLiteDatabase dB, int rate1, int rate2, int rate3, int rate4,Cursor cursor, int p1work,String id) {//dynamic query
+        //if you want to store null in db then null will not be stored so using indicator to store individually.To set a column value to null in SQLite using execSQL, you should not include quotes around the null keyword
+       // dB.execSQL("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_32_R1 + "='" + null + "' , " + Database.COL_33_R2 + "=null  , " + Database.COL_34_R3 + "='" + null+ "' ,  WHERE " + Database.COL_31_ID + "='" + id + "'");
+
+        String[] columns = {Database.COL_32_R1, Database.COL_33_R2, Database.COL_34_R3, Database.COL_35_R4};
+        int[] rates = {rate1, rate2, rate3, rate4};
+
+        StringBuilder updateQuery = new StringBuilder("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET ");
+        for (int i = 0; i < columns.length; i++) {
+            updateQuery.append(columns[i]).append(" = ").append(rates[i] != 0 ? rates[i] : "NULL");
+            if (i < columns.length) updateQuery.append(", ");
+        }
+        updateQuery.append(Database.COL_397_TOTAL_WORKED_DAYS + " ='" + (cursor.getInt(0) + p1work))
+                .append("' WHERE ").append(Database.COL_31_ID).append(" = '").append(id).append("'");
+
+        dB.execSQL(updateQuery.toString());
+
+    }
+
     private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
         try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned

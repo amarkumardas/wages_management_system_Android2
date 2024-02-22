@@ -26,7 +26,7 @@
             android:drawableLeft="@drawable/ic_baseline_search_24"
             android:drawablePadding="4dp"
             android:gravity="center_vertical"
-            android:hint="@string/search_by_name_or_id_or_last_4_digit_of_a_c"
+            android:hint="@string/search_by_name_phone_id_ac_aadhaar"
             android:paddingLeft="4dp"
             android:textSize="15sp"
             android:id="@+id/search_click_tv"/>

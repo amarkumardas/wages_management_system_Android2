@@ -1189,7 +1189,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                } else {
 //                    pdfSequenceNo = -1;
 //                }
-                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"FUTURE  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
+                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
              }else{
                 return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
             }

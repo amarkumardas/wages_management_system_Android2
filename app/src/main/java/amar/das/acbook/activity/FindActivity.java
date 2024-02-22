@@ -6,10 +6,13 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,6 +35,7 @@ ArrayList<MLGAllRecordModel> allMLGList;
 Database db;
 Button  btn1,btn2,btn3;
 boolean bool=false;
+TextView searchHint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +43,6 @@ boolean bool=false;
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.This can be applied only on activity
         setContentView(R.layout.activity_find);
 
-//        db=new Database(this);//on start only database should be create
         db=Database.getInstance(this);//on start only database should be create
         //ids
         searchView=findViewById(R.id.serach_view);
@@ -47,8 +50,12 @@ boolean bool=false;
         btn1=findViewById(R.id.mestre_btn);
         btn2=findViewById(R.id.laber_btn);
         btn3=findViewById(R.id.g_btn);
+        searchHint=findViewById(R.id.search_hint);
 
 
+        searchHint.setOnClickListener(view -> {//searchHint.setTooltipText("may name is amar\n kumar \n das");
+            MyUtility.showResult(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext());
+         });
         searchRecycler.setHasFixedSize(true);
 
         //getting all data
@@ -171,8 +178,6 @@ boolean bool=false;
         searchRecycler.setAdapter(allMLGRecordAdapter);
         bool=true;//to set adapter recycler view on onQueryTextChange method
         Database.closeDatabase();
-        //db.close();//closing database to prevent data leak
-       // Toast.makeText(FindActivity.this, "TOTAL: "+allMLGRecordAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
     }
 
     public void goto_back(View view) {
@@ -180,7 +185,6 @@ boolean bool=false;
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.find_layout, new MLFragment()).commit();
     }
-
     /*In some situations, we need to recall activity again from onCreate(). This example demonstrates how to reload activity
     whenever we return back to this activity we will always get refreshed activity
     Disadvantage is whenever we press back button then it will load all data eg:50000 then it will take time to return back because we are refreshing

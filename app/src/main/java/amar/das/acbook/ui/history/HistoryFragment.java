@@ -303,7 +303,7 @@ public class HistoryFragment extends Fragment {
         loadOrNot=true;
         Database db=Database.getInstance(getContext());
         totalRecord =db.getRowsCountOfSpecificDateHistory(year,month,dayOfMonth);
-        Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
         historyArraylist = geHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
         historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
         binding.historyRecyclerview.setAdapter(historyAdapter);
@@ -335,7 +335,7 @@ public class HistoryFragment extends Fragment {
         loadOrNot=true;
         Database db=Database.getInstance(getContext());
         totalRecord = db.getRowsCountOfOnlyTotalPaymentReceivedHistory(year,month,dayOfMonth);
-        Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
         historyArraylist = geHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
         historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
         binding.historyRecyclerview.setAdapter(historyAdapter);

@@ -13,23 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="10">
+        android:weightSum="11">
 
         <Button
             android:layout_width="0dp"
             android:layout_height="28dp"
-
             android:layout_gravity="center_vertical"
             android:layout_marginStart="6dp"
             android:layout_marginLeft="2dp"
             android:layout_marginTop="6dp"
-
             android:layout_marginBottom="6dp"
             android:layout_weight="1"
             android:background="@drawable/baseline_arrow_goback"
             android:foreground="?android:attr/selectableItemBackground"
-            android:onClick="goto_back"
-            />
+            android:onClick="goto_back"/>
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/serach_view"
@@ -39,18 +36,26 @@
             android:layout_weight="9"
             android:background="@drawable/white_detailsbg"
             android:inputType="textCapCharacters|textAutoCorrect"
-            app:defaultQueryHint="Enter Last 4,5 digits of A/C,Aadhar Card"
+            app:defaultQueryHint="@string/serch_view_hint"
             app:iconifiedByDefault="false"
             app:searchIcon="@null">
-
             <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
         </androidx.appcompat.widget.SearchView>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/baseline_info_24"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:id="@+id/search_hint"/>
         <!-- app:iconifiedByDefault="false" so that user enter anywhere to write and show icon by default.means to make searchview
 expanded automatically
  app:searchIcon="@null" to remove default icon-->
-
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

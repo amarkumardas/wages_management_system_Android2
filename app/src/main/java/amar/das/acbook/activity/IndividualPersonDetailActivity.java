@@ -54,13 +54,14 @@ import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.WagesDetailsAdapter;
 import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-    ActivityIndividualPersonDetailBinding binding;
+     ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
     public static String audioPath;//it is made static so that in adapter class if user during updating data if audio is saved or not saved and user suddenly closed the app then on destroy method that audio should be deleted from device.so on destroy method code is there to delete that audio path form device
     public static android.app.AlertDialog adapterDialog;//made it static so that we can close adapter dialog in activity on destroy method
@@ -623,9 +624,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         infoSave.setText(getResources().getString(R.string.save));
                         editOrNot[0] =true;
                     }else{//while saving this will execute
-                        boolean updateRaingsuccess,locationReligionSuccess;
+                        boolean updateRateSuccess,locationReligionSuccess;
                         String star;
-                        if (active.equals("1")) {//if user has pressed radio button then only it will execute
+                        if (active.equals(GlobalConstants.ACTIVE.getValue())) {//if user has pressed radio button then only it will execute
 
                             if(!db.makeIdActive(fromIntentPersonId)){
                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
@@ -658,7 +659,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p4Rate= Integer.parseInt(inputP4Et.getText().toString().trim());
                         }
 
-                        updateRaingsuccess =db.update_Rating_TABLE_NAME3(star,remarksMetaData.getText().toString().trim(),leaveDate,returnDate,p1Rate,p2Rate,p3Rate,p4Rate,fromIntentPersonId,indicator);
+                        updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator);
 
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
@@ -667,7 +668,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
-                        if(updateRaingsuccess || locationReligionSuccess){
+                        if(updateRateSuccess || locationReligionSuccess){
                             displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
                                     religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
                                     p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));

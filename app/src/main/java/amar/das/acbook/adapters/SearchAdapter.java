@@ -10,7 +10,6 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -73,12 +72,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             holder.phoneNumber.setText("PHONE:    -");
         }
 
-       holder.singleRowCartView.setOnClickListener(view -> {
-           Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
-           intent.putExtra("ID",data.getId());
-           context.startActivity(intent);
-           //((Activity)context).finish();//syntax to destroy activity from adapter
-       });
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
+            intent.putExtra("ID",data.getId());
+            context.startActivity(intent);
+            //((Activity)context).finish();//syntax to destroy activity from adapter
+        });
     }
     @Override
     public int getItemCount() {
@@ -91,66 +90,92 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     //it works background can be called as child thread
     Filter filter=new Filter() {//anonymous filter class
-//        String query = "SELECT * FROM your_table WHERE " +
-//                "(account_number LIKE '%" + keyword + "%' OR " +
-//                "aadhaar_number LIKE '%" + keyword + "%' OR " +
-//                "name LIKE '%" + keyword + "%')";
         @Override
         protected FilterResults performFiltering(CharSequence keyword) {//charSequence change to keyword
             ArrayList<SearchModel> filteredData=new ArrayList<>();//whatever data is filtered will be store here
+             keyword=keyword.toString().replaceAll("[^a-zA-Z0-9\\s]", "");//[^a-zA-Z0-9\\s] it will remove all special character except whitespace,string will look like "a234 4 5"
+              boolean keywordLength = keyword.toString().replaceAll(" ","").trim().length() >= 10;
 
+            if(!keywordLength && keyword.toString().matches("[\\s*[0-9]+\\s*]+")){//\\s is whitespace and * is optional if user enter space between character then also work
+               String str=keyword.toString().replaceAll(" ","");//removing all spaces with ""
 
-            if(keyword.toString().matches("[\\s*[0-9]+\\s*]+")){//\\s is whitespace and * is optional if user enter space between character then also work
-
-                String str=keyword.toString().replaceAll(" ","");//removing all spaces with ""
-
-                if (str.length() == 4) {
-                     for (SearchModel obj : backup) {
+                if (str.length() == 4) {//ac
+                     for (SearchModel obj : backup){
                        //contains method checks like pattern match
                        // if (obj.getAccount().substring(obj.getAccount().length()-4).equals(str)) //not working while using only this statement no idea
-                           if(obj.getAccount().contains(str)) {//if it matches then store in filter data ie. arraylist
+                           if(obj.getAccount()!=null && obj.getAccount().contains(str)) {//if it matches then store in filter data ie. arraylist
                                if (obj.getAccount().substring(obj.getAccount().length()-4).equals(str))//boilerplate code but its working
                                    filteredData.add(obj);//equals method check  by content
                            }
                     }
-                }
-                else if (str.length() == 5) {
+                }else if (str.length() == 5) {//aadhaar
                     // if (obj.getAadhaar().substring(obj.getAadhaar().length()-5).equals(str))//not working while using only this statement no idea
                     for (SearchModel obj : backup) {
-                        if (obj.getAadhaar().contains(str)) {//if it matches then store in filter data ie. arraylist
+                        if (obj.getAadhaar()!=null && obj.getAadhaar().contains(str)) {//if it matches then store in filter data ie. arraylist
                             //here already length is checked so no exception obj.getAadhaar().length()-5
                             if (obj.getAadhaar().substring(obj.getAadhaar().length()-5).equals(str))//boilerplate code but its working
                                filteredData.add(obj);//equals method check  by content
                         }
                     }
+                }else if (str.length() == 6) {//phone
+                    // if (obj.getAadhaar().substring(obj.getAadhaar().length()-5).equals(str))//not working while using only this statement no idea
+                    for (SearchModel obj : backup) {
+                        if (obj.getPhoneNumber()!=null && obj.getPhoneNumber().contains(str)) {//if it matches then store in filter data ie. arraylist
+                            //here already length is checked so no exception obj.getAadhaar().length()-5
+                            if (obj.getPhoneNumber().substring(obj.getPhoneNumber().length()-6).equals(str))//boilerplate code but its working
+                                filteredData.add(obj);//equals method check  by content
+                        }
+                    }
                 }
-            }else if(keyword.toString().matches("[\\s*[a-zA-Z]+\\s*]+")){
+            }else if(keyword.toString().matches("[\\s*[a-zA-Z]+\\s*]+")){//name
+
                  for (SearchModel obj : backup) {             //front and last spaces are removed using trim()
                    // if(obj.getName().startsWith(keyword.toString().toUpperCase().trim()))//if we enter A the it will show result whose first letter is A followed by other letters so we will get exact name
-                    if(obj.getName().contains(keyword.toString().toUpperCase().trim()))//if we use this then name may be duplicate so using contain method so that it store when it match like patter match
+                    if(obj.getName()!=null && obj.getName().contains(keyword.toString().toUpperCase().trim()))//if we use this then name may be duplicate so using contain method so that it store when it match like patter match
                     {//if it matches then store in filter data ie arraylist
                         filteredData.add(obj);
                     }
                 }
-            }else if(keyword.toString().matches("[\\s*[a-zA-Z][0-9]+\\s*]+")){//to search with id user have to type any letter then id
-
-                String str=keyword.toString().replaceAll("[\\s*[a-zA-Z]+\\s]","");//replacing all spaces and alphabet with ""
+            }else if(!keywordLength && keyword.toString().matches("[\\s*[a-zA-Z][0-9]+\\s*]+")) {// with id user have to type any letter then id
+                String str = keyword.toString().replaceAll("[\\s*[a-zA-Z]+\\s]", "");//replacing all spaces and alphabet with ""
 
                 for (SearchModel obj : backup) {
                     //since id is not duplicate so filteredData should not contain duplicate like 23,123,123 here 23 is in all so
-                     // equal method is used to check only content and then store
-                   if(obj.getId().equals(str))//if it matches then store in filter data ie arraylist
+                    // equal method is used to check only content and then store
+                    if (obj.getId().equals(str))//if it matches then store in filter data ie arraylist
                     {  //string equals( ) method is called because obj.getId() is string
                         filteredData.add(obj);
                         break;//once id found then break because id is not duplicate
                     }
                 }
+                //if length is greater than or equal to 10 and only number or space contain then only condition would be true
+            }else if (keywordLength &&  keyword.toString().matches("[\\s*[0-9]+\\s*]+")){//\\s is whitespace and * is optional if user enter space between character then also work
+                String str=keyword.toString().replaceAll(" ","");//removing all spaces with "".\\s is space
+
+                checkFullPhoneAadhaarAccount(backup,str,filteredData);
+
             }
             //we have to return FilterResults so creating its object
             FilterResults  filterResults=new FilterResults();
             filterResults.values=filteredData;
             return filterResults;//this return will go in publishResults method
         }
+
+        private void checkFullPhoneAadhaarAccount(ArrayList<SearchModel> backup, String str, ArrayList<SearchModel> filteredData) {
+            for (SearchModel obj : backup) { //checking complete phone,aadhaar,account.taken separately if statement to add all matching data
+
+                if(obj.getPhoneNumber()!=null && obj.getPhoneNumber().equals(str)){
+                    filteredData.add(obj);
+                }
+                if(obj.getAadhaar()!=null && obj.getAadhaar().equals(str)) {
+                    filteredData.add(obj);
+                }
+                if(obj.getAccount()!=null && obj.getAccount().equals(str)){
+                    filteredData.add(obj);
+                }
+            }
+        }
+
         @Override //view main UI thread
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
               dataList.clear();//clearing to show new filter search result
@@ -166,10 +191,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 //            notifyDataSetChanged();
         }
     };//it is like statement so ; is necessary
-
     public class ViewHolder extends  RecyclerView.ViewHolder{
         TextView name,id, aadhaar,account, acHolderName,phoneNumber,inactiveOrActive;
-        CardView singleRowCartView;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
            name=itemView.findViewById(R.id.search_name_tv);
@@ -177,7 +201,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
            aadhaar =itemView.findViewById(R.id.search_aadhar_tv);
            account=itemView.findViewById(R.id.search_ac_tv);
            acHolderName =itemView.findViewById(R.id.search_skill_tv);
-           singleRowCartView=itemView.findViewById(R.id.single_row_cartview);
            phoneNumber=itemView.findViewById(R.id.search_phone_tv);
            inactiveOrActive=itemView.findViewById(R.id.search_inactive_or_active_tv);
         }

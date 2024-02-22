@@ -421,7 +421,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
        detailsReview.create().show();
     }
     private void insertDataToTable3(String id) {
-        if(!db.insertDataTable3( id,0,0,0,0,null,null,null,null))
+        if(!db.insertDataTable3( id,null,null,null,null,null,null,null,null))
             Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
     }
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {

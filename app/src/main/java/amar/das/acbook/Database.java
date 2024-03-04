@@ -140,7 +140,7 @@ public class Database extends SQLiteOpenHelper {
     public final static String TABLE_HISTORY ="history_table";
     public final static String COL_1_ID_H ="ID";//here date and time and id is acting like primary key
     public final static String COL_2_USER_DATE_H ="DATE";//here date is user given date and time and id is acting like primary key
-//    public final static String COL_4_MICPATH_H ="MICPATH";//NOT TAKEN BECAUSE will take from current table
+
     public final static String COL_5_REMARKS_H ="REMARKS";
     public final static String COL_6_WAGES_H ="WAGES";
     public final static String COL_8_P1_H ="P1";

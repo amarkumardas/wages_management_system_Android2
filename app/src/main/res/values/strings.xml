@@ -47,7 +47,7 @@
     <string name="tab_on_mic_to_start_recording">TAB ON MIC TO START RECORDING</string>
     <string name="hyphen_entered">-ENTERED]</string>
     <string name="deposited_with_hyphen">[DEPOSITED]-</string>
-<!--<string name="hyphen_automatic_entered">-AUTOMATIC ENTERED]</string>-->
+    <!--<string name="hyphen_automatic_entered">-AUTOMATIC ENTERED]</string>-->
     <string name="deposited">[DEPOSITED]</string>
     <string name="audio_playing">AUDIO PLAYING</string>
     <string name="hyphen_edited">-EDITED]</string>
@@ -57,7 +57,7 @@
 
     <!--find all activity and fragment ml-->
     <string name="serch_view_hint">Enter Ac(4),Aadhaar(5),Phone(6),ID Followed By Any One Letter,Name</string>
-    <string name="search_by_name_phone_id_ac_aadhaar">Search by Name, Phone, ID, A/C, Aadhaar</string>
+    <string name="by_name_phone_id_ac_aadhaar">By Name, Phone, ID, A/C, Aadhaar</string>
     <string name="searching_tips">SEARCHING TIPS</string>
     <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter ID Followed By Any One Letter.</string>
 
@@ -97,9 +97,9 @@
     <string name="inserted">INSERTED</string>
     <string name="inserted_plus">INSERTED+</string>
     <string name="updated">UPDATED</string>
-<!--    <string name="automatic">AUTOMATIC</string>-->
+    <!--    <string name="automatic">AUTOMATIC</string>-->
     <string name="failed_to_create_pdf">FAILED TO CREATE PDF</string>
-<!--    <string name="total_people_worked">TOTAL PEOPLE WORKED</string>-->
+    <!--    <string name="total_people_worked">TOTAL PEOPLE WORKED</string>-->
     <string name="history">HISTORY</string>
     <string name="history_details_are_in_sequential_order">History Details Are In Sequential Order.</string>
     <string name="if_status_is_colon">If Status Is:</string>
@@ -117,7 +117,7 @@
     <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
     <string name="no_phone_number">NO PHONE NUMBER</string>
     <string name="failed_to_insert">FAILED TO INSERT</string>
-<!--    <string name="failed_to_make_history">FAILED TO MAKE HISTORY</string>-->
+    <!--    <string name="failed_to_make_history">FAILED TO MAKE HISTORY</string>-->
     <string name="value_out_of_range_please_check_total_work_amount">VALUE OUT OF RANGE PLEASE CHECK TOTAL WORK AMOUNT</string>
     <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
     <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
@@ -159,8 +159,12 @@
     <string name="all_cleared">ALL CLEARED</string>
     <string name="balance">BALANCE</string>
 
-    <!--InactiveFragment-->
-<!--    <string name="please_wait_loading">PLEASE WAIT LOADING</string>-->
+    <!--Drawer-->
+    <string name="backup_active_m_l_g">BACKUP ACTIVE M L G</string>
+    <string name="backup_inactive_m">BACKUP INACTIVE M</string>
+    <string name="backup_inactive_l">BACKUP INACTIVE L</string>
+    <string name="backup_inactive_g">BACKUP INACTIVE G</string>
+    <string name="backup_manually">Backup manually</string>
 
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
@@ -282,6 +286,7 @@
     <string name="mestre">M</string>
     <string name="laber">L</string>
     <string name="women_laber">G</string>
+    <string name="inactive">INACTIVE</string>
 
     <string name="deposit_amount">DEPOSIT AMOUNT</string>
     <string name="total_equal">TOTAL =</string>
@@ -381,6 +386,4 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
-
-
 </resources>

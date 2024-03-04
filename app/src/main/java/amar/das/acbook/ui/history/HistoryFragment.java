@@ -66,7 +66,7 @@ public class HistoryFragment extends Fragment {
     ProgressDialogHelper progressDialogHelper;
     final byte defaultHistoryStoringForOneWeek =7,twoWeek=14,threeWeek=21;
     private FragmentHistoryTabBinding binding;
-    byte whichOneTwoFetch=0;
+    byte whichOneTwoFetch=0;//0,1,2,3
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState){
         binding = FragmentHistoryTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -461,9 +461,9 @@ public class HistoryFragment extends Fragment {
 
                     String[][] historyOriginalData=db.getSpecificDataHistoryForPdf(startingDate.getYear(),(byte)startingDate.getMonthValue(),(byte)startingDate.getDayOfMonth());
                                                                                                                             //  //Color.rgb(221, 133, 3) yellow
-                    if(!makePdf.singleCustomRow(getHeaderOfSpecificHistoryDate(startingDate,historyOriginalData),new float[]{100f},0,0,0,0,false,(byte)0,(byte)120)) return false;
+                    if(!makePdf.singleCustomRow(getHeaderOfSpecificHistoryDate(startingDate,historyOriginalData),new float[]{100f},0,0,0,0,false,(byte)0,(byte)0)) return false;
 
-                    if(!createSpecifiedDateHistoryPdf(makePdf,historyOriginalData,startingDate)) return false;
+                    if(!createSpecifiedDateHistoryPdf(makePdf,historyOriginalData)) return false;
 
                     if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true))
                         return false;//just for space
@@ -480,12 +480,12 @@ public class HistoryFragment extends Fragment {
         if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then length would be 1 so return no history available
              return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()+" - "+origionalHistoryData[0][0]};
         }
-        return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()};
+        return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()+" -> "+getHistorySummary(startsDate)};
     }
     private String[] getHistoryCreatedDetails(String startDayOfMonthMonthYear, String endDayOfMonthMonthYear) {
         return new String[]{"HISTORY FROM DATE:  "+startDayOfMonthMonthYear+"  TO  "+endDayOfMonthMonthYear,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
     }
-    private boolean createSpecifiedDateHistoryPdf(MakePdf makePdf, String origionalHistoryData[][],LocalDate date) {
+    private boolean createSpecifiedDateHistoryPdf(MakePdf makePdf, String origionalHistoryData[][]) {
         if(makePdf == null || origionalHistoryData==null) return false;
 
         if(origionalHistoryData.length == 1 && origionalHistoryData[0].length == 1){//if no history then return true because message no history available is already set in history header.so no need to create header
@@ -514,8 +514,8 @@ public class HistoryFragment extends Fragment {
                 if(!makePdf.writeSentenceWithoutLines(new String[]{"REMARKS: "+formattedHistoryData[i][7]},new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//FOR REMARKS
                 if(!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true) )return false;//just for space
            }
-        if(!makePdf.writeSentenceWithoutLines(new String[]{getHistorySummary(date)}, new float[]{100f}, false, (byte) 0, (byte) 0,true) )return false;//summary
-        if(!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true) )return false;//just for space
+//        if(!makePdf.writeSentenceWithoutLines(new String[]{getHistorySummary(date)}, new float[]{100f}, false, (byte) 0, (byte) 0,true) )return false;//summary
+//        if(!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true) )return false;//just for space
 
         return true;
     }

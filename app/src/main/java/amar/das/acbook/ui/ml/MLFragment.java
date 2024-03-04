@@ -25,6 +25,7 @@ import amar.das.acbook.databinding.FragmentMlTabBinding;
 
 public class MLFragment extends Fragment  {
     private FragmentMlTabBinding binding ;
+   // private String[] titles=new String[]{getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
     private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
     //important
     //to store image in db we have to convert Bitmap to bytearray
@@ -62,8 +63,8 @@ public class MLFragment extends Fragment  {
 //        });
 
 
-        binding.verticledotsmenuClick.setOnClickListener(view -> {
-            PopupMenu popup=new PopupMenu(getContext(),binding.verticledotsmenuClick);
+        binding.verticleMenu.setOnClickListener(view -> {
+            PopupMenu popup=new PopupMenu(getContext(),binding.verticleMenu);
             popup.inflate(R.menu.popuo_menu);
 
             popup.setOnMenuItemClickListener(item -> {
@@ -82,6 +83,10 @@ public class MLFragment extends Fragment  {
                 return true;
             });
             popup.show();
+        });
+        binding.addPerson.setOnClickListener(view -> {
+            Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
+            startActivity(intent);
         });
         return root;
     }

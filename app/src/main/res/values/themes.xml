@@ -14,10 +14,13 @@
         <!-- Customize your theme here. -->
 
     </style>
+
     <style name="Theme.ACBook.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
     <style name="Theme.ACBook.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
     <style name="Theme.ACBook.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

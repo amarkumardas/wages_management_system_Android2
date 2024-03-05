@@ -16,15 +16,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:orientation="horizontal">
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:background="#D6DADF">
 
         <Button
             android:layout_marginStart="6dp"
             android:layout_marginBottom="6dp"
             android:layout_width="35dp"
-            android:layout_height="25dp"
+            android:layout_height="27dp"
             android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
             android:background="@drawable/baseline_arrow_goback"
             android:layout_marginLeft="5dp"
             android:onClick="go_back"
@@ -35,16 +37,17 @@
             android:layout_height="wrap_content"
             android:text="@string/enter_details"
             android:textColor="@color/black"
+            android:layout_gravity="center_vertical"
             android:textSize="20dp"
             android:textStyle="bold"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginLeft="10dp"
+            />
     </LinearLayout>
 
     <ImageView
         android:layout_width="140dp"
         android:layout_height="155dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/imageview"
         android:src="@drawable/defaultprofileimage"

@@ -766,39 +766,19 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return true;
     }
-    public String getAccountDetailsFromDb(String id,String idNamePhone) {//return null when error
-        try (Database db=new Database(getApplicationContext());
-             Cursor cursor = db.getData("SELECT "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+" , "+Database.COL_5_BANKNAME+" , "+Database.COL_9_ACCOUNT_HOLDER_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
-        {
-            StringBuilder sb=new StringBuilder(idNamePhone);
-            if (cursor != null) {//which ever phone is available that phone will be send
-                cursor.moveToFirst();
+    public String getAccountDetailsFromDb(String id, String idNamePhone) {
+        try (Database db = new Database(getApplicationContext());
+             Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
 
-                if(!cursor.getString(2).isEmpty()){//isEmpty() checks for empty string only and not for null
-                    sb.append("\nBANK NAME: ").append(cursor.getString(2)).append("\n");
-                }else{
-                    sb.append("\nBANK NAME: null\n");
-                }
-                if(!cursor.getString(3).isEmpty()){
-                    sb.append("\nA/C HOLDER NAME: ").append(cursor.getString(3)).append("\n");
-                }else{
-                    sb.append("A/C HOLDER NAME: null\n");
-                }
-
-                if(!cursor.getString(0).isEmpty()){
-                    sb.append("\nA/C: ").append(convertToReadableNumber(cursor.getString(0))).append("\n\n");
-                }else{
-                    sb.append("A/C: null\n");
-                }
-                
-                if(!cursor.getString(1).isEmpty()){
-                    sb.append("IFSC CODE: ").append(cursor.getString(1));
-                }else{
-                    sb.append("IFSC CODE: null");
-                }
+            StringBuilder sb = new StringBuilder(idNamePhone);
+            if (cursor != null && cursor.moveToFirst()) {
+                sb.append("\nBANK NAME: ").append(cursor.getString(2) != null ? cursor.getString(2) : "").append("\n");
+                sb.append("A/C HOLDER NAME: ").append(cursor.getString(3) != null ? cursor.getString(3) : "").append("\n");
+                sb.append("A/C: ").append(cursor.getString(0) != null ? convertToReadableNumber(cursor.getString(0)) : "").append("\n\n");
+                sb.append("IFSC CODE: ").append(cursor.getString(1) != null ? cursor.getString(1) : "");
             }
             return sb.toString();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
@@ -808,22 +788,12 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
              Cursor cursor = db.getData("SELECT " +Database.COL_2_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
         {
             StringBuilder sb=new StringBuilder();
-            if (cursor != null) {//which ever phone is available that phone will be send
-                cursor.moveToFirst();
+            if (cursor != null && cursor.moveToFirst()) {//which ever phone is available that phone will be send
 
                 sb.append("ID: ").append(id).append("\n");
-                if (!cursor.getString(0).isEmpty()){
-                    sb.append("NAME: ").append(cursor.getString(0)).append("\n");
-                }else{
-                    sb.append("NAME: null\n");
-                }
-
+                sb.append("NAME: ").append(cursor.getString(0)!= null?cursor.getString(0):"").append("\n");
                 String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
-                if(activePhoneNumber != null) {
-                    sb.append("PHONE: ").append(activePhoneNumber);
-                }else{
-                    sb.append("PHONE: null");
-                }
+                sb.append("PHONE: ").append(activePhoneNumber!= null? activePhoneNumber:"");
             }
             return sb.toString().trim();
         }catch(Exception ex){

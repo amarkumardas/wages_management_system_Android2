@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -100,6 +101,9 @@ TextView searchHint;
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                btn3.setBackgroundResource(R.drawable.white_detailsbg);
+                btn2.setBackgroundResource(R.drawable.white_detailsbg);
+                btn1.setBackgroundResource(R.drawable.white_detailsbg);//making background white so that if user pressed button then search then button background should be white
                 if(bool) {//this will set adapter to recycler view while switching from button M L G
                     searchRecycler.setAdapter(searchAdapter);
                 }
@@ -117,7 +121,10 @@ TextView searchHint;
 //            imm.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
 //        }
 //    }
-
+     public void invoiceBackupButton(View view){
+         Intent intent = new Intent(view.getContext(), BackupCalculatedInvoicesActivity.class);
+         startActivity(intent);
+     }
     public void mestreButton(View view) {
         //setting back ground color
 //        view.setBackgroundColor(getColor(R.color.background));

@@ -18,7 +18,7 @@
 
     <!--AllCalculatedInvoicesActivity-->
     <string name="backup_invoice_files">BACKUP INVOICE FILES</string>
-    <string name="not_found">NOT FOUND</string>
+<!--    <string name="not_found">NOT FOUND</string>-->
     <string name="no_backup_invoice_available">NO BACKUP INVOICE AVAILABLE</string>
     <string name="calculated_invoice">CALCULATED INVOICE</string>
 
@@ -59,6 +59,7 @@
     <string name="serch_view_hint">Enter Ac(4),Aadhaar(5),Phone(6),ID Followed By Any One Letter,Name</string>
     <string name="by_name_phone_id_ac_aadhaar">By Name, Phone, ID, A/C, Aadhaar</string>
     <string name="searching_tips">SEARCHING TIPS</string>
+    <string name="invoice">INVOICE</string>
     <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter ID Followed By Any One Letter.</string>
 
 
@@ -165,6 +166,8 @@
     <string name="backup_inactive_l">BACKUP INACTIVE L</string>
     <string name="backup_inactive_g">BACKUP INACTIVE G</string>
     <string name="backup_manually">Backup manually</string>
+    <string name="open">OPEN</string>
+    <string name="close">CLOSE</string>
 
     <!--Common view text-->
     <string name="cancel">CANCEL</string>

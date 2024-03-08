@@ -429,17 +429,38 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         bitmap.compress(Bitmap.CompressFormat.JPEG,50,byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();//converted bitmap to byte array
     }
-    public void go_back(View view) {
+    public void go_back(View view){//when user press back arrow
          //from activity to activity
+//        if(getIntent().hasExtra("ID")){//execute when it is called from other activity with ID intent
+//            Intent intent=new Intent(getBaseContext(),IndividualPersonDetailActivity.class); //go back
+//            intent.putExtra("ID",fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
+//            startActivity(intent);
+//            finish();//destroy current activity
+//        }else{//go from activity to fragment
+//            finish();//first destroy current activity then go back
+//            //fragment not getting refresh
+////            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+////            transaction.replace(R.id.insert_detailsof_l_m_g, new MLFragment()).commit();
+//
+//            super.onBackPressed();
+//        }
+        refreshIndividualPersonDetailActivity(fromIntentPersonId);
+    }
+    @Override
+    public void onBackPressed(){//when user press back button
+        refreshIndividualPersonDetailActivity(fromIntentPersonId);
+    }
+    public void refreshIndividualPersonDetailActivity(String id){
+        //from activity to activity
         if(getIntent().hasExtra("ID")){//execute when it is called from other activity with ID intent
-            Intent in=new Intent(getBaseContext(),IndividualPersonDetailActivity.class); //go back
-            in.putExtra("ID",fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
-            startActivity(in);
+            Intent intent=new Intent(getBaseContext(),IndividualPersonDetailActivity.class); //go back
+            intent.putExtra("ID",id);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
+            startActivity(intent);
             finish();//destroy current activity
-        }else {//go from activity to fragment
-            finish();//first destroy current activity then go back
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.insert_detailsof_l_m_g, new MLFragment()).commit();
+        }else {
+            finish();//destroy current activity
+            super.onBackPressed();
         }
     }
+
 }

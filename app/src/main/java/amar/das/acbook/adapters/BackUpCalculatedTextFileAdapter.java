@@ -381,11 +381,13 @@ public class BackUpCalculatedTextFileAdapter extends RecyclerView.Adapter<BackUp
 
             dataList.clear(); // Clearing to show new filter search result
             ArrayList<TextFileModel> filteredList = (ArrayList<TextFileModel>) filterResults.values;
-            if (filteredList.isEmpty()) {
-                 Toast.makeText(context,context.getResources().getString(R.string.not_found), Toast.LENGTH_SHORT).show();
-            }else {
-                dataList.addAll(filteredList);
-            }
+//            if (filteredList.isEmpty()) {//display message if not found
+//                Toast.makeText(context,context.getResources().getString(R.string.not_found), Toast.LENGTH_SHORT).show();
+//            }else {
+//                dataList.addAll(filteredList);
+//            }
+            dataList.addAll(filteredList);
+
             notifyDataSetChanged();
         }};//anonymous filter class
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view

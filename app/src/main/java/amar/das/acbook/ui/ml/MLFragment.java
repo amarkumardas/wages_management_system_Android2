@@ -1,18 +1,24 @@
 package amar.das.acbook.ui.ml;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import amar.das.acbook.activity.BackupCalculatedInvoicesActivity;
@@ -24,8 +30,11 @@ import amar.das.acbook.databinding.FragmentMlTabBinding;
 
 
 public class MLFragment extends Fragment  {
+    ActionBarDrawerToggle drawerToggle;
     private FragmentMlTabBinding binding ;
-   // private String[] titles=new String[]{getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
+    //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
+   // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
+
     private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
     //important
     //to store image in db we have to convert Bitmap to bytearray
@@ -35,8 +44,23 @@ public class MLFragment extends Fragment  {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        takeAllAppPermissionAtOnce();
+        drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
+        binding.drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
 
+        binding.verticleMenu.setOnClickListener(view -> {
+           binding.drawerLayout.openDrawer(GravityCompat.START);
+        });
+        binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()){
+                case R.id.backup_active_mlg:{
+                    Toast.makeText(getContext(), "clicked", Toast.LENGTH_SHORT).show();
+                }break;
+            }
+            binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
+            return true;});
+
+        takeAllAppPermissionAtOnce();
         binding.searchClickTv.setOnClickListener(view -> {
             Intent intent=new Intent(getContext(),FindActivity.class);
             startActivity(intent);
@@ -63,27 +87,27 @@ public class MLFragment extends Fragment  {
 //        });
 
 
-        binding.verticleMenu.setOnClickListener(view -> {
-            PopupMenu popup=new PopupMenu(getContext(),binding.verticleMenu);
-            popup.inflate(R.menu.popuo_menu);
-
-            popup.setOnMenuItemClickListener(item -> {
-                switch(item.getItemId()){
-                    case R.id.insert_new:{
-                        Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
-                        startActivity(intent);
-                        break;
-                    }
-                    case R.id.all_invoice:{
-                        Intent intent = new Intent(getContext(), BackupCalculatedInvoicesActivity.class);
-                        startActivity(intent);
-                        break;
-                    }
-                }
-                return true;
-            });
-            popup.show();
-        });
+//        binding.verticleMenu.setOnClickListener(view -> {
+//            PopupMenu popup=new PopupMenu(getContext(),binding.verticleMenu);
+//            popup.inflate(R.menu.popuo_menu);
+//
+//            popup.setOnMenuItemClickListener(item -> {
+//                switch(item.getItemId()){
+//                    case R.id.insert_new:{
+//                        Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
+//                        startActivity(intent);
+//                        break;
+//                    }
+//                    case R.id.all_invoice:{
+//                        Intent intent = new Intent(getContext(), BackupCalculatedInvoicesActivity.class);
+//                        startActivity(intent);
+//                        break;
+//                    }
+//                }
+//                return true;
+//            });
+//            popup.show();
+//        });
         binding.addPerson.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
             startActivity(intent);

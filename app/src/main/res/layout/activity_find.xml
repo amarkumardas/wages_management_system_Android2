@@ -62,7 +62,7 @@ expanded automatically
         android:background="@color/purple_700"
         android:orientation="horizontal"
         android:padding="4dp"
-        android:weightSum="3">
+        android:weightSum="4">
 
         <Button
             android:id="@+id/mestre_btn"
@@ -73,7 +73,7 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="mestreButton"
-            android:text="M"
+            android:text="@string/mestre"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="17sp"
@@ -89,10 +89,10 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="maleLaberButton"
-            android:text="L"
+            android:text="@string/laber"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17dp"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -105,11 +105,26 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="womenLaberButton"
-            android:text="G"
+            android:text="@string/women_laber"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17dp"
+            android:textSize="17sp"
             android:textStyle="bold"
+            android:foreground="?android:attr/selectableItemBackground"/>
+
+        <Button
+            android:id="@+id/invoice_btn"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/white_detailsbg"
+            android:onClick="invoiceBackupButton"
+            android:text="@string/invoice"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="17sp"
             android:foreground="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>

@@ -691,7 +691,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             });
-            binding.finalCalculationBtn.setOnLongClickListener(new View.OnLongClickListener() {
+            binding.finalCalculationBtn.setOnClickListener(new View.OnClickListener() {
                 TextView defaultSkillTextTv,totalP1CountTv,workTotalAmountTv,totalP1AmountTv,advanceOrBalanceTv,totalDepositAmountTv,wagesTotalAmountTv,skill1TextTv,totalP2CountTv,totalP2AmountTv,skill2TextTv,totalP3CountTv,totalP3AmountTv,skill3TextTv,totalP4CountTv,totalP4AmountTv;
                 LinearLayout p2Layout,p3Layout,p4Layout,totalDepositAmountLayout;
                 EditText p1RateTv,p2RateTv,p3RateTv,p4RateTv;
@@ -700,7 +700,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 int totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0;//while saving this variable required
                 byte indicate=0;
                 @Override
-                public boolean onLongClick(View view){
+                public void onClick(View view){
                     AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                     LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
                     View myView=inflater.inflate(R.layout.final_calculation_layout,null);//myView contain all layout view ids
@@ -1060,9 +1060,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }else{Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();}
 
                    return false;
-                    });//on long press
+                    });
                     finalDialog.show();
-                    return false;
                 }
                 private boolean dataBaseDeleteAndCreatePdfOperation() {
                     try {

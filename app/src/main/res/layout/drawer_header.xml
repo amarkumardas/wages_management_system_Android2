@@ -16,7 +16,7 @@
             android:id="@+id/business_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BEST CONSTRUCTION WORK BENCH"
+            android:text="CONSTRUCTION WORK BENCH"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textAlignment="center"
@@ -27,7 +27,7 @@
             android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PHONE: 7005422684, 9436018408"
+            android:text="PHONE: 70054226897897, 94878736018408"
             android:textAlignment="textStart"
             android:textColor="@color/white"
             android:textSize="12sp" />
@@ -76,6 +76,7 @@
         android:src="@drawable/original_pencil_border_color_24"
         app:fabSize="normal"
         app:rippleColor="#FDE300"
-        app:tint="@color/white" />
+        app:tint="@color/white"
+         android:id="@+id/header_drawer"/>
 
 </RelativeLayout>

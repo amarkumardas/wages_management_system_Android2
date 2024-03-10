@@ -1,24 +1,35 @@
 <resources>
     <string name="app_name">AC Book</string>
     <string name="update">UPDATE</string>
+
+    <!--person details-->
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name">NAME</string>
-    <!--    <string name="enter_a_c_number">A/C number</string>-->
-    <!--    <string name="active_phone_number_2">ACTIVE PHONE NUMBER 2</string>-->
+    <string name="ac_number">A/C NUMBER</string>
     <string name="enter_aadhaar_card_number">AADHAAR CARD NUMBER</string>
     <string name="enter_phone_number">ACTIVE PHONE NUMBER 1</string>
+    <string name="phone_number_2">PHONE NUMBER 2</string>
     <string name="skilled_in">TYPE</string>
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
-    <string name="enter_bank_name">Bank Name</string>
-    <!--<string name="enter_ifsc_code">IFSC Code</string>-->
+    <string name="bank_name">BANK NAME</string>
+    <string name="ifsc_code">IFSC CODE</string>
     <string name="menu_insert_new_">NEW PERSON</string>
     <string name="menu_backup_invoices">BACKUP INVOICE</string>
     <string name="insert_data">ADD</string>
     <string name="account_holder_name">A/C HOLDER NAME</string>
 
+    <!--business details-->
+    <string name="business_details">BUSINESS DETAILS</string>
+    <string name="business_name">BUSINESS NAME</string>
+    <string name="whatsapp_phone">WHATSAPP NUMBER</string>
+    <string name="email">EMAIL</string>
+    <string name="gstin">GST NUMBER</string>
+    <string name="address">ADDRESS</string>
+
+
     <!--AllCalculatedInvoicesActivity-->
     <string name="backup_invoice_files">BACKUP INVOICE FILES</string>
-<!--    <string name="not_found">NOT FOUND</string>-->
+    <!--    <string name="not_found">NOT FOUND</string>-->
     <string name="no_backup_invoice_available">NO BACKUP INVOICE AVAILABLE</string>
     <string name="calculated_invoice">CALCULATED INVOICE</string>
 

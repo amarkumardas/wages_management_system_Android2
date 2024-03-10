@@ -6,7 +6,7 @@
     tools:context=".activity.InsertPersonDetailsActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ECB102">
+    android:background="@color/yellow_for_input">
 <!--    android:id="@+id/insert_detailsof_l_m_g"> error scroll view cant host id-->
 <LinearLayout
 
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
-        android:background="#D6DADF">
+        android:background="@color/purple_700">
 
         <Button
             android:layout_marginStart="6dp"
@@ -78,6 +78,7 @@
         android:textSize="17dp"
         android:inputType="textCapCharacters"
         android:foreground="?android:attr/selectableItemBackground"
+        android:importantForAutofill="yes"
         android:id="@+id/name_et"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -90,7 +91,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="ACTIVE PHONE NUMBER 1"
+            android:text="@string/enter_phone_number"
             android:textSize="12dp"
             android:layout_marginLeft="25dp"
             android:layout_marginRight="4dp"
@@ -100,7 +101,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="PHONE NUMBER 2"
+            android:text="@string/phone_number_2"
             android:textSize="12dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="25dp"
@@ -132,6 +133,7 @@
             android:inputType="number"
             android:digits="1234567890"
             android:foreground="?android:attr/selectableItemBackground"
+            android:importantForAutofill="yes"
             android:id="@+id/phonenumber_et"/>
 
         <EditText
@@ -150,6 +152,7 @@
             android:inputType="number"
             android:digits="1234567890"
             android:foreground="?android:attr/selectableItemBackground"
+            android:importantForAutofill="yes"
             android:id="@+id/acholder_et"
             />
     </LinearLayout>
@@ -164,7 +167,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="LOCATION"
+            android:text="@string/location"
             android:textSize="12dp"
             android:layout_marginLeft="25dp"
             android:layout_marginRight="4dp"
@@ -174,7 +177,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="RELIGION"
+            android:text="@string/religion"
             android:textSize="12dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="25dp"
@@ -251,11 +254,12 @@
         android:textSize="17dp"
         android:maxLength="12"
         android:id="@+id/aadharcard_et"
+        android:importantForAutofill="yes"
         android:foreground="?android:attr/selectableItemBackground"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="BANK NAME"
+        android:text="@string/bank_name"
         android:textSize="12dp"
         android:layout_marginLeft="26dp"
         android:textColor="@color/black"
@@ -289,7 +293,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="A/C NUMBER"
+            android:text="@string/ac_number"
             android:textSize="12dp"
             android:layout_marginLeft="25dp"
             android:layout_marginRight="4dp"
@@ -299,7 +303,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="IFSC CODE"
+            android:text="@string/ifsc_code"
             android:textSize="12dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="25dp"
@@ -330,6 +334,7 @@
             android:inputType="number"
             android:digits="1234567890"
             android:id="@+id/accountno_et"
+            android:importantForAutofill="yes"
             android:foreground="?android:attr/selectableItemBackground"/>
 
         <EditText
@@ -348,6 +353,7 @@
             android:textColor="@color/black"
             android:inputType="textCapCharacters"
             android:id="@+id/ifsccode_et"
+            android:importantForAutofill="yes"
             android:foreground="?android:attr/selectableItemBackground"
             />
     </LinearLayout>
@@ -374,6 +380,7 @@
         android:textColor="@color/black"
         android:textSize="17dp"
         android:id="@+id/fathername_et"
+        android:importantForAutofill="yes"
         android:foreground="?android:attr/selectableItemBackground"/>
     <RadioGroup
         android:layout_width="match_parent"

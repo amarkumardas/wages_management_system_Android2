@@ -18,6 +18,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -27,14 +29,13 @@ import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
+import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
 
 
 public class MLFragment extends Fragment  {
-    ActionBarDrawerToggle drawerToggle;
     private FragmentMlTabBinding binding ;
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
-
     private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
     //important
     //to store image in db we have to convert Bitmap to bytearray
@@ -44,12 +45,19 @@ public class MLFragment extends Fragment  {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
+        ActionBarDrawerToggle  drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
+
+        FloatingActionButton fab = binding.navigationDrawer.getHeaderView(0).findViewById(R.id.header_drawer);//first getting view then finding id.//View headerView = binding.navigationDrawer.getHeaderView(0);
+        fab.setOnClickListener(view -> {
+            BusinessInfoBottomSheetFragment businessInfoBottomSheetFragment=new BusinessInfoBottomSheetFragment();
+            businessInfoBottomSheetFragment.show(requireActivity().getSupportFragmentManager(),businessInfoBottomSheetFragment.getTag());
+        });
+
         binding.verticleMenu.setOnClickListener(view -> {
-           binding.drawerLayout.openDrawer(GravityCompat.START);
+           binding.drawerLayout.openDrawer(GravityCompat.START);//to open drawer
         });
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()){

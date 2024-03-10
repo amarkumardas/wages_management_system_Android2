@@ -23,22 +23,12 @@
         android:padding="2dp"
         android:layout_marginTop="4dp"
         android:weightSum="12">
-        <Button
-            android:id="@+id/verticle_menu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-             android:layout_marginStart="10dp"
-            android:layout_marginEnd="5dp"
-            android:layout_gravity="center_vertical"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:background="@drawable/baseline_menu_24"/>
+
         <TextView
             android:layout_weight="10"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="1dp"
+            android:layout_marginLeft="7dp"
             android:background="@drawable/white_detailsbg"
             android:drawableLeft="@drawable/ic_baseline_search_24"
             android:drawablePadding="4dp"
@@ -52,11 +42,20 @@
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_weight="1"
-            android:layout_marginStart="13dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="12dp"
             android:layout_gravity="center_vertical"
             android:foreground="?android:attr/selectableItemBackground"
             android:background="@drawable/baseline_person_add_alt_1_24"/>
+        <Button
+            android:id="@+id/verticle_menu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:layout_gravity="center_vertical"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/baseline_menu_24"/>
 
     </LinearLayout>
     <com.google.android.material.tabs.TabLayout

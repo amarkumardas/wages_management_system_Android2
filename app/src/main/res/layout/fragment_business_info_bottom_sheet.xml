@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/yellow_for_input"
     tools:context=".fragments.BusinessInfoBottomSheetFragment">
 
     <LinearLayout
@@ -13,21 +12,24 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:orientation="horizontal"
-        android:background="@color/purple_700">
+        android:layout_height="30dp"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_rounded_dialog">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/business_details"
-            android:textColor="@color/white"
-            android:layout_gravity="center_vertical"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:layout_marginLeft="10dp"
-            />
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:textSize="15sp"
+            android:layout_marginTop="5dp"
+            android:textStyle="bold" />
     </LinearLayout>
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/yellow_for_input">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/whatsapp_phone"
+            android:text="@string/whatsapp_number"
             android:textSize="12dp"
             android:layout_marginLeft="25dp"
             android:layout_marginRight="4dp"
@@ -75,7 +77,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="PHONE NUMBER 2"
+            android:text="@string/phone_number"
             android:textSize="12dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="25dp"
@@ -150,7 +152,6 @@
         android:inputType="textEmailAddress"
         android:textColor="@color/black"
         android:textSize="17dp"
-        android:maxLength="12"
         android:id="@+id/email_et"
         android:importantForAutofill="yes"
         android:foreground="?android:attr/selectableItemBackground"/>
@@ -188,13 +189,13 @@
         android:layout_marginTop="19dp" />
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="43dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="1dp"
         android:layout_marginRight="25dp"
-        android:background="@drawable/white_detailsbg"
         android:paddingLeft="10dp"
         android:textStyle="bold"
+        android:maxLength="150"
         android:inputType="textMultiLine"
         android:textColor="@color/black"
         android:textSize="17dp"
@@ -215,5 +216,6 @@
             android:textSize="15sp"
             android:id="@+id/business_info_save_button"
             android:foreground="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
     </LinearLayout>
 </ScrollView>

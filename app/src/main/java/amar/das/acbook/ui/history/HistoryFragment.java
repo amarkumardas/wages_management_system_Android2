@@ -291,7 +291,7 @@ public class HistoryFragment extends Fragment {
       return db.isDataOfDatePresentInHistoryTable(date[2],(byte) date[1], (byte) date[0]);
     }
     private void deleteHistoryPreviousData() {//delete the data which is not in between given date
-        int[]  dateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        int[]  dateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS.name(), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
         Database db=Database.getInstance(getContext());
         if(!db.deleteHistoryRecord(dateArray[0], (byte) dateArray[1], (byte) dateArray[2])){
             Toast.makeText(getContext(), "FAILED TO DELETE HISTORY", Toast.LENGTH_LONG).show();
@@ -387,9 +387,9 @@ public class HistoryFragment extends Fragment {
             return arraylist;
     }
     private String historyKeepingRangeMessage() {
-        int[] settingStartDateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        int[] settingStartDateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS.name(), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
         byte week=0;
-        int days=SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek);
+        int days=SharedPreferencesHelper.getInt(getContext(), SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS.name(), defaultHistoryStoringForOneWeek);
         week= (byte) ((days== defaultHistoryStoringForOneWeek)?1:(days==twoWeek)? 2: (days==threeWeek)? 3:0);
         StringBuilder sb=new StringBuilder(50).append( week+" WEEK HISTORY PRESENT FROM DATE  "+settingStartDateArray[2]+"-"+settingStartDateArray[1]+"-"+settingStartDateArray[0]+"  TO  "+LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear());//actually it store extra 1 day and it is important
         return sb.toString();
@@ -401,7 +401,7 @@ public class HistoryFragment extends Fragment {
         LocalDate userStartDate=LocalDate.of(startDate[2],startDate[1],startDate[0]);//this is better for taking date instead of using date pattern like dd-mm--yy this give erro when 0 is not present
         LocalDate userEndDate=LocalDate.of(endDate[2],endDate[1],endDate[0]);
 
-        int startDateArray[]= getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),String.valueOf(SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
+        int startDateArray[]= getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS.name(), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
 
         LocalDate settingStartDate=LocalDate.of(startDateArray[0],startDateArray[1],startDateArray[2]);
         LocalDate settingEndDate=LocalDate.now();

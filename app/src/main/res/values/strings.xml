@@ -21,9 +21,12 @@
     <!--business details-->
     <string name="business_details">BUSINESS DETAILS</string>
     <string name="business_name">BUSINESS NAME</string>
-    <string name="whatsapp_phone">WHATSAPP NUMBER</string>
+    <string name="whatsapp_number">WHATSAPP NUMBER</string>
+    <string name="phone_number">PHONE NUMBER</string>
+    <string name="whatsapp">WHATSAPP</string>
     <string name="email">EMAIL</string>
     <string name="gstin">GST NUMBER</string>
+    <string name="gst">GST</string>
     <string name="address">ADDRESS</string>
 
 
@@ -400,4 +403,5 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
+
 </resources>

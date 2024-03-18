@@ -1,35 +1,31 @@
 package amar.das.acbook.ui.ml;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import amar.das.acbook.activity.BackupCalculatedInvoicesActivity;
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
+import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
+import amar.das.acbook.utility.MyUtility;
 
 
 public class MLFragment extends Fragment  {
@@ -49,11 +45,18 @@ public class MLFragment extends Fragment  {
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
+        initialiseHeader();
 
-        FloatingActionButton fab = binding.navigationDrawer.getHeaderView(0).findViewById(R.id.header_drawer);//first getting view then finding id.//View headerView = binding.navigationDrawer.getHeaderView(0);
-        fab.setOnClickListener(view -> {
+        binding.navigationDrawer.getHeaderView(0).findViewById(R.id.edit_header_drawer).setOnClickListener(view -> {//first getting view then finding id.//View headerView = binding.navigationDrawer.getHeaderView(0);
+            binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             BusinessInfoBottomSheetFragment businessInfoBottomSheetFragment=new BusinessInfoBottomSheetFragment();
             businessInfoBottomSheetFragment.show(requireActivity().getSupportFragmentManager(),businessInfoBottomSheetFragment.getTag());
+        });
+
+        binding.navigationDrawer.getHeaderView(0).findViewById(R.id.header_layout).setOnClickListener(view -> {
+            if(MyUtility.copyTextToClipBoard(getBusinessDetails(),getContext())){
+                MyUtility.snackBar(view,getResources().getString(R.string.message_copied));
+            }
         });
 
         binding.verticleMenu.setOnClickListener(view -> {
@@ -122,6 +125,42 @@ public class MLFragment extends Fragment  {
         });
         return root;
     }
+
+    private String  getBusinessDetails() {
+        StringBuilder text=new StringBuilder();
+        if(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),"").equals("")){//if there is no business name
+            text.append(getResources().getString(R.string.business_name)+":\n");
+        }else {
+            text.append(SharedPreferencesHelper.getString(getContext(), SharedPreferencesHelper.Keys.BUSINESS_NAME.name(), "")+"\n");
+        }
+        text.append(getResources().getString(R.string.whatsapp)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),"")+" , "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),"")+"\n")
+                .append(getResources().getString(R.string.email)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.EMAIL.name(),"")+"\n")
+                .append(getResources().getString(R.string.gst)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.GST_NUMBER.name(),"")+"\n")
+                .append(getResources().getString(R.string.address)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.ADDRESS.name(),""));
+        return text.toString();
+    }
+
+    private void initialiseHeader(){
+        TextView businessName= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_name_tv);
+        if(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),"").equals("")){
+            businessName.setText(getResources().getString(R.string.business_name)+":");
+        }else {
+            businessName.setText(SharedPreferencesHelper.getString(getContext(), SharedPreferencesHelper.Keys.BUSINESS_NAME.name(), ""));
+        }
+
+        TextView phone= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.phone_and_whatsapp_tv);
+        phone.setText(getResources().getString(R.string.whatsapp)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),"")+" , "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),""));
+
+        TextView email= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.email_tv);
+        email.setText(getResources().getString(R.string.email)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.EMAIL.name(),""));
+
+        TextView gstIn= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.gstin_tv);
+        gstIn.setText(getResources().getString(R.string.gst)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.GST_NUMBER.name(),""));
+
+        TextView businessAddress= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_address_tv);
+        businessAddress.setText(getResources().getString(R.string.address)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.ADDRESS.name(),""));
+    }
+
     private void takeAllAppPermissionAtOnce() {
         //Taking multiple permission at once by user https://www.youtube.com/watch?v=y0gX4FD3nxk or  https://www.youtube.com/watch?v=y0gX4FD3nxk
         //CHECKING ALL PERMISSION IS GRANTED OR NOT

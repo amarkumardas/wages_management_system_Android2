@@ -82,7 +82,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (getIntent().hasExtra("ID")) {//every operation will be perform based on id
-          //  db = new Database(this);//on start only database should be create
              db=Database.getInstance(this);
             fromIntentPersonId = getIntent().getStringExtra("ID");//getting data from intent
 

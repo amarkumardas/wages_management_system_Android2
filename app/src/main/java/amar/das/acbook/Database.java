@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.ui.history.HistoryFragment;
 import amar.das.acbook.utility.MyUtility;
@@ -1912,7 +1913,11 @@ public class Database extends SQLiteOpenHelper {
     }
     private boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
         try{
-            makePdf.makeTopHeaderOrganizationDetails("RRD Construction Work","GSTIN-123456789123456789", "9436018408", "7005422684", "rrdconstructionbench@gmail.com",false);
+            makePdf.makeTopHeaderOrganizationDetails(SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),""),
+                    ((SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.GST_NUMBER.name(),"").equals(""))?"":(context.getResources().getString(R.string.gst)+": "+SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.GST_NUMBER.name(),""))),
+                    SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),""),
+                    SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),""),
+                    SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.EMAIL.name(),""),false);
             return true;
         }catch(Exception ex){
             ex.printStackTrace();

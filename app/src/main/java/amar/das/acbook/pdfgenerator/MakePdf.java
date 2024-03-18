@@ -81,7 +81,7 @@ public class MakePdf{
 
             myPaint.setColor(Color.WHITE);
             myPaint.setTextAlign(Paint.Align.LEFT);//text will be in middle
-            canvas.drawText("Contact: " + contact + ", Whatsapp: " + whatsappNumber + ", Email: " + email, 8,  top+20 , myPaint);//top+20 to dynamically get change
+            canvas.drawText("Phone: " + contact + ", Whatsapp: "+ whatsappNumber + ", Email: " + email, 8,  top+20 , myPaint);//top+20 to dynamically get change
 
             currentHeightOfDataOfPage=currentHeightOfDataOfPage+gabBetweenComponents;//Update the data height variable with the height of the rectangle that was just drawn.to use for next component
             return true;

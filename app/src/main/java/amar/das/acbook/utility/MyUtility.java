@@ -3,6 +3,8 @@ package amar.das.acbook.utility;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -1435,6 +1437,20 @@ public class MyUtility {
         }catch (Exception x){
             x.printStackTrace();
             runtimeSuggestionAmountToGive.setText("0");
+        }
+    }
+    public static boolean copyTextToClipBoard(String message,Context context) {
+        if(message==null){
+            return false;
+        }
+        try{
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("label",message);
+            clipboard.setPrimaryClip(clip);
+            return true;
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
         }
     }
 }

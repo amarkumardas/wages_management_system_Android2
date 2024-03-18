@@ -531,20 +531,20 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return true;
     }
-    public boolean copyTextToClipBoard(String message) {
-        if(message==null){
-            return false;
-        }
-        try{
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("label",message);
-            clipboard.setPrimaryClip(clip);
-            return true;
-        }catch (Exception x){
-            x.printStackTrace();
-            return false;
-        }
-    }
+//    public boolean copyTextToClipBoard(String message) {
+//        if(message==null){
+//            return false;
+//        }
+//        try{
+//            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+//            ClipData clip = ClipData.newPlainText("label",message);
+//            clipboard.setPrimaryClip(clip);
+//            return true;
+//        }catch (Exception x){
+//            x.printStackTrace();
+//            return false;
+//        }
+//    }
 //    private boolean sendSMSUsingIntentToPhoneNumber(String message, String id) {
 //        if(message==null && id==null) {
 //            return false;
@@ -755,9 +755,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 }
             });
             showMessage_tV.setOnClickListener(view -> {
-                if(copyTextToClipBoard(message)){
-                     Toast.makeText(PdfViewerOperationActivity.this,  getResources().getString(R.string.message_copied), Toast.LENGTH_LONG).show();
-                }
+                if(MyUtility.copyTextToClipBoard(message,getBaseContext())){
+                    MyUtility.snackBar(view,getResources().getString(R.string.message_copied));
+                 }
             });
             dialog.show();
         }catch (Exception e){
@@ -1140,7 +1140,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     public String[] getPersonDetailsForCurrentInvoice(String id) {
         try (Database db=new Database(getBaseContext());
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")
              //Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")
               ){
             if (cursor1 != null){

@@ -6,17 +6,18 @@
     android:background="@color/purple_700">
 
     <LinearLayout
+        android:foreground="?android:attr/selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_marginTop="30dp"
+        android:id="@+id/header_layout"
         android:padding="5dp">
 
         <TextView
             android:id="@+id/business_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CONSTRUCTION WORK BENCH"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textAlignment="center"
@@ -27,7 +28,7 @@
             android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PHONE: 70054226897897, 94878736018408"
+
             android:textAlignment="textStart"
             android:textColor="@color/white"
             android:textSize="12sp" />
@@ -37,7 +38,7 @@
             android:layout_marginTop="1dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EMAIL: amarkumar13012000@gmail.com"
+
             android:textAlignment="textStart"
             android:textColor="@color/white"
             android:textSize="12sp" />
@@ -47,21 +48,20 @@
             android:layout_marginTop="1dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GSTin: 657gfdjyf677rfju66f"
+
             android:textAlignment="textStart"
             android:textColor="@color/white"
             android:textSize="12sp" />
 
         <TextView
-            android:id="@+id/address_tv"
+            android:id="@+id/business_address_tv"
             android:layout_marginTop="1dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ADDRESS: island colony jguy jgu 1 jhgkjh jhgjhg kigkj"
+            android:singleLine="true"
             android:textAlignment="textStart"
             android:textSize="12sp"
-            android:textColor="@color/white"
-            android:maxLength="40" />
+            android:textColor="@color/white"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -77,6 +77,6 @@
         app:fabSize="normal"
         app:rippleColor="#FDE300"
         app:tint="@color/white"
-         android:id="@+id/header_drawer"/>
+         android:id="@+id/edit_header_drawer"/>
 
 </RelativeLayout>

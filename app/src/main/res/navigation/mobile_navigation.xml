@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_notifications_tab"/>
     <fragment
         android:id="@+id/navigation_ml"
-        android:name="amar.das.acbook.ui.ml.MLFragment"
+        android:name="amar.das.acbook.ui.ml.MLDrawerFragment"
         android:label="@string/title_ml"
         tools:layout="@layout/fragment_ml_tab" /><!--MLFragment is class name-->
 

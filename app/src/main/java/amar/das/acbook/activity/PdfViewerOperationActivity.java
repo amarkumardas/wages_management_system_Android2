@@ -7,8 +7,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -187,7 +185,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     boolean errorIndicator=false;
                     switch (itemName) {
                         case "A/C": {
-                            if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetailsFromDb(fromIntentPersonId,getIdNamePhone(fromIntentPersonId)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
+                            if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetails(fromIntentPersonId,getIdNamePhone(fromIntentPersonId)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                             }
                         }break;
@@ -219,7 +217,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                                  runOnUiThread(() -> progressBar.showProgressBar());
 
                                  //background execute
-                                 if (!shareAllData(fromIntentPersonId)) {
+                                 if (!shareAllDataAsTextFile(fromIntentPersonId)) {
                                     runOnUiThread(() -> displayDialogMessage("SOMETHING","WENT WRONG"));
                                  }
                                  //post execute
@@ -333,31 +331,25 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    private boolean shareAllData(String id) {
+    private boolean shareAllDataAsTextFile(String id) {
         StringBuilder sb=new StringBuilder();
         try{
-            String[] message=getPersonDetailsForCurrentInvoice(id);//id,name,invoice number,date
+            String[] message=getPersonDetailsForCurrentInvoice(id);//id,name,invoice number,created date
             sb.append(message[1]).append("\n");
             sb.append(message[0]).append("\n");//setting first id value
             sb.append(message[2]).append("\n");
             sb.append(message[3]).append("\n");
 
-            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
+            String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),false);
             if(phoneNumber!=null){
                 sb.append("PHONE: ").append(phoneNumber).append("\n");//phone number
-            }else{
-                sb.append("PHONE: null").append("\n");
             }
+            sb.append(getOtherDetails(id));//other details like aadhaar,location,religion,total worked days etc
 
-            sb.append(getOtherDetails(id)).append("\n");//other details like aadhaar
-
-            String accountDetails=getAccountDetailsFromDb(id,"");
+            String accountDetails= getAccountDetails(id,"");
             if(accountDetails!=null){
-                sb.append(accountDetails).append("\n");//account details
-            }else{
-              sb.append("ACCOUNT DETAILS: null") .append("\n");
+                sb.append(accountDetails).append("\n\n");//account details
             }
-
             sb.append(getAllSumAndDepositAndWagesDetails(id));//all wages and deposit data
             sb.append("------------FINISH--------------");
             return shareLargeDataAsTextFileToAnyApp(id, TextFile.allDataTextFileName,sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
@@ -367,20 +359,42 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    private String getOtherDetails(String id){
+    private String getOtherDetails(String id){//which ever data is not present that column data is not included
         try(Database db=new Database(getBaseContext());
-            Cursor cursor = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-            if(cursor != null){
-                cursor.moveToFirst();
-            }else return "null";
+            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+            Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+            String skills[]=db.getAllSkill(id);
 
-         StringBuilder sb=new StringBuilder();
-
-            if(!cursor.getString(0).isEmpty()){
-                sb.append("AADHAAR NO: ").append(cursor.getString(0));
-            }else{
-                sb.append("AADHAAR NO: null");
+            StringBuilder sb=new StringBuilder();
+            if(cursor1 != null && cursor1.moveToFirst()){
+             sb.append(!TextUtils.isEmpty(cursor1.getString(0)) ?("AADHAAR NO: " + cursor1.getString(0)+"\n") : "")//!TextUtils.isEmpty() checks for null and ""
+               .append(!TextUtils.isEmpty(cursor1.getString(1)) ? ("LOCATION: " + cursor1.getString(1)+" , ") : "")
+               .append(!TextUtils.isEmpty(cursor1.getString(2)) ? ("RELIGION: " + cursor1.getString(2)+"\n") :"");
             }
+
+            if(cursor2 != null && cursor2.moveToFirst()){
+              sb.append(!TextUtils.isEmpty(cursor2.getString(0)) ? ("LEAVING DATE: " + cursor2.getString(0)+" , ") : "")
+                .append(!TextUtils.isEmpty(cursor2.getString(1)) ? ("RETURN DATE: " + cursor2.getString(1)+"\n") : "")
+                .append(!TextUtils.isEmpty(cursor2.getString(2)) ? ("TOTAL WORKED DAYS: " + cursor2.getString(2)+" , ") : "")
+                .append(!TextUtils.isEmpty(cursor2.getString(3)) ? ("STAR: " + cursor2.getString(3)+"\n") : "");
+
+            }
+
+            switch (MyUtility.get_indicator(getBaseContext(),id)){
+                case 1:{
+                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append("\n");
+                }break;
+                case 2:{
+                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append("\n");
+                }break;
+                case 3:{
+                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append("\n");
+                }break;
+                case 4:{
+                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append(" , "+skills[3]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(7))?cursor2.getString(7):"0")).append("\n");
+                }break;
+            }
+                sb.append(!TextUtils.isEmpty(cursor2.getString(8)) ? ("REMARKS: " + cursor2.getString(8)+"\n") : "");
             return sb.toString();
 
         }catch (Exception x){
@@ -458,7 +472,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     private String activePhoneNumberToShare(String id){//return null when exception or return null when no phone number
         try{
-            if(MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext())!= null) {//checking phoneNumber is there or not
+            if(MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true)!= null) {//checking phoneNumber is there or not
                 return getIdNamePhone(id);
             }else{
                 return null;
@@ -517,7 +531,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
            return false;
        }
         try{
-            String activePhone=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());//for opening whatsapp we have to check phone number is available or not
+            String activePhone=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true);//for opening whatsapp we have to check phone number is available or not
             if(activePhone!=null) {
                 if(!MyUtility.shareMessageDirectlyToWhatsApp(message,activePhone,getBaseContext())){//if fail
                      return shareLargeDataAsTextFileToAnyApp(id,fileName,message,mimeType,title);
@@ -722,7 +736,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     if(defaultTrueForOpenAnyAppAndFalseForWhatsApp){
                         shareShortMessageToAnyApp(MyUtility.get12hrCurrentTimeAndDate() + "\n" + message + amount + remarks);
                     }else{//execute only when boolean value is false
-                        String activePhone= MyUtility.getActivePhoneNumbersFromDb(id,getBaseContext());//for opening whatsapp we have to check phone number is available or not
+                        String activePhone= MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true);//for opening whatsapp we have to check phone number is available or not
                         if(activePhone!=null) {
                             MyUtility.shareMessageDirectlyToWhatsApp(MyUtility.get12hrCurrentTimeAndDate() + "\n" + message + amount + remarks,activePhone,getBaseContext());
                         }else{
@@ -766,7 +780,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return true;
     }
-    public String getAccountDetailsFromDb(String id, String idNamePhone) {
+    public String getAccountDetails(String id, String idNamePhone) {//if error return null
         try (Database db = new Database(getApplicationContext());
              Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
 
@@ -774,7 +788,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if (cursor != null && cursor.moveToFirst()) {
                 sb.append("\nBANK NAME: ").append(cursor.getString(2) != null ? cursor.getString(2) : "").append("\n");
                 sb.append("A/C HOLDER NAME: ").append(cursor.getString(3) != null ? cursor.getString(3) : "").append("\n");
-                sb.append("A/C: ").append(cursor.getString(0) != null ? convertToReadableNumber(cursor.getString(0)) : "").append("\n\n");
+                sb.append("A/C: ").append(cursor.getString(0) != null ? convertToReadableNumber(cursor.getString(0)) : "").append("\n");
                 sb.append("IFSC CODE: ").append(cursor.getString(1) != null ? cursor.getString(1) : "");
             }
             return sb.toString();
@@ -792,7 +806,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
                 sb.append("ID: ").append(id).append("\n");
                 sb.append("NAME: ").append(cursor.getString(0)!= null?cursor.getString(0):"").append("\n");
-                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,getApplicationContext());
+                String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true);
                 sb.append("PHONE: ").append(activePhoneNumber!= null? activePhoneNumber:"");
             }
             return sb.toString().trim();
@@ -836,8 +850,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //  return false;
 //}
     public boolean shareLargeDataAsTextFileToAnyApp(String id,String fileName,String message,String mimeType,String title){
-        //if(id==null|| message==null|| mimeType==null||title==null||sharePdfLauncher==null){
-        if(id==null|| message==null|| mimeType==null||title==null){
+         if(id==null|| message==null|| mimeType==null||title==null){
             return false;
         }
         try { // create a file to store the data
@@ -1140,9 +1153,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     public String[] getPersonDetailsForCurrentInvoice(String id) {
         try (Database db=new Database(getBaseContext());
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")
-             //Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"= '" + id + "'")
-              ){
+             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
 

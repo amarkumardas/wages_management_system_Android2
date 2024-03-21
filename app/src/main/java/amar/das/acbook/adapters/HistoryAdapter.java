@@ -52,7 +52,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         if(data.isShared()){
             holder.shareIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
         }else{
-            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(data.getId(),context);
+            String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(data.getId(),context,true);
             if(phoneNumber!=null){//if there is phone number
                 holder.shareIcon.setBackgroundResource(R.drawable.baseline_whatsapp_24);
             }else{//if no phone number
@@ -146,7 +146,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                    MyUtility.shareShortMessageToAnyApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context);//open any app
                }
            }else{//send to whatsapp.if no contact then open any app
-               String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(data.getId(),context);
+               String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(data.getId(),context,true);
                if(phoneNumber!=null){
                    if (MyUtility.shareMessageDirectlyToWhatsApp(MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()), phoneNumber, context)){//if false then open any app
                        try(Database db=Database.getInstance(context)){//update table as shared.if data send to contact number or whatsapp

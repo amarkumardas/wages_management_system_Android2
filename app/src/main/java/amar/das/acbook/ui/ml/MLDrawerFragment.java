@@ -14,10 +14,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayoutMediator;
-
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
@@ -27,9 +24,8 @@ import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
-
-public class MLFragment extends Fragment  {
-    private FragmentMlTabBinding binding ;
+public class MLDrawerFragment extends Fragment {
+    private   FragmentMlTabBinding binding ;
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
     private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
@@ -40,7 +36,8 @@ public class MLFragment extends Fragment  {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
+        takeAllAppPermissionAtOnce();
+        //for drawer toggle
         ActionBarDrawerToggle  drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
@@ -49,7 +46,7 @@ public class MLFragment extends Fragment  {
 
         binding.navigationDrawer.getHeaderView(0).findViewById(R.id.edit_header_drawer).setOnClickListener(view -> {//first getting view then finding id.//View headerView = binding.navigationDrawer.getHeaderView(0);
             binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
-            BusinessInfoBottomSheetFragment businessInfoBottomSheetFragment=new BusinessInfoBottomSheetFragment();
+            BusinessInfoBottomSheetFragment businessInfoBottomSheetFragment=new BusinessInfoBottomSheetFragment();//open dialog
             businessInfoBottomSheetFragment.show(requireActivity().getSupportFragmentManager(),businessInfoBottomSheetFragment.getTag());
         });
 
@@ -62,6 +59,7 @@ public class MLFragment extends Fragment  {
         binding.verticleMenu.setOnClickListener(view -> {
            binding.drawerLayout.openDrawer(GravityCompat.START);//to open drawer
         });
+
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()){
                 case R.id.backup_active_mlg:{
@@ -71,11 +69,10 @@ public class MLFragment extends Fragment  {
             binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;});
 
-        takeAllAppPermissionAtOnce();
+
         binding.searchClickTv.setOnClickListener(view -> {
             Intent intent=new Intent(getContext(),FindActivity.class);
             startActivity(intent);
-
         });
 
         binding.viewPager2.setAdapter(new FragmentAdapter(getActivity()));

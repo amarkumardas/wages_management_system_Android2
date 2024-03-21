@@ -6,8 +6,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -25,7 +23,7 @@ import amar.das.acbook.adapters.SearchAdapter;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MLGAllRecordModel;
 import amar.das.acbook.model.SearchModel;
-import amar.das.acbook.ui.ml.MLFragment;
+import amar.das.acbook.ui.ml.MLDrawerFragment;
 import amar.das.acbook.utility.MyUtility;
 
 public class FindActivity extends AppCompatActivity {
@@ -65,7 +63,7 @@ TextView searchHint;
 
         while(cursor.moveToNext()){
             SearchModel model=new SearchModel();
-            model.setPhoneNumber(MyUtility.getActivePhoneNumbersFromDb(cursor.getString(0),getBaseContext()));
+            model.setPhoneNumber(MyUtility.getActiveOrBothPhoneNumber(cursor.getString(0),getBaseContext(),true));
             model.setId(cursor.getString(0));
             model.setName(cursor.getString(1));
             model.setAccount(cursor.getString(2));
@@ -190,7 +188,7 @@ TextView searchHint;
     public void goto_back(View view) {
         finish();//first destroy then go back
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.find_layout, new MLFragment()).commit();
+        transaction.replace(R.id.find_layout, new MLDrawerFragment()).commit();
     }
     /*In some situations, we need to recall activity again from onCreate(). This example demonstrates how to reload activity
     whenever we return back to this activity we will always get refreshed activity

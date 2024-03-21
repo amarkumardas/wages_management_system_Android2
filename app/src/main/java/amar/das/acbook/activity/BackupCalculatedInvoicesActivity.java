@@ -18,20 +18,20 @@ import java.util.LinkedList;
 
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.BackUpCalculatedTextFileAdapter;
-import amar.das.acbook.databinding.AllCalculatedInvoicesBinding;
+import amar.das.acbook.databinding.ActivityBackupCalculatedInvoicesBinding;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.textfilegenerator.TextFile;
-import amar.das.acbook.ui.ml.MLFragment;
+import amar.das.acbook.ui.ml.MLDrawerFragment;
 import amar.das.acbook.utility.MyUtility;
 
 public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
-      AllCalculatedInvoicesBinding binding;
+       ActivityBackupCalculatedInvoicesBinding binding;
       byte toDeleteOldInvoiceIndicator=100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
-        binding = AllCalculatedInvoicesBinding.inflate(getLayoutInflater());
+        binding = ActivityBackupCalculatedInvoicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(TextFile.textFileFolderName);
@@ -88,9 +88,12 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            binding.textfileCalculatedHint.setOnClickListener(view -> {
+                MyUtility.showResult(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext());
+            });
 
             if(allFilePathFromDevice.size() >= toDeleteOldInvoiceIndicator){
-                MyUtility.snackBar(binding.getRoot().findFocus(),"DELETE OLD INVOICES TO FREE SPACE");
+                MyUtility.snackBar(binding.getRoot().findFocus(),getResources().getString(R.string.backup_calculated_invoice_and_delete_invoice_to_free_up_space));
             }
 
         }else if(allFilePathFromDevice==null){
@@ -100,7 +103,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
     public void invoice_layout_go_back(View view){
         finish();//first destroy current activity then go back
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.all_calculated_invoices_layout, new MLFragment()).commit();
+        transaction.replace(R.id.all_calculated_invoices_layout, new MLDrawerFragment()).commit();
     }
     private ArrayList<String> getAllAbsolutePathOfFilesFromFolderDevice(String folderName){//if no data return empty list ie 0 size, and if error return null
         try{

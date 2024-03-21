@@ -272,7 +272,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.activePhone1Tv.setText(HtmlCompat.fromHtml("ACTIVE PHONE1-  " + "<b>" + cursor.getString(5)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
                 binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
 
-                if (cursor.getString(5).length() == 10 || MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext()) != null) {//if there is no phone number then show default icon color black else green icon
+//                if (cursor.getString(5).length() == 10 || (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null)) {//if there is no phone number then show default icon color black else green icon
+//                    binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
+//                }
+
+                if (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null) {//if there is no phone number then show default icon color black else green icon
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
                 }
 
@@ -320,7 +324,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
                 LayoutInflater inflater=LayoutInflater.from(IndividualPersonDetailActivity.this);
 
-                View myView=inflater.inflate(R.layout.meta_data,null);//myView contain all layout view ids
+                View myView=inflater.inflate(R.layout.person_meta_data,null);//myView contain all layout view ids
                 myCustomDialog.setView(myView);//set custom layout to alert dialog
                 myCustomDialog.setCancelable(false);//if user touch to other place then dialog will not be close
 
@@ -403,7 +407,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                }
 //                cursor1.close();
                 //---------------------------------------------------------------------------------------------------------------------------
-                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_REFFERAL_REMARKS+" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
+                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_PERSON_REMARKS +" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
                 cursor21.moveToFirst();
 
                 //total worked days
@@ -1215,9 +1219,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
             });
             binding.callTv.setOnClickListener(view -> {//it will call to first active number if not available then make call to second active number
-                if (MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext()) != null) {
+                if (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null) {
                     Intent callingIntent = new Intent(Intent.ACTION_DIAL);
-                    callingIntent.setData(Uri.parse("tel:+91" + MyUtility.getActivePhoneNumbersFromDb(fromIntentPersonId,getBaseContext())));
+                    callingIntent.setData(Uri.parse("tel:+91" + MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true)));
                     startActivity(callingIntent);
                 } else
                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_SHORT).show();
@@ -1253,28 +1257,28 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
     }
 
-    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1,String skill2,int p2,String skill3,int p3,String skill4,int p4){
+    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
         StringBuilder sb=new StringBuilder();
         switch (indicator){
             case 1:{
-                sb.append(skill1).append(" - "+p1);
+                sb.append(skill1).append(" : "+p1Rate);
             }break;
             case 2:{
-                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2);
+                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate);
             }break;
             case 3:{
-                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2).append("  "+skill3).append(" - "+p3);
+                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate);
             }break;
             case 4:{
-                sb.append(skill1).append(" - "+p1).append("  "+skill2).append(" - "+p2).append("  "+skill3).append(" - "+p3).append("  "+skill4).append(" - "+p4);
+                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate).append("  "+skill4).append(" : "+p4Rate);
             }break;
         }
-        sb.append("\n\nSTAR-  " + star)
-                .append("\nLEAVING -     "+leavingDate)
-                .append("\nRETURNING - "+returningDate)
-                .append("\nLOCATION-  "+locationAutoComplete)
-                .append("\nRELIGION-    "+religionAutoComplete)
-                .append( "\n\nREMARKS- "+remarksMetaData);
+        sb.append("\n\nSTAR:  " + star)
+                .append("\nLEAVING :     "+leavingDate)
+                .append("\nRETURNING : "+returningDate)
+                .append("\nLOCATION:  "+locationAutoComplete)
+                .append("\nRELIGION:    "+religionAutoComplete)
+                .append( "\n\nREMARKS: "+remarksMetaData);
         return sb.toString();
     }
     private void rateUpdateManually(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {

@@ -123,12 +123,13 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_39_INDICATOR ="INDICATOR";
     public final static String COL_391_STAR ="STAR";
     public final static String COL_392_LEAVINGDATE ="LEAVINGDATE";
-    public final static String COL_393_REFFERAL_REMARKS ="REFFERAL";
+    public final static String COL_398_RETURNINGDATE ="RETURNDATE";
+    public final static String COL_393_PERSON_REMARKS ="REFFERAL";
     public final static String COL_394_INVOICE1 ="PDF1";//or invoice
     public final static String COL_395_INVOICE2 ="PDF2";
     public final static String COL_396_PDFSEQUENCE ="PDFSEQUENCE";//invoice sequence
     public final static String COL_397_TOTAL_WORKED_DAYS="TOTAL_WORKED_DAYS";
-    public final static String COL_398_RETURNINGDATE ="RETURNDATE";
+
     //table 4---------------------------------------------------------------------------------------
     public final static String TABLE_NAME_LOCATION ="location_table";
     public final static String COL_41_LOCATION ="LOCATION";
@@ -141,7 +142,6 @@ public class Database extends SQLiteOpenHelper {
     public final static String TABLE_HISTORY ="history_table";
     public final static String COL_1_ID_H ="ID";//here date and time and id is acting like primary key
     public final static String COL_2_USER_DATE_H ="DATE";//here date is user given date and time and id is acting like primary key
-
     public final static String COL_5_REMARKS_H ="REMARKS";
     public final static String COL_6_WAGES_H ="WAGES";
     public final static String COL_8_P1_H ="P1";
@@ -192,7 +192,7 @@ public class Database extends SQLiteOpenHelper {
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_HISTORY + " ("+COL_1_ID_H+" INTEGER,"+COL_13_SYSTEM_DATETIME_H +" TEXT NOT NULL,"+COL_21_NAME_H +" VARCHAR(100) DEFAULT NULL,"+ COL_2_USER_DATE_H +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_H +" TEXT DEFAULT NULL,"+ COL_6_WAGES_H +" NUMERIC DEFAULT NULL,"+ COL_8_P1_H +" INTEGER DEFAULT NULL,"+ COL_9_P2_H +" INTEGER DEFAULT NULL,"+ COL_10_P3_H +" INTEGER DEFAULT NULL,"+ COL_11_P4_H +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_H +" CHAR(1) DEFAULT NULL,"+ COL_14_P1_SKILL_H+" CHAR(1) DEFAULT NULL,"+ COL_15_P2_SKILL_H+" CHAR(1) DEFAULT NULL,"+ COL_16_P3_SKILL_H+" CHAR(1) DEFAULT NULL,"+ COL_17_P4_SKILL_H +" CHAR(1) DEFAULT NULL,"+COL_18_IS_SHARED_H +" CHAR(1) DEFAULT NULL,"+ COL_19_STATUS_H+" CHAR(1) DEFAULT NULL,"+ COL_20_SUBTRACTED_ADVANCE_OR_BALANCE_H +" NUMERIC DEFAULT NULL);");
 
 
-         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RATE_SKILL + " ("+COL_31_ID+" INTEGER PRIMARY KEY NOT NULL ,"+COL_32_R1+" INTEGER DEFAULT NULL,"+COL_33_R2+" INTEGER DEFAULT NULL,"+COL_34_R3+" INTEGER DEFAULT NULL,"+COL_35_R4+" INTEGER DEFAULT NULL,"+ COL_36_SKILL2 +" CHAR(1) DEFAULT NULL,"+ COL_37_SKILL3 +" CHAR(1) DEFAULT NULL,"+ COL_38_SKILL4 +" CHAR(1) DEFAULT NULL,"+COL_39_INDICATOR+" CHAR(1) DEFAULT NULL,"+ COL_391_STAR +" CHAR(1) DEFAULT NULL,"+COL_392_LEAVINGDATE+" VARCHAR(10) DEFAULT NULL,"+COL_393_REFFERAL_REMARKS+" TEXT DEFAULT NULL,"+COL_394_INVOICE1+" BLOB DEFAULT NULL,"+COL_395_INVOICE2+" BLOB DEFAULT NULL,"+COL_396_PDFSEQUENCE+" INTEGER DEFAULT 0 , "+COL_397_TOTAL_WORKED_DAYS+" INTEGER DEFAULT 0 , "+COL_398_RETURNINGDATE+" TEXT DEFAULT NULL);");//id is primary key because according to id only data is stored in table 3 so no duplicate
+         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RATE_SKILL + " ("+COL_31_ID+" INTEGER PRIMARY KEY NOT NULL ,"+COL_32_R1+" INTEGER DEFAULT NULL,"+COL_33_R2+" INTEGER DEFAULT NULL,"+COL_34_R3+" INTEGER DEFAULT NULL,"+COL_35_R4+" INTEGER DEFAULT NULL,"+ COL_36_SKILL2 +" CHAR(1) DEFAULT NULL,"+ COL_37_SKILL3 +" CHAR(1) DEFAULT NULL,"+ COL_38_SKILL4 +" CHAR(1) DEFAULT NULL,"+COL_39_INDICATOR+" CHAR(1) DEFAULT NULL,"+ COL_391_STAR +" CHAR(1) DEFAULT NULL,"+COL_392_LEAVINGDATE+" VARCHAR(10) DEFAULT NULL,"+ COL_393_PERSON_REMARKS +" TEXT DEFAULT NULL,"+COL_394_INVOICE1+" BLOB DEFAULT NULL,"+COL_395_INVOICE2+" BLOB DEFAULT NULL,"+COL_396_PDFSEQUENCE+" INTEGER DEFAULT 0 , "+COL_397_TOTAL_WORKED_DAYS+" INTEGER DEFAULT 0 , "+COL_398_RETURNINGDATE+" TEXT DEFAULT NULL);");//id is primary key because according to id only data is stored in table 3 so no duplicate
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_LOCATION + " ("+COL_41_LOCATION+" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RELIGION + " ("+COL_51_RELIGION+" TEXT DEFAULT NULL);");
      }catch(Exception e){
@@ -1549,7 +1549,7 @@ public class Database extends SQLiteOpenHelper {
             dB.beginTransaction();//transaction start
             ContentValues cv = new ContentValues();//to enter data at once it is like hash map
             cv.put(COL_391_STAR, star);
-            cv.put(COL_393_REFFERAL_REMARKS, remarks);
+            cv.put(COL_393_PERSON_REMARKS, remarks);
             cv.put(COL_392_LEAVINGDATE, leavingDate);
             cv.put(COL_398_RETURNINGDATE,returningDate);
             switch (indicator){//to avoid unnecessary update
@@ -1956,7 +1956,7 @@ public class Database extends SQLiteOpenHelper {
 //                    pdfSequenceNo=-1;//if error
 //                }
 
-                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
+                String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,context,true);
                 if(activePhoneNumber != null){
                     activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
                 }else{

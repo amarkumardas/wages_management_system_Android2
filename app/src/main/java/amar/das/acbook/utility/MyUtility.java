@@ -331,7 +331,7 @@ public class MyUtility {
             }
             cursor.close();
 
-            String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
+            String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,context,true);
             if(activePhoneNumber != null){
                 fileName.append("phone").append(activePhoneNumber.substring(activePhoneNumber.length() - 6));//phone number
             }else{
@@ -892,7 +892,7 @@ public class MyUtility {
                     pdfSequenceNo = -1;//if error
                 }
 
-                String activePhoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
+                String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,context,true);
                 if(activePhoneNumber != null){
                     activePhoneNumber= activePhoneNumber.substring(activePhoneNumber.length() - 6);//phone number
                 }else{
@@ -951,26 +951,77 @@ public class MyUtility {
 //            return false;
 //        }
 //    }
-    public static String getActivePhoneNumbersFromDb(String id,Context context){//if no data return null..it return first phone number if first not available then send second phone number will be return
+//    public static String getActiveOrBothPhoneNumber(String id, Context context, boolean forOnlyOneActiveNumberTrue){//if no data return null..it return first phone number if first not available then send second phone number will be return
+//        Database db = Database.getInstance(context);
+//        try (Cursor cursor = db.getData("SELECT " +Database.COL_7_ACTIVE_PHONE1+" , "+Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+//            if (cursor != null &&  cursor.moveToFirst()) {//which ever phone is available that phone will be send
+//
+//                if (forOnlyOneActiveNumberTrue){
+//                    if (cursor.getString(0) != null && cursor.getString(0).length() == 10) {
+//                        return cursor.getString(0);
+//                    }
+//                if(cursor.getString(1) != null && cursor.getString(1).length() == 10) {
+//                    return cursor.getString(1);
+//                }
+//               }else{
+//                    StringBuilder sb = new StringBuilder();
+//                    if (cursor.getString(0) != null && cursor.getString(0).length() == 10) {
+//                        sb.append(cursor.getString(0));
+//                    }
+//
+//                    if(cursor.getString(1) != null && cursor.getString(1).length() == 10) {
+//                        if(sb.length()>0){//add comma when first number is there
+//                            sb.append(", "+cursor.getString(1));
+//                        }
+//                        sb.append(cursor.getString(1));
+//                    }
+//                    return sb.toString();//return both contact number
+//                }
+//            }
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//            return null;
+//        }
+//        return null;
+//    }
+    public static String getActiveOrBothPhoneNumber(String id, Context context, boolean forOnlyOneActiveNumberTrue) {//if no data return null..if forOnlyOneActiveNumberTrue is true it return first phone number if first not available then send second phone number will be return.if false return both number
         Database db = Database.getInstance(context);
-        try (
-             Cursor cursor = db.getData("SELECT " +Database.COL_7_ACTIVE_PHONE1+" , "+Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-            if (cursor != null) {//which ever phone is available that phone will be send
-                cursor.moveToFirst();
-                if (cursor.getString(0).length() == 10){
-                    return cursor.getString(0);
-                }
+        String activePhone1 = null;
+        String phone2 = null;
 
-                if (cursor.getString(1).length() == 10){
-                    return cursor.getString(1);
-                }
+        try (Cursor cursor = db.getData("SELECT " + Database.COL_7_ACTIVE_PHONE1 + " , " + Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
+            if (cursor != null && cursor.moveToFirst()) {
+                activePhone1 = cursor.getString(0);
+                phone2 = cursor.getString(1);
+                if(activePhone1 == null && phone2==null) return null;//no data
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
+
+        if (forOnlyOneActiveNumberTrue) {
+            if (activePhone1 != null && activePhone1.length() == 10) {
+                return activePhone1;
+            } else if (phone2 != null && phone2.length() == 10) {
+                return phone2;
+            }
+        } else {
+            StringBuilder sb = new StringBuilder();
+            if (activePhone1 != null && activePhone1.length() == 10) {
+                sb.append(activePhone1);
+            }
+            if (phone2 != null && phone2.length() == 10) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(phone2);
+            }
+            return sb.toString(); // Return both contact numbers
+        }
         return null;
     }
+
     public static String convertToIndianNumberSystem(long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
         String inputString = String.valueOf(number);//converting integer to string
         StringBuilder result = new StringBuilder();
@@ -1122,7 +1173,7 @@ public class MyUtility {
             case "SHARE":{
                  if(data !=null){//best code
                      try(Database db=Database.getInstance(context)){//share to whats app if not contact open any app to share
-                         String phoneNumber = MyUtility.getActivePhoneNumbersFromDb(data.getId(), context);
+                         String phoneNumber = MyUtility.getActiveOrBothPhoneNumber(data.getId(), context,true);
                         String[] skillArr=db.getAllSkill(data.getId());
                          if (phoneNumber != null) {
 
@@ -1240,7 +1291,7 @@ public class MyUtility {
             return false;
         }
         try{
-            String phoneNumber=MyUtility.getActivePhoneNumbersFromDb(id,context);
+            String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,context,true);
             if(phoneNumber!=null){
                 if(checkPermissionForSMS(context)){   //send an SMS using an intent
                     Intent intent=new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms",phoneNumber,null));//The first parameter specifies the protocol ("sms"), the second parameter specifies the recipient's phone number.URI can be used to launch the SMS app with a pre-filled recipient phone number.
@@ -1453,4 +1504,29 @@ public class MyUtility {
             return false;
         }
     }
+//    public static String getAllPersonDetails(String id){
+//        StringBuilder sb=new StringBuilder();
+//        try{
+//            String[] message=getPersonDetailsForCurrentInvoice(id);//id,name,invoice number,date
+//            sb.append(message[1]).append("\n");
+//            sb.append(message[0]).append("\n");//setting first id value
+//            sb.append(message[2]).append("\n");
+//            sb.append(message[3]).append("\n");
+//
+//            String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getApplicationContext());
+//            if(phoneNumber!=null){
+//                sb.append("PHONE: ").append(phoneNumber).append("\n");//phone number
+//            }else{
+//                sb.append("PHONE: null").append("\n");
+//            }
+//
+//            sb.append(getOtherDetails(id)).append("\n");//other details like aadhaar
+//
+//            String accountDetails=getAccountDetailsFromDb(id,"");
+//            if(accountDetails!=null){
+//                sb.append(accountDetails).append("\n");//account details
+//            }else{
+//                sb.append("ACCOUNT DETAILS: null") .append("\n");
+//            }
+//    }
 }

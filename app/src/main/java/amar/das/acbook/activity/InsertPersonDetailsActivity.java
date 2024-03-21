@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -38,7 +37,6 @@ import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
-import amar.das.acbook.ui.ml.MLFragment;
 import amar.das.acbook.utility.MyUtility;
 
 

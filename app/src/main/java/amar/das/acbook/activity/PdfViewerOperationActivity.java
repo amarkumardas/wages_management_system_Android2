@@ -21,8 +21,6 @@ import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -45,19 +43,20 @@ import amar.das.acbook.R;
 import amar.das.acbook.Database;
 
 import amar.das.acbook.databinding.ActivityPdfViewerBinding;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
-import amar.das.acbook.textfilegenerator.TextFile;
+
 import amar.das.acbook.utility.MyUtility;
 
 public class PdfViewerOperationActivity extends AppCompatActivity {
     ActivityPdfViewerBinding binding;
     byte whichPdfIndicatorChangesDynamically;
     String fromIntentPersonId;
-    public static String pdfFolderName="acBookPDF";
-    String runningInvoiceFileName ="running_invoice";
+   // public static String pdfFolderName="acBookPDF";
+   // String runningInvoiceFileName ="running_invoice";
 
-    String calculatedInvoiceFileName ="calculated_invoice";
+   // String calculatedInvoiceFileName ="calculated_invoice";
     //ActivityResultLauncher<Intent> sharePdfLauncher;
     //String[] absolutePathArrayToDelete=new String[4];//index 0 may contain path of pdf1 or 2 and index 1 may contain path of pdf3 , and both string array index may contain pdf1orpdf2 and pdf3.INDEX 2 contain  the path of image.index 3 is for text file to delete
 
@@ -121,7 +120,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                    absolutePathArrayToDelete[1]=null; //after file deleted set null
 //                }
 
-                String pdfAbsolutePath= createRunningInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
+                String pdfAbsolutePath= createRunningPDFInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
                 if(downloadPdfUsingAbsPathOrByte(pdfAbsolutePath,null,fromIntentPersonId)){
                     displayDialogMessage("DOWNLOADED","RUNNING INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
                 }else{
@@ -150,10 +149,10 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
                     if(whichPdfIndicatorChangesDynamically == (byte) 1 || whichPdfIndicatorChangesDynamically == (byte) 2){//1 or 2
                         boolean largeFileSizeIndicator[]={false};
-                        pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator), calculatedInvoiceFileName, fromIntentPersonId);
+                        pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator), GlobalConstants.CALCULATED_INVOICE_FILE_NAME.getValue(), fromIntentPersonId);
                        // absolutePathArrayToDelete[0]=pdfFile.getAbsolutePath();
                     }else if(whichPdfIndicatorChangesDynamically == (byte) 3){
-                        pdfFile= createRunningInvoiceAndReturnFile(fromIntentPersonId);
+                        pdfFile= createRunningPDFInvoiceAndReturnFile(fromIntentPersonId);
                        // absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();
                     }
                     /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
@@ -201,7 +200,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                         }break;
                         case "RUNNING INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
                             //MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
-                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true), runningInvoiceFileName, fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
+                             if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true), GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue(), fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                              }
                         }break;
@@ -264,7 +263,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             }
             });
 
-        binding.runningPdfBtn.setOnClickListener(view -> {
+        binding.runningInvoicePdfBtn.setOnClickListener(view -> {
             ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
             backgroundTask.execute(() -> {
                 runOnUiThread(() -> progressBar.showProgressBar());//pre execute
@@ -292,12 +291,12 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 return false;
             }
             if(pdfByte!=null){
-               return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, calculatedInvoiceFileName)+".pdf",pdfByte);
+               return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.CALCULATED_INVOICE_FILE_NAME.getValue())+".pdf",pdfByte);
             }
 
             if(absolutePath!= null){
                 byte[] convertedBytes = Files.readAllBytes(Paths.get(absolutePath));// This code uses the Files.readAllBytes() method from the java.nio.file package to read all the bytes from the file specified by the absolute path into a byte array. This method is more concise and efficient .
-                return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, runningInvoiceFileName)+".pdf",convertedBytes);
+                return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue())+".pdf",convertedBytes);
             }
             return false;
         }catch(Exception x){
@@ -334,74 +333,73 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     private boolean shareAllDataAsTextFile(String id) {
         StringBuilder sb=new StringBuilder();
         try{
-            String[] message=getPersonDetailsForCurrentInvoice(id);//id,name,invoice number,created date
+            String[] message= MyUtility.getPersonDetailsForRunningPDFInvoice(id,getBaseContext());//id,name,invoice number,created date
             sb.append(message[1]).append("\n");
             sb.append(message[0]).append("\n");//setting first id value
             sb.append(message[2]).append("\n");
-            sb.append(message[3]).append("\n");
+            sb.append(message[3]).append("\n\n");
 
             String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),false);
             if(phoneNumber!=null){
                 sb.append("PHONE: ").append(phoneNumber).append("\n");//phone number
             }
-            sb.append(getOtherDetails(id));//other details like aadhaar,location,religion,total worked days etc
-
             String accountDetails= getAccountDetails(id,"");
             if(accountDetails!=null){
                 sb.append(accountDetails).append("\n\n");//account details
             }
+            sb.append(MyUtility.getOtherDetails(id,getBaseContext()));//other details like aadhaar,location,religion,total worked days etc
+
             sb.append(getAllSumAndDepositAndWagesDetails(id));//all wages and deposit data
             sb.append("------------FINISH--------------");
-            return shareLargeDataAsTextFileToAnyApp(id, TextFile.allDataTextFileName,sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
+            return shareLargeDataAsTextFileToAnyApp(id, GlobalConstants.ALL_DETAILS_TEXT_FILE_NAME.getValue(),sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
 
         }catch (Exception x){
             x.printStackTrace();
             return false;
         }
     }
-    private String getOtherDetails(String id){//which ever data is not present that column data is not included
-        try(Database db=new Database(getBaseContext());
-            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-            Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-            String skills[]=db.getAllSkill(id);
-
-            StringBuilder sb=new StringBuilder();
-            if(cursor1 != null && cursor1.moveToFirst()){
-             sb.append(!TextUtils.isEmpty(cursor1.getString(0)) ?("AADHAAR NO: " + cursor1.getString(0)+"\n") : "")//!TextUtils.isEmpty() checks for null and ""
-               .append(!TextUtils.isEmpty(cursor1.getString(1)) ? ("LOCATION: " + cursor1.getString(1)+" , ") : "")
-               .append(!TextUtils.isEmpty(cursor1.getString(2)) ? ("RELIGION: " + cursor1.getString(2)+"\n") :"");
-            }
-
-            if(cursor2 != null && cursor2.moveToFirst()){
-              sb.append(!TextUtils.isEmpty(cursor2.getString(0)) ? ("LEAVING DATE: " + cursor2.getString(0)+" , ") : "")
-                .append(!TextUtils.isEmpty(cursor2.getString(1)) ? ("RETURN DATE: " + cursor2.getString(1)+"\n") : "")
-                .append(!TextUtils.isEmpty(cursor2.getString(2)) ? ("TOTAL WORKED DAYS: " + cursor2.getString(2)+" , ") : "")
-                .append(!TextUtils.isEmpty(cursor2.getString(3)) ? ("STAR: " + cursor2.getString(3)+"\n") : "");
-
-            }
-
-            switch (MyUtility.get_indicator(getBaseContext(),id)){
-                case 1:{
-                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append("\n");
-                }break;
-                case 2:{
-                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append("\n");
-                }break;
-                case 3:{
-                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append("\n");
-                }break;
-                case 4:{
-                    sb.append(skills[0]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append(" , "+skills[3]).append(": RATE "+(!TextUtils.isEmpty(cursor2.getString(7))?cursor2.getString(7):"0")).append("\n");
-                }break;
-            }
-                sb.append(!TextUtils.isEmpty(cursor2.getString(8)) ? ("REMARKS: " + cursor2.getString(8)+"\n") : "");
-            return sb.toString();
-
-        }catch (Exception x){
-            x.printStackTrace();
-            return "error";
-        }
-    }
+//    private String getOtherDetails(String id){//which ever data is not present that column data is not included
+//        try(Database db=new Database(getBaseContext());
+//            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+//            Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+//            String skills[]=db.getAllSkill(id);
+//
+//            StringBuilder sb=new StringBuilder();
+//            if(cursor1 != null && cursor1.moveToFirst()){
+//             sb.append(!TextUtils.isEmpty(cursor1.getString(0)) ?("AADHAAR NO: " + cursor1.getString(0)+"\n") : "")//!TextUtils.isEmpty() checks for null and ""
+//               .append(!TextUtils.isEmpty(cursor1.getString(1)) ? ("LOCATION: " + cursor1.getString(1)+" , ") : "")
+//               .append(!TextUtils.isEmpty(cursor1.getString(2)) ? ("RELIGION: " + cursor1.getString(2)+"\n") :"");
+//            }
+//
+//            if(cursor2 != null && cursor2.moveToFirst()){
+//              sb.append(!TextUtils.isEmpty(cursor2.getString(0)) ? ("LEAVING DATE: " + cursor2.getString(0)+" , ") : "")
+//                .append(!TextUtils.isEmpty(cursor2.getString(1)) ? ("RETURN DATE: " + cursor2.getString(1)+"\n") : "")
+//                .append(!TextUtils.isEmpty(cursor2.getString(2)) ? ("TOTAL WORKED DAYS: " + cursor2.getString(2)+" , ") : "")
+//                .append(!TextUtils.isEmpty(cursor2.getString(3)) ? ("STAR: " + cursor2.getString(3)+"\n\n") : "");
+//
+//            }
+//            switch (MyUtility.get_indicator(getBaseContext(),id)){
+//                case 1:{
+//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append("\n");
+//                }break;
+//                case 2:{
+//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append("\n");
+//                }break;
+//                case 3:{
+//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append("\n");
+//                }break;
+//                case 4:{
+//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append(" , "+skills[3]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(7))?cursor2.getString(7):"0")).append("\n");
+//                }break;
+//            }
+//                sb.append(!TextUtils.isEmpty(cursor2.getString(8)) ? ("REMARKS: " + cursor2.getString(8)+"\n\n") : "");
+//            return sb.toString();
+//
+//        }catch (Exception x){
+//            x.printStackTrace();
+//            return "error";
+//        }
+//    }
     private boolean shareImageAndMessageToAnyApp(String message, String id) {
         //if(message==null|| id==null || sharePdfLauncher ==null){
         if(message==null|| id==null){
@@ -588,7 +586,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     private String getMessageForCurrentInvoice(String id,boolean trueForAllAndFalseForOnlyPersonDetails){//return null when exception
         StringBuilder sb=new StringBuilder();
         try{
-            String[] message=getPersonDetailsForCurrentInvoice(id);
+            String[] message= MyUtility.getPersonDetailsForRunningPDFInvoice(id,getBaseContext());
             sb.append(message[1]).append("\n");
             sb.append(message[0]).append("\n");//setting first id value
             sb.append(message[2]).append("\n");
@@ -781,7 +779,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         return true;
     }
     public String getAccountDetails(String id, String idNamePhone) {//if error return null
-        try (Database db = new Database(getApplicationContext());
+        try (Database db = new Database(getBaseContext());
              Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
 
             StringBuilder sb = new StringBuilder(idNamePhone);
@@ -960,17 +958,17 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                case 1: {
                    binding.pdf1Btn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf2Btn.setBackgroundResource(R.drawable.white_detailsbg);
-                   binding.runningPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
+                   binding.runningInvoicePdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
                }
                break;
                case 2: {
                    binding.pdf2Btn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf1Btn.setBackgroundResource(R.drawable.white_detailsbg);
-                   binding.runningPdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
+                   binding.runningInvoicePdfBtn.setBackgroundResource(R.drawable.white_detailsbg);
                }
                break;
                case 3: {
-                   binding.runningPdfBtn.setBackgroundResource(R.drawable.graycolor_bg);
+                   binding.runningInvoicePdfBtn.setBackgroundResource(R.drawable.graycolor_bg);
                    binding.pdf2Btn.setBackgroundResource(R.drawable.white_detailsbg);
                    binding.pdf1Btn.setBackgroundResource(R.drawable.white_detailsbg);
                }
@@ -1055,7 +1053,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //            }
 
         try {//optimised code
-            File pdfFile= createRunningInvoiceAndReturnFile(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
+            File pdfFile= createRunningPDFInvoiceAndReturnFile(id);//when user view this pdf then if user close the app then created file should be deleted so updating absolutePathPdfToDelete to delete on destroy
             if (pdfFile != null) {
                // absolutePathArrayToDelete[1]=pdfFile.getAbsolutePath();//update to delete
                 binding.pdfView.fromFile(pdfFile).load();
@@ -1067,7 +1065,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    public File createRunningInvoiceAndReturnFile(String id) {//return null when error
+    public File createRunningPDFInvoiceAndReturnFile(String id) {//return null when error
         try {
             byte indicator =  MyUtility.get_indicator(getBaseContext(),id);
             boolean[] errorDetection = {false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
@@ -1083,7 +1081,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true))
                 return null;//just for space
 
-            if (!makePdf.writeSentenceWithoutLines(getPersonDetailsForCurrentInvoice(id), new float[]{40f, 10f, 20f, 30f}, true, (byte) 0, (byte) 0,true))
+            if (!makePdf.writeSentenceWithoutLines(MyUtility.getPersonDetailsForRunningPDFInvoice(id,getBaseContext()), new float[]{40f, 10f, 20f, 30f}, true, (byte) 0, (byte) 0,true))
                 return null;//name,id,date,future invoice number
 
             if (errorDetection[0] == false) {
@@ -1107,7 +1105,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     return null;//after finish page we cannot write to it
 
                 //while creating current pdf then its file name should be same because if user click on current PDF button repeatedly then many file will be create in device which is useless.so to avoid that file name is kept same so that whenever user click current pdf button then new file will be replaced with old file so it is necessary to keep same file name.if file name is unique then many file will be created in device
-                 pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), MyUtility.generateUniqueFileNameByTakingDateTime(id,runningInvoiceFileName));//we have to return filename  view pdf using file path
+                 pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue()));//we have to return filename  view pdf using file path
                 if (!makePdf.closeDocumentLastOperation4()) return null;
             }
             return pdfFile;
@@ -1116,7 +1114,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return null;
         }
     }
-    public float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
+    public static float[] getColumnWidthBasedOnIndicator(byte indicator,boolean[] errorDetection) {
         try{
             switch (indicator) {
                 case 1: return new float[]{10f, 12f, 5f, 73f};
@@ -1151,35 +1149,35 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return true;
     }
-    public String[] getPersonDetailsForCurrentInvoice(String id) {
-        try (Database db=new Database(getBaseContext());
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-            if (cursor1 != null){
-                cursor1.moveToFirst();
-
-                int pdfSequenceNo=MyUtility.getPdfSequence(id,getBaseContext());
-                if(pdfSequenceNo != -1){//if -1 means error
-                    pdfSequenceNo = pdfSequenceNo+1;
-                }
-//                else {
-//                    pdfSequenceNo=-1;//if errro
+//    public String[] getPersonDetailsForRunningPDFInvoice(String id) {
+//        try (Database db=new Database(getBaseContext());
+//             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+//            if (cursor1 != null){
+//                cursor1.moveToFirst();
+//
+//                int pdfSequenceNo=MyUtility.getPdfSequence(id,getBaseContext());
+//                if(pdfSequenceNo != -1){//if -1 means error
+//                    pdfSequenceNo = pdfSequenceNo+1;
 //                }
-//                if (cursor2 != null) {
-//                    cursor2.moveToFirst();
-//                    pdfSequenceNo =(cursor2.getInt(0) + 1);//pdf sequence in db is updated and since it is for future invoice number so for now increasing manually
-//                } else {
-//                    pdfSequenceNo = -1;
-//                }
-                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
-             }else{
-                return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-            return new String[]{"ERROR",id,"ERROR","ERROR"};//to avoid error
-        }
-    }
+////                else {
+////                    pdfSequenceNo=-1;//if errro
+////                }
+////                if (cursor2 != null) {
+////                    cursor2.moveToFirst();
+////                    pdfSequenceNo =(cursor2.getInt(0) + 1);//pdf sequence in db is updated and since it is for future invoice number so for now increasing manually
+////                } else {
+////                    pdfSequenceNo = -1;
+////                }
+//                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
+//             }else{
+//                return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
+//            }
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
+//            return new String[]{"ERROR",id,"ERROR","ERROR"};//to avoid error
+//        }
+//    }
     public void displayDialogMessage(String title, String message) {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(PdfViewerOperationActivity.this);
         showDataFromDataBase.setCancelable(true);
@@ -1193,11 +1191,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return null;
         }
         try {
-            File folder = new File(getExternalFilesDir(null) + "/"+ PdfViewerOperationActivity.pdfFolderName+"");//create directory
+            File folder = new File(getExternalFilesDir(null) + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"");//create directory
             if (!folder.exists()) {//if folder not exist then create folder
                 folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
             }
-            File file = new File(getExternalFilesDir(null) + "/"+ PdfViewerOperationActivity.pdfFolderName+"/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
+            File file = new File(getExternalFilesDir(null) + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
 
                 FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
                 fileOutputStream.write(pdfByte);
@@ -1258,7 +1256,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                }
 //            }
 //        }
-       if(!MyUtility.deleteFolderAllFiles(pdfFolderName,true,getBaseContext())){//delete external file
+       if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file

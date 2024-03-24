@@ -8,8 +8,8 @@ import amar.das.acbook.utility.MyUtility;
 public class TextFile {
     private StringBuilder text;
     public static String textFileAbsolutePathInDevice;
-    public static String textFileFolderName="acBookBackupInvoice";
-    public static String allDataTextFileName ="allData";
+    //public static String textFileFolderName="acBookBackupInvoice";
+//    public static String allDataTextFileName ="_all_data_";
 
     public TextFile (){
         this.text=new StringBuilder();

@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,6 +30,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +45,7 @@ import java.util.List;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -50,6 +54,9 @@ import amar.das.acbook.voicerecording.VoiceRecorder;
 public class MyUtility {
     public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    }
+    public static String backupDateTime(){
+       return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
     public static String getTime12hr(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -300,7 +307,7 @@ public class MyUtility {
             }else return false;
 
             textFile.appendText(sb.toString());
-          return textFile.createTextFile(externalFileDir,TextFile.textFileFolderName,generateUniqueFileName(context,id));
+          return textFile.createTextFile(externalFileDir,GlobalConstants.TEXT_FILE_FOLDER_NAME.getValue(),generateUniqueFileName(context,id));
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -1504,29 +1511,93 @@ public class MyUtility {
             return false;
         }
     }
-//    public static String getAllPersonDetails(String id){
-//        StringBuilder sb=new StringBuilder();
-//        try{
-//            String[] message=getPersonDetailsForCurrentInvoice(id);//id,name,invoice number,date
-//            sb.append(message[1]).append("\n");
-//            sb.append(message[0]).append("\n");//setting first id value
-//            sb.append(message[2]).append("\n");
-//            sb.append(message[3]).append("\n");
-//
-//            String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getApplicationContext());
-//            if(phoneNumber!=null){
-//                sb.append("PHONE: ").append(phoneNumber).append("\n");//phone number
-//            }else{
-//                sb.append("PHONE: null").append("\n");
-//            }
-//
-//            sb.append(getOtherDetails(id)).append("\n");//other details like aadhaar
-//
-//            String accountDetails=getAccountDetailsFromDb(id,"");
-//            if(accountDetails!=null){
-//                sb.append(accountDetails).append("\n");//account details
-//            }else{
-//                sb.append("ACCOUNT DETAILS: null") .append("\n");
-//            }
-//    }
+    public static String[] getPersonDetailsForRunningPDFInvoice(String id,Context context) {
+       // try (Database db=new Database(context);
+        try (Database db=Database.getInstance(context);
+             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+            if (cursor1 != null){
+                cursor1.moveToFirst();
+
+                int pdfSequenceNo=MyUtility.getPdfSequence(id,context);
+                if(pdfSequenceNo != -1){//if -1 means error
+                    pdfSequenceNo = pdfSequenceNo+1;
+                }
+//                else {
+//                    pdfSequenceNo=-1;//if errro
+//                }
+//                if (cursor2 != null) {
+//                    cursor2.moveToFirst();
+//                    pdfSequenceNo =(cursor2.getInt(0) + 1);//pdf sequence in db is updated and since it is for future invoice number so for now increasing manually
+//                } else {
+//                    pdfSequenceNo = -1;
+//                }
+                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
+            }else{
+                return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+             return new String[]{"ERROR",id,"ERROR","ERROR"};//to avoid error
+        }
+    }
+    public static String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator,int[] arrayOfTotalWagesDepositRateAccordingToIndicator,Context context) {// when no data and if error errorDetection will be set to true
+        try{//getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
+            switch (indicator) {
+                case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,context.getResources().getString(R.string.star_total_star)};
+
+                case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,context.getResources().getString(R.string.star_total_star)};
+
+                case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,context.getResources().getString(R.string.star_total_star)};
+
+                case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,context.getResources().getString(R.string.star_total_star)};
+            }
+            return new String[]{"wrong indicator"};//this code will not execute due to return in switch block just using to avoid error
+        }catch (Exception ex){
+            ex.printStackTrace();
+            // errorDetection[0]=true;//indicate error has occur
+            return new String[]{"error occurred"};//to avoid error
+        }
+    }
+    public static String getOtherDetails(String id,Context context){//which ever data is not present that column data is not included
+        try(Database db=  Database.getInstance(context);
+            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+            Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+            String skills[]=db.getAllSkill(id);
+
+            StringBuilder sb=new StringBuilder();
+            if(cursor1 != null && cursor1.moveToFirst()){
+                sb.append(!TextUtils.isEmpty(cursor1.getString(0)) ?("AADHAAR NO: " + cursor1.getString(0)+"\n") : "")//!TextUtils.isEmpty() checks for null and ""
+                        .append(!TextUtils.isEmpty(cursor1.getString(1)) ? ("LOCATION: " + cursor1.getString(1)+" , ") : "")
+                        .append(!TextUtils.isEmpty(cursor1.getString(2)) ? ("RELIGION: " + cursor1.getString(2)+"\n") :"");
+            }
+
+            if(cursor2 != null && cursor2.moveToFirst()){
+                sb.append(!TextUtils.isEmpty(cursor2.getString(0)) ? ("LEAVING DATE: " + cursor2.getString(0)+" , ") : "")
+                        .append(!TextUtils.isEmpty(cursor2.getString(1)) ? ("RETURN DATE: " + cursor2.getString(1)+"\n") : "")
+                        .append(!TextUtils.isEmpty(cursor2.getString(2)) ? ("TOTAL WORKED DAYS: " + cursor2.getString(2)+" , ") : "")
+                        .append(!TextUtils.isEmpty(cursor2.getString(3)) ? ("STAR: " + cursor2.getString(3)+"\n\n") : "");
+
+            }
+            switch (MyUtility.get_indicator(context,id)){
+                case 1:{
+                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append("\n");
+                }break;
+                case 2:{
+                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append("\n");
+                }break;
+                case 3:{
+                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append("\n");
+                }break;
+                case 4:{
+                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append(" , "+skills[3]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(7))?cursor2.getString(7):"0")).append("\n");
+                }break;
+            }
+            sb.append(!TextUtils.isEmpty(cursor2.getString(8)) ? ("REMARKS: " + cursor2.getString(8)+"\n\n") : "");
+            return sb.toString();
+
+        }catch (Exception x){
+            x.printStackTrace();
+            return "error";
+        }
+    }
 }

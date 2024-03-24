@@ -54,7 +54,7 @@
                 android:foreground="?android:attr/selectableItemBackground"/>
 
             <Button
-                android:id="@+id/running_pdf_btn"
+                android:id="@+id/running_invoice_pdf_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

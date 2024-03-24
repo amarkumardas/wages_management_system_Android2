@@ -388,7 +388,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 //this should not be use in other class   other wise it will not be called when user change radio button
                 radioGroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
                     if (checkedIdOfRadioBtn == R.id.active_metadata) {
-                        active = "1";//updating active variable
+                        active = GlobalConstants.ACTIVE.getValue();//updating active variable
                     }
                 });
                 //-----------------------------------------to remove returning date automatically------returning date remove manually by admin so to call the worker untill they come---------------------------------------------------

@@ -15,8 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.textfilegenerator.TextFile;
@@ -1008,9 +1011,6 @@ public class Database extends SQLiteOpenHelper {
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_IALG, wages);
                     }
-//                    if (deposit != 0) {
-//                        cv.put(COL_7_DEPOSIT_IALG, deposit);
-//                    }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_IALG, p1);
                     }
@@ -1242,7 +1242,7 @@ public class Database extends SQLiteOpenHelper {
          * other method cannot insert or update in active table due to id inactive*/
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
-            if (activeInactiveSkill[0].equals("0")){//if person is inactive then insert data from inactive table to active table
+            if (activeInactiveSkill[0].equals(GlobalConstants.INACTIVE.getValue())){//if person is inactive then insert data from inactive table to active table
                  if(isRedundantDataPresentInOtherTable(id)){
                      Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
                      return false;
@@ -1989,7 +1989,7 @@ public class Database extends SQLiteOpenHelper {
                 if (recyclerViewWagesData != null){//null means data not present
                     if(makePdf.makeTable(skillHeader, recyclerViewWagesData,columnWidth, 9, false)){
                         //getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
-                        if(!makePdf.singleCustomRow(getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator, errorDetection, arrayOfTotalWagesDepositRateAccordingToIndicator), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
+                        if(!makePdf.singleCustomRow(MyUtility.getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(indicator,arrayOfTotalWagesDepositRateAccordingToIndicator,context), columnWidth, 0, Color.rgb(221, 133, 3), 0, 0, true, (byte) 0, (byte) 0)){
                             return false;
                         }
                     }else return false;
@@ -2012,7 +2012,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
-    private float[] depositColumn() {
+    public static float[] depositColumn() {
         return  new float[]{10f, 12f, 78f};
     }
 
@@ -2098,24 +2098,24 @@ public class Database extends SQLiteOpenHelper {
             }
         }else return false;
     }
-    private String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator, boolean[] errorDetection,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
-        try{
-            switch (indicator) {
-                case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,context.getResources().getString(R.string.star_total_star)};
-
-                case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,context.getResources().getString(R.string.star_total_star)};
-
-                case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,context.getResources().getString(R.string.star_total_star)};
-
-                case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,context.getResources().getString(R.string.star_total_star)};
-            }
-            return new String[]{"wrong indicator"};//this code will not execute due to return in switch block just using to avoid error
-        }catch (Exception ex){
-            ex.printStackTrace();
-            errorDetection[0]=true;//indicate error has occur
-            return new String[]{"error occurred"};//to avoid error
-        }
-    }
+//    public static String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
+//        try{//getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
+//            switch (indicator) {
+//                case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,context.getResources().getString(R.string.star_total_star)};
+//
+//                case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,context.getResources().getString(R.string.star_total_star)};
+//
+//                case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,context.getResources().getString(R.string.star_total_star)};
+//
+//                case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,context.getResources().getString(R.string.star_total_star)};
+//            }
+//            return new String[]{"wrong indicator"};//this code will not execute due to return in switch block just using to avoid error
+//        }catch (Exception ex){
+//            ex.printStackTrace();
+//           // errorDetection[0]=true;//indicate error has occur
+//            return new String[]{"error occurred"};//to avoid error
+//        }
+//    }
     private boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
         try{
             switch(indicator){
@@ -2636,7 +2636,7 @@ public class Database extends SQLiteOpenHelper {
     }
     public String getMicPath(String id,String systemDateTime){//String id,String systemDateTime this two variables act as primary key
        try(Cursor cursor=getData("SELECT "+ getColumnNameOutOf4Table(id, (byte) 3) +" FROM " + tableNameOutOf4Table(id) + " WHERE "+ getColumnNameOutOf4Table(id, (byte) 1) +"= '" + id + "'" + " AND "+ getColumnNameOutOf4Table(id, (byte) 11) +"= '"+systemDateTime+ "'")){
-            if(cursor.getCount() == 0) return null;//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+            if(cursor!= null && cursor.getCount() == 0) return null;//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
             cursor.moveToFirst();
             return cursor.getString(0);
         }catch (Exception x){
@@ -2710,15 +2710,60 @@ public class Database extends SQLiteOpenHelper {
            return false;
         }
     }
-    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
-        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
-            cursor.moveToFirst();
-            return (cursor.getShort(0) == 1)? true:false;//if getShort(0) is 1 that means data is present in table.
-        }catch (Exception x){
-            x.printStackTrace();
-            return false;
+    public String[] getIdOfActiveMLG() {//if error return null
+        try {
+            List<Integer> idList = new ArrayList<>();//insertion is fast
+
+            Cursor cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    idList.add(cursor.getInt(0));
+                }
+                cursor.close();
+            }
+
+            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    idList.add(cursor.getInt(0));
+                }
+                cursor.close();
+            }
+
+            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NULL");
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    idList.add(cursor.getInt(0));
+                }
+                cursor.close();
+            }
+
+            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    idList.add(cursor.getInt(0));
+                }
+                cursor.close();
+            }
+            Collections.sort(idList);//asc order default
+            return idList.stream()
+                    .map(String::valueOf)
+                    .toArray(String[]::new);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
+
+//    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
+//        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
+//            cursor.moveToFirst();
+//            return (cursor.getShort(0) == 1)? true:false;//if getShort(0) is 1 that means data is present in table.
+//        }catch (Exception x){
+//            x.printStackTrace();
+//            return false;
+//        }
+//    }
 }
 //    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it
 //        ChatGPT

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import amar.das.acbook.adapters.MestreLaberGAdapter;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -56,7 +57,7 @@ public class ActiveLGFragment extends Fragment {
 
         advance=root.findViewById(R.id.active_l_g_advance);
         balance=root.findViewById(R.id.active_l_g_balance);
-        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')");
+        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')");
         advanceBalanceCursor.moveToFirst();
         advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
         balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -68,7 +69,7 @@ public class ActiveLGFragment extends Fragment {
         Cursor cursorGL;
         lGArrayList =new ArrayList<>(100);
 
-        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NULL");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
+        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NULL");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
         while(cursorGL.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorGL.getString(2));
@@ -81,7 +82,7 @@ public class ActiveLGFragment extends Fragment {
             lGArrayList.add(data);//adding data to mestreArraylist
         }
        // cursorGL=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE (TYPE='L' OR TYPE='G') AND (ACTIVE='1')  AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC LIMIT "+ActiveMFragment.initialLoadDataFotActiveMAndL);//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
-        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='1')  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC ");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
+        cursorGL=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC ");//so that today data entered will be below and not entered data person will be up which will indicate that data is not entered
 
         while(cursorGL.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import amar.das.acbook.activity.PdfViewerOperationActivity;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.utility.MyUtility;
 
 public class MakePdf{
@@ -396,12 +397,10 @@ public class MakePdf{
 
             return true;
         } catch (Exception ex) {
-          //  System.out.println("writeSentenceWithoutLines method error***************************");
             ex.printStackTrace();
             return false;
         }
     }
-
     private void attachOrDetachToComponentsAndUpdateCurrentHeightOfDataOfPage(boolean forAttachTrue){//it will attach or detach to components
         if(forAttachTrue && currentHeightOfDataOfPage!= 0f){//since we are subtracting so checking currentHeightOfDataOfPage is 0 or not
             currentHeightOfDataOfPage=currentHeightOfDataOfPage-gabBetweenComponents;//if attach then we have to minus gabBetweenComponents so that it will attach.because currentHeightOfDataOfPage has already added value of gabBetweenComponents
@@ -531,15 +530,14 @@ public class MakePdf{
 //                folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
 //             }
 
-            if(MyUtility.isFolderExistIfNotExistCreateIt(externalFileDir, PdfViewerOperationActivity.pdfFolderName)) {
-                File filePath = new File(externalFileDir + "/"+ PdfViewerOperationActivity.pdfFolderName+"/" + fileName + ".pdf");//path of pdf where it is saved in device
+            if(MyUtility.isFolderExistIfNotExistCreateIt(externalFileDir,GlobalConstants.PDF_FOLDER_NAME.getValue())) {
+                File filePath = new File(externalFileDir + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"/" + fileName + ".pdf");//path of pdf where it is saved in device
                 myPdfDocument.writeTo(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
                // return filePath.getAbsolutePath();//returning created file absolute path
                 return filePath;
-            }else return null;
+            }else return null;//error
 
         }catch (Exception e){
-       // System.out.println("CREATED PDF NOT COPIED TO DEVICE PDF FILE********************************************");
             e.printStackTrace();
             return null;
         }

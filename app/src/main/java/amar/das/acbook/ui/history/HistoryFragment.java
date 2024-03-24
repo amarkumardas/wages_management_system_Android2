@@ -34,9 +34,10 @@ import java.util.concurrent.Executors;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
-import amar.das.acbook.activity.PdfViewerOperationActivity;
+
 import amar.das.acbook.adapters.HistoryAdapter;
 import amar.das.acbook.databinding.FragmentHistoryTabBinding;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.HistoryModel;
 import amar.das.acbook.pdfgenerator.MakePdf;
 
@@ -185,12 +186,12 @@ public class HistoryFragment extends Fragment {
                    return;
                }
 
-               if(userStartDateDayOfMonthMonthYear.equals(userEndDateDayOfMonthMonthYear)){//if start and end date is equal then we would check that date data is present or not.if present do nothing else display message to user and return
-                   if(!isDataPresentInHistoryTable(userStartDateDayOfMonthMonthYear)){
-                       MyUtility.snackBar(view12,getResources().getString(R.string.history_not_available));
-                       return;
-                   }
-               }
+//               if(userStartDateDayOfMonthMonthYear.equals(userEndDateDayOfMonthMonthYear)){//if start and end date is equal then we would check that date data is present or not.if present do nothing else display message to user and return
+//                   if(!isDataPresentInHistoryTable(userStartDateDayOfMonthMonthYear)){
+//                       MyUtility.snackBar(view12,getResources().getString(R.string.history_not_available));
+//                       return;
+//                   }
+//               }
 
                String pdfAndReturnAbsolutePath=generateHistoryPdfAndReturnAbsolutePath(userStartDateDayOfMonthMonthYear,userEndDateDayOfMonthMonthYear);
                if(pdfAndReturnAbsolutePath !=null){
@@ -285,11 +286,11 @@ public class HistoryFragment extends Fragment {
         });
         return root;
     }
-    private boolean isDataPresentInHistoryTable(String userStartDateDayOfMonthMonthYear){
-      Database db=Database.getInstance(getContext());
-      int[] date=convertStringDateToDayOfMonthMonthYear(userStartDateDayOfMonthMonthYear);
-      return db.isDataOfDatePresentInHistoryTable(date[2],(byte) date[1], (byte) date[0]);
-    }
+//    private boolean isDataPresentInHistoryTable(String userStartDateDayOfMonthMonthYear){
+//      Database db=Database.getInstance(getContext());
+//      int[] date=convertStringDateToDayOfMonthMonthYear(userStartDateDayOfMonthMonthYear);
+//      return db.isDataOfDatePresentInHistoryTable(date[2],(byte) date[1], (byte) date[0]);
+//    }
     private void deleteHistoryPreviousData() {//delete the data which is not in between given date
         int[]  dateArray =getBeforeOrForwardDateYearMonthDayOfMonth((byte)-SharedPreferencesHelper.getInt(getContext(),SharedPreferencesHelper.Keys.HISTORY_KEEPING_DAYS.name(), defaultHistoryStoringForOneWeek),LocalDate.now().getYear(),(byte)LocalDate.now().getMonthValue(),(byte)LocalDate.now().getDayOfMonth());//START DATE is calculated using now date
         Database db=Database.getInstance(getContext());
@@ -304,7 +305,7 @@ public class HistoryFragment extends Fragment {
         Database db=Database.getInstance(getContext());
         totalRecord =db.getRowsCountOfSpecificDateHistory(year,month,dayOfMonth);
        // Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
-        historyArraylist = geHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
+        historyArraylist = getHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
         historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
         binding.historyRecyclerview.setAdapter(historyAdapter);
         layoutManager=new LinearLayoutManager( getContext(), LinearLayoutManager.VERTICAL, false);
@@ -319,8 +320,8 @@ public class HistoryFragment extends Fragment {
         loadOrNot=true;
         Database db=Database.getInstance(getContext());
         totalRecord = db.getRowsCountOfOnlyTotalPaymentHistory(year,month,dayOfMonth);
-        Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
-        historyArraylist = geHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
+        //Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
+        historyArraylist = getHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
         historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
         binding.historyRecyclerview.setAdapter(historyAdapter);
         layoutManager=new LinearLayoutManager( getContext(), LinearLayoutManager.VERTICAL, false);
@@ -336,14 +337,14 @@ public class HistoryFragment extends Fragment {
         Database db=Database.getInstance(getContext());
         totalRecord = db.getRowsCountOfOnlyTotalPaymentReceivedHistory(year,month,dayOfMonth);
        // Toast.makeText(getContext(), "total data: "+totalRecord, Toast.LENGTH_SHORT).show();
-        historyArraylist = geHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
+        historyArraylist = getHistoryDataAccordingToIndicator(year,month,dayOfMonth,0,totalNumberOfLoadedData, historyArraylist,container,whichOneTwoFetch);//updating inactive arraylist otherwise NPE don't know its referenced is passed but still not updated in method
         historyAdapter =new HistoryAdapter(getContext(), historyArraylist);//this common code should be there otherwise adapter will not be updated
         binding.historyRecyclerview.setAdapter(historyAdapter);
         layoutManager=new LinearLayoutManager( getContext(), LinearLayoutManager.VERTICAL, false);
         binding.historyRecyclerview.setLayoutManager(layoutManager);
         binding.historyRecyclerview.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
     }
-    private ArrayList<HistoryModel> geHistoryDataAccordingToIndicator(int year, byte month, byte dayOfMonth, int skip, int fetch, ArrayList<HistoryModel> arraylist, ViewGroup container, byte whichOneTwoFetch) {
+    private ArrayList<HistoryModel> getHistoryDataAccordingToIndicator(int year, byte month, byte dayOfMonth, int skip, int fetch, ArrayList<HistoryModel> arraylist, ViewGroup container, byte whichOneTwoFetch) {
         Database db=Database.getInstance(getContext());
         Cursor cursor=null;
         if(whichOneTwoFetch==1){
@@ -379,9 +380,9 @@ public class HistoryFragment extends Fragment {
                 model.setName(cursor.getString(17));
                 arraylist.add(model);
             }
-            if(arraylist.size()==0){
-                MyUtility.snackBar(container,getResources().getString(R.string.history_not_available));
-            }
+//            if(arraylist.size()==0){
+//                MyUtility.snackBar(container,getResources().getString(R.string.history_not_available));
+//            }
             arraylist.trimToSize();//to free space
             cursor.close();
             return arraylist;
@@ -444,16 +445,16 @@ public class HistoryFragment extends Fragment {
 
             if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//just for space
 
-            if (!makePdf.writeSentenceWithoutLines(getHistoryCreatedDetails(startDayOfMonthMonthYear,endDayOfMonthMonthYear), new float[]{60f,40f}, true, (byte) 0, (byte) 0,true))
-                return false;
+            if (!makePdf.writeSentenceWithoutLines(getHistoryCreatedDetails(startDayOfMonthMonthYear,endDayOfMonthMonthYear), new float[]{30f,45f,25f}, true, (byte) 0, (byte) 0,true)) return false;
 
-           // if (!makePdf.writeSentenceWithoutLines(new String[]{"History Instructions."} , new float[]{100f}, false, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.history_details_are_in_sequential_order)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.if_status_is_colon)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_colon_user_has_inserted_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_plus_user_has_inserted_and_updated_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.updated_user_has_updated_previous_day_data)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
-            if (!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;//just for space
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.up)} , new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.uar)} , new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;
+            if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.if_status_is_colon)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_colon_user_has_inserted_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.inserted_plus_user_has_inserted_and_updated_data_on_same_day)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.updated_user_has_updated_previous_day_data)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getResources().getString(R.string.calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically)} , new float[]{100f}, true, (byte) 0, (byte) 0,false)) return false;
 
             // Iterate over the range of dates
                 LocalDate startingDate = startDate;
@@ -465,8 +466,7 @@ public class HistoryFragment extends Fragment {
 
                     if(!createSpecifiedDateHistoryPdf(makePdf,historyOriginalData)) return false;
 
-                    if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true))
-                        return false;//just for space
+                    if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//just for space
 
                     startingDate = startingDate.plusDays(1); // Move to the next date
                 }
@@ -483,7 +483,7 @@ public class HistoryFragment extends Fragment {
         return  new String[]{"HISTORY DATE: "+startsDate.getDayOfMonth()+"-"+startsDate.getMonthValue()+"-"+startsDate.getYear()+" , "+startsDate.getDayOfWeek().name()+" -> "+getHistorySummary(startsDate)};
     }
     private String[] getHistoryCreatedDetails(String startDayOfMonthMonthYear, String endDayOfMonthMonthYear) {
-        return new String[]{"HISTORY FROM DATE:  "+startDayOfMonthMonthYear+"  TO  "+endDayOfMonthMonthYear,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
+        return new String[]{"HISTORY FROM DATE:  "+startDayOfMonthMonthYear+"  TO  "+endDayOfMonthMonthYear,getResources().getString(R.string.history_details_are_in_sequential_order),"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
     }
     private boolean createSpecifiedDateHistoryPdf(MakePdf makePdf, String origionalHistoryData[][]) {
         if(makePdf == null || origionalHistoryData==null) return false;
@@ -496,7 +496,7 @@ public class HistoryFragment extends Fragment {
         String formattedHistoryData[][]=formateHistoryDataAccordingToColumn(origionalHistoryData);//formatted data-"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKING DAYS","REMARKS","UPDATED PAYMENT","UPDATED PAYMENT RECEIVED"
         if(formattedHistoryData==null) return false;
 
-        if(!makePdf.makeTable(new String[]{"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKED DAYS","PAYMENT","RECEIVED"},new String[][]{{}},getColumnWidth(), 9, true)) {
+        if(!makePdf.makeTable(new String[]{"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKED DAYS","UP","UAR"},new String[][]{{}},getColumnWidth(), 9, true)) {
             return false;
         }
 
@@ -782,7 +782,7 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(!MyUtility.deleteFolderAllFiles(PdfViewerOperationActivity.pdfFolderName,true,getContext())){//delete pdf folder all files
+        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete pdf folder all files
             Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         binding = null;

@@ -68,7 +68,7 @@
     <string name="audio_playing">AUDIO PLAYING</string>
     <string name="hyphen_edited">-EDITED]</string>
     <string name="previous_details_were_colon">PREVIOUS DETAILS WERE:</string>
-    <!--    <string name="recording">RECORDING</string>-->
+    <!--<string name="recording">RECORDING</string>-->
     <!--<string name="ok">OK</string>-->
 
     <!--find all activity and fragment ml-->
@@ -98,7 +98,7 @@
     <string name="calculated">CALCULATED</string>
 
     <!--history fragment-->
-    <string name="history_not_available">HISTORY NOT AVAILABLE</string>
+    <!--<string name="history_not_available">HISTORY NOT AVAILABLE</string>-->
     <string name="sharing_to_active_phone_number_enabled">SHARING TO ACTIVE PHONE NUMBER ENABLED</string>
     <string name="sharing_to_whatsapp_enabled">SHARING TO WHATSAPP ENABLED</string>
     <string name="total_amount_received">TOTAL AMOUNT RECEIVED</string>
@@ -113,17 +113,17 @@
     <string name="inserted">INSERTED</string>
     <string name="inserted_plus">INSERTED+</string>
     <string name="updated">UPDATED</string>
-    <!--    <string name="automatic">AUTOMATIC</string>-->
     <string name="failed_to_create_pdf">FAILED TO CREATE PDF</string>
-    <!--    <string name="total_people_worked">TOTAL PEOPLE WORKED</string>-->
+
     <string name="history">HISTORY</string>
     <string name="history_details_are_in_sequential_order">History Details Are In Sequential Order.</string>
-    <string name="if_status_is_colon">If Status Is:</string>
+    <string name="if_status_is_colon">If STATUS Is:</string>
     <string name="inserted_colon_user_has_inserted_data_on_same_day">INSERTED : User Has Inserted Data On Same Day.</string>
     <string name="inserted_plus_user_has_inserted_and_updated_data_on_same_day">INSERTED+ : User Has Inserted And Updated Data On Same Day.</string>
     <string name="updated_user_has_updated_previous_day_data">UPDATED : User Has Updated Previous Day Data.</string>
     <string name="calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically">CALCULATED : User Has Calculated All Wages. And Data Is Inserted Automatically.</string><!-- Data Inserted Automatically By System.By Calculating All Wages/ CALCULATED : Data Is Inserted Automatically After Calculating All Wages-->
-
+    <string name="uar">UAR : Means Updated Amount Received. User Has Updated Previous Data And Received Amount After Subtracting Previous Day Amount.</string>
+    <string name="up">UP: Means Updated Payment. User Has Updated Previous Data And Paid Amount After Subtracting Previous Day Amount.</string>
 
     <!--IndividualPersonDetailActivity-->
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
@@ -133,7 +133,7 @@
     <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
     <string name="no_phone_number">NO PHONE NUMBER</string>
     <string name="failed_to_insert">FAILED TO INSERT</string>
-    <!--    <string name="failed_to_make_history">FAILED TO MAKE HISTORY</string>-->
+    <!--<string name="failed_to_make_history">FAILED TO MAKE HISTORY</string>-->
     <string name="value_out_of_range_please_check_total_work_amount">VALUE OUT OF RANGE PLEASE CHECK TOTAL WORK AMOUNT</string>
     <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
     <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
@@ -181,6 +181,8 @@
     <string name="backup_inactive_l">BACKUP INACTIVE L</string>
     <string name="backup_inactive_g">BACKUP INACTIVE G</string>
     <string name="backup_manually">Backup manually</string>
+    <string name="backup_failed">BACKUP FAILED</string>
+    <string name="no_data_present">NO DATA PRESENT</string>
     <string name="open">OPEN</string>
     <string name="close">CLOSE</string>
 

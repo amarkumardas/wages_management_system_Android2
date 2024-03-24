@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.BackUpCalculatedTextFileAdapter;
 import amar.das.acbook.databinding.ActivityBackupCalculatedInvoicesBinding;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.TextFileModel;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.ui.ml.MLDrawerFragment;
@@ -34,7 +35,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
         binding = ActivityBackupCalculatedInvoicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(TextFile.textFileFolderName);
+        ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(GlobalConstants.TEXT_FILE_FOLDER_NAME.getValue());
         if(allFilePathFromDevice != null){//if null means error
 
           if(allFilePathFromDevice.size()==0){

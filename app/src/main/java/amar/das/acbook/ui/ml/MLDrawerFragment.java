@@ -15,17 +15,25 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.tabs.TabLayoutMediator;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.FragmentAdapter;
+import amar.das.acbook.backupdata.AllDataBackup;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
+import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class MLDrawerFragment extends Fragment {
     private   FragmentMlTabBinding binding ;
+    private ArrayList<String> absoluteFilePath;
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
     private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
@@ -36,6 +44,8 @@ public class MLDrawerFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        absoluteFilePath =new ArrayList<>();//initialize
+
         takeAllAppPermissionAtOnce();
         //for drawer toggle
         ActionBarDrawerToggle  drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
@@ -61,12 +71,25 @@ public class MLDrawerFragment extends Fragment {
         });
 
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
+            ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
             switch (item.getItemId()){
                 case R.id.backup_active_mlg:{
-                    Toast.makeText(getContext(), "clicked", Toast.LENGTH_SHORT).show();
+                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                    backgroundTask.execute(() -> {
+                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+
+                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+                        if(dataBackup.backupMLGDataInPDFFormat()){
+                            absoluteFilePath.add(dataBackup.createdAbsoluteFilePath);
+                        }else {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                        }
+
+                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                    });backgroundTask.shutdown();//when all task completed then only shutdown
                 }break;
             }
-            binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
+          //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;});
 
 
@@ -179,6 +202,9 @@ public class MLDrawerFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        for (String path: absoluteFilePath) {//delete created file
+            MyUtility.deletePdfOrRecordingUsingPathFromDevice(path);
+        }
         binding = null;
     }
 }

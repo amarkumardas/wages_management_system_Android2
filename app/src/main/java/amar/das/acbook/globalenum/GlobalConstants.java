@@ -5,8 +5,10 @@ public enum GlobalConstants {
      ACTIVE("1"),
      INACTIVE("0"),
 
-     BACKUP_ACTIVE_MLG_PDF_NAME("active_mlg_backup"),
-
+     BACKUP_ACTIVE_MLG_PDF_FILE_NAME("active_skill_mlg_backup"),
+     BACKUP_INACTIVE_M_TEXT_FILE_NAME("inactive_skill_m_backup"),
+    BACKUP_INACTIVE_L_TEXT_FILE_NAME("inactive_skill_l_backup"),
+    BACKUP_INACTIVE_G_TEXT_FILE_NAME("inactive_skill_g_backup"),
     //text file name
     ALL_DETAILS_TEXT_FILE_NAME("_all_data_"),
     TEXT_FILE_FOLDER_NAME("acBookBackupInvoice"),

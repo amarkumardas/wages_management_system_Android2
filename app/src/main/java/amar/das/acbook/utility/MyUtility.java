@@ -1028,7 +1028,20 @@ public class MyUtility {
         }
         return null;
     }
-
+    public static String convertToReadableNumber(String number){//In this optimized code, we create a char array arr with an initial capacity equal to the length of the input string str, plus an extra capacity for the spaces that will be inserted (i.e., str.length() + str.length() / 4). We then loop through each character of the input string str, appending each character to arr using arr[j++] = str.charAt(i).After every fourth character (except for the last character in the string), we append a space character to arr using arr[j++] = ' '. We use an integer variable j to keep track of the next index in arr where a character should be inserted.
+        if(number==null){
+            return "null";
+        }
+        char[] arr=new char[number.length()+number.length()/4];
+        int j=0;
+        for (int i = 0; i < number.length(); i++) {
+            arr[j++]=number.charAt(i);
+            if((i+1)%4==0 && i!=number.length()-1){
+                arr[j++]=' ';
+            }
+        }
+        return new String(arr).trim();
+    }
     public static String convertToIndianNumberSystem(long number) {//https://www.geeksforgeeks.org/convert-the-number-from-international-system-to-indian-system/
         String inputString = String.valueOf(number);//converting integer to string
         StringBuilder result = new StringBuilder();
@@ -1332,6 +1345,7 @@ public class MyUtility {
                 }else{
                     folder=context.getExternalCacheDir();//getting cache directory to delete all files
                 }
+
                 if (folder.exists() && folder.isDirectory()) {//if folder exist and if it is directory then delete all file present in this folder
 
                     File[] listOfFiles = folder.listFiles();//getting all files present in folder

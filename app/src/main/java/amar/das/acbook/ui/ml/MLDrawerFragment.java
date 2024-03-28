@@ -16,7 +16,7 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.ArrayList;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,16 +27,17 @@ import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.backupdata.AllDataBackup;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class MLDrawerFragment extends Fragment {
     private   FragmentMlTabBinding binding ;
-    private ArrayList<String> absoluteFilePath;
+
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
-    private String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
+    private final String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
     //important
     //to store image in db we have to convert Bitmap to bytearray
     //to set in imageview we have to get from db as Blob known as large byte and convert it to Bitmap then set in imageview
@@ -44,8 +45,6 @@ public class MLDrawerFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        absoluteFilePath =new ArrayList<>();//initialize
-
         takeAllAppPermissionAtOnce();
         //for drawer toggle
         ActionBarDrawerToggle  drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
@@ -79,9 +78,43 @@ public class MLDrawerFragment extends Fragment {
                         getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                         AllDataBackup dataBackup=new AllDataBackup(getContext());
-                        if(dataBackup.backupMLGDataInPDFFormat()){
-                            absoluteFilePath.add(dataBackup.createdAbsoluteFilePath);
-                        }else {
+                        if(!dataBackup.backupActiveMLGDataInPDFFormat()){
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                        }
+                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                    });backgroundTask.shutdown();//when all task completed then only shutdown
+                }break;
+                case R.id.backup_inactive_m:{
+                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                    backgroundTask.execute(() -> {
+                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+
+                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                        }
+                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                    });backgroundTask.shutdown();//when all task completed then only shutdown
+                }break;
+                case R.id.backup_inactive_l:{
+                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                    backgroundTask.execute(() -> {
+                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+
+                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                        }
+                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                    });backgroundTask.shutdown();//when all task completed then only shutdown
+                }break;
+                case R.id.backup_inactive_g:{
+                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                    backgroundTask.execute(() -> {
+                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+
+                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
                             getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
                         }
 
@@ -202,8 +235,11 @@ public class MLDrawerFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        for (String path: absoluteFilePath) {//delete created file
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(path);
+        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete external file
+            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
+        if(!MyUtility.deleteFolderAllFiles(null,false,getContext())){//delete cache file
+            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         binding = null;
     }

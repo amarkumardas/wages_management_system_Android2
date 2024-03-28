@@ -68,6 +68,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         binding = ActivityPdfViewerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         ProgressDialogHelper progressBar = new ProgressDialogHelper( this);
 
 //        sharePdfLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),activityResult ->{//ActivityResultCallback it will execute when return from other intent
@@ -349,7 +350,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             }
             sb.append(MyUtility.getOtherDetails(id,getBaseContext()));//other details like aadhaar,location,religion,total worked days etc
 
-            sb.append(getAllSumAndDepositAndWagesDetails(id));//all wages and deposit data
+            sb.append(getAllSumAndDepositAndWagesDetails(id,getBaseContext()));//all wages and deposit data
             sb.append("------------FINISH--------------");
             return shareLargeDataAsTextFileToAnyApp(id, GlobalConstants.ALL_DETAILS_TEXT_FILE_NAME.getValue(),sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
 
@@ -593,7 +594,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             sb.append(message[3]).append("\n");
 
             if(trueForAllAndFalseForOnlyPersonDetails) {//if true then send all details including wages and deposit
-                sb.append(getAllSumAndDepositAndWagesDetails(id));
+                sb.append(getAllSumAndDepositAndWagesDetails(id,getBaseContext()));
                 sb.append("------------FINISH--------------");
             }
 
@@ -613,28 +614,28 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
             return sb.toString();
     }
-    private String getAllSumAndDepositAndWagesDetails(String id) {
+    public static String getAllSumAndDepositAndWagesDetails(String id,Context context) {
         StringBuilder sb=new StringBuilder();
         try{
-            byte indicator=MyUtility.get_indicator(getBaseContext(),id);
+            byte indicator=MyUtility.get_indicator(context,id);
             boolean[] errorDetection={false};//when ever exception occur it will be updated to true in method so it indicate error occurred or not
-            String[] header = MyUtility.getWagesHeadersFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateBasedOnIndicator   TO AVOID INDEX EXCEPTION
-            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(getBaseContext(),id, indicator, errorDetection);//it amy return null   when no data
-            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(getBaseContext(),id, errorDetection);//it amy return null   when no data
-            int[] arrayOfTotalWagesDepositRateBasedOnIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(getBaseContext(),id,indicator,errorDetection);//if error cause errorDetection will be set true
+            String[] header = MyUtility.getWagesHeadersFromDbBasedOnIndicator(context,id, indicator, errorDetection);//THIS SHOULD BE TOP at arrayOfTotalWagesDepositRateBasedOnIndicator   TO AVOID INDEX EXCEPTION
+            String[][] recyclerViewWagesData = MyUtility.getAllWagesDetailsFromDbBasedOnIndicator(context,id, indicator, errorDetection);//it amy return null   when no data
+            String[][] recyclerViewDepositData = MyUtility.getAllDepositFromDb(context,id, errorDetection);//it amy return null   when no data
+            int[] arrayOfTotalWagesDepositRateBasedOnIndicator= MyUtility.getSumOfTotalWagesDepositRateDaysWorkedBasedOnIndicator(context,id,indicator,errorDetection);//if error cause errorDetection will be set true
 
             if(!errorDetection[0]){//if(errorDetection[0]==false){
 
-                sb.append("-----------").append(getResources().getString(R.string.summary)).append("-----------");
+                sb.append("-----------").append(context.getResources().getString(R.string.summary)).append("-----------");
                 sb.append(MyUtility.getTotalWagesDepositAndWorkingAccordingToIndicator(indicator,header,arrayOfTotalWagesDepositRateBasedOnIndicator,recyclerViewDepositData!=null));
 
 
                 if (recyclerViewDepositData != null) {//null means data not present so don't add deposit in text
                     int rowLength=recyclerViewDepositData.length;
                     int columnLength=recyclerViewDepositData[0].length;
-                    sb.append("\n-------------------------------");
+                    sb.append("\n------------------------------");
 
-                    sb.append("\n").append(getResources().getString(R.string.total_no_of_deposit_entries)).append(" ").append(rowLength).append("\n\n");
+                    sb.append("\n").append(context.getResources().getString(R.string.total_no_of_deposit_entries)).append(" ").append(rowLength).append("\n\n");
                     for (int row = 0; row < rowLength; row++) {
                         sb.append(row + 1).append("-> ");
                         for (int col = 0; col < columnLength; col++) {
@@ -656,7 +657,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                         sb.append("-------------------------------");
                     }
 
-                    sb.append("\n").append(getResources().getString(R.string.total_no_of_wages_entries)).append(" ").append(rowLength).append("\n\n");
+                    sb.append("\n").append(context.getResources().getString(R.string.total_no_of_wages_entries)).append(" ").append(rowLength).append("\n\n");
 
                     for (int row = 0; row < rowLength; row++) {
                         sb.append(row + 1).append("-> ");
@@ -786,7 +787,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if (cursor != null && cursor.moveToFirst()) {
                 sb.append("\nBANK NAME: ").append(cursor.getString(2) != null ? cursor.getString(2) : "").append("\n");
                 sb.append("A/C HOLDER NAME: ").append(cursor.getString(3) != null ? cursor.getString(3) : "").append("\n");
-                sb.append("A/C: ").append(cursor.getString(0) != null ? convertToReadableNumber(cursor.getString(0)) : "").append("\n");
+                sb.append("A/C: ").append(cursor.getString(0) != null ? MyUtility.convertToReadableNumber(cursor.getString(0)) : "").append("\n");
                 sb.append("IFSC CODE: ").append(cursor.getString(1) != null ? cursor.getString(1) : "");
             }
             return sb.toString();
@@ -813,20 +814,20 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return "error";
         }
     }
-    public String convertToReadableNumber(String number){//In this optimized code, we create a char array arr with an initial capacity equal to the length of the input string str, plus an extra capacity for the spaces that will be inserted (i.e., str.length() + str.length() / 4). We then loop through each character of the input string str, appending each character to arr using arr[j++] = str.charAt(i).After every fourth character (except for the last character in the string), we append a space character to arr using arr[j++] = ' '. We use an integer variable j to keep track of the next index in arr where a character should be inserted.
-        if(number==null){
-            return "null";
-        }
-        char[] arr=new char[number.length()+number.length()/4];
-        int j=0;
-        for (int i = 0; i < number.length(); i++) {
-            arr[j++]=number.charAt(i);
-            if((i+1)%4==0 && i!=number.length()-1){
-                arr[j++]=' ';
-            }
-        }
-        return new String(arr).trim();
-    }
+//    public String convertToReadableNumber(String number){//In this optimized code, we create a char array arr with an initial capacity equal to the length of the input string str, plus an extra capacity for the spaces that will be inserted (i.e., str.length() + str.length() / 4). We then loop through each character of the input string str, appending each character to arr using arr[j++] = str.charAt(i).After every fourth character (except for the last character in the string), we append a space character to arr using arr[j++] = ' '. We use an integer variable j to keep track of the next index in arr where a character should be inserted.
+//        if(number==null){
+//            return "null";
+//        }
+//        char[] arr=new char[number.length()+number.length()/4];
+//        int j=0;
+//        for (int i = 0; i < number.length(); i++) {
+//            arr[j++]=number.charAt(i);
+//            if((i+1)%4==0 && i!=number.length()-1){
+//                arr[j++]=' ';
+//            }
+//        }
+//        return new String(arr).trim();
+//    }
 //    public boolean shareMjessageDirectlyToWhatsApp(String message,String indianWhatsappNumber){
 //  if(message==null || indianWhatsappNumber==null){
 //      return false;
@@ -1263,42 +1264,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
     }
-
-//    private boolean deleteFolderAllFiles(String folderName,boolean trueForExternalFileDirAndFalseForCacheFileDir){
-//        try{
-//            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())){//checking permission
-//                File folder;
-//                if(trueForExternalFileDirAndFalseForCacheFileDir){
-//                    folder= new File(getExternalFilesDir(null) + "/" + folderName);//File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
-//                }else{
-//                   folder=getExternalCacheDir();//getting cache directory to delete all files
-//                }
-//                    if (folder.exists() && folder.isDirectory()) {//if folder exist and if it is directory then delete all file present in this folder
-//
-//                    File[] listOfFiles = folder.listFiles();//getting all files present in folder
-//                       if (listOfFiles != null && listOfFiles.length > 0) {
-//                        for (File file : listOfFiles){
-//
-//                            if (file.isFile()) {//file.isFile() is a method call on the File object, specifically the isFile() method. This method returns true if the File object refers to a regular file and false if it refers to a directory, a symbolic link, or if the file doesn't exist.
-//                                 if (!file.delete()) {// File deleted successfully
-//                                    return false; // Failed to delete the file
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }else{
-//                Toast.makeText(PdfViewerOperationActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-//                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
-//                return false;
-//            }
-//            return true;
-//        }catch (Exception x){
-//            x.printStackTrace();
-//            return false;
-//        }
-//    }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -1310,15 +1275,13 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //    private boolean checkPermissionForSMS() {
 //        return ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
 //    }
-    public void showSoftKeyboardByForced() {
+    private void showSoftKeyboardByForced() {
         try {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);//working
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }catch (Exception e){
             e.printStackTrace();
         }
-
-
 //       public void showSoftKeyboardByForced(View searchView ) {//code link https://developer.android.com/training/keyboard-input/visibility#java
 //        if (searchView.requestFocus()) {
 //            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);

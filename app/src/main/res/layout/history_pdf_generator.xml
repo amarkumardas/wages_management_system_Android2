@@ -11,9 +11,10 @@
         android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="22dp"
+            android:layout_height="24dp"
             android:text="@string/generate_history_pdf"
             android:textAlignment="center"
+            android:paddingTop="2dp"
             android:background="@color/purple_700"
             android:textSize="14dp"
             android:textStyle="bold"

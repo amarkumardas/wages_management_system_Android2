@@ -2730,7 +2730,7 @@ public class Database extends SQLiteOpenHelper {
                 cursor.close();
             }
 
-            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NULL");
+            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'  AND "+Database.COL_15_LATESTDATE+" IS NULL");
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
@@ -2738,12 +2738,75 @@ public class Database extends SQLiteOpenHelper {
                 cursor.close();
             }
 
-            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
                 }
                 cursor.close();
+            }
+            Collections.sort(idList);//asc order default
+            return idList.stream()
+                    .map(String::valueOf)
+                    .toArray(String[]::new);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public String[] getIdOfInActiveMOrLOrG(String whichLabour) {//if error return null
+        try {
+            List<Integer> idList = new ArrayList<>();//insertion is fast
+            Cursor cursor=null;
+            if(whichLabour.equals(context.getResources().getString(R.string.mestre))){
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
+
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
+
+            }else if(whichLabour.equals(context.getResources().getString(R.string.laber))){
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
+
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
+            }else if(whichLabour.equals(context.getResources().getString(R.string.women_laber))){
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
+
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        idList.add(cursor.getInt(0));
+                    }
+                    cursor.close();
+                }
             }
             Collections.sort(idList);//asc order default
             return idList.stream()

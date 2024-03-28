@@ -1,11 +1,18 @@
 package amar.das.acbook.backupdata;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -18,25 +25,86 @@ public class AllDataBackup{
     private Context context;
     private int numberOfPerson;
     private String backupFileName;
-    public String createdAbsoluteFilePath;
 
     public AllDataBackup(Context context) {
         this.context = context;
     }
+    public boolean backupInActiveMOrLOrGDataInTextFormat(String textFileName, String skillType){
+        Database db=Database.getInstance(context);
+        String[] personIds =db.getIdOfInActiveMOrLOrG(skillType); if(personIds==null) return  false;//if error
 
-    public boolean backupMLGDataInPDFFormat(){
+        this.numberOfPerson=personIds.length;
+        backupFileName =MyUtility.backupDateTime()+textFileName;//GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue()
+        StringBuilder sb=new StringBuilder();
+        sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append(" BACKUP OF ").append(numberOfPerson).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
+        sb.append(getTotalInActiveAdvanceAndBalance(skillType)).append("\n-----------------------------\n\n");
+
+        for (String id:personIds){//loop
+            sb=createInActiveMOrLOrGInvoiceTextFile(id,sb);
+            if(sb==null) return false;
+        }
+
+         if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain",context.getString(R.string.backup_inactive_m)+" SHARE TEXT FILE USING",context)) return false;
+
+        Database.closeDatabase();
+        return true;//if everything goes fine
+    }
+    private String getTotalInActiveAdvanceAndBalance(String skillType) {
+        Database db=Database.getInstance(context);
+        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
+            cursor.moveToFirst();
+            StringBuilder sb = new StringBuilder();
+            sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
+                    .append(" , TOTAL BALANCE Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
+            return sb.toString();
+        }catch(Exception x){
+            x.printStackTrace();
+            return "error";
+        }
+    }
+    private boolean shareLargeDataAsTextFileToAnyApp(String fileName,String message,String mimeType,String title,Context context){//if error return null
+        if(message==null|| mimeType==null||title==null){
+            return false;
+        }
+        try { // create a file to store the data
+            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){
+                File file = new File(context.getExternalCacheDir(), fileName + ".txt");//creating txt file in cache directory file name  getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
+                FileOutputStream outputStream = new FileOutputStream(file);
+                outputStream.write(message.getBytes());
+                outputStream.close();
+                // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
+                if (!MyUtility.shareFileToAnyApp(file , mimeType, title,context)) {//open intent to share
+                    Toast.makeText(context, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
+               // return file.getAbsolutePath();
+                return true;
+            }else{
+                Toast.makeText(context, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean backupActiveMLGDataInPDFFormat(){
         Database db=Database.getInstance(context);
         String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
 
         this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_NAME.getValue();
+        backupFileName =MyUtility.backupDateTime()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue();
 
         MakePdf makePdf = new MakePdf();
         if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return false;//created page 1
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//just for space
-        if (!makePdf.writeSentenceWithoutLines(new String[]{"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate(),"BACKUP OF  "+numberOfPerson+"  ACTIVE  "+context.getResources().getString(R.string.mestre)+context.getResources().getString(R.string.laber)+context.getResources().getString(R.string.women_laber)+".  SORTED  ACCORDING TO  ID"}, new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return false;
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//just for space
-
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+        if (!makePdf.writeSentenceWithoutLines(getPdfCreatedInfo(numberOfPerson), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return false;
+        if (!makePdf.writeSentenceWithoutLines(getTotalActiveAdvanceAndBalanceInfo(), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
 
         for (String id:personIds){//loop
             if(!createActiveMLGInvoicePDF(id,makePdf)) return false;
@@ -45,16 +113,69 @@ public class AllDataBackup{
         if (!makePdf.createdPageFinish2()) return false;//after finish page we cannot write to it
 
         File pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(context.getExternalFilesDir(null).toString(), backupFileName);//we have to return filename  view pdf using file path
-        if(pdfFile == null) return false;//error
+        if(pdfFile == null) return false;//means error
 
-        createdAbsoluteFilePath=pdfFile.getAbsolutePath();//to delete this file from device
         if (!makePdf.closeDocumentLastOperation4()) return false;
 
-        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", GlobalConstants.BACKUP_ACTIVE_MLG_PDF_NAME.getValue()+" SHARE PDF USING",context)) return false;//open intent to share
+        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" SHARE PDF USING",context)) return false;//open intent to share
 
         Database.closeDatabase();
         return true;//if everything goes fine
     }
+    public String[] getPdfCreatedInfo(int numberOfPerson) {
+        String[] backupInfo = new String[2];
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());
+        backupInfo[0] = sb1.toString();
+
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("BACKUP OF ").append(numberOfPerson)
+                .append(" ACTIVE  PEOPLE  SKILLED  IN ( ")
+                .append(context.getResources().getString(R.string.mestre)).append(" ")
+                .append(context.getResources().getString(R.string.laber)).append(" ")
+                .append(context.getResources().getString(R.string.women_laber)).append(" ")
+                .append("). SORTED ACCORDING TO  ID");
+        backupInfo[1] = sb2.toString();
+        return backupInfo;
+    }
+    public String[] getTotalActiveAdvanceAndBalanceInfo() {
+        String[] ratesInfo = new String[1];
+        StringBuilder sb = new StringBuilder();
+        Database db=Database.getInstance(context);
+        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'")){
+            cursor.moveToFirst();
+            sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE  Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
+                    .append(" , TOTAL BALANCE  Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
+            ratesInfo[0] = sb.toString();
+            return ratesInfo;
+        }catch (Exception x){
+            x.printStackTrace();
+            return new String[]{"error"};
+        }
+    }
+//    private String getTotalActiveMLGAdvanceAndBalance(boolean forAdvanceTrueForBalanceFalse) {
+//        Database db=Database.getInstance(context);
+//        Cursor cursor=null;
+//        try{
+//        if(forAdvanceTrueForBalanceFalse){
+//            cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");
+//            cursor.moveToFirst();
+//            return MyUtility.convertToIndianNumberSystem(cursor.getLong(0));
+//        }else{
+//            cursor=db.getData("SELECT SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");
+//            cursor.moveToFirst();
+//            return MyUtility.convertToIndianNumberSystem(cursor.getLong(0));
+//        }
+//
+//        }catch(Exception x){
+//            x.printStackTrace();
+//            return "error";
+//        }finally {
+//            if(cursor!=null)cursor.close();
+//        }
+//    }
     private boolean createActiveMLGInvoicePDF(String id, MakePdf makePdf){
         try {
             byte indicator =  MyUtility.get_indicator(context,id);
@@ -68,7 +189,7 @@ public class AllDataBackup{
 
             String personDetails[]=MyUtility.getPersonDetailsForRunningPDFInvoice(id,context);//id ,name,invoice number
             if(!makePdf.singleCustomRow(new String[]{personDetails[1],personDetails[0],personDetails[2]}, new float[]{10f, 66f, 24f},0,0,0,0,false,(byte)0,(byte)0)) return false;
-            if(!makePdf.writeSentenceWithoutLines(new String[]{getPersonOtherDetails(id)},new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//name,id,date,future invoice number,created date
+            if(!makePdf.writeSentenceWithoutLines(new String[]{getPhoneAccountOtherDetailsIfDataIsNotNull(id)},new float[]{100f}, false, (byte) 0, (byte) 0,true)) return false;//name,id,date,future invoice number,created date
 
             if (!errorDetection[0]){
 
@@ -98,22 +219,33 @@ public class AllDataBackup{
         }
         return true;
     }
-
-    private String getPersonOtherDetails(String id) {
+    private StringBuilder createInActiveMOrLOrGInvoiceTextFile(String id,StringBuilder sb) {
+        try{
+            String personDetails[]=MyUtility.getPersonDetailsForRunningPDFInvoice(id,context);//id ,name,invoice number
+            sb.append(personDetails[1]).append(" , ").append(personDetails[0]).append(" , ").append(personDetails[2]).append("\n")
+              .append(getPhoneAccountOtherDetailsIfDataIsNotNull(id))//other details like aadhaar,location,religion,total worked days etc
+              .append(PdfViewerOperationActivity.getAllSumAndDepositAndWagesDetails(id,context))//all wages and deposit data
+              .append("------------FINISH--------------\n\n");
+            return sb;
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
+    private String getPhoneAccountOtherDetailsIfDataIsNotNull(String id) {
         StringBuilder sb=new StringBuilder();
-        if(id=="92");
         String phoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,context,false);
         if(!TextUtils.isEmpty(phoneNumber)){//checks for null or ""
             sb.append("PHONE: ").append(phoneNumber).append("\n");//phone number
         }
-        String accountDetails= getAccountDetails(id);
+        String accountDetails= getAccountDetailsIfDataIsNotNull(id);
         if(accountDetails!=null){
             sb.append(accountDetails).append("\n\n");//account details
         }
         sb.append(MyUtility.getOtherDetails(id,context));//other details like aadhaar,location,religion,total worked days etc
         return sb.toString();
     }
-    private String getAccountDetails(String id) {//if error return null
+    private String getAccountDetailsIfDataIsNotNull(String id) {//if error return null
        // try (Database db = new Database(context);
         try (Database db =Database.getInstance(context);
              Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
@@ -138,7 +270,7 @@ public class AllDataBackup{
                     sb.append("A/C HOLDER NAME: ").append(cursor.getString(3)).append("\n");
                 }
                 if (!TextUtils.isEmpty(cursor.getString(0))) {
-                    sb.append("A/C: ").append(convertToReadableNumber(cursor.getString(0))).append("\n");
+                    sb.append("A/C: ").append(MyUtility.convertToReadableNumber(cursor.getString(0))).append("\n");
                 }
                 if (!TextUtils.isEmpty(cursor.getString(1))) {
                     sb.append("IFSC CODE: ").append(cursor.getString(1));
@@ -149,19 +281,5 @@ public class AllDataBackup{
             ex.printStackTrace();
             return null;
         }
-    }
-    private String convertToReadableNumber(String number){//In this optimized code, we create a char array arr with an initial capacity equal to the length of the input string str, plus an extra capacity for the spaces that will be inserted (i.e., str.length() + str.length() / 4). We then loop through each character of the input string str, appending each character to arr using arr[j++] = str.charAt(i).After every fourth character (except for the last character in the string), we append a space character to arr using arr[j++] = ' '. We use an integer variable j to keep track of the next index in arr where a character should be inserted.
-        if(number==null){
-            return "null";
-        }
-        char[] arr=new char[number.length()+number.length()/4];
-        int j=0;
-        for (int i = 0; i < number.length(); i++) {
-            arr[j++]=number.charAt(i);
-            if((i+1)%4==0 && i!=number.length()-1){
-                arr[j++]=' ';
-            }
-        }
-        return new String(arr).trim();
     }
 }

@@ -159,6 +159,8 @@
     <string name="total_work_deposit_plus_work_amount_equal">TOTAL DEPOSIT+WORK AMOUNT=</string>
     <string name="rate">RATE</string>
     <string name="x">X</string>
+    <string name="save_wages">SAVE WAGES</string>
+    <string name="save_deposit">SAVE DEPOSIT</string>
 
     <!--recycler view input data-->
     <string name="days_required_to_work">DAYS REQUIRED TO WORK =</string>
@@ -176,10 +178,10 @@
     <string name="balance">BALANCE</string>
 
     <!--Drawer-->
-    <string name="backup_active_m_l_g">BACKUP ACTIVE M L G</string>
-    <string name="backup_inactive_m">BACKUP INACTIVE M</string>
-    <string name="backup_inactive_l">BACKUP INACTIVE L</string>
-    <string name="backup_inactive_g">BACKUP INACTIVE G</string>
+    <string name="backup_active_m_l_g">BACKUP ACTIVE SKILL M L G</string>
+    <string name="backup_inactive_m">BACKUP INACTIVE SKILL M</string>
+    <string name="backup_inactive_l">BACKUP INACTIVE SKILL L</string>
+    <string name="backup_inactive_g">BACKUP INACTIVE SKILL G</string>
     <string name="backup_manually">Backup manually</string>
     <string name="backup_failed">BACKUP FAILED</string>
     <string name="no_data_present">NO DATA PRESENT</string>

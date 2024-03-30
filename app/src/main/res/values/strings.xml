@@ -306,8 +306,12 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="mestre">M</string>
+    <string name="m">M (MASON)</string>
     <string name="laber">L</string>
+    <string name="l">L (LABER)</string>
     <string name="women_laber">G</string>
+    <string name="g">G (WOMEN)</string>
+    <string name="skill">SKILL</string>
     <string name="inactive">INACTIVE</string>
 
     <string name="deposit_amount">DEPOSIT AMOUNT</string>

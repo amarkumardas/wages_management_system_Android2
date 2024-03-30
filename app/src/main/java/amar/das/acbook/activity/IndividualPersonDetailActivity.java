@@ -53,6 +53,7 @@ import java.util.concurrent.Executors;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.WagesDetailsAdapter;
+import amar.das.acbook.customdialog.Dialog;
 import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.WagesDetailsModel;
@@ -318,6 +319,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
             }
             cursor2.close();
+            binding.p1RateTv.setOnClickListener(view -> {
+                Dialog dialog=new Dialog(this);
+                dialog.openUpdateRatesDialog(true);
+            });
+
             //Meta data
             binding.infoTv.setOnClickListener(view ->{
                 final boolean[] editOrNot = {false,false};
@@ -672,9 +678,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
                         if(updateRateSuccess || locationReligionSuccess){
-                            displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
-                                    religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
-                                    p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));
+//                            displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
+//                                    religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
+//                                    p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));
                         }else{
                             displayResult("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
                         }
@@ -1251,7 +1257,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         } else
             Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_SHORT).show();
         //to insert data in recyclerview
-        binding.fab.setOnClickListener(view -> {
+         binding.fab.setOnClickListener(view -> {
             correctInputArr =new int[7];//so that when again enter data fresh array will be created
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
@@ -1372,7 +1378,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         }catch (Exception x){
             x.printStackTrace();
-            Toast.makeText(this, "error occurred", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "error occurred", Toast.LENGTH_LONG).show();
         }
     }
     public void rate1Et(EditText inputP1Rate, Button  saveButton, int checkCorrectionArray[], int userInputRateArray[]) {
@@ -2176,14 +2182,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-
     public void refreshCurrentActivity(String id) {
         Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",id);
         finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
         startActivity(intent);
     }
-
     public void showDialogAsMessage( String query,String ifTitle,String ifMessage,String elseTitle,String elseMessage){
         if(db.updateTable(query)){
             displayResult(ifTitle,ifMessage);

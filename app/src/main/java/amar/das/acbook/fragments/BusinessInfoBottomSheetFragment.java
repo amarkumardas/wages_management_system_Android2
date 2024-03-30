@@ -92,7 +92,7 @@ public class BusinessInfoBottomSheetFragment extends BottomSheetDialogFragment {
                 }
 
                 if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
-                     binding.phoneNumberEt.setTextColor(Color.RED);
+                    binding.phoneNumberEt.setTextColor(Color.RED);
                     binding.businessInfoSaveButton.setVisibility(View.GONE);
                     correctInputArr[2]=2;//means wrong data
                 }

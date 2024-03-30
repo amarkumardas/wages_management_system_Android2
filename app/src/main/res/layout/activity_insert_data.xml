@@ -382,45 +382,53 @@
         android:id="@+id/fathername_et"
         android:importantForAutofill="yes"
         android:foreground="?android:attr/selectableItemBackground"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/skill"
+        android:textSize="12dp"
+        android:layout_marginLeft="26dp"
+        android:textColor="@color/black"
+        android:layout_marginTop="19dp" />
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="19dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:weightSum="3"
         android:id="@+id/skill_radiogp">
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/mestre"
-            android:paddingRight="30dp"
+            android:text="@string/m"
+
             android:layout_weight="1"
             android:id="@+id/mestre"
             android:textStyle="bold"
-            android:textSize="17dp"
+            android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"
             />
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/laber"
-            android:paddingRight="30dp"
+            android:text="@string/l"
+
             android:layout_weight="1"
             android:id="@+id/laber"
             android:textStyle="bold"
-            android:textSize="17dp"
+            android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/women_laber"
-            android:paddingRight="30dp"
+            android:text="@string/g"
+
             android:layout_weight="1"
             android:textStyle="bold"
             android:id="@+id/women_laber"
-            android:textSize="17dp"
+            android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"
             />
     </RadioGroup>
@@ -429,7 +437,7 @@
         android:layout_width="230dp"
         android:layout_height="45dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="33dp"
         android:layout_marginBottom="50dp"
         android:background="@drawable/dark_blue_buttonbg"
         android:onClick="insert_click"

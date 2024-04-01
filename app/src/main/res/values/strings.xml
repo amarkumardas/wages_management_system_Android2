@@ -31,9 +31,9 @@
 
 
     <!--backup CalculatedInvoicesActivity-->
-    <string name="backup_invoice_files">BACKUP INVOICE FILES</string>
+    <string name="calculated_invoice_files">CALCULATED INVOICE FILES</string>
     <string name="backup_calculated_invoice_and_delete_invoice_to_free_up_space">BACKUP CALCULATED INVOICE AND DELETE INVOICE TO FREE UP SPACE"</string>
-    <string name="no_backup_invoice_available">NO BACKUP INVOICE AVAILABLE</string>
+    <string name="no_calculated_invoice_available">NO CALCULATED INVOICE AVAILABLE</string>
     <string name="calculated_invoice">CALCULATED INVOICE</string>
     <string name="backup_and_freeup_space_tips">BACKUP AND FREEUP SPACE TIPS</string>
     <string name="calculated_invoice_backup_hint">How To Back Up Calculated Invoice?\n\n1. Long-press On Any File.\n\n2. Select All The Files You Want To Back Up, Then Share Them To Google Drive Or Any Other Storage Location.\n\nHow To Free Up Space?\n\nAfter Taking Back Up, Delete All The Selected Files By Clicking The Delete Icon.</string>
@@ -126,6 +126,8 @@
     <string name="up">UP: Means Updated Payment. User Has Updated Previous Data And Paid Amount After Subtracting Previous Day Amount.</string>
 
     <!--IndividualPersonDetailActivity-->
+    <string name="not_saved">NOT SAVED</string>
+    <string name="days">days</string>
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
     <string name="equal_provide_rate">= PROVIDE RATE</string>
     <string name="days_left">DAYS LEFT</string>
@@ -203,7 +205,7 @@
     <string name="activate">ACTIVATE</string>
     <string name="person_info">PERSON INFO</string>
     <string name="edit">EDIT</string>
-    <string name="rate_equal">RATE =</string>
+<!--    <string name="rate_equal">RATE =</string>-->
 
     <string-array name="addOrRemoveMlG">
         <item>SELECT</item>

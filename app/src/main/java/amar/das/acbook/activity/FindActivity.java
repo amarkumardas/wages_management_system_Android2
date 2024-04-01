@@ -53,7 +53,7 @@ TextView searchHint;
 
 
         searchHint.setOnClickListener(view -> {//searchHint.setTooltipText("may name is amar\n kumar \n das");
-            MyUtility.showResult(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext());
+            MyUtility.showDefaultDialog(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext());
          });
         searchRecycler.setHasFixedSize(true);
 

@@ -1159,7 +1159,7 @@ public class MyUtility {
             end--;
         }
     }
-    public static void showResult(String title, String message,Context context) {
+    public static void showDefaultDialog(String title, String message, Context context) {
         AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(context);
         showDataFromDataBase.setCancelable(false);
         showDataFromDataBase.setTitle(title);
@@ -1185,7 +1185,7 @@ public class MyUtility {
             }break;
             case "REMARKS":{
                 if(remarks != null) {//checking remarks is present or not
-                    MyUtility.showResult(view.getContext().getResources().getString(R.string.remarks),remarks,context);
+                    MyUtility.showDefaultDialog(view.getContext().getResources().getString(R.string.remarks),remarks,context);
                 }else{
                     MyUtility.snackBar(view,view.getResources().getString(R.string.no_remarks));
                 }

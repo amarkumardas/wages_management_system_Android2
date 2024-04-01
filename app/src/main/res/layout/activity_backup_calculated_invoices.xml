@@ -64,15 +64,14 @@ expanded automatically
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10"
-        android:layout_marginLeft="1dp"
-        android:layout_marginRight="1dp"
+
         android:background="#FAFAFA">
     <TextView
         android:id="@+id/total_backup_message"
         android:layout_weight="5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/backup_invoice_files"
+        android:text="@string/calculated_invoice_files"
         android:gravity="center"
         android:textColor="@color/black"
         android:textSize="12sp"/>
@@ -89,8 +88,7 @@ expanded automatically
         android:id="@+id/text_file_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="1dp"
-        android:layout_marginRight="1dp"
+
         android:background="#D6DADF">
      </androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

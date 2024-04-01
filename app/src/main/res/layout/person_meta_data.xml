@@ -46,21 +46,16 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
-            android:weightSum="10"
+            android:weightSum="8"
             android:background="#D6DADF"
             android:id="@+id/hardcode_meta_layout">
-            <TextView
-                android:layout_weight="2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textSize="10sp"
-                />
+
             <TextView
                 android:id="@+id/hardcoded_p1_tv_meta"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-
+                android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:textAlignment="center"
                 android:textColor="@color/black"
@@ -109,17 +104,17 @@
             android:orientation="horizontal"
             android:layout_marginTop="4dp"
             android:id="@+id/input_layout_meta"
-            android:weightSum="10"
+            android:weightSum="8"
             android:background="#D6DADF">
-            <TextView
-                android:layout_weight="2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:text="@string/rate_equal"
-                android:textSize="10sp"
-                />
+<!--            <TextView-->
+<!--                android:layout_weight="2"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textAlignment="center"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:text="@string/rate_equal"-->
+<!--                android:textSize="10sp"-->
+<!--                />-->
             <EditText
                 android:layout_weight="2"
                 android:layout_width="0dp"
@@ -129,6 +124,7 @@
                 android:textStyle="bold"
                 android:layout_marginRight="2dp"
                 android:layout_marginLeft="2dp"
+                android:hint="@string/rate"
                 android:singleLine="true"
                 android:maxLength="5"
                 android:textAlignment="center"
@@ -150,6 +146,7 @@
                 android:layout_marginRight="2dp"
                 android:layout_marginLeft="2dp"
                 android:textAlignment="center"
+                android:hint="@string/rate"
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
@@ -168,6 +165,7 @@
                 android:layout_marginLeft="2dp"
                 android:textAlignment="center"
                 android:textColor="@color/black"
+                android:hint="@string/rate"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"
                 android:id="@+id/input_p3_et_meta"/>
@@ -183,6 +181,7 @@
                 android:layout_marginLeft="2dp"
                 android:singleLine="true"
                 android:textAlignment="center"
+                android:hint="@string/rate"
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 android:inputType="numberDecimal"

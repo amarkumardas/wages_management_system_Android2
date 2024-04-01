@@ -21,13 +21,12 @@ import amar.das.acbook.adapters.BackUpCalculatedTextFileAdapter;
 import amar.das.acbook.databinding.ActivityBackupCalculatedInvoicesBinding;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.TextFileModel;
-import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.ui.ml.MLDrawerFragment;
 import amar.das.acbook.utility.MyUtility;
 
 public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
        ActivityBackupCalculatedInvoicesBinding binding;
-      byte toDeleteOldInvoiceIndicator=100;
+      byte toDeleteOldInvoiceIndicator=120;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +38,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
         if(allFilePathFromDevice != null){//if null means error
 
           if(allFilePathFromDevice.size()==0){
-              binding.totalBackupMessage.setText(getResources().getString(R.string.no_backup_invoice_available));
+              binding.totalBackupMessage.setText(getResources().getString(R.string.no_calculated_invoice_available));
           }
             binding.textFileTotalCount.setText("" + allFilePathFromDevice.size());
             LinkedList<TextFileModel> pathList=new LinkedList<>();
@@ -63,7 +62,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 @Override
                 public void updatedCount(int count) {
                     if(count == 0){
-                        binding.totalBackupMessage.setText(getResources().getString(R.string.no_backup_invoice_available));
+                        binding.totalBackupMessage.setText(getResources().getString(R.string.no_calculated_invoice_available));
                     }
                     binding.textFileTotalCount.setText("" +count);
                 }
@@ -83,6 +82,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 }
                 @Override
                 public boolean onQueryTextChange(String newText) {
+                    newText=newText.replaceAll("[^a-zA-Z0-9]", "");//replace all special character with ""
                     binding.textFileRecyclerview.setAdapter(textFileAdapter);
 
                     textFileAdapter.getFilter().filter(newText);
@@ -90,7 +90,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 }
             });
             binding.textfileCalculatedHint.setOnClickListener(view -> {
-                MyUtility.showResult(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext());
+                MyUtility.showDefaultDialog(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext());
             });
 
             if(allFilePathFromDevice.size() >= toDeleteOldInvoiceIndicator){

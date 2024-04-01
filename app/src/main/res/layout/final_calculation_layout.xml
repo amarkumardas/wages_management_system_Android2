@@ -14,7 +14,7 @@
           android:textStyle="bold"
           android:textSize="14dp"
           android:background="@color/purple_700"
-          android:textColor="@color/black"/>
+          android:textColor="@color/white"/>
 
 
     <LinearLayout
@@ -416,7 +416,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-
             android:text="@string/cancel"
             android:textSize="15dp"
             android:textColor="#FF0000"

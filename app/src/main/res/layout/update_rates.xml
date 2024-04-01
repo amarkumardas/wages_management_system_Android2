@@ -27,24 +27,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="15dp"
-        android:weightSum="10"
+        android:weightSum="8"
+        android:padding="5dp"
         android:background="#D6DADF"
         android:id="@+id/hardcode_meta_layout">
-        <TextView
-            android:layout_weight="2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:text="SKILL"
-            android:textSize="10sp"
-            />
+
         <TextView
             android:id="@+id/hardcoded_p1_tv_rate"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
-
+            android:layout_marginLeft="2dp"
             android:layout_marginRight="2dp"
             android:textAlignment="center"
             android:textColor="@color/black"
@@ -93,17 +86,10 @@
         android:orientation="horizontal"
         android:layout_marginTop="4dp"
         android:id="@+id/input_layout_meta"
-        android:weightSum="10"
+        android:weightSum="8"
+        android:padding="5dp"
         android:background="#D6DADF">
-        <TextView
-            android:layout_weight="2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:text="RATE"
-            android:textSize="10sp"
-            />
+
         <EditText
             android:layout_weight="2"
             android:layout_width="0dp"

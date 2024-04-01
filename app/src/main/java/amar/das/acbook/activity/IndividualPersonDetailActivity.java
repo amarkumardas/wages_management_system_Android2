@@ -62,7 +62,7 @@ import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-     ActivityIndividualPersonDetailBinding binding;
+      ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
     public static String audioPath;//it is made static so that in adapter class if user during updating data if audio is saved or not saved and user suddenly closed the app then on destroy method that audio should be deleted from device.so on destroy method code is there to delete that audio path form device
     public static android.app.AlertDialog adapterDialog;//made it static so that we can close adapter dialog in activity on destroy method
@@ -291,39 +291,53 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
             }
-          //setting star rating
-            Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
-            cursor2.moveToFirst();
-            if(cursor2.getString(0) != null || cursor2.getString(1) != null) {
+             //setting star rating
+              try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
+                  cursor2.moveToFirst();
+                if (cursor2.getString(0) != null || cursor2.getString(1) != null) {
 
-                if(cursor2.getString(1) != null){//https://www.youtube.com/watch?v=VmhcvoenUl0
-                    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
-                    String[] dateArray = cursor2.getString(1).split("-");
+                    if (cursor2.getString(1) != null) {//https://www.youtube.com/watch?v=VmhcvoenUl0
+                        LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
+                        String[] dateArray = cursor2.getString(1).split("-");
 //                    d = Integer.parseInt(dateArray[0]);
 //                    m = Integer.parseInt(dateArray[1]);
 //                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
-                    dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
-                    //between (2022-05-01,2022-05-01) like
-                   // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
-                                                     //between (2022-05-01,2022-05-01) like
-                    binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate,dbDate)+" "+getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+                        dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
+                        //between (2022-05-01,2022-05-01) like
+                        // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+                        //between (2022-05-01,2022-05-01) like
+                        binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
 
-                    if(ChronoUnit.DAYS.between(todayDate,dbDate) <= redIndicatorToLeave){
-                       binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
-                   }
-                }else{
-                    binding.starRatingTv.setText(cursor2.getString(0) + " *");
+                        if (ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave) {
+                            binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
+                        }
+                    } else {
+                        binding.starRatingTv.setText(cursor2.getString(0) + " *");
+                    }
+
+                } else {
+                    binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
                 }
-
-            }else {
-                binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
             }
-            cursor2.close();
-            binding.p1RateTv.setOnClickListener(view -> {
-                Dialog dialog=new Dialog(this);
-                dialog.openUpdateRatesDialog(true);
-            });
+            //cursor2.close();
 
+            binding.p1RateTv.setOnClickListener(view -> {
+                Dialog dialog=new Dialog(this,fromIntentPersonId);
+                dialog.openUpdateRatesDialogSaveAndRefresh(true);
+            });
+            binding.p2RateTv.setOnClickListener(view -> {
+                Dialog dialog=new Dialog(this,fromIntentPersonId);
+                dialog.openUpdateRatesDialogSaveAndRefresh(true);
+            });
+            binding.p3RateTv.setOnClickListener(view -> {
+                Dialog dialog=new Dialog(this,fromIntentPersonId);
+                dialog.openUpdateRatesDialogSaveAndRefresh(true);
+            });
+            binding.p4RateTv.setOnClickListener(view -> {
+                Dialog dialog=new Dialog(this,fromIntentPersonId);
+                dialog.openUpdateRatesDialogSaveAndRefresh(true);
+            });
+            
             //Meta data
             binding.infoTv.setOnClickListener(view ->{
                 final boolean[] editOrNot = {false,false};
@@ -377,9 +391,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 remarksMetaData.setEnabled(false);
                 //-------------------------------------------------------------------------------------------------------------------------
                 int indicator=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
-                int []checkCorrectionArray = new int[indicator];
-                int []userInputRateArray=new int[indicator];
-                rateUpdateManually(hardcodedP1Tv,inputP1Et,hardcodedP2Tv,inputP2Et,hardcodedP3Tv,inputP3Et,hardcodedP4Tv,inputP4Et,infoSave,checkCorrectionArray,userInputRateArray,indicator,fromIntentPersonId);
+                setRateComponentAccordingToId(hardcodedP1Tv,inputP1Et,hardcodedP2Tv,inputP2Et,hardcodedP3Tv,inputP3Et,hardcodedP4Tv,inputP4Et,infoSave,new int[indicator],new int[indicator],indicator,fromIntentPersonId);
                 //--------------------------------------------------------------------------------------------------------------------------
                 Cursor cursor1 = db.getData("SELECT "+Database.COL_12_ACTIVE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 cursor1.moveToFirst();
@@ -510,7 +522,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                                     } else
-                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
+                                        displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
                                 }
                                 break;
                                 case "ADD M": //adding M p3
@@ -526,7 +538,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                                     } else
-                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
+                                        displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
                                 }
                                 break;
                                 case "ADD G": //adding G p4
@@ -543,7 +555,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                                     } else
-                                        displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
+                                        displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
                                 }
                                 break;
                                 case "REMOVE M/L/G": //removing
@@ -554,7 +566,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     if (cursorIndicator != null) {
                                         cursorIndicator.moveToFirst();
                                         if (cursorIndicator.getString(0) == null) {//person1
-                                            displayResult(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
+                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
 
                                         } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
@@ -562,12 +574,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2 so set null
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                                 }
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
 
                                         } else if (cursorIndicator.getString(0).equals("3")) {//person3
@@ -576,12 +588,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                                 }
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
                                         } else if (cursorIndicator.getString(0).equals("4")) {//person4
                                            // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
@@ -589,15 +601,15 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                             result.moveToFirst();
                                             if (result.getInt(0) == 0) {//Means no data IN P2
                                                 if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                                 }else{
                                                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                                 }
                                             } else if (result.getInt(0) >= 1) {
-                                                displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                             }
                                         } else
-                                            displayResult(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
+                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
                                     } else
                                         Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
                                 }
@@ -668,7 +680,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p4Rate= Integer.parseInt(inputP4Et.getText().toString().trim());
                         }
 
-                        updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator);
+                        updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator,false);
 
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
@@ -678,11 +690,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
                         if(updateRateSuccess || locationReligionSuccess){
+                             refreshCurrentActivity(fromIntentPersonId);
 //                            displayResult("SAVED SUCCESSFULLY",generateMessageAccordingToIndicator(star,leavingDateTv.getText().toString().trim(),returningDate.getText().toString().trim(),locationAutoComplete.getText().toString().trim(),
 //                                    religionAutoComplete.getText().toString().trim(),remarksMetaData.getText().toString().trim(),indicator,hardcodedP1Tv.getText().toString().trim(),
 //                                    p1Rate,hardcodedP2Tv.getText().toString().trim(),p2Rate,hardcodedP3Tv.getText().toString().trim(),p3Rate,hardcodedP4Tv.getText().toString().trim(),p4Rate));
                         }else{
-                            displayResult("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
+                            displayResultAndRefresh("FAILED TO SAVE!!!", "DATA NOT UPDATED- UPDATE QUERY FAILED- PLEASE TRY AGAIN");
                         }
                     }
                 });
@@ -1287,7 +1300,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 .append( "\n\nREMARKS: "+remarksMetaData);
         return sb.toString();
     }
-    private void rateUpdateManually(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
+    private void setRateComponentAccordingToId(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
         try(Database db=new Database(getBaseContext());
             Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
             if(rateCursor1 != null) rateCursor1.moveToFirst();
@@ -1378,10 +1391,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         }catch (Exception x){
             x.printStackTrace();
-            Toast.makeText(this, "error occurred", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "error occurred to show visibility", Toast.LENGTH_LONG).show();
         }
     }
-    public void rate1Et(EditText inputP1Rate, Button  saveButton, int checkCorrectionArray[], int userInputRateArray[]) {
+    private void rate1Et(EditText inputP1Rate, Button  saveButton, int checkCorrectionArray[], int userInputRateArray[]) {
         inputP1Rate.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -1412,7 +1425,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-    public void rate2Et(EditText inputP2Rate, Button saveButton, int[] checkCorrectionArray, int[] userInputRateArray) {
+    private void rate2Et(EditText inputP2Rate, Button saveButton, int[] checkCorrectionArray, int[] userInputRateArray) {
         inputP2Rate.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -1631,7 +1644,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_l), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_l), getResources().getString(R.string.status_colon_failed));
 
                             } else
-                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
+                                displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.laber));
                         }break;
                         case "ADD M": //adding M p3
                         {
@@ -1646,7 +1659,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.mestre) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_m), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_m), getResources().getString(R.string.status_colon_failed));
 
                             } else
-                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
+                                displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.mestre));
                         }break;
                         case "ADD G": //adding G p4
                         {
@@ -1662,7 +1675,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 showDialogAsMessage("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "='" + getResources().getString(R.string.women_laber) + "' , " + Database.COL_39_INDICATOR + "=" + 4 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'", getResources().getString(R.string.successfully_added_g), getResources().getString(R.string.status_colon_success), getResources().getString(R.string.failed_to_add_g), getResources().getString(R.string.status_colon_failed));
 
                             } else
-                                displayResult(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
+                                displayResultAndRefresh(getResources().getString(R.string.only_4_person_allowed_to_add), getResources().getString(R.string.status_cant_add_more) + getResources().getString(R.string.women_laber));
                         }break;
                         case "REMOVE M/L/G": //removing
                         {
@@ -1672,19 +1685,19 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             if (cursorIndicator != null) {
                                 cursorIndicator.moveToFirst();
                                 if (cursorIndicator.getString(0) == null) {//person1
-                                    displayResult(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
+                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
 
                                 } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                      Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                     result.moveToFirst();
                                     if (result.getInt(0) == 0) {//Means no data IN P2 so set null
                                         if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                         }else{
                                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                         }
                                     } else if (result.getInt(0) >= 1) {
-                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                     }
 
                                 } else if (cursorIndicator.getString(0).equals("3")) {//person3
@@ -1692,27 +1705,27 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                     result.moveToFirst();
                                     if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
                                         if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                         }else{
                                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                         }
                                     } else if (result.getInt(0) >= 1) {
-                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                     }
                                 } else if (cursorIndicator.getString(0).equals("4")) {//person4
                                     Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
                                     result.moveToFirst();
                                     if (result.getInt(0) == 0) {//Means no data IN P2
                                         if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResult(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
                                         }else{
                                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                                         }
                                     } else if (result.getInt(0) >= 1) {
-                                        displayResult(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
                                     }
                                 } else
-                                    displayResult(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
+                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
                             } else
                                 Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
                         }break;
@@ -2190,22 +2203,23 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     }
     public void showDialogAsMessage( String query,String ifTitle,String ifMessage,String elseTitle,String elseMessage){
         if(db.updateTable(query)){
-            displayResult(ifTitle,ifMessage);
+            displayResultAndRefresh(ifTitle,ifMessage);
         }else{
-            displayResult(elseTitle, elseMessage);
+            displayResultAndRefresh(elseTitle, elseMessage);
         }
     }
-    private void displayResult(String title, String message)  {
+    private void displayResultAndRefresh(String title, String message)  {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
         showDataFromDataBase.setCancelable(false);
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
         showDataFromDataBase.setPositiveButton(getResources().getString(R.string.ok),(dialogInterface, i) -> {
             dialogInterface.dismiss();//close current dialog
-            Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
-            intent.putExtra("ID",fromIntentPersonId);
-            finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
-            startActivity(intent);
+            refreshCurrentActivity(fromIntentPersonId);
+//            Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);
+//            intent.putExtra("ID",fromIntentPersonId);
+//            finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
+//            startActivity(intent);
         });
         showDataFromDataBase.create().show();
     }

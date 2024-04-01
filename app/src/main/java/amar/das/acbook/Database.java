@@ -1541,17 +1541,19 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    public boolean update_Rating_TABLE_NAME3(String star,String remarks,String leavingDate,String returningDate,String r1,String r2,String r3,String r4,String id,int indicator){
+    public boolean update_Rating_TABLE_NAME3(String star,String remarks,String leavingDate,String returningDate,String r1,String r2,String r3,String r4,String id,int indicator,boolean forUpdateOnlyRateTrue){
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
             dB = this.getWritableDatabase();//getting permission it should be here
             dB.beginTransaction();//transaction start
             ContentValues cv = new ContentValues();//to enter data at once it is like hash map
-            cv.put(COL_391_STAR, star);
-            cv.put(COL_393_PERSON_REMARKS, remarks);
-            cv.put(COL_392_LEAVINGDATE, leavingDate);
-            cv.put(COL_398_RETURNINGDATE,returningDate);
+            if(!forUpdateOnlyRateTrue) {
+                cv.put(COL_391_STAR, star);
+                cv.put(COL_393_PERSON_REMARKS, remarks);
+                cv.put(COL_392_LEAVINGDATE, leavingDate);
+                cv.put(COL_398_RETURNINGDATE, returningDate);
+            }
             switch (indicator){//to avoid unnecessary update
                 case 1:{
                     cv.put(COL_32_R1,r1);

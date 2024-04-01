@@ -110,6 +110,7 @@
         android:weightSum="4"
         android:background="#D6DADF">
         <EditText
+            android:hint="@string/days"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="45dp"
@@ -129,6 +130,7 @@
             <requestFocus></requestFocus><!--cursor will focus here when this activity is open and to open keyboard code is written in manifest file writing focus here is important otherwise keyboard will not open-->
         </EditText>
         <EditText
+            android:hint="@string/days"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="45dp"
@@ -146,6 +148,7 @@
             android:id="@+id/input_p2_et"
             android:foreground="?android:attr/selectableItemBackground"/>
         <EditText
+            android:hint="@string/days"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="45dp"
@@ -163,6 +166,7 @@
             android:id="@+id/input_p3_et"
             android:foreground="?android:attr/selectableItemBackground"/>
         <EditText
+            android:hint="@string/days"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="45dp"

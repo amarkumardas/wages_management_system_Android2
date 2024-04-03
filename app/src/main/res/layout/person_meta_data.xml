@@ -45,8 +45,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="5dp"
             android:weightSum="8"
+            android:padding="4dp"
             android:background="#D6DADF"
             android:id="@+id/hardcode_meta_layout">
 
@@ -102,9 +103,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:id="@+id/input_layout_meta"
             android:weightSum="8"
+            android:padding="4dp"
             android:background="#D6DADF">
 <!--            <TextView-->
 <!--                android:layout_weight="2"-->
@@ -491,7 +493,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="WRITE REMARKS"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:layout_marginRight="4dp"
             android:layout_marginLeft="4dp"
             android:fadingEdgeLength="233dp"

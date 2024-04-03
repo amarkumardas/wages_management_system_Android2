@@ -1153,7 +1153,7 @@ public class Database extends SQLiteOpenHelper {
         return null;
     }
 
-    private Integer[] getTotalOfWagesP1P2P3P4Deposit(String id,String columnNameOfP1, String columnNameOfP2, String columnNameOfP3, String columnNameOfP4,String tableName,String idColumnName) {//if error return null
+    private Integer[] getTotalOfWagesP1P2P3P4Deposit(String id,String columnNameOfP1, String columnNameOfP2, String columnNameOfP3, String columnNameOfP4,String tableName,String idColumnName) {//if error return null,or if no data value would be 0
         Integer[] arr=new Integer[6];
         arr[0]=MyUtility.getTotalWagesAmount(id,context);
 

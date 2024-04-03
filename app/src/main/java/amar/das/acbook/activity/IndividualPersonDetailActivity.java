@@ -287,7 +287,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 binding.imageImg.setImageBitmap(bitmap);
 
                 binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2- " + "<b>" + cursor.getString(8)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.idTv.setText("ID- " + cursor.getString(9));
+                binding.idTv.setText("ID " + cursor.getString(9));
             } else {
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
             }
@@ -1527,16 +1527,22 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
         totalWages=sumCursor[0];
         totalDeposit=sumCursor[5];
+        if(totalDeposit==0){
+            binding.textWorkDepositTv.setText(getResources().getString(R.string.total_work_amount));//if no deposit
+        }else{
+            binding.textWorkDepositTv.setText(getResources().getString(R.string.total_work_deposit_plus_work_amount));
+        }
 
         if(((totalDeposit + totalr1r2r3r4sum1sum2sum3sum4) < 0) || (totalr1r2r3r4sum1sum2sum3sum4 < 0) || (totalDeposit < 0)) //user cant enter negative number so when (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) is negative that means int range is exceeds so wrong result will be shown
             Toast.makeText(this,getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
 
-        binding.workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
+        binding.workAndDepositTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
         //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
         if ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) < totalWages) {
+            binding.textAdvanceOrBalanceTv.setText(getResources().getString(R.string.advance_due));
             binding.advanceOrBalanceTv.setTextColor(Color.RED);
             //                                        total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-            binding.advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
+            binding.advanceOrBalanceTv.setText(MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
 
             //updating Advance to db                                                    total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
             bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
@@ -1552,9 +1558,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
             //totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
         }else if((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) >= totalWages) {//>= is given because of green color and when calculation is 0
+            binding.textAdvanceOrBalanceTv.setText(getResources().getString(R.string.balance));
             binding.advanceOrBalanceTv.setTextColor(getColor(R.color.green));
             //                                           totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
-            binding.advanceOrBalanceTv.setText("= " + MyUtility.convertToIndianNumberSystem((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) - totalWages));
+            binding.advanceOrBalanceTv.setText(MyUtility.convertToIndianNumberSystem((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) - totalWages));
 
             //updating balance to db if greater then or equal to 0
             bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");

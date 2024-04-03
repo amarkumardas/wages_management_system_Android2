@@ -87,7 +87,7 @@
     <string name="ok">OK</string>
     <string name="no_remarks">NO REMARKS</string>
     <string name="you_are_updating">YOU ARE UPDATING</string>
-    <string name="to_update">TO UPDATE</string>
+<!--    <string name="to_update">TO UPDATE</string>-->
     <string name="audio_not_found_may_be_deleted">AUDIO NOT FOUND MAY BE DELETED</string>
     <string name="failed_to_update">FAILED TO UPDATE</string>
     <string name="correct_the_data_or_cancel_and_enter_again">CORRECT THE DATA OR CANCEL AND ENTER AGAIN</string>
@@ -122,12 +122,13 @@
     <string name="inserted_plus_user_has_inserted_and_updated_data_on_same_day">INSERTED+ : User Has Inserted And Updated Data On Same Day.</string>
     <string name="updated_user_has_updated_previous_day_data">UPDATED : User Has Updated Previous Day Data.</string>
     <string name="calculated_user_has_calculated_all_wages_and_data_is_inserted_automatically">CALCULATED : User Has Calculated All Wages. And Data Is Inserted Automatically.</string><!-- Data Inserted Automatically By System.By Calculating All Wages/ CALCULATED : Data Is Inserted Automatically After Calculating All Wages-->
-    <string name="uar">UAR : Means Updated Amount Received. User Has Updated Previous Data And Received Amount After Subtracting Previous Day Amount.</string>
-    <string name="up">UP: Means Updated Payment. User Has Updated Previous Data And Paid Amount After Subtracting Previous Day Amount.</string>
+    <string name="uar">UAR : Means Updated Amount Received. User Has Updated Previous day Data And Received Amount After Subtracting Previous Day Amount.</string>
+    <string name="up">UP: Means Updated Payment. User Has Updated Previous day Data And Paid Amount After Subtracting Previous Day Amount.</string>
 
     <!--IndividualPersonDetailActivity-->
     <string name="not_saved">NOT SAVED</string>
-    <string name="days">days</string>
+    <string name="days">DAYS</string>
+    <string name="wages">WAGES</string>
     <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
     <string name="equal_provide_rate">= PROVIDE RATE</string>
     <string name="days_left">DAYS LEFT</string>
@@ -158,7 +159,9 @@
     <string name="star_total_star">****TOTAL****</string>
     <string name="total_work_amount_equal">TOTAL WORK AMOUNT =</string>
     <string name="total_deposit_equal">TOTAL DEPOSIT =</string>
+    <string name="total_wages">TOTAL WAGES</string>
     <string name="total_work_deposit_plus_work_amount_equal">TOTAL DEPOSIT+WORK AMOUNT=</string>
+    <string name="total_work_deposit_plus_work_amount">TOTAL DEPOSIT+WORK AMOUNT</string>
     <string name="rate">RATE</string>
     <string name="x">X</string>
     <string name="save_wages">SAVE WAGES</string>
@@ -167,6 +170,7 @@
     <!--recycler view input data-->
     <string name="days_required_to_work">DAYS REQUIRED TO WORK =</string>
     <string name="work_amount">WORK AMOUNT =</string>
+    <string name="total_work_amount">TOTAL WORK AMOUNT</string>
     <string name="write_remarks">WRITE REMARKS</string>
 
     <!-- Database.java-->
@@ -319,7 +323,7 @@
     <string name="deposit_amount">DEPOSIT AMOUNT</string>
     <string name="total_equal">TOTAL =</string>
     <string name="final_calculation">FINAL CALCULATION</string>
-    <string name="long_press_to_save">LONG PRESS TO SAVE</string>
+    <string name="long_press_to_save_pdf">LONG PRESS TO SAVE PDF</string>
     <string name="to_deposit">TO DEPOSIT</string>
 <!--    <string name="title_activity_scrolling">ScrollingActivity</string>-->
 <!--    <string name="large_text">-->

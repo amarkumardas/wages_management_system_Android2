@@ -35,7 +35,7 @@ public class Dialog {
         AlertDialog.Builder myCustomDialog=new AlertDialog.Builder( context);
         LayoutInflater inflater=LayoutInflater.from(context);
 
-        View myView=inflater.inflate(R.layout.update_rates,null);//myView contain all layout view ids
+        View myView=inflater.inflate(R.layout.dialog_update_rates,null);//myView contain all layout view ids
         myCustomDialog.setView(myView);//set custom layout to alert dialog
         myCustomDialog.setCancelable(setCancelable);//if false user touch to other place then dialog will not be close
 

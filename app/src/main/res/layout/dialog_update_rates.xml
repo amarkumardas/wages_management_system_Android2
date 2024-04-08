@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="24dp"
-            android:text="UPDATE RATE"
+            android:text="@string/set_rate"
             android:paddingTop="1dp"
             android:background="@color/purple_700"
             android:textAlignment="center"

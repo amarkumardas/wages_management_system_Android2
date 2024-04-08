@@ -76,7 +76,7 @@
     <string name="by_name_phone_id_ac_aadhaar">By Name, Phone, ID, A/C, Aadhaar</string>
     <string name="searching_tips">SEARCHING TIPS</string>
     <string name="invoice">INVOICE</string>
-    <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter ID Followed By Any One Letter.</string>
+    <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter Any One Letter then ID or Enter ID Then Any One Letter.</string>
 
     <!--InsertDataActivity-->
     <string name="updated_successfully">UPDATED SUCCESSFULLY</string>
@@ -129,9 +129,9 @@
     <string name="not_saved">NOT SAVED</string>
     <string name="days">DAYS</string>
     <string name="wages">WAGES</string>
-    <string name="equal_new_person_provide_rate">= NEW PERSON PROVIDE RATE</string>
-    <string name="equal_provide_rate">= PROVIDE RATE</string>
-    <string name="days_left">DAYS LEFT</string>
+    <string name="equal_new_person_provide_rate">= SET RATE NEW PERSON </string>
+    <string name="equal_provide_rate">= SET RATE</string>
+    <string name="days_to_leave">DAYS TO LEAVE</string>
     <string name="failed_to_play_audio">FAILED TO PLAY AUDIO</string>
     <string name="failed_to_start_recording">FAILED TO START RECORDING</string>
     <string name="no_phone_number">NO PHONE NUMBER</string>
@@ -146,7 +146,7 @@
     <string name="status_colon_failed">STATUS: FAILED</string>
     <string name="no_data_present_so_removed">NO DATA PRESENT SO REMOVED</string>
     <string name="status_colon_success">STATUS: SUCCESS</string>
-    <string name="because_data_is_present_newline_total_sum_equal">BECAUSE DATA IS PRESENT\nTOTAL SUM= </string>
+    <string name="because_data_is_present_newline_total_sum">BECAUSE DATA IS PRESENT\nTOTAL SUM: </string>
     <string name="successfully_added_l">SUCCESSFULLY  ADDED L</string>
     <string name="failed_to_add_l">FAILED TO ADD L</string>
     <string name="successfully_added_m">SUCCESSFULLY  ADDED M</string>
@@ -168,7 +168,7 @@
     <string name="save_deposit">SAVE DEPOSIT</string>
 
     <!--recycler view input data-->
-    <string name="days_required_to_work">DAYS REQUIRED TO WORK =</string>
+    <string name="days_required_to_work_for">DAYS REQUIRED TO WORK FOR</string>
     <string name="work_amount">WORK AMOUNT =</string>
     <string name="total_work_amount">TOTAL WORK AMOUNT</string>
     <string name="write_remarks">WRITE REMARKS</string>
@@ -197,6 +197,7 @@
     <!--Common view text-->
     <string name="cancel">CANCEL</string>
     <string name="delete">DELETE</string>
+    <string name="set_rate">SET RATE</string>
 
     <!--info data or meta data -->
     <string name="add_remove_m_l_g">ADD/REMOVE M L G</string>

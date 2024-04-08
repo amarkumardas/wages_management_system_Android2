@@ -1,5 +1,6 @@
 package amar.das.acbook.ui.history;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +37,7 @@ import java.util.concurrent.Executors;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
+import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.adapters.HistoryAdapter;
 import amar.das.acbook.databinding.FragmentHistoryTabBinding;
 import amar.das.acbook.globalenum.GlobalConstants;
@@ -198,6 +201,11 @@ public class HistoryFragment extends Fragment {
 
                    ExecutorService backgroundTask= Executors.newSingleThreadExecutor();
                    backgroundTask.execute(()->{
+                       if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                          // runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());//not working
+                           ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                           return;
+                       }
                     //background task
                      /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
                      if(!MyUtility.shareFileToAnyApp(new File(pdfAndReturnAbsolutePath),"application/pdf",historyFileName(userStartDateDayOfMonthMonthYear,userEndDateDayOfMonthMonthYear),getContext())) {//open intent to share
@@ -786,5 +794,6 @@ public class HistoryFragment extends Fragment {
             Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         binding = null;
+        Database.closeDatabase();
     }
 }

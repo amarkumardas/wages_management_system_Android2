@@ -1,5 +1,7 @@
 package amar.das.acbook.adapters;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 
 import android.content.Intent;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
+import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.model.HistoryModel;
 import amar.das.acbook.ui.history.HistoryFragment;
 import amar.das.acbook.utility.MyUtility;
@@ -134,6 +138,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         //*************************************done audio and mic*********************************************************
 
         holder.shareIcon.setOnClickListener(view -> {
+            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(view.getContext())) {
+                Toast.makeText(view.getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions((Activity) view.getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                return;
+            }
            if(HistoryFragment.shareingToggle){//send to phone number if no then open any app
                //if(MyUtility.sendMessageToContact(data.getId(), generateRecordeMessageToSend(data),context)){//if false then open any app
                if(MyUtility.sendMessageToContact(data.getId(), MyUtility.generateRecordMessageToSend(data.getId(),data.getUserDate(),data.getWagesOrDeposit(),data.getIsDeposit(),data.getP1Skill(),data.getP1Work(),data.getP2Skill(),data.getP2Work(),data.getP3Skill(),data.getP3Work(),data.getP4Skill(),data.getP4Work(),data.getRemarks()),context)){

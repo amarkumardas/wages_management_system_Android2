@@ -460,5 +460,9 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Database.closeDatabase();
+    }
 }

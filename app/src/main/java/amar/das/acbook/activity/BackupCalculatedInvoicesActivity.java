@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.BackUpCalculatedTextFileAdapter;
 import amar.das.acbook.databinding.ActivityBackupCalculatedInvoicesBinding;
@@ -139,4 +140,10 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
 //        long fileSizeInBytes = file.length();
 //        return (int) (fileSizeInBytes / (1024 * 1024));
 //    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Database.closeDatabase();
+    }
 }

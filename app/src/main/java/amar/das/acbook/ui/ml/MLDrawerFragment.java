@@ -1,6 +1,7 @@
 package amar.das.acbook.ui.ml;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import amar.das.acbook.Database;
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
@@ -75,6 +77,12 @@ public class MLDrawerFragment extends Fragment {
                 case R.id.backup_active_mlg:{
                     ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                     backgroundTask.execute(() -> {
+                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                            return;
+                        }
+
                         getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                         AllDataBackup dataBackup=new AllDataBackup(getContext());
@@ -87,6 +95,12 @@ public class MLDrawerFragment extends Fragment {
                 case R.id.backup_inactive_m:{
                     ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                     backgroundTask.execute(() -> {
+                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                            return;
+                        }
+
                         getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                         AllDataBackup dataBackup=new AllDataBackup(getContext());
@@ -99,6 +113,11 @@ public class MLDrawerFragment extends Fragment {
                 case R.id.backup_inactive_l:{
                     ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                     backgroundTask.execute(() -> {
+                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                            return;
+                        }
                         getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                         AllDataBackup dataBackup=new AllDataBackup(getContext());
@@ -111,6 +130,11 @@ public class MLDrawerFragment extends Fragment {
                 case R.id.backup_inactive_g:{
                     ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                     backgroundTask.execute(() -> {
+                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                            return;
+                        }
                         getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                         AllDataBackup dataBackup=new AllDataBackup(getContext());
@@ -242,6 +266,7 @@ public class MLDrawerFragment extends Fragment {
             Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         binding = null;
+        Database.closeDatabase();
     }
 }
 

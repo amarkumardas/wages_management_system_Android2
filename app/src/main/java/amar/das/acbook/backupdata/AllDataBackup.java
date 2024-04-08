@@ -1,14 +1,10 @@
 package amar.das.acbook.backupdata;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.widget.Toast;
-
-import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +32,7 @@ public class AllDataBackup{
         this.numberOfPerson=personIds.length;
         backupFileName =MyUtility.backupDateTime()+textFileName;//GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue()
         StringBuilder sb=new StringBuilder();
-        sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append(" BACKUP OF ").append(numberOfPerson).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
+        sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append("\nBACKUP OF ").append(numberOfPerson).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
         sb.append(getTotalInActiveAdvanceAndBalance(skillType)).append("\n-----------------------------\n\n");
 
         for (String id:personIds){//loop
@@ -44,13 +40,18 @@ public class AllDataBackup{
             if(sb==null) return false;
         }
 
-         if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain",context.getString(R.string.backup_inactive_m)+" SHARE TEXT FILE USING",context)) return false;
+         if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain", "BACKUP INACTIVE SKILL "+skillType+" TEXT FILE",context)) return false;
 
         Database.closeDatabase();
         return true;//if everything goes fine
     }
     private String getTotalInActiveAdvanceAndBalance(String skillType) {
         Database db=Database.getInstance(context);
+        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skillType,false);
+        if(noRateIds!=null){//means no rate ids are there
+            return "FOR CALCULATING TOTAL ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+        }
+
         try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
             cursor.moveToFirst();
             StringBuilder sb = new StringBuilder();
@@ -69,7 +70,7 @@ public class AllDataBackup{
             return false;
         }
         try { // create a file to store the data
-            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){
+//            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){
                 File file = new File(context.getExternalCacheDir(), fileName + ".txt");//creating txt file in cache directory file name  getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(message.getBytes());
@@ -82,11 +83,11 @@ public class AllDataBackup{
                 //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
                // return file.getAbsolutePath();
                 return true;
-            }else{
-                Toast.makeText(context, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                return false;
-            }
+//            }else{
+//                Toast.makeText(context, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                return false;
+//            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -117,7 +118,7 @@ public class AllDataBackup{
 
         if (!makePdf.closeDocumentLastOperation4()) return false;
 
-        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" SHARE PDF USING",context)) return false;//open intent to share
+        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" PDF FILE",context)) return false;//open intent to share
 
         Database.closeDatabase();
         return true;//if everything goes fine
@@ -140,14 +141,20 @@ public class AllDataBackup{
     }
     public String[] getTotalActiveAdvanceAndBalanceInfo() {
         String[] ratesInfo = new String[1];
-        StringBuilder sb = new StringBuilder();
         Database db=Database.getInstance(context);
+        String noRateIds=db.getIdsAndReturnNullIfRateIsProvidedOfActiveMLG();
+        if(noRateIds!=null){//means no rate ids are there
+             ratesInfo[0] ="FOR CALCULATING  TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+             return ratesInfo;
+        }
+        StringBuilder sb = new StringBuilder();
         try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'")){
             cursor.moveToFirst();
             sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE  Rs: ")
                     .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
                     .append(" , TOTAL BALANCE  Rs: ")
                     .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
+
             ratesInfo[0] = sb.toString();
             return ratesInfo;
         }catch (Exception x){

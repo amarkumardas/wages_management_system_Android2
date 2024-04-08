@@ -198,23 +198,26 @@
             android:weightSum="20">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="9"
-                android:text="@string/days_required_to_work"
-                android:textColor="@color/purple_700"
-                android:layout_gravity="center_vertical"
-                android:textSize="11sp"
-                android:id="@+id/only_used_while_updating"
-                />
-
-            <TextView
                 android:id="@+id/no_of_days"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
                 android:layout_gravity="center_vertical"
-                android:textSize="14dp" />
+                android:layout_weight="3"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                tools:ignore="RtlCompat" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                android:text="@string/days_required_to_work_for"
+                android:textColor="@color/purple_700"
+                android:layout_gravity="center_vertical"
+                android:textAlignment="center"
+                android:textSize="11sp"
+                android:id="@+id/only_used_while_updating"
+                tools:ignore="RtlCompat"/>
 
             <TextView
                 android:id="@+id/advance_or_balance_amount_warring_tv"
@@ -225,7 +228,7 @@
                 android:textAlignment="center"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/black"
-                android:textSize="20dp"
+                android:textSize="20sp"
                 tools:ignore="RtlCompat" />
         </LinearLayout>
         <LinearLayout
@@ -241,7 +244,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="6"
+                android:layout_weight="5"
                 android:text="@string/work_amount"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/purple_700"
@@ -250,10 +253,11 @@
                 />
 
             <TextView
-                android:layout_weight="3"
+                android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="#0DAF07"
+                android:textAlignment="center"
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:id="@+id/work_amount_tv"/>

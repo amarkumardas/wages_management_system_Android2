@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -140,6 +141,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         binding.sharePdfBtn.setOnClickListener(view -> {
             ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
             backgroundTask.execute(() -> {
+                if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
+                    runOnUiThread(() -> Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                    return;
+                }
                 //pre execute
                 if(whichPdfIndicatorChangesDynamically==3) {//3 is referring to current invoice.Progress bar is needed because it take time to create.Where as 1 and 2 don't take time so no need of progress bar
                     runOnUiThread(() -> progressBar.showProgressBar());
@@ -158,6 +164,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     }
                     /*note:using whatsapp we cannot send pdf directly to whatsapp phone number like message for that we required approval so not using that feature*/
                     if(whichPdfIndicatorChangesDynamically <=(byte)3){// this will only execute when value is 1,2 or 3
+
+
                         if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf","ID "+fromIntentPersonId+" SHARE PDF USING",getBaseContext())) {//open intent to share
                             runOnUiThread(() -> displayDialogMessage("CANNOT","SHARE PDF"));
                         }
@@ -185,11 +193,21 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     boolean errorIndicator=false;
                     switch (itemName) {
                         case "A/C": {
-                            if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetails(fromIntentPersonId,getIdNamePhone(fromIntentPersonId)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
+                            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
+                                Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                return;
+                            }
+                            if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetails(fromIntentPersonId,getIdNamePhone(fromIntentPersonId,true)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                             }
                         }break;
                         case "PHONE NUMBER": {
+                            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
+                                 Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                return;
+                            }
                             String message = activePhoneNumberToShare(fromIntentPersonId);//if there is no phone number then return null also when exception
                             if (message != null) {//if no phone number then don't open dialog because its useless
                                 if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(message, getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) {
@@ -201,18 +219,29 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                         }break;
                         case "RUNNING INVOICE":{//here thread is not used because it takes more time to load when data is more but usually data is less so it will take 1 sec to load data.so not used thread because it will take more time and extra code
                             //MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
+                            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
+                               Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                               ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                return;
+                            }
+
                              if (!openAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getMessageForCurrentInvoice(fromIntentPersonId,true), GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue(), fromIntentPersonId, true)) {  //getMessageForCurrentInvoice()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                              }
                         }break;
                         case "IMAGE": {
-                            if (!shareImageAndMessageToAnyApp(getIdNamePhone(fromIntentPersonId),fromIntentPersonId)) {
+                            if (!shareImageAndMessageToAnyApp(getIdNamePhone(fromIntentPersonId,true),fromIntentPersonId)) {
                                 errorIndicator=true;
                             }
                         }break;
                         case "SHARE ALL": {
                             ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                              backgroundTask.execute(() -> {
+                                 if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
+                                     runOnUiThread(() -> Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                                      ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                                     return;
+                                 }
                                  //pre execute
                                  runOnUiThread(() -> progressBar.showProgressBar());
 
@@ -471,8 +500,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     private String activePhoneNumberToShare(String id){//return null when exception or return null when no phone number
         try{
-            if(MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true)!= null) {//checking phoneNumber is there or not
-                return getIdNamePhone(id);
+            if(MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),false)!= null) {//checking phoneNumber is there or not
+                return getIdNamePhone(id,false);
             }else{
                 return null;
             }
@@ -796,7 +825,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return null;
         }
     }
-    public String getIdNamePhone(String id) {
+    public String getIdNamePhone(String id,boolean forOnlyOneActiveNumberTrue) {
         try (Database db=new Database(getApplicationContext());
              Cursor cursor = db.getData("SELECT " +Database.COL_2_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
         {
@@ -805,7 +834,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
                 sb.append("ID: ").append(id).append("\n");
                 sb.append("NAME: ").append(cursor.getString(0)!= null?cursor.getString(0):"").append("\n");
-                String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true);
+                String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),forOnlyOneActiveNumberTrue);
                 sb.append("PHONE: ").append(activePhoneNumber!= null? activePhoneNumber:"");
             }
             return sb.toString().trim();
@@ -853,7 +882,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
         try { // create a file to store the data
-            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {
+            //if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())) {
                 File file = new File(getExternalCacheDir(), MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".txt");//creating txt file in cache directory file name  getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(message.getBytes());
@@ -865,11 +894,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 }
                 //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
                 return true;
-            }else{
-                Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                return false;
-            }
+//            }else{
+//                Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                return false;
+//            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -1248,23 +1277,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //        }
 //    }
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-//        for (String path:absolutePathArrayToDelete){
-//            if(path!=null){
-//                if(!MyUtility.deletePdfOrRecordingUsingPathFromDevice(path)){
-//                    Log.d(this.getClass().getSimpleName(),"failed to delete file from device");
-//                }
-//            }
-//        }
-       if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
-           Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
-        }
-        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file
-            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
-        }
-    }
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
         finish();//destroy current activity
@@ -1294,5 +1306,16 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
 //                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);//to close keyboard
 //                        imm.hideSoftInputFromWindow(view.getWindowToken(),0);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
+        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file
+            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
+        Database.closeDatabase();
     }
 }

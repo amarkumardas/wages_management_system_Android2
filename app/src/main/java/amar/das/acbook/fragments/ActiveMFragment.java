@@ -65,11 +65,17 @@ public class ActiveMFragment extends Fragment {
          advance=root.findViewById(R.id.active_m_advance);
          balance=root.findViewById(R.id.active_m_balance);
 
-         Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");
-         advanceBalanceCursor.moveToFirst();
-         advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-         balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-         advanceBalanceCursor.close();
+        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(getString(R.string.mestre),true);
+        if(noRateIds == null) {
+            Cursor advanceBalanceCursor = db.getData("SELECT SUM(" + Database.COL_13_ADVANCE + "),SUM(" + Database.COL_14_BALANCE + ") FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.mestre) + "' AND " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE.getValue() + "'");
+            advanceBalanceCursor.moveToFirst();
+            advance.setText(HtmlCompat.fromHtml("ADVANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            advanceBalanceCursor.close();
+        }else{
+            advance.setText("SET RATE TO ID:"+noRateIds);
+            balance.setText("");
+        }
 
 //        LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01
 //        String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022

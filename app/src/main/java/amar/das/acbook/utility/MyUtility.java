@@ -45,6 +45,7 @@ import java.util.List;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
+import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
@@ -775,7 +776,7 @@ public class MyUtility {
             return null;
         }
     }
-    public static byte get_indicator(Context context,String PersonId) {//indicator value start from 1.in db table there is no indicator 1 but we require indicator 1 so by default we are sending value 1 as default.
+    public static byte get_indicator(Context context,String PersonId) {//indicator value start from 1.in db table there is no indicator 1. instead null value is there. but we require indicator as 1 when indicator is null so by default we are sending value 1 as default.
         Database db=Database.getInstance(context);
         try(Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
             if (cursor != null) {
@@ -790,7 +791,7 @@ public class MyUtility {
 
         }catch(Exception ex){
             ex.printStackTrace();
-            return 1;
+            return 1;//potential may cause error
         }
         return 1;//by default 1
     }
@@ -1192,6 +1193,11 @@ public class MyUtility {
             }break;
             case "SHARE":{
                  if(data !=null){//best code
+                     if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(view.getContext())) {
+                         Toast.makeText(view.getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                         ActivityCompat.requestPermissions((Activity) view.getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                         return;
+                     }
                      try(Database db=Database.getInstance(context)){//share to whats app if not contact open any app to share
                          String phoneNumber = MyUtility.getActiveOrBothPhoneNumber(data.getId(), context,true);
                         String[] skillArr=db.getAllSkill(data.getId());

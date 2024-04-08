@@ -1554,7 +1554,7 @@ public class Database extends SQLiteOpenHelper {
                 cv.put(COL_392_LEAVINGDATE, leavingDate);
                 cv.put(COL_398_RETURNINGDATE, returningDate);
             }
-            switch (indicator){//to avoid unnecessary update
+            switch (indicator){//to avoid unnecessary update.other column will be updated to null only if there is no value
                 case 1:{
                     cv.put(COL_32_R1,r1);
                 }break;
@@ -1823,7 +1823,7 @@ public class Database extends SQLiteOpenHelper {
         dB.beginTransaction();//transaction start
 
        /**3.updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance*/
-        success=updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(dB,id,totalDeposit,  totalWages,  p1,  p2,  p3,  p4,  r1,  r2,  r3,  r4,  indicate,innerArray);//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
+        success=updateRateTotalDaysWorkedTotalAdvanceOrBalanceToDatabase(dB,id,totalDeposit,  totalWages,  p1,  p2,  p3,  p4,  r1,  r2,  r3,  r4,indicate,innerArray);//this method updateRateTotalAdvanceOrBalanceToDatabase() calculate first so that other method would access db and get updated balance or advance
         if(!success) return false;
 
         /**4.get total sum of wages deposit and m l m m to specify as remarks after final calculation.Do this operation otherwise it will be lost after operation perform ie.deletion.after that*/
@@ -2228,16 +2228,14 @@ public class Database extends SQLiteOpenHelper {
         String[] columns = {Database.COL_32_R1, Database.COL_33_R2, Database.COL_34_R3, Database.COL_35_R4};
         int[] rates = {rate1, rate2, rate3, rate4};
 
-        StringBuilder updateQuery = new StringBuilder("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET ");
+        StringBuilder updateRateQuery = new StringBuilder("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET ");
         for (int i = 0; i < columns.length; i++) {
-            updateQuery.append(columns[i]).append(" = ").append(rates[i] != 0 ? rates[i] : "NULL");
-            if (i < columns.length) updateQuery.append(", ");
+            updateRateQuery.append(columns[i]).append(" = ").append(rates[i] != 0 ? rates[i] : "NULL");
+            if (i < columns.length) updateRateQuery.append(", ");
         }
-        updateQuery.append(Database.COL_397_TOTAL_WORKED_DAYS + " ='" + (cursor.getInt(0) + p1work))
+        updateRateQuery.append(Database.COL_397_TOTAL_WORKED_DAYS + " ='" + (cursor.getInt(0) + p1work))
                 .append("' WHERE ").append(Database.COL_31_ID).append(" = '").append(id).append("'");
-
-        dB.execSQL(updateQuery.toString());
-
+        dB.execSQL(updateRateQuery.toString());
     }
 
     private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
@@ -2715,8 +2713,16 @@ public class Database extends SQLiteOpenHelper {
     public String[] getIdOfActiveMLG() {//if error return null
         try {
             List<Integer> idList = new ArrayList<>();//insertion is fast
+            Cursor cursor=null;
+//             cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+//            if (cursor != null) {
+//                while (cursor.moveToNext()) {
+//                    idList.add(cursor.getInt(0));
+//                }
+//                cursor.close();
+//            }
 
-            Cursor cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");//no need to check for latest date is null or not we need only active ids
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
@@ -2724,23 +2730,15 @@ public class Database extends SQLiteOpenHelper {
                 cursor.close();
             }
 
-            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    idList.add(cursor.getInt(0));
-                }
-                cursor.close();
-            }
+//            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'  AND "+Database.COL_15_LATESTDATE+" IS NULL");
+//            if (cursor != null) {
+//                while (cursor.moveToNext()) {
+//                    idList.add(cursor.getInt(0));
+//                }
+//                cursor.close();
+//            }
 
-            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'  AND "+Database.COL_15_LATESTDATE+" IS NULL");
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    idList.add(cursor.getInt(0));
-                }
-                cursor.close();
-            }
-
-            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'  AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
@@ -2756,12 +2754,20 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
-    public String[] getIdOfInActiveMOrLOrG(String whichLabour) {//if error return null
+    public String[] getIdOfInActiveMOrLOrG(String skillType) {//if error return null
         try {
             List<Integer> idList = new ArrayList<>();//insertion is fast
             Cursor cursor=null;
-            if(whichLabour.equals(context.getResources().getString(R.string.mestre))){
-                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+            if(skillType.equals(context.getResources().getString(R.string.mestre))){
+//                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue() +"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+//                if (cursor != null) {
+//                    while (cursor.moveToNext()) {
+//                        idList.add(cursor.getInt(0));
+//                    }
+//                    cursor.close();
+//                }
+
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");//no need to check for latest date we need only inactive data
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
@@ -2769,40 +2775,32 @@ public class Database extends SQLiteOpenHelper {
                     cursor.close();
                 }
 
-                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        idList.add(cursor.getInt(0));
-                    }
-                    cursor.close();
-                }
+            }else if(skillType.equals(context.getResources().getString(R.string.laber))){
+//                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+//                if (cursor != null) {
+//                    while (cursor.moveToNext()) {
+//                        idList.add(cursor.getInt(0));
+//                    }
+//                    cursor.close();
+//                }
 
-            }else if(whichLabour.equals(context.getResources().getString(R.string.laber))){
-                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");//if new user is created and not single data is inserted than that labour id will be fetch
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
                     }
                     cursor.close();
                 }
+            }else if(skillType.equals(context.getResources().getString(R.string.women_laber))){
+//                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+//                if (cursor != null) {
+//                    while (cursor.moveToNext()) {
+//                        idList.add(cursor.getInt(0));
+//                    }
+//                    cursor.close();
+//                }
 
-                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        idList.add(cursor.getInt(0));
-                    }
-                    cursor.close();
-                }
-            }else if(whichLabour.equals(context.getResources().getString(R.string.women_laber))){
-                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        idList.add(cursor.getInt(0));
-                    }
-                    cursor.close();
-                }
-
-                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL");
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
@@ -2819,7 +2817,137 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
+    public String getIdsAndReturnNullIfRateIsProvidedOfActiveMLG(){//return null when all rate is provided else return string of ids of no rate is provided and return string of error occured when there is exception
+        Cursor cursor=null;
+        try{
+            StringBuilder resultBuilder = new StringBuilder();
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND ( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                resultBuilder.append(cursor.getString(0)).append(" , ");
+             }
+            }cursor.close();
 
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            if(resultBuilder.length()==0) return null;
+            return resultBuilder.substring(0,resultBuilder.length()-2);//to remove last , and space
+
+        }catch (Exception x){
+            x.printStackTrace();
+            return "error occurred while calculating total advance and balance";
+        }
+//        SELECT pd.id FROM person_details_table pd INNER JOIN rate_skills_indicator_table r ON pd.id = r.id
+//        WHERE pd.ACTIVE = 1
+//        AND r.R1 IS NULL
+//        AND( r.INDICATOR = 1 OR r.INDICATOR IS NULL);
+    }
+    public String getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(String skill, boolean forActiveTrue){//return null when all rate is provided else return string of ids of no rate is provided and return string of error occured when there is exception
+        Cursor cursor=null;
+        try{//getting data from two table
+            StringBuilder resultBuilder = new StringBuilder();
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+                while (cursor.moveToNext()){
+                    resultBuilder.append(cursor.getString(0)).append(" , ");
+                }
+            }cursor.close();
+
+            if(resultBuilder.length()==0) return null;
+
+            return resultBuilder.substring(0,resultBuilder.length()-2);//to remove last , and space
+
+        }catch (Exception x){
+            x.printStackTrace();
+            return "error occurred while calculating total advance and balance";
+        }
+//        SELECT pd.id FROM person_details_table pd INNER JOIN rate_skills_indicator_table r ON pd.id = r.id
+//        WHERE pd.ACTIVE = 1
+//        AND r.R1 IS NULL
+//        AND( r.INDICATOR = 1 OR r.INDICATOR IS NULL);
+    }
+   public String getIdOfLGSkillAndReturnNullIfRateIsProvidedOfActive(){
+       Cursor cursor=null;
+       try{//getting data from two table
+           StringBuilder resultBuilder = new StringBuilder();
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+ GlobalConstants.ACTIVE.getValue() +"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+           if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+               while (cursor.moveToNext()){
+                   resultBuilder.append(cursor.getString(0)).append(" , ");
+               }
+           }cursor.close();
+
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+           if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+               while (cursor.moveToNext()){
+                   resultBuilder.append(cursor.getString(0)).append(" , ");
+               }
+           }cursor.close();
+
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+           if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+               while (cursor.moveToNext()){
+                   resultBuilder.append(cursor.getString(0)).append(" , ");
+               }
+           }cursor.close();
+
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+           if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
+               while (cursor.moveToNext()){
+                   resultBuilder.append(cursor.getString(0)).append(" , ");
+               }
+           }cursor.close();
+
+           if(resultBuilder.length()==0) return null;
+
+           return resultBuilder.substring(0,resultBuilder.length()-2);//to remove last , and space
+
+       }catch (Exception x){
+           x.printStackTrace();
+           return "error occurred while calculating total advance and balance";
+       }
+
+   }
 //    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
 //        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
 //            cursor.moveToFirst();

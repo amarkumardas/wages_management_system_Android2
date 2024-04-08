@@ -72,7 +72,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     int cYear;
     byte cMonth,cDayOfMonth;
     int [] correctInputArr =new int[7];
-    String active ="0";
+    String active =GlobalConstants.INACTIVE.getValue();
     byte redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
     ArrayList<WagesDetailsModel> dataList;
     @Override
@@ -296,31 +296,30 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                   cursor2.moveToFirst();
                 if (cursor2.getString(0) != null || cursor2.getString(1) != null) {
 
-                    if (cursor2.getString(1) != null) {//https://www.youtube.com/watch?v=VmhcvoenUl0
+                    binding.starRatingTv.setText((cursor2.getString(0)!=null)?(cursor2.getString(0) +" *"):"0 *");//when leaving date is more the 21 days then show star
+
+                    if (cursor2.getString(1) != null) {//when there is leaving date https://www.youtube.com/watch?v=VmhcvoenUl0
                         LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
                         String[] dateArray = cursor2.getString(1).split("-");
-//                    d = Integer.parseInt(dateArray[0]);
-//                    m = Integer.parseInt(dateArray[1]);
-//                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
+
                         dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
                         //between (2022-05-01,2022-05-01) like
                         // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
                         //between (2022-05-01,2022-05-01) like
-                        binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
 
-                        if (ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave) {
+                        //to show how many days left to leave
+                       // binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+
+                        if (ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave){//if true then update text
                             binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
+                            binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_to_leave));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
                         }
-                    } else {
-                        binding.starRatingTv.setText(cursor2.getString(0) + " *");
                     }
-
                 } else {
                     binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
                 }
             }
             //cursor2.close();
-
             binding.p1RateTv.setOnClickListener(view -> {
                 Dialog dialog=new Dialog(this,fromIntentPersonId);
                 dialog.openUpdateRatesDialogSaveAndRefresh(true);
@@ -337,7 +336,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 Dialog dialog=new Dialog(this,fromIntentPersonId);
                 dialog.openUpdateRatesDialogSaveAndRefresh(true);
             });
-            
             //Meta data
             binding.infoTv.setOnClickListener(view ->{
                 final boolean[] editOrNot = {false,false};
@@ -505,7 +503,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
                         String data = adapterView.getItemAtPosition(pos).toString();
                         try(Database db=new Database(getBaseContext());
-                        Cursor cursorx =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")) {
+                            Cursor cursorx =db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'")){
                             cursorx.moveToFirst();//skill which is null there skill is updated
                             switch (data) {
                                 case "ADD L": //adding L means p2
@@ -560,60 +558,65 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 break;
                                 case "REMOVE M/L/G": //removing
                                 {
-                                    editOrNot[1] = true;//indicate user has selected option
-                                    //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
-                                    Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                                    if (cursorIndicator != null) {
-                                        cursorIndicator.moveToFirst();
-                                        if (cursorIndicator.getString(0) == null) {//person1
-                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
+                                    try (Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")){//First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
+                                        editOrNot[1] = true;//indicate user has selected option
+                                        if (cursorIndicator != null && cursorIndicator.moveToFirst()) {
 
-                                        } else if (cursorIndicator.getString(0).equals("2")) {//person2
-                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                            result.moveToFirst();
-                                            if (result.getInt(0) == 0) {//Means no data IN P2 so set null
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                                }else{
-                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
-                                                }
-                                            } else if (result.getInt(0) >= 1) {
-                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                            }
+                                            if (cursorIndicator.getString(0) == null) {//person1
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
 
-                                        } else if (cursorIndicator.getString(0).equals("3")) {//person3
-                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                            result.moveToFirst();
-                                            if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                                }else{
-                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                            } else if (cursorIndicator.getString(0).equals("2")) {//person2
+                                                // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                                Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                                result.moveToFirst();
+                                                if (result.getInt(0) == 0) {//Means no data IN P2 so set null
+                                                    if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= NULL , " + Database.COL_33_R2 + "= NULL  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                        displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    } else {
+                                                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                    }
+                                                } else if (result.getInt(0) >= 1) {
+                                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
                                                 }
-                                            } else if (result.getInt(0) >= 1) {
-                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                            }
-                                        } else if (cursorIndicator.getString(0).equals("4")) {//person4
-                                           // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
-                                            Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                            result.moveToFirst();
-                                            if (result.getInt(0) == 0) {//Means no data IN P2
-                                                if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                                    displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                                }else{
-                                                    Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                if (result != null) result.close();
+
+                                            } else if (cursorIndicator.getString(0).equals("3")) {//person3
+                                                // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                                Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                                result.moveToFirst();
+                                                if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
+                                                    if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= NULL , " + Database.COL_34_R3 + "= NULL  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                        displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    } else {
+                                                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                    }
+                                                } else if (result.getInt(0) >= 1) {
+                                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
                                                 }
-                                            } else if (result.getInt(0) >= 1) {
-                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                            }
+                                                if (result != null) result.close();
+
+                                            } else if (cursorIndicator.getString(0).equals("4")) {//person4
+                                                // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                                Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                                result.moveToFirst();
+                                                if (result.getInt(0) == 0) {//Means no data IN P2
+                                                    if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= NULL , " + Database.COL_35_R4 + "= NULL , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                        displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                                    } else {
+                                                        Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                                    }
+                                                } else if (result.getInt(0) >= 1) {
+                                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
+                                                }
+                                                if (result != null) result.close();
+
+                                            } else
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
                                         } else
-                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
-                                    } else
-                                        Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }catch (Exception x){
                             x.printStackTrace();
@@ -1041,30 +1044,36 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    if (skillNRateCursor != null) {
-                        skillNRateCursor.close();
-                    }
+                    if (skillNRateCursor != null) skillNRateCursor.close();
 
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click button multiple times
 
-                        if((checkInternalStorageAvailability() * 1000) >= 30) {//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
-                         if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {//Take permission
+                        if(!((checkInternalStorageAvailability() * 1000) >= 30)) {//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+                         Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();
+                         return false;
+                        }
 
-                              ProgressDialogHelper progressBar = new ProgressDialogHelper(IndividualPersonDetailActivity.this);
-                              ExecutorService backgroundTask = Executors.newSingleThreadExecutor(); // Create an ExecutorService
-                              backgroundTask.execute(() -> {
+                         if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {//Take permission
+                           Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                           ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                           return false;
+                         }
+
+                         ProgressDialogHelper progressBar = new ProgressDialogHelper(IndividualPersonDetailActivity.this);
+                         ExecutorService backgroundTask = Executors.newSingleThreadExecutor(); // Create an ExecutorService
+                         backgroundTask.execute(() -> {
                                                        //on pre execute
-                                                       runOnUiThread(() -> {//first close the dialog then showing progress bar on main thread
-                                                                           if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
-                                                                               finalDialog.dismiss();
-                                                                            }
-                                                                             progressBar.showProgressBar();
-                                                                            });
-                             boolean success=dataBaseDeleteAndCreatePdfOperation();//background task
+                          runOnUiThread(() -> {//first close the dialog then showing progress bar on main thread
+                          if (finalDialog != null && finalDialog.isShowing()) {//dismiss dialog before going to pdf-viewer activity
+                           finalDialog.dismiss();
+                           }
+                           progressBar.showProgressBar();
+                           });
+                         boolean success=dataBaseDeleteAndCreatePdfOperation();//background task
 
-                            //on post execute method.will execute after all operation completed
-                            runOnUiThread(() ->{ progressBar.hideProgressBar();
+                          //on post execute method.will execute after all operation completed
+                         runOnUiThread(() ->{ progressBar.hideProgressBar();
                                                if(success){
                                                    if(!viewPDFFromDb((byte) 2, fromIntentPersonId)) {//column name should be correct Viewing pdf2
                                                        Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO VIEW PDF", Toast.LENGTH_LONG).show();
@@ -1075,11 +1084,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             });
 
                         });backgroundTask.shutdown();//it will shutdown when all task is completed.The backgroundTask.shutdown() method is executed when you want to stop the ExecutorService. This can be useful for a number of reasons, such as when you are finished using the ExecutorService or when you want to conserve resources.When you call the backgroundTask.shutdown() method, the ExecutorService will stop accepting new tasks. However, any tasks that are already in progress will continue to run until they are finished.Once all of the tasks in the ExecutorService have finished running, the ExecutorService will be shutdown. This means that all of the threads in the pool will be cleaned up and the ExecutorService will no longer be usable.It is important to note that the backgroundTask.shutdown() method will not block your app. This means that you can continue to use your app after calling the backgroundTask.shutdown() method.
-
-                    }else{Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                           ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
-                         }
-                }else{Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();}
 
                    return false;
                     });
@@ -1275,31 +1279,30 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
-
-    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
-        StringBuilder sb=new StringBuilder();
-        switch (indicator){
-            case 1:{
-                sb.append(skill1).append(" : "+p1Rate);
-            }break;
-            case 2:{
-                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate);
-            }break;
-            case 3:{
-                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate);
-            }break;
-            case 4:{
-                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate).append("  "+skill4).append(" : "+p4Rate);
-            }break;
-        }
-        sb.append("\n\nSTAR:  " + star)
-                .append("\nLEAVING :     "+leavingDate)
-                .append("\nRETURNING : "+returningDate)
-                .append("\nLOCATION:  "+locationAutoComplete)
-                .append("\nRELIGION:    "+religionAutoComplete)
-                .append( "\n\nREMARKS: "+remarksMetaData);
-        return sb.toString();
-    }
+//    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
+//        StringBuilder sb=new StringBuilder();
+//        switch (indicator){
+//            case 1:{
+//                sb.append(skill1).append(" : "+p1Rate);
+//            }break;
+//            case 2:{
+//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate);
+//            }break;
+//            case 3:{
+//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate);
+//            }break;
+//            case 4:{
+//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate).append("  "+skill4).append(" : "+p4Rate);
+//            }break;
+//        }
+//        sb.append("\n\nSTAR:  " + star)
+//                .append("\nLEAVING :     "+leavingDate)
+//                .append("\nRETURNING : "+returningDate)
+//                .append("\nLOCATION:  "+locationAutoComplete)
+//                .append("\nRELIGION:    "+religionAutoComplete)
+//                .append( "\n\nREMARKS: "+remarksMetaData);
+//        return sb.toString();
+//    }
     private void setRateComponentAccordingToId(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {
         try(Database db=new Database(getBaseContext());
             Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
@@ -1686,56 +1689,64 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         }break;
                         case "REMOVE M/L/G": //removing
                         {
-                            editOrNot[1] = true;//indicate user has selected option
-                            //First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
-                            Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'");
-                            if (cursorIndicator != null) {
-                                cursorIndicator.moveToFirst();
-                                if (cursorIndicator.getString(0) == null) {//person1
-                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill),getResources().getString(R.string.status_colon_failed));//default M or L or G
+                            try (Cursor cursorIndicator = db.getData("SELECT " + Database.COL_39_INDICATOR + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")){//First getting indicator to decide whether delete or not.if indicator is null then cant delete because by default M or L or G present.If indicator is 2,3,4 then checking data is present or not if present then don't delete else delete
+                                editOrNot[1] = true;//indicate user has selected option
+                                if (cursorIndicator != null && cursorIndicator.moveToFirst()) {
 
-                                } else if (cursorIndicator.getString(0).equals("2")) {//person2
-                                     Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                    result.moveToFirst();
-                                    if (result.getInt(0) == 0) {//Means no data IN P2 so set null
-                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= " + null + " , " + Database.COL_33_R2 + "=0  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                        }else{
-                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
-                                        }
-                                    } else if (result.getInt(0) >= 1) {
-                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                    }
+                                    if (cursorIndicator.getString(0) == null) {//null or 1 person1
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
 
-                                } else if (cursorIndicator.getString(0).equals("3")) {//person3
-                                    Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                    result.moveToFirst();
-                                    if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
-                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= " + null + " , " + Database.COL_34_R3 + "=0  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                        }else{
-                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                    } else if (cursorIndicator.getString(0).equals("2")) {//person2
+                                        // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                        Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 7) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                        result.moveToFirst();
+                                        if (result.getInt(0) == 0) {//Means no data IN P2 so set null
+                                            if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_36_SKILL2 + "= NULL , " + Database.COL_33_R2 + "= NULL  , " + Database.COL_39_INDICATOR + "=" + 1 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            } else {
+                                                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                            }
+                                        } else if (result.getInt(0) >= 1) {
+                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
                                         }
-                                    } else if (result.getInt(0) >= 1) {
-                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                    }
-                                } else if (cursorIndicator.getString(0).equals("4")) {//person4
-                                    Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
-                                    result.moveToFirst();
-                                    if (result.getInt(0) == 0) {//Means no data IN P2
-                                        if(db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= " + null + " , " + Database.COL_35_R4 + "=0 , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
-                                            displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
-                                        }else{
-                                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                        if (result != null) result.close();
+
+                                    } else if (cursorIndicator.getString(0).equals("3")) {//person3
+                                        // Cursor result = db.getData("SELECT SUM(" + Database.COL_100_P3 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                        Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 8) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                        result.moveToFirst();
+                                        if (result.getInt(0) == 0) {//Means no data IN P2                                                                                          //decreasing indicator from 3 to 2
+                                            if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_37_SKILL3 + "= NULL , " + Database.COL_34_R3 + "= NULL  , " + Database.COL_39_INDICATOR + "=" + 2 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            } else {
+                                                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                            }
+                                        } else if (result.getInt(0) >= 1) {
+                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
                                         }
-                                    } else if (result.getInt(0) >= 1) {
-                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum_equal) + result.getInt(0));
-                                    }
+                                        if (result != null) result.close();
+
+                                    } else if (cursorIndicator.getString(0).equals("4")) {//person4
+                                        // Cursor result = db.getData("SELECT SUM(" + Database.COL_1111_P4 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
+                                        Cursor result = db.getData("SELECT SUM(" + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 9) + ") FROM " + db.tableNameOutOf4Table(fromIntentPersonId) + " WHERE " + db.getColumnNameOutOf4Table(fromIntentPersonId, (byte) 1) + "= '" + fromIntentPersonId + "'");
+                                        result.moveToFirst();
+                                        if (result.getInt(0) == 0) {//Means no data IN P2
+                                            if (db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_38_SKILL4 + "= NULL , " + Database.COL_35_R4 + "= NULL , " + Database.COL_39_INDICATOR + "=" + 3 + " WHERE " + Database.COL_31_ID + "= '" + fromIntentPersonId + "'")) {
+                                                displayResultAndRefresh(getResources().getString(R.string.no_data_present_so_removed), getResources().getString(R.string.status_colon_success));
+                                            } else {
+                                                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                                            }
+                                        } else if (result.getInt(0) >= 1) {
+                                            displayResultAndRefresh(getResources().getString(R.string.cant_remove), getResources().getString(R.string.because_data_is_present_newline_total_sum) + result.getInt(0));
+                                        }
+                                        if (result != null) result.close();
+
+                                    } else
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
                                 } else
-                                    displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
-                            } else
-                                Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
-                        }break;
+                                    Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
+                            }break;
+                        }
                     }
                 }catch (Exception x){
                     x.printStackTrace();

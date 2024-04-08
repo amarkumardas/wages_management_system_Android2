@@ -35,20 +35,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-             android:textStyle="bold"
-            android:text="AMAR KUMAR DA jhgjhjh jhgfjhg"
+            android:textStyle="bold"
             android:paddingTop="2dp"
 
             android:layout_gravity="center_vertical"
-             android:textColor="@color/white"
-             android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textAlignment="center"
             android:id="@+id/name_tv"
             tools:ignore="RtlCompat" />
         <TextView
             android:layout_weight="3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="13dp"
+            android:textSize="10dp"
             android:layout_gravity="center"
             android:textAlignment="center"
             android:textColor="@color/white"
@@ -428,7 +427,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
 
-                    android:textColor="@color/black"
+
                     android:textAlignment="textEnd"
                     android:text="@string/skill"
                     android:layout_gravity="bottom"
@@ -448,7 +447,7 @@
                         android:layout_weight="2"
                         android:text="@string/days"
                         android:textAlignment="textEnd"
-                        android:textColor="@color/black"
+
                         android:layout_gravity="bottom"
                         android:textSize="10dp"
                         tools:ignore="RtlCompat" />

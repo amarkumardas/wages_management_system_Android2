@@ -18,7 +18,6 @@ import android.widget.AbsListView;
 import android.widget.ProgressBar;
 
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -117,13 +116,18 @@ public class InactiveFragment extends Fragment {
         return root;
     }
     public ArrayList<MestreLaberGModel> loadInitialDataHavingTotalAdvanceNBalanceOfInactive(TextView advance,TextView balance,String skill,int limit,ArrayList<MestreLaberGModel> arraylist) {
-        //db=new Database(getContext());//on start only database should be create
-        Database db=  Database.getInstance(getContext());
-        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE +"+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND ("+Database.COL_12_ACTIVE+"='0')");
-        advanceBalanceCursor.moveToFirst();
-        advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+ MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-        balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-        advanceBalanceCursor.close();
+        Database db = Database.getInstance(getContext());
+        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skill,false);
+        if(noRateIds == null) {
+            Cursor advanceBalanceCursor = db.getData("SELECT SUM(" + Database.COL_13_ADVANCE + "),SUM(" + Database.COL_14_BALANCE + ") FROM " + Database.TABLE_NAME1 + " WHERE +" + Database.COL_8_MAINSKILL1 + "='" + skill + "' AND (" + Database.COL_12_ACTIVE + "='0')");
+            advanceBalanceCursor.moveToFirst();
+            advance.setText(HtmlCompat.fromHtml("ADVANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            advanceBalanceCursor.close();
+        }else{
+            advance.setText("SET RATE TO ID:"+noRateIds);
+            balance.setText("");
+        }
 
         Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
         arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much

@@ -381,5 +381,6 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+        Database.closeDatabase();
     }
 }

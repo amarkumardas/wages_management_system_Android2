@@ -54,15 +54,20 @@ public class ActiveLGFragment extends Fragment {
         progressBar=binding.progressBarActiveLG;
         progressBar.setVisibility(View.GONE);//initially visibility will be not there only when data is loading then visibility set visible
 
-
         advance=root.findViewById(R.id.active_l_g_advance);
         balance=root.findViewById(R.id.active_l_g_balance);
-        Cursor advanceBalanceCursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+"),SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"') AND ("+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"')");
-        advanceBalanceCursor.moveToFirst();
-        advance.setText(HtmlCompat.fromHtml("ADVANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-        balance.setText(HtmlCompat.fromHtml("BALANCE: "+"<b>"+MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1))+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-        advanceBalanceCursor.close();
 
+        String noRateIds=db.getIdOfLGSkillAndReturnNullIfRateIsProvidedOfActive();
+        if(noRateIds == null) {
+            Cursor advanceBalanceCursor = db.getData("SELECT SUM(" + Database.COL_13_ADVANCE + "),SUM(" + Database.COL_14_BALANCE + ") FROM " + Database.TABLE_NAME1 + " WHERE (" + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.laber) + "' OR " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.women_laber) + "') AND (" + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE.getValue() + "')");
+            advanceBalanceCursor.moveToFirst();
+            advance.setText(HtmlCompat.fromHtml("ADVANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+            advanceBalanceCursor.close();
+        }else{
+            advance.setText("SET RATE TO ID:"+noRateIds);
+            balance.setText("");
+        }
 //        LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01
 //        String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
 //        System.out.println("LG");

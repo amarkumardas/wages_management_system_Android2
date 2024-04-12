@@ -15,7 +15,8 @@ public enum GlobalConstants {
     //pdf file name
     PDF_FOLDER_NAME("acBookPDF"),
     RUNNING_INVOICE_FILE_NAME("_running_invoice"),
-    CALCULATED_INVOICE_FILE_NAME("_calculated_invoice");
+    CALCULATED_INVOICE_FILE_NAME("_calculated_invoice"),
+    DEFAULT_BUSINESS_NAME("CONSTRUCTION WORK");
     private final String value;
 
     GlobalConstants(String value) {

@@ -42,7 +42,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
        holder.id.setText("ID: "+data.getId());
        holder.name.setText(HtmlCompat.fromHtml("NAME: "+"<b>"+data.getName()+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-       holder.acHolderName.setText("SKILL: "+data.getSkill());
+       holder.acHolderName.setText(""+context.getString(R.string.skill)+": "+data.getSkill());
 
        if(data.isActive()){
            holder.inactiveOrActive.setText(GlobalConstants.ACTIVE.name());
@@ -54,13 +54,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
        //user may enter only account no or AADHAAR so if else is use separately
        //account and aadhaar length should be greater than 4 or 5 otherwise string out of bound exception because we r using this method (data.getAccount().length() - 4 or 5)so checking in if statement.we are viewing last 4 and 5 letters to user
-        if(data.getAccount().length()>4  ) {
+        if(data.getAccount() !=null && data.getAccount().length()>4 ) {
             holder.account.setText(HtmlCompat.fromHtml("A/C: " +"<b>"+ data.getAccount().substring(data.getAccount().length() - 4)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 4 letters
         }else {/*when data is not there in Db than set account  to - otherwise others people value is been showed in place of account To check just comment next line and see.Default null in database is not working only empty data is set if user don't enter data.*/
             holder.account.setText("A/C:    -");
           }
 
-        if(data.getAadhaar().length()>5){
+        if(data.getAadhaar()!=null && data.getAadhaar().length()>5){
             holder.aadhaar.setText(HtmlCompat.fromHtml("AADHAAR: " +"<b>"+ data.getAadhaar().substring(data.getAadhaar().length() - 5)+"<b>",HtmlCompat.FROM_HTML_MODE_LEGACY));//getting last 5 letters
         }else{/*when data is not there in Db than set  aadhaar to - otherwise others people value is been showed in place of aadhaar .Default null in database is not working only empty data is set if user don't enter data*/
             holder.aadhaar.setText("AADHAAR:    -");
@@ -142,7 +142,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 for (SearchModel obj : backup) {
                     //since id is not duplicate so filteredData should not contain duplicate like 23,123,123 here 23 is in all so
                     // equal method is used to check only content and then store
-                    if (obj.getId().equals(str))//if it matches then store in filter data ie arraylist
+                    if (obj.getId()!=null && obj.getId().equals(str))//if it matches then store in filter data ie arraylist
                     {  //string equals( ) method is called because obj.getId() is string
                         filteredData.add(obj);
                         break;//once id found then break because id is not duplicate

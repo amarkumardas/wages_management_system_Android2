@@ -61,16 +61,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10">
-        <ImageView
-            android:layout_width="108dp"
-            android:layout_height="124dp"
+          <ImageView
+            android:layout_width="85dp"
+            android:layout_height="83dp"
             android:layout_gravity="start"
             android:src="@drawable/defaultprofileimage"
             android:scaleType="fitXY"
             android:id="@+id/image_img"/>
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="83dp"
             android:orientation="vertical"
             android:background="@color/white"
             android:layout_marginRight="2dp">
@@ -124,7 +125,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:singleLine="true"
                 android:textSize="13dp"
                 android:textColor="@color/black"
@@ -132,33 +132,33 @@
                 android:layout_marginRight="2dp"
                 android:layout_marginLeft="2dp"
                 android:id="@+id/account_tv"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textSize="12dp"
-                android:gravity="start"
-                android:layout_marginRight="2dp"
-                android:layout_marginLeft="2dp"
-                android:id="@+id/ifsc_code_tv"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textSize="12dp"
-                android:gravity="start"
-                android:layout_marginRight="2dp"
-                android:layout_marginLeft="2dp"
-                android:id="@+id/bank_name_tv"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textSize="12dp"
-                android:gravity="start"
-                android:layout_marginRight="2dp"
-                android:layout_marginLeft="2dp"
-                android:id="@+id/ac_holder_name_tv"/>
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:singleLine="true"-->
+<!--                android:textSize="12dp"-->
+<!--                android:gravity="start"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_marginLeft="2dp"-->
+<!--                android:id="@+id/ifsc_code_tv"/>-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:singleLine="true"-->
+<!--                android:textSize="12dp"-->
+<!--                android:gravity="start"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_marginLeft="2dp"-->
+<!--                android:id="@+id/bank_name_tv"/>-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:singleLine="true"-->
+<!--                android:textSize="12dp"-->
+<!--                android:gravity="start"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_marginLeft="2dp"-->
+<!--                android:id="@+id/ac_holder_name_tv"/>-->
 <!-- android:id="@+id/ac_holder_tv"-->
         </LinearLayout>
     </LinearLayout>
@@ -319,7 +319,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/single_record_recy"
             android:layout_width="match_parent"
-            android:layout_height="450dp"
+            android:layout_height="400dp"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp">
 
@@ -861,7 +861,7 @@
                     android:id="@+id/text_work_deposit_tv"
                     android:layout_width="0dp"
                     android:layout_height="15dp"
-                    android:layout_weight="13"
+                    android:layout_weight="14"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="10dp"/>
@@ -871,7 +871,7 @@
                     android:id="@+id/text_advance_or_balance_tv"
                     android:layout_width="0dp"
                     android:layout_height="15dp"
-                    android:layout_weight="8"
+                    android:layout_weight="7"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="10dp"/>
@@ -893,7 +893,7 @@
                     android:id="@+id/wages_total_amount_tv"
                     android:layout_width="0dp"
                     android:layout_height="25dp"
-                    android:layout_weight="8"
+                    android:layout_weight="9"
                     android:textAlignment="center"
 
                     android:textColor="#FF9800"
@@ -905,7 +905,7 @@
                     android:id="@+id/work_and_deposit_total_amount_tv"
                     android:layout_width="0dp"
                     android:layout_height="25dp"
-                    android:layout_weight="11"
+                    android:layout_weight="10"
 
                     android:textAlignment="center"
                     android:textColor="@color/black"

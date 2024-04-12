@@ -236,12 +236,12 @@ public class MyUtility {
 
         try(Database db=new Database(context))
         {
-            if (!location.trim().isEmpty() && locationHashSet.add(location)) {//if false that means data is duplicate
+            if ( !TextUtils.isEmpty(location) && locationHashSet.add(location)) {//if false that means data is duplicate
                 if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_LOCATION +" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
                    return false;//means error
                 }
             }
-            if (!religion.trim().isEmpty() && religionHashSet.add(religion)) {//if false that means data is duplicate
+            if (!TextUtils.isEmpty(religion) && religionHashSet.add(religion)) {//if false that means data is duplicate
                 if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_RELIGION +" ( "+Database.COL_51_RELIGION+" ) VALUES ( '"+religion+"' );")){
                     return false;//means error
                 }
@@ -250,8 +250,6 @@ public class MyUtility {
         }catch (Exception x){
             x.printStackTrace();
             return false;
-        }finally {
-          Database.closeDatabase();
         }
     }
     public static int getPdfSequence(String id,Context context){//if error return -1

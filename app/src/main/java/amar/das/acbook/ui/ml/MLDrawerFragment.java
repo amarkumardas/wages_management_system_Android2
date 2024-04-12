@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -220,13 +221,13 @@ public class MLDrawerFragment extends Fragment {
     private void initialiseHeader(){
         TextView businessName= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_name_tv);
         if(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),"").equals("")){
-            businessName.setText(getResources().getString(R.string.business_name)+":");
+            businessName.setText(getResources().getString(R.string.business_name)+": "+GlobalConstants.DEFAULT_BUSINESS_NAME.getValue());
         }else {
-            businessName.setText(SharedPreferencesHelper.getString(getContext(), SharedPreferencesHelper.Keys.BUSINESS_NAME.name(), ""));
+            businessName.setText(SharedPreferencesHelper.getString(getContext(), SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),""));
         }
 
         TextView phone= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.phone_and_whatsapp_tv);
-        phone.setText(getResources().getString(R.string.whatsapp)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),"")+" , "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),""));
+        phone.setText(getWhatsappOrPhoneNumber(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),""),SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),"")));
 
         TextView email= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.email_tv);
         email.setText(getResources().getString(R.string.email)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.EMAIL.name(),""));
@@ -236,6 +237,22 @@ public class MLDrawerFragment extends Fragment {
 
         TextView businessAddress= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_address_tv);
         businessAddress.setText(getResources().getString(R.string.address)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.ADDRESS.name(),""));
+    }
+
+    private String getWhatsappOrPhoneNumber(String whatsappNo, String phoneNo) {
+        StringBuilder sb = new StringBuilder(getResources().getString(R.string.whatsapp)+": ");
+
+        if (!TextUtils.isEmpty(whatsappNo)) {
+            sb.append(whatsappNo);
+
+            if (!TextUtils.isEmpty(phoneNo)) {
+                sb.append(" , ").append(phoneNo);
+            }
+        } else if (!TextUtils.isEmpty(phoneNo)) {
+            sb.append(phoneNo);
+        }
+
+        return sb.toString();
     }
 
     private void takeAllAppPermissionAtOnce() {
@@ -248,7 +265,7 @@ public class MLDrawerFragment extends Fragment {
                 (getContext().checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED)){
 
         }else{//if user not granted permission then request for permission
-            Toast.makeText(getContext(), "ALL PERMISSION REQUIRED ENABLED PERMISSION", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "ALL PERMISSION REQUIRED PLEASE ENABLE PERMISSION", Toast.LENGTH_LONG).show();
             ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_EXTERNAL_STORAGE,

@@ -12,10 +12,10 @@
         android:layout_margin="1dp"
         android:padding="1dp"
         app:cardCornerRadius="5dp">
-
+<!-- android:layout_width="100dp" make it wrap content  -->
         <LinearLayout
             android:id="@+id/yellow_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <TextView

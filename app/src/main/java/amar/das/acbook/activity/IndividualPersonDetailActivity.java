@@ -62,7 +62,7 @@ import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
 public class IndividualPersonDetailActivity extends AppCompatActivity {
-      ActivityIndividualPersonDetailBinding binding;
+    ActivityIndividualPersonDetailBinding binding;
     MediaRecorder mediaRecorder;
     public static String audioPath;//it is made static so that in adapter class if user during updating data if audio is saved or not saved and user suddenly closed the app then on destroy method that audio should be deleted from device.so on destroy method code is there to delete that audio path form device
     public static android.app.AlertDialog adapterDialog;//made it static so that we can close adapter dialog in activity on destroy method
@@ -262,16 +262,16 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
               }
             //*******************done Recycler view********************************************
             //retrieving data from db
-            Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_4_IFSCCODE+","+Database.COL_5_BANKNAME+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+            Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
             if (cursor != null) {
                 cursor.moveToFirst();
                 binding.nameTv.setText(cursor.getString(0));
-                binding.accountTv.setText(HtmlCompat.fromHtml("A/C-  " + "<b>" + cursor.getString(1) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.ifscCodeTv.setText("IFSC-  " + cursor.getString(2));
-                binding.bankNameTv.setText("BANK- " + cursor.getString(3));
-                binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD-  " + "<b>" + cursor.getString(4) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.activePhone1Tv.setText(HtmlCompat.fromHtml("ACTIVE PHONE1-  " + "<b>" + cursor.getString(5)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
+                binding.accountTv.setText(HtmlCompat.fromHtml("A/C:  " + "<b>" + cursor.getString(1) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+               // binding.ifscCodeTv.setText("IFSC-  " + cursor.getString(2));
+               // binding.bankNameTv.setText("BANK- " + cursor.getString(3));
+                binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD:  " + "<b>" + cursor.getString(2) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+                binding.activePhone1Tv.setText(HtmlCompat.fromHtml("ACTIVE PHONE1:  " + "<b>" + cursor.getString(3)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+              //  binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
 
 //                if (cursor.getString(5).length() == 10 || (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null)) {//if there is no phone number then show default icon color black else green icon
 //                    binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
@@ -281,20 +281,20 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
                 }
 
-                byte[] image = cursor.getBlob(7);//getting image from db as blob
+                byte[] image = cursor.getBlob(4);//getting image from db as blob
                 //getting bytearray image from DB and converting  to bitmap to set in imageview
                 Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
                 binding.imageImg.setImageBitmap(bitmap);
 
-                binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2- " + "<b>" + cursor.getString(8)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.idTv.setText("ID " + cursor.getString(9));
-            } else {
+                binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2: " + "<b>" + cursor.getString(5)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+                binding.idTv.setText("ID " + cursor.getString(6));
+            }else{
                 Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
             }
              //setting star rating
-              try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
+            try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
                   cursor2.moveToFirst();
-                if (cursor2.getString(0) != null || cursor2.getString(1) != null) {
+                if (cursor2.getString(0) != null || cursor2.getString(1) != null){
 
                     binding.starRatingTv.setText((cursor2.getString(0)!=null)?(cursor2.getString(0) +" *"):"0 *");//when leaving date is more the 21 days then show star
 
@@ -315,10 +315,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_to_leave));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
                         }
                     }
-                } else {
+                }else{
                     binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
                 }
             }
+            binding.starRatingTv.setOnClickListener(view ->{//it will work when only few days left to leave less than 21 days
+                try(Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
+                    cursor2.moveToFirst();
+                    if (cursor2.getString(0) != null){
+
+                            LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
+                            String[] dateArray = cursor2.getString(0).split("-");
+
+                            dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
+
+                            if(ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave){//if true then update text
+                                MyUtility.snackBar(view,getString(R.string.person_will_leave_on_date_colon)+cursor2.getString(0));
+                             }
+                    }
+                }
+            });
             //cursor2.close();
             binding.p1RateTv.setOnClickListener(view -> {
                 Dialog dialog=new Dialog(this,fromIntentPersonId);

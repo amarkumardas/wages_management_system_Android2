@@ -46,18 +46,18 @@
     </LinearLayout>
 
     <ImageView
-        android:layout_width="140dp"
-        android:layout_height="155dp"
+        android:layout_width="135dp"
+        android:layout_height="140dp"
         android:layout_marginTop="10dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/imageview"
-        android:src="@drawable/defaultprofileimage"
+        android:background="@drawable/defaultprofileimage"
         android:scaleType="fitXY"
         android:foreground="?android:attr/selectableItemBackground"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enter_name"
+        android:text="@string/enter_name_star"
         android:textSize="12dp"
         android:layout_marginLeft="26dp"
         android:textColor="@color/black"
@@ -385,11 +385,11 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/skill"
+        android:text="@string/skill_star"
         android:textSize="12dp"
         android:layout_marginLeft="26dp"
         android:textColor="@color/black"
-        android:layout_marginTop="19dp" />
+        android:layout_marginTop="17dp" />
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -439,7 +439,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="33dp"
         android:layout_marginBottom="50dp"
-        android:background="@drawable/dark_blue_buttonbg"
+        android:background="@drawable/green_color_bg"
         android:onClick="insert_click"
         android:text="@string/insert_data"
         android:textColor="@color/white"

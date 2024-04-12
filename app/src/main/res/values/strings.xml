@@ -3,8 +3,13 @@
     <string name="update">UPDATE</string>
 
     <!--person details-->
+    <string name="wrong_input">WRONG INPUT</string>
+    <string name="please_select_skill">PLEASE SELECT SKILL</string>
+    <string name="name_cannot_be_empty">"NAME CANNOT BE EMPTY"</string>
     <string name="enter_details">ENTER DETAILS</string>
-    <string name="enter_name">NAME</string>
+    <string name="enter_name_star">NAME *</string>
+    <string name="skill_star">SKILL *</string>
+    <string name="skill">SKILL</string>
     <string name="ac_number">A/C NUMBER</string>
     <string name="enter_aadhaar_card_number">AADHAAR CARD NUMBER</string>
     <string name="enter_phone_number">ACTIVE PHONE NUMBER 1</string>
@@ -126,6 +131,7 @@
     <string name="up">UP: Means Updated Payment. User Has Updated Previous day Data And Paid Amount After Subtracting Previous Day Amount.</string>
 
     <!--IndividualPersonDetailActivity-->
+    <string name="person_will_leave_on_date_colon">PERSON WILL  LEAVE  ON DATE:</string>
     <string name="not_saved">NOT SAVED</string>
     <string name="days">DAYS</string>
     <string name="wages">WAGES</string>
@@ -318,7 +324,6 @@
     <string name="l">L (LABER)</string>
     <string name="women_laber">G</string>
     <string name="g">G (WOMEN)</string>
-    <string name="skill">SKILL</string>
     <string name="inactive">INACTIVE</string>
 
     <string name="deposit_amount">DEPOSIT AMOUNT</string>

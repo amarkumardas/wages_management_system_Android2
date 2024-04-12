@@ -14,9 +14,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -30,6 +34,7 @@ import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -41,15 +46,16 @@ import amar.das.acbook.utility.MyUtility;
 
 
 public class InsertPersonDetailsActivity extends AppCompatActivity {
-   Button add;
-  EditText name,account, acHolderName, ifscCode, aadhaarCard,phone, fatherName;
+  int [] correctInputArr =new int[10];
+  Button add;
+  EditText name,account, phone2, ifscCode, aadhaarNumber, activephone1, accountHolderName;
   AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
   Database db;
   RadioGroup radioGroup;
   RadioButton  laberRadio,womenRadio,mestreRadio;
   String skill,fromIntentPersonId;
   String[] indianBank;//to store array
-    HashSet<String> religionHashSet,locationHashSet;
+  HashSet<String> religionHashSet,locationHashSet;
     //********************for camera and galary***********************
     private static final int GalleryPick = 1;
     private static final int CAMERA_REQUEST = 100;
@@ -60,35 +66,30 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
     String storagePermission[];
     ImageView imageView;
     //****************************************************************
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         setContentView(R.layout.activity_insert_data);
 
-        //database created
-        db =new Database(this);
-        //set ids
+        db =Database.getInstance(getBaseContext());
         add=findViewById(R.id.add_button);
         name=findViewById(R.id.name_et);
         account=findViewById(R.id.accountno_et);
-        acHolderName =findViewById(R.id.acholder_et);
+        phone2 =findViewById(R.id.acholder_et);
         ifscCode =findViewById(R.id.ifsccode_et);
         bankName_autoComplete =findViewById(R.id.bankname_autocomplte_tv);
         location_autoComplete=findViewById(R.id.location_autoComplete_tv);
         religion_autoComplete=findViewById(R.id.religion_autoComplete_tv);
-        aadhaarCard =findViewById(R.id.aadharcard_et);
-        phone=findViewById(R.id.phonenumber_et);
-        fatherName =findViewById(R.id.fathername_et);
-
-        //radio button
+        aadhaarNumber =findViewById(R.id.aadharcard_et);
+        activephone1 =findViewById(R.id.phonenumber_et);
+        accountHolderName =findViewById(R.id.fathername_et);
         radioGroup=findViewById(R.id.skill_radiogp);
         laberRadio =findViewById(R.id.laber);//required when updating
         womenRadio=findViewById(R.id.women_laber);//required when updating
         mestreRadio=findViewById(R.id.mestre);//required when updating
-        laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
-        skill="L";//skill default value otherwise null will be set as default so its important
+       // laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
+        //skill=getResources().getString(R.string.laber);//skill default value otherwise null will be set as default so its important
         radioGroup.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
             switch(checkedIdOfRadioBtn){
                 case R.id.mestre:{
@@ -122,53 +123,316 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageview);
 
         // allowing permissions of gallery and camera
-        cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        cameraPermission = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
         // After clicking on text we will have
         // to choose whether to
         // select image from camera and gallery
         imageView.setOnClickListener(view -> showImagePicDialog());
-
-
-        if(getIntent().hasExtra("ID")){//after getting all the ids setting all data according to id
+        if(getIntent().hasExtra("ID")){//while updating. after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
-            //retrieving data from db
-            Cursor cursor1= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
 
-            if(cursor1 != null) {
-                cursor1.moveToFirst();
+            Cursor cursor1= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
+            if(cursor1 != null && cursor1.moveToFirst()){
                 name.setText(cursor1.getString(0));
                 account.setText(cursor1.getString(1));
                 ifscCode.setText(cursor1.getString(2));
                 bankName_autoComplete.setText(cursor1.getString(3));
-                location_autoComplete.setText(cursor1.getString(10));
-                religion_autoComplete.setText(cursor1.getString(11));
-                aadhaarCard.setText(cursor1.getString(4));
-                phone.setText(cursor1.getString(5));
+                aadhaarNumber.setText(cursor1.getString(4));
+                activephone1.setText(cursor1.getString(5));
                 skill=cursor1.getString(6);//skill is variable
-
-                 //radio button should be checked according to data
-                 if(skill.equals(getResources().getString(R.string.laber)))
+                accountHolderName.setText(cursor1.getString(7));
+                 if(skill.equals(getResources().getString(R.string.laber))) //radio button should be checked according to data
                     laberRadio.setChecked(true);
                  else if(skill.equals(getResources().getString(R.string.mestre)))
                      mestreRadio.setChecked(true);
                  else//skill.equals("G")
                      womenRadio.setChecked(true);
-
-                fatherName.setText(cursor1.getString(7));
-
                 byte[] image=cursor1.getBlob(8);//getting image from db as blob and storing in byte type Blop is large type
                 //getting bytearray image from DB and converting  to bitmap to set in imageview
                 Bitmap bitmap= BitmapFactory.decodeByteArray(image,0, image.length);
                 imageView.setImageBitmap(bitmap);
-                acHolderName.setText(cursor1.getString(9));
-                add.setBackgroundResource(R.drawable.green_color_bg);
-                add.setText(getResources().getString(R.string.save));
+                phone2.setText(cursor1.getString(9));
+                location_autoComplete.setText(cursor1.getString(10));
+                religion_autoComplete.setText(cursor1.getString(11));
+                add.setText(getResources().getString(R.string.update));//change text to update
                 cursor1.close();
             }else
                 Toast.makeText(this, "cursor is null", Toast.LENGTH_SHORT).show();
         }
+        name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= name.getText().toString().trim();
+                name.setTextColor(Color.BLACK);
+                correctInputArr[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(userInput.isEmpty() || !userInput.matches("[a-zA-Z ]+")){//alphabetic characters, and spaces
+                    if(userInput.isEmpty()){
+                        Toast.makeText(InsertPersonDetailsActivity.this, getString(R.string.name_cannot_be_empty), Toast.LENGTH_LONG).show();
+                    }
+                    name.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[0]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        activephone1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String string= activephone1.getText().toString().trim();
+                activephone1.setTextColor(Color.BLACK);
+                correctInputArr[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
+                    activephone1.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[1]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        phone2.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String string= phone2.getText().toString().trim();
+                phone2.setTextColor(Color.BLACK);
+                correctInputArr[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
+                    phone2.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[2]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        location_autoComplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= location_autoComplete.getText().toString().trim();
+                location_autoComplete.setTextColor(Color.BLACK);
+                correctInputArr[3]=1;//means data is inserted correct.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(userInput.matches("[a-zA-Z ]+") || userInput.isEmpty())){//alphabetic characters, and spaces
+                    location_autoComplete.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[3]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        religion_autoComplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= religion_autoComplete.getText().toString().trim();
+                religion_autoComplete.setTextColor(Color.BLACK);
+                correctInputArr[4]=1;//means data is inserted correct.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(userInput.matches("[a-zA-Z ]+") || userInput.isEmpty())){//alphabetic characters, and spaces
+                    religion_autoComplete.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[4]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        aadhaarNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String string= aadhaarNumber.getText().toString().trim();
+                aadhaarNumber.setTextColor(Color.BLACK);
+                correctInputArr[5]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
+                    aadhaarNumber.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[5]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        bankName_autoComplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= bankName_autoComplete.getText().toString().trim();
+                bankName_autoComplete.setTextColor(Color.BLACK);
+                correctInputArr[6]=1;//means data is inserted correct.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(userInput.matches("[a-zA-Z ]+") || userInput.isEmpty())){//alphabetic characters, and spaces
+                    bankName_autoComplete.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[6]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        account.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String string= account.getText().toString().trim();
+                account.setTextColor(Color.BLACK);
+                correctInputArr[7]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
+                    account.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[7]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        ifscCode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= ifscCode.getText().toString().trim();
+                ifscCode.setTextColor(Color.BLACK);
+                correctInputArr[8]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(userInput.matches("[a-zA-Z0-9]+") || userInput.isEmpty())){//alphabetic characters, and spaces
+                    ifscCode.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[8]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        accountHolderName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String userInput= accountHolderName.getText().toString().trim();
+                accountHolderName.setTextColor(Color.BLACK);
+                correctInputArr[9]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+
+                //this will check if other data is right or wrong
+                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                    add.setText(getString(R.string.save));
+                    add.setBackgroundResource(R.drawable.green_color_bg);
+                    add.setEnabled(true);
+                }
+
+                if(!(userInput.matches("[a-zA-Z ]+") || userInput.isEmpty())){//alphabetic characters, and spaces
+                    accountHolderName.setTextColor(Color.RED);
+                    add.setText(getString(R.string.wrong_input));
+                    add.setBackgroundResource(R.drawable.red_color_background);
+                    add.setEnabled(false);
+                    correctInputArr[9]=2;//means wrong data
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
     }
 
     private void showImagePicDialog() {
@@ -194,7 +458,6 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         });
         builder.create().show();
     }
-
     // checking storage permissions
     @NonNull
     private Boolean checkStoragePermission() {
@@ -202,12 +465,10 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         Toast.makeText(this, ""+result, Toast.LENGTH_SHORT).show();
         return result;
     }
-
     // Requesting  gallery permission
     private void requestStoragePermission() {
         requestPermissions(storagePermission, STORAGE_REQUEST);
     }
-
     // checking camera permissions
     @NonNull
     private Boolean checkCameraPermission() {
@@ -217,12 +478,10 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         Toast.makeText(this, ""+result1+result, Toast.LENGTH_SHORT).show();
         return result && result1;
     }
-
     // Requesting camera permission
     private void requestCameraPermission() {
         requestPermissions(cameraPermission, CAMERA_REQUEST);
     }
-
     // Requesting camera and gallery
     // permission if not given
     @Override
@@ -272,62 +531,60 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to crop image", Toast.LENGTH_SHORT).show();
         }
     }
-    //action while clicking insert button
-    public void insert_click(View view) {
-        add.setVisibility(View.GONE);//so that user do not enter again add button while data is  inserting in database because if user do again then it will overload
 
-        String personName=name.getText().toString().toUpperCase().trim();//taking all value in uppercase
-        String personAccount=account.getText().toString().trim();
-        String personPhoneNumber2= acHolderName.getText().toString().toUpperCase().trim();
-        String personIfscCode= ifscCode.getText().toString().toUpperCase().trim();
-        String personAadhaar= aadhaarCard.getText().toString().trim();
-        String personActivePhoneNo2=phone.getText().toString().trim();
-        String personAccountHolderName= fatherName.getText().toString().toUpperCase().trim();
-        String personSkill=skill;
-        String personBankName= bankName_autoComplete.getText().toString().trim();//autocomplete Text view
-        String location=location_autoComplete.getText().toString().toUpperCase().trim();//autocomplete Text view
-        String religion=religion_autoComplete.getText().toString().toUpperCase().trim();//autocomplete Text view
+    public void insert_click(View view) { //action while clicking insert button
 
-        //to store in db we have to convert imageview to Bitmap and Bitmap to bytearray and to retrieve it from db we have to convert bytearray to Bitmap to set in imageview
-        BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();//A Drawable that wraps a bitmap and can be tiled, stretched..
-        Bitmap fullSizeBitmapImage = drawable.getBitmap();//converted imageview to bitmap
-        Bitmap reduceSize= ImageResizer.reduceBitmapSize(fullSizeBitmapImage,46000);//resizing image to store in db
-        byte[] imageStore= convertBitmapToByteArray(reduceSize);//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+        if(!checkSkillAndNameIsEmpty(view,skill,name.getText().toString().trim())) return;
+
+        //add.setVisibility(View.GONE);//so that user do not enter again add button while data is  inserting in database because if user do again then it will overload
+        String personName = TextUtils.isEmpty(name.getText().toString().trim()) ? null : name.getText().toString().toUpperCase().trim();
+        String personAccount = TextUtils.isEmpty(account.getText().toString().trim()) ? null : account.getText().toString().trim();
+        String personPhoneNumber2 = TextUtils.isEmpty(phone2.getText().toString().trim()) ? null : phone2.getText().toString().trim();
+        String personIfscCode = TextUtils.isEmpty(ifscCode.getText().toString().trim()) ? null : ifscCode.getText().toString().toUpperCase().trim();
+        String personAadhaar = TextUtils.isEmpty(aadhaarNumber.getText().toString().trim()) ? null : aadhaarNumber.getText().toString().trim();
+        String personActivePhoneNo2 = TextUtils.isEmpty(activephone1.getText().toString().trim()) ? null : activephone1.getText().toString().trim();
+        String personAccountHolderName = TextUtils.isEmpty(accountHolderName.getText().toString().trim()) ? null : accountHolderName.getText().toString().toUpperCase().trim();
+        String personSkill=TextUtils.isEmpty(skill)?null:skill;//checked before
+        String personBankName = TextUtils.isEmpty(bankName_autoComplete.getText().toString().trim()) ? null : bankName_autoComplete.getText().toString().toUpperCase().trim();
+        String location = TextUtils.isEmpty(location_autoComplete.getText().toString().trim()) ? null : location_autoComplete.getText().toString().toUpperCase().trim();
+        String religion = TextUtils.isEmpty(religion_autoComplete.getText().toString().trim()) ? null : religion_autoComplete.getText().toString().toUpperCase().trim();
+        byte[] imageStore=!isImageViewNull(imageView)?convertBitmapToByteArray(imageView):null;//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+
 
             AlertDialog.Builder detailsReview = new AlertDialog.Builder(this);
             detailsReview.setCancelable(false);
             detailsReview.setTitle("REVIEW DETAILS");// Html tags video- https://www.youtube.com/watch?v=98BD6IjQQkE
-            detailsReview.setMessage(HtmlCompat.fromHtml("Name-" +"<b>"+ personName+"</b>"+"<br>"+"<br>"+
-                    "Active Phone No.1---  " +"<b>"+ personActivePhoneNo2 +"</b>" +"<br>"+"<br>"+
-                    "Phone No.2------------- " +"<b>"+personPhoneNumber2+"</b>" +"<br>"+"<br>"+
-                    "Location-- " +"<b>"+location+"</b>" +"<br>"+"<br>"+
-                    "Religion-- " +"<b>"+religion+"</b>" +"<br>"+"<br>"+
-                    "Aadhaar Card No.- " +"<b>"+ personAadhaar+"</b>"  +"<br>"+"<br>"+
-                    "Bank Name-" +"<b>"+ personBankName+"</b>"+"<br>" +"<br>"+
-                    "Account No.--" +"<b>"+ personAccount +"</b>" +"<br>"+"<br>"+
-                    "IFSC Code---  " +"<b>"+ personIfscCode+"</b>"  +"<br>"+"<br>"+
-                    "A/C Holder Name-" +"<b>"+ personAccountHolderName+"</b>" +"<br>"+"<br>"+
-                    "Person Skill- " +"<b>"+ personSkill+"</b>"  +"<br>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+            detailsReview.setMessage(HtmlCompat.fromHtml("Name-" +"<b>"+ (personName!=null?personName:"")+"</b>"+"<br>"+"<br>"+
+                    "Active Phone No.1---  " +"<b>"+ (personActivePhoneNo2!=null?personActivePhoneNo2:"") +"</b>" +"<br>"+"<br>"+
+                    "Phone No.2------------- " +"<b>"+(personPhoneNumber2!=null?personPhoneNumber2:"")+"</b>" +"<br>"+"<br>"+
+                    "Location-- " +"<b>"+(location!=null?location:"")+"</b>" +"<br>"+"<br>"+
+                    "Religion-- " +"<b>"+(religion!=null?religion:"")+"</b>" +"<br>"+"<br>"+
+                    "Aadhaar Card No.- " +"<b>"+ (personAadhaar!=null?personAadhaar:"")+"</b>"  +"<br>"+"<br>"+
+                    "Bank Name-" +"<b>"+ (personBankName!=null?personBankName:"")+"</b>"+"<br>" +"<br>"+
+                    "Account No.--" +"<b>"+ (personAccount!=null?personAccount:"") +"</b>" +"<br>"+"<br>"+
+                    "IFSC Code---  " +"<b>"+ (personIfscCode!=null?personIfscCode:"")+"</b>"  +"<br>"+"<br>"+
+                    "A/C Holder Name-" +"<b>"+ (personAccountHolderName!=null?personAccountHolderName:"")+"</b>" +"<br>"+"<br>"+
+                    "Person Skill- " +"<b>"+ (personSkill!=null?personSkill:"")+"</b>"  +"<br>",HtmlCompat.FROM_HTML_MODE_LEGACY));
 
             detailsReview.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> {
                 dialogInterface.dismiss();
-                add.setVisibility(View.VISIBLE);
+               // add.setVisibility(View.VISIBLE);
+                add.setEnabled(true);
             });
             detailsReview.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
 
-                    boolean success = false;
                     //update
                     if (getIntent().hasExtra("ID")) {//will execute only when updating
-
+                        boolean success = false;
                         if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(InsertPersonDetailsActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
 
                         if (db.updatePersonSkillAndShiftData(personSkill, fromIntentPersonId)) {//if skill get updated then only all data will be updated its important
-                            success = db.updateDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, fromIntentPersonId, location, religion);
+                            success = db.updateAllPersonDetails(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, fromIntentPersonId, location, religion);
                         }
 
                         if (success) {//if it is updated then show successfully message
@@ -348,54 +605,70 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                         } else
                             Toast.makeText(InsertPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
 
-                    } else {//this will execute only when adding new person
+                    } else {
+                        //this will execute only when adding new person
 
                       //  for (int k = 1; k <= 50; k++) {
+                        String newelyCreatedId=null;
                         if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(InsertPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
+                            return;
                         }
-                        success = db.insertDataTable1(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, location, religion);
+                        if((newelyCreatedId= db.insertDataToDetailsAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, location, religion))==null){//if null means error
+                            displayResult("FAILED", "TO ADD");
+                            return;
+                        }
 
-                        if (success) {//checking for duplicate
-                            Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2, location, religion);
-                            StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
-                            String holdLastId = "";
+                        if (newelyCreatedId !=null){
 
-                            if (result.getCount() == 1 || result.getCount() > 1) {//no duplicate
-                                buffer = new StringBuilder();
-
-                                if (result.moveToFirst() && result.getCount() == 1) {//ONLY 1 DATE NO DUPLICATE
-
-                                    insertDataToTable3(result.getString(0));//update R1,R2,R3,R4 TO 0
-
-                                    buffer.append("\n" + "NEW PERSON ID- ").append(result.getString(0));
-                                    displayResult("CREATED SUCCESSFULLY", buffer.toString());
-                                    add.setVisibility(View.VISIBLE);
-                                }
-
-                                if (result.getCount() > 1) {//this will be true when user all details is same to others means DUPLICATE
-                                    buffer.append("Matching ").append(result.getCount()).append(" Person with same Details-").append("\n");
-                                    result.moveToPrevious();//it help to start from first otherwise 1 item is not displayed
-                                    while (result.moveToNext()) {
-                                        holdLastId = "" + result.getString(0);//to display new added person ids comes at last when loop
-                                        buffer.append("\nPerson ID- ").append(result.getString(0));
-                                    }
-                                    //update R1,R2,R3,R4 TO 0
-                                    insertDataToTable3(holdLastId);//hold last id variable has newly added id.If this insertDataToTable3(hold last id);  method is placed in while loop then all matching duplicate then have to  execute which is useless and produce exception
-
-                                    displayResult("Successfully Added New Person ID- " + holdLastId, buffer.toString());
-                                    add.setVisibility(View.VISIBLE);
-                                }
-                                result.close();//closing cursor
-                            } else
-                                displayResult("Data is Inserted but Query not returned any ID", "\n" + "result.getCount()= " + result.getCount());
-
-                            // eraseAllDataAfterInsertingFromLayout();//should be here because control does not wait for its execution
-                        } else
-                            displayResult("Data FAILED to Insert", "\n" + "Number of column maybe different in DataBase");
+                         checkForDuplicates(add);//checking for duplicate
+                        }else{
+//                            displayResult("FAILED TO ADD", "\n" + "Number of column maybe different in DataBase");
+                            displayResult("FAILED", "TO ADD");
+                        }
                    // }//for inserting duplicate rows
                 }
                 }
+
+                private void checkForDuplicates(Button add) {
+                    Database db=Database.getInstance(getBaseContext());
+                    Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2, location, religion);
+                    StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
+                    String holdLastId = "";//ITS NEW PERSON ID
+
+                    if (result !=null && result.getCount() == 1 || result.getCount() > 1) {//no duplicate
+                        buffer = new StringBuilder();
+
+                        if (result.getCount() == 1 && result.moveToFirst()) {//ONLY 1 DATE NO DUPLICATE
+
+                            setDefaultRateToId(result.getString(0));//update R1,R2,R3,R4 TO 0
+                            buffer.append("\n" + "NEW PERSON ID: ").append(result.getString(0));
+                            displayResult("CREATED SUCCESSFULLY", buffer.toString());
+                            //add.setVisibility(View.VISIBLE);
+                            add.setEnabled(true);
+                        }
+
+                        if (result.getCount() > 1) {//this will be true when user all details is same to others means DUPLICATE
+                            buffer.append("MATCHING ").append(result.getCount()).append(" PERSON WITH SAME DETAILS:").append("\n");
+                            //result.moveToPrevious();//it help to start from first otherwise 1 item is not displayed
+                            while (result.moveToNext()) {
+                                holdLastId = "" + result.getString(0);//to display new added person ids comes at last when loop
+                                buffer.append("\nPERSON ID: ").append(result.getString(0));
+                            }
+
+                            setDefaultRateToId(holdLastId);//update R1,R2,R3,R4 TO 0hold last id variable has newly added id.If this insertDataToTable3(hold last id);  method is placed in while loop then all matching duplicate then have to  execute which is useless and produce exception
+
+                            displayResult("SUCCESSFULLY ADDED NEW PERSON ID- " + holdLastId, buffer.toString());
+                            //add.setVisibility(View.VISIBLE);
+                            add.setEnabled(true);
+                        }
+                        result.close();//closing cursor
+                    }else
+                        displayResult("PERSON IS ADDED", "BUT QUERY NOT RETURNED ANY DATA OF THAT PERSON");
+
+                     eraseAllDataAfterInsertingFromLayout();//should be here because control does not wait for its execution
+                }
+
                 private void displayResult(String title, String message) {
                     AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertPersonDetailsActivity.this);
                     showDataFromDataBase.setCancelable(false);
@@ -405,27 +678,83 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                     showDataFromDataBase.create().show();
                 }
                 private void eraseAllDataAfterInsertingFromLayout() {
+                    location_autoComplete.setText("");
+                    religion_autoComplete.setText("");
                     name.setText("");
                     account.setText("");
-                    acHolderName.setText("");
+                    phone2.setText("");
                     ifscCode.setText("");
                     bankName_autoComplete.setText("");
-                    aadhaarCard.setText("");
-                    phone.setText("");
-                    fatherName.setText("");
+                    aadhaarNumber.setText("");
+                    activephone1.setText("");
+                    accountHolderName.setText("");
                     imageView.setImageResource(R.drawable.defaultprofileimage);
+
+                    skill=null;
+                    laberRadio.setChecked(false);
+                    womenRadio.setChecked(false);
+                    mestreRadio.setChecked(false);
                 }
             });
-       detailsReview.create().show();
+            detailsReview.create().show();
     }
-    private void insertDataToTable3(String id) {
-        if(!db.insertDataTable3( id,null,null,null,null,null,null,null,null))
+
+    private boolean checkSkillAndNameIsEmpty(View view, String skill, String name) {
+        if(TextUtils.isEmpty(skill)){
+            MyUtility.snackBar(view,getString(R.string.please_select_skill));
+            return false;
+        }
+        if(TextUtils.isEmpty(name)){
+            MyUtility.snackBar(view,getString(R.string.name_cannot_be_empty));
+           return  false;
+        }
+        return true;
+    }
+
+    private boolean isImageViewNull(ImageView imageView) {//if getDrawable() returns non-null, it means an image has been set by user, and if it returns null, no image has been set.
+        try {
+            BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();//If imageView.getDrawable() returns null, it means that there is no image or drawable set to the ImageView. In such a case, attempting to cast null to BitmapDrawable would result in a NullPointerException.
+            return drawable==null?true:false;
+        } catch (Exception e) {
+            e.printStackTrace();
+           return false;
+        }
+    }
+
+    private void setDefaultRateToId(String id) {
+        if(!db.insertDataTable3( id,null,null,null,null,null,null,null,null))//default values
             Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
     }
-    private byte[] convertBitmapToByteArray(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,50,byteArrayOutputStream);
-        return byteArrayOutputStream.toByteArray();//converted bitmap to byte array
+    private byte[] convertBitmapToByteArray(ImageView imageView) {//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+        if(imageView==null) return null;
+        byte[] image=null;
+        ByteArrayOutputStream byteArrayOutputStream=null;
+        try {
+            BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+            Bitmap fullSizeBitmapImage = drawable.getBitmap();
+
+            // Resize the bitmap efficiently
+            Bitmap reducedSizeBitmap = ImageResizer.reduceBitmapSize(fullSizeBitmapImage, 46000);
+
+            // Compress the resized bitmap into a byte array
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            reducedSizeBitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+
+            // Return the byte array
+            image = byteArrayOutputStream.toByteArray();
+
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            Toast.makeText(this, "image processing error", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        return image;
     }
     public void go_back(View view){//when user press back arrow
          //from activity to activity

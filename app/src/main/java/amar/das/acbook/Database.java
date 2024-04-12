@@ -227,7 +227,9 @@ public class Database extends SQLiteOpenHelper {
      // Log.d("DATABASE","ON UPGRADE DROP 3 TABLES");
       //onCreate(sqLiteDatabase);
     }
-    public boolean insertDataTable1(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, byte[] image, String acHolder,String location,String religion) {
+    public String insertDataToDetailsAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, byte[] image, String phone2, String location, String religion) {//if error return null
+       if(skill==null || name==null) return null;
+        String newelyCreatedId=null;
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -241,37 +243,58 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_6_AADHAAR_NUMBER, aadhaarCard);
             cv.put(COL_7_ACTIVE_PHONE1, phoneNumber);
             cv.put(COL_8_MAINSKILL1, skill);
-            cv.put(COL_9_ACCOUNT_HOLDER_NAME, fatherName);
+            cv.put(COL_9_ACCOUNT_HOLDER_NAME, accountHolderName);
             cv.put(COL_10_IMAGE, image);
-            cv.put(COL_11_ACTIVE_PHONE2, acHolder);
+            cv.put(COL_11_ACTIVE_PHONE2, phone2);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
-            cv.put(COL_12_ACTIVE,"1");//when new user added then it will be active
-            success=(dB.insert(TABLE_NAME1, null, cv) == -1)? false: true;// -1 is returned if error occurred
+            cv.put(COL_12_ACTIVE,GlobalConstants.ACTIVE.getValue());//when new user added then it will be active
+            //newelyCreatedId=(dB.insert(TABLE_NAME1, null, cv) == -1)? false: true;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
+            newelyCreatedId=String.valueOf(dB.insert(TABLE_NAME1, null, cv));// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
+
+            if(!newelyCreatedId.equals(-1)) {//inserting data to rate table
+                cv = new ContentValues();//to enter data at once it is like hash map
+                cv.put(COL_31_ID, newelyCreatedId);
+                cv.put(COL_32_R1, (String) null);
+                cv.put(COL_33_R2, (String) null);
+                cv.put(COL_34_R3, (String) null);
+                cv.put(COL_35_R4, (String) null);
+                cv.put(COL_36_SKILL2, (String) null);
+                cv.put(COL_37_SKILL3, (String) null);
+                cv.put(COL_38_SKILL4, (String) null);
+                cv.put(COL_39_INDICATOR, (String) null);
+                if (!(success = (dB.insert(TABLE_NAME_RATE_SKILL, null, cv) == -1) ? false : true)) return null;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
+            }
+
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            return null;
         }finally{
             if (dB != null){
-                if(success){//if success then only commit
+                if(newelyCreatedId!=null && !newelyCreatedId.equals("-1") && success){//if newelyCreatedId then only commit
                     dB.setTransactionSuccessful();//If you want to commit the transaction there is a method setTransactionSuccessful() which will commit the values in the database.If you want to rollback your transaction then you need to endTransaction() without committing the transaction by setTransactionSuccessful().
                 }
                 dB.endTransaction(); //Commit or rollback the transaction.it will rollback when some error occur
                 dB.close(); // db.close();//closing db after operation performed
             }
         }
-        return success;
+        return newelyCreatedId;
     }
-    public  Cursor getId(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String type, String fatherName,String acHolder,String location,String religion){
-            db = this.getReadableDatabase();//error when closing db or cursor
-            String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + fatherName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + acHolder + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
-            return db.rawQuery(query, null);
+    public  Cursor getId(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String type, String accountHolderName,String phone2,String location,String religion){
+//            db = this.getReadableDatabase();//error when closing db or cursor
+//            String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + accountHolderName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + phone2 + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
+//            return db.rawQuery(query, null);
+
+            String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + accountHolderName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + phone2 + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
+            return getData(query);
+
      }
     public Cursor getData(String query){//error when closing db or cursor so don't close cursor
             db = this.getReadableDatabase();
              return db.rawQuery(query, null);
     }
-    public boolean updateDataTable1(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, byte[] image, String acHolder, String Id,String location,String religion ) {
+    public boolean updateAllPersonDetails(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, byte[] image, String acHolder, String id, String location, String religion ) {
+       if(skill==null || id==null || name==null) return false;
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -290,7 +313,7 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_11_ACTIVE_PHONE2, acHolder);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
-            success=(dB.update(TABLE_NAME1, cv, Database.COL_1_ID+"=?", new String[]{Id})!=1)? false :true;//if update return 1 then data is updated else not updated.//0 is returned if no record updated and it return number of rows updated
+            success=(dB.update(TABLE_NAME1, cv, Database.COL_1_ID+"=?", new String[]{id})!=1)? false :true;//if update return 1 then data is updated else not updated.//0 is returned if no record updated and it return number of rows updated
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -337,6 +360,7 @@ public class Database extends SQLiteOpenHelper {
         return success;
     }
     public boolean updatePersonSkillAndShiftData(String changedSkill,String id) {
+        if(changedSkill==null || id==null) return false;
         try{
             String[] previousActiveOrInactiveAndSkill =getActiveOrInactiveAndSkill(id);
             /**if previous  and changedSkill
@@ -1915,7 +1939,7 @@ public class Database extends SQLiteOpenHelper {
     }
     private boolean fetchOrganizationDetailsAndWriteToPDF(MakePdf makePdf) {
         try{
-            makePdf.makeTopHeaderOrganizationDetails(SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),""),
+            makePdf.makeTopHeaderOrganizationDetails(SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),GlobalConstants.DEFAULT_BUSINESS_NAME.getValue()),
                     ((SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.GST_NUMBER.name(),"").equals(""))?"":(context.getResources().getString(R.string.gst)+": "+SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.GST_NUMBER.name(),""))),
                     SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.PHONE_NUMBER.name(),""),
                     SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),""),

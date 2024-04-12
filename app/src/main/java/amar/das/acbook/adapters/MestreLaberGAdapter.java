@@ -56,10 +56,12 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {//to fill data on every view filed
         MestreLaberGModel data=arrayList.get(position);
         byte[] image=data.getPerson_img();//getting image from db
-        //getting bytearray image from DB and converting  to bitmap to set in imageview
-        Bitmap bitmap= BitmapFactory.decodeByteArray(image,0, image.length);
+        if(image!=null) {
+            //getting bytearray image from DB and converting  to bitmap to set in imageview
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            holder.profileImg.setImageBitmap(bitmap);
+        }
         holder.name.setText(data.getName());
-        holder.profileImg.setImageBitmap(bitmap);
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
             holder.amountAdvance.setText(""+data.getAdvanceAmount());
             holder.amountAdvance.setTextColor(Color.RED);

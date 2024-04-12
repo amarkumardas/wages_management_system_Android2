@@ -51,14 +51,13 @@ TextView searchHint;
         btn3=findViewById(R.id.g_btn);
         searchHint=findViewById(R.id.search_hint);
 
-
         searchHint.setOnClickListener(view -> {//searchHint.setTooltipText("may name is amar\n kumar \n das");
             MyUtility.showDefaultDialog(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext());
          });
         searchRecycler.setHasFixedSize(true);
 
         //getting all data
-        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_8_MAINSKILL1+" , "+Database.COL_12_ACTIVE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_12_ACTIVE+"='1' OR "+Database.COL_12_ACTIVE+"='0'");
+        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_8_MAINSKILL1+" , "+Database.COL_12_ACTIVE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_12_ACTIVE+"='"+GlobalConstants.ACTIVE.getValue()+"' OR "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'");
         dataList =new ArrayList<>();
 
         while(cursor.moveToNext()){
@@ -77,7 +76,6 @@ TextView searchHint;
 
         searchRecycler.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         searchRecycler.setAdapter(searchAdapter);
-        //db.close();//closing database to prevent data leak
         Database.closeDatabase();
 
        // searchView.setQuery("I",true); //to set default text to search box
@@ -176,7 +174,7 @@ TextView searchHint;
         cursor2.close();
         //sorting according to name IN accenting order by default or natural sorting order
         //anonymous inner class Lambda expression can be used
-        allMLGList.sort(Comparator.comparing(MLGAllRecordModel::getName));
+        allMLGList.sort(Comparator.comparing(MLGAllRecordModel::getName));//name should not be null
 
         SeparateAllMLGRecordAdapter allMLGRecordAdapter=new SeparateAllMLGRecordAdapter(this,allMLGList);
         searchRecycler.setHasFixedSize(true);
@@ -184,7 +182,6 @@ TextView searchHint;
         bool=true;//to set adapter recycler view on onQueryTextChange method
         Database.closeDatabase();
     }
-
     public void goto_back(View view) {
         finish();//first destroy then go back
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

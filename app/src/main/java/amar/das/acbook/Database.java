@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteBlobTooBigException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -186,6 +187,8 @@ public class Database extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {//it will execute only once        //NOT NULL OR DEFAULT NOT WORKING AND VARCHAR GIVEN VALUE NOT WORKING HOLDING MORE THAN GIVEN VALUE
      try {//if some error occur it will handle
+         //sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20)  DEFAULT NULL UNIQUE,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(40) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12)  DEFAULT NULL UNIQUE,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10)  DEFAULT NULL UNIQUE, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(40) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
+
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(100) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE0_ACTIVE_MESTRE + " ("+ COL_1_ID_AM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_AM+" TEXT NOT NULL,"+COL_2_DATE_AM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_AM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_AM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_AM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_AM +" INTEGER DEFAULT NULL,"+ COL_9_P2_AM +" INTEGER DEFAULT NULL,"+ COL_10_P3_AM +" INTEGER DEFAULT NULL,"+ COL_11_P4_AM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_AM +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE1_ACTIVE_LG + " ("+ COL_1_ID_ALG +" INTEGER ,"+COL_13_SYSTEM_DATETIME_ALG+" TEXT NOT NULL,"+COL_2_DATE_ALG +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_ALG +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_ALG +" TEXT DEFAULT NULL,"+ COL_6_WAGES_ALG +" NUMERIC DEFAULT NULL,"+ COL_8_P1_ALG +" INTEGER DEFAULT NULL,"+ COL_9_P2_ALG +" INTEGER DEFAULT NULL,"+ COL_10_P3_ALG +" INTEGER DEFAULT NULL,"+ COL_11_P4_ALG +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_ALG +" CHAR(1) DEFAULT NULL);");
@@ -252,7 +255,7 @@ public class Database extends SQLiteOpenHelper {
             //newelyCreatedId=(dB.insert(TABLE_NAME1, null, cv) == -1)? false: true;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
             newelyCreatedId=String.valueOf(dB.insert(TABLE_NAME1, null, cv));// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
 
-            if(!newelyCreatedId.equals(-1)) {//inserting data to rate table
+            if(newelyCreatedId!=null && !newelyCreatedId.equals(-1)){//inserting data to rate table
                 cv = new ContentValues();//to enter data at once it is like hash map
                 cv.put(COL_31_ID, newelyCreatedId);
                 cv.put(COL_32_R1, (String) null);
@@ -264,7 +267,7 @@ public class Database extends SQLiteOpenHelper {
                 cv.put(COL_38_SKILL4, (String) null);
                 cv.put(COL_39_INDICATOR, (String) null);
                 if (!(success = (dB.insert(TABLE_NAME_RATE_SKILL, null, cv) == -1) ? false : true)) return null;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
-            }
+            }else return null; //because newelyCreatedId would be -1 which means error
 
         }catch (Exception e){
             e.printStackTrace();
@@ -281,13 +284,8 @@ public class Database extends SQLiteOpenHelper {
         return newelyCreatedId;
     }
     public  Cursor getId(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String type, String accountHolderName,String phone2,String location,String religion){
-//            db = this.getReadableDatabase();//error when closing db or cursor
-//            String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + accountHolderName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + phone2 + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
-//            return db.rawQuery(query, null);
-
-            String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+"='" + name + "' AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+"='" + accountHolderName + "' AND "+Database.COL_3_BANKAC+"='" + bankAccount + "' AND "+Database.COL_7_ACTIVE_PHONE1+"='" + phoneNumber + "' AND "+Database.COL_4_IFSCCODE+"='" + ifscCode + "' AND "+Database.COL_6_AADHAAR_NUMBER+"='" + aadhaarCard + "' AND "+Database.COL_8_MAINSKILL1 +"='" + type + "' AND "+Database.COL_5_BANKNAME+"='" + bankName + "' AND "+Database.COL_11_ACTIVE_PHONE2+"='" + phone2 + "' AND "+Database.COL_17_LOCATION+"='"+location+"' AND "+Database.COL_18_RELIGION+"='"+religion+"'";
-            return getData(query);
-
+           String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+ ((name!=null)?"='"+name+"'":" IS NULL") + " AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+((accountHolderName!=null)?"='"+accountHolderName+"'":" IS NULL")+ " AND "+Database.COL_3_BANKAC+((bankAccount!=null)?"='"+bankAccount+"'":" IS NULL") + " AND "+Database.COL_7_ACTIVE_PHONE1+((phoneNumber!=null)?"='"+phoneNumber+"'":" IS NULL") + " AND "+Database.COL_4_IFSCCODE+((ifscCode!=null)?"='"+ifscCode+"'":" IS NULL") + " AND "+Database.COL_6_AADHAAR_NUMBER+((aadhaarCard!=null)?"='"+aadhaarCard+"'":" IS NULL")+ " AND "+Database.COL_8_MAINSKILL1 +((type!=null)?"='"+type+"'":" IS NULL")+ " AND "+Database.COL_5_BANKNAME+((bankName !=null)?"='"+bankName+"'":" IS NULL")+ " AND "+Database.COL_11_ACTIVE_PHONE2+((phone2 !=null)?"='"+phone2+"'":" IS NULL") + " AND "+Database.COL_17_LOCATION+((location !=null)?"='"+location+"'":" IS NULL")+" AND "+Database.COL_18_RELIGION+((religion !=null)?"='"+religion+"'":" IS NULL");
+           return getData(query);
      }
     public Cursor getData(String query){//error when closing db or cursor so don't close cursor
             db = this.getReadableDatabase();
@@ -2970,8 +2968,39 @@ public class Database extends SQLiteOpenHelper {
            x.printStackTrace();
            return "error occurred while calculating total advance and balance";
        }
-
    }
+    public boolean isNameMatching(String name) {
+        if(TextUtils.isEmpty(name)) return false;
+        Cursor cursor=null;
+        try {
+            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_2_NAME+" = '" + name + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (cursor != null && !cursor.isClosed()) { // Ensure that the cursor is closed even if an exception occurs
+                cursor.close();
+            }
+        }
+    }
+    public boolean isActivePhoneNumberMatching(String phoneNumber) {
+        if(TextUtils.isEmpty(phoneNumber)) return false;
+
+        Cursor cursor=null;
+        try {
+            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_7_ACTIVE_PHONE1+" = '" + phoneNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (cursor != null && !cursor.isClosed()) { // Ensure that the cursor is closed even if an exception occurs
+                cursor.close();
+            }
+        }
+    }
+
 //    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
 //        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
 //            cursor.moveToFirst();

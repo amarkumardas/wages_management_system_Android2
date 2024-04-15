@@ -7,10 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
@@ -167,6 +169,8 @@ public class BusinessInfoBottomSheetFragment extends BottomSheetDialogFragment {
 
         binding.businessInfoSaveButton.setOnClickListener(view1 -> {
 
+            if(!checkCredentials(binding.whatsappNumberEt,binding.phoneNumberEt)) return ;
+
                SharedPreferencesHelper.setString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),binding.businessNameEt.getText().toString().toUpperCase().trim());
 
                 SharedPreferencesHelper.setString(getContext(),SharedPreferencesHelper.Keys.WHATSAPP_NUMBER.name(),binding.whatsappNumberEt.getText().toString().trim());
@@ -182,6 +186,18 @@ public class BusinessInfoBottomSheetFragment extends BottomSheetDialogFragment {
                 dismiss();//close bottom-sheet
         });
         return view;
+    }
+    private boolean checkCredentials(EditText whatsApp, EditText phoneNumber) {
+        boolean isValid = true;
+        if (!TextUtils.isEmpty(whatsApp.getText().toString().trim()) && whatsApp.getText().toString().trim().length() != 10) {
+            whatsApp.setError(getString(R.string.should_be_10_digits));
+            isValid = false;
+        }
+        if (!TextUtils.isEmpty(phoneNumber.getText().toString().trim()) && phoneNumber.getText().toString().trim().length() != 10) {
+            phoneNumber.setError(getString(R.string.should_be_10_digits));
+            isValid = false;
+        }
+        return isValid;
     }
     private void initialiseFieldsWithValues(){
         binding.businessNameEt.setText(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),GlobalConstants.DEFAULT_BUSINESS_NAME.getValue()));

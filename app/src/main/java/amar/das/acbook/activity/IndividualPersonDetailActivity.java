@@ -282,9 +282,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
 
                 byte[] image = cursor.getBlob(4);//getting image from db as blob
-                //getting bytearray image from DB and converting  to bitmap to set in imageview
-                Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                binding.imageImg.setImageBitmap(bitmap);
+                if(image!= null) {
+                    //getting bytearray image from DB and converting  to bitmap to set in imageview
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                    binding.imageImg.setImageBitmap(bitmap);
+                }
 
                 binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2: " + "<b>" + cursor.getString(5)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
                 binding.idTv.setText("ID " + cursor.getString(6));

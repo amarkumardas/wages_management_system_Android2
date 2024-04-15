@@ -3,9 +3,15 @@
     <string name="update">UPDATE</string>
 
     <!--person details-->
+
+    <string name="phone_number_already_exists">PHONE NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
+    <string name="please_add_father_name_to_person_name">PLEASE ADD FATHER NAME TO PERSON NAME</string>
+    <string name="should_be_12_digits">SHOULD BE 12 DIGITS</string>
+    <string name="should_be_11_digits">SHOULD BE 11 DIGITS</string>
+    <string name="should_be_10_digits">SHOULD BE 10 DIGITS</string>
     <string name="wrong_input">WRONG INPUT</string>
     <string name="please_select_skill">PLEASE SELECT SKILL</string>
-    <string name="name_cannot_be_empty">"NAME CANNOT BE EMPTY"</string>
+    <string name="please_enter_name">"PLEASE ENTER NAME"</string>
     <string name="enter_details">ENTER DETAILS</string>
     <string name="enter_name_star">NAME *</string>
     <string name="skill_star">SKILL *</string>

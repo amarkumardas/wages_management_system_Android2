@@ -45,7 +45,6 @@ import java.util.List;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
-import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.model.WagesDetailsModel;
@@ -200,7 +199,7 @@ public class MyUtility {
         return true;//if user deleted file from device ie. file not exist in device so return true
     }
     public static String[] getReligionFromDb(Context context) {
-        String [] religion=null;
+        String [] religion;
         try(//Database db=new Database(context);
             Database db=Database.getInstance(context);
             Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME_RELIGION)){
@@ -323,13 +322,13 @@ public class MyUtility {
 
             cursor =db.getData("SELECT "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'");
             cursor.moveToFirst();
-            if(cursor.getString(0).length()>4) {
+            if(cursor.getString(0)!=null && cursor.getString(0).length()>4) {
                 fileName.append("ac").append(cursor.getString(0).substring(cursor.getString(0).length() - 4));//account
             }else{
                 fileName.append("acnull");
             }
 
-            if(cursor.getString(1).length()>5){
+            if(cursor.getString(1)!=null && cursor.getString(1).length()>5){
                 fileName.append("ad").append(cursor.getString(1).substring(cursor.getString(1).length() - 5));//aadhaar
             }
             else{
@@ -774,12 +773,12 @@ public class MyUtility {
             return null;
         }
     }
-    public static byte get_indicator(Context context,String PersonId) {//indicator value start from 1.in db table there is no indicator 1. instead null value is there. but we require indicator as 1 when indicator is null so by default we are sending value 1 as default.
+    public static byte get_indicator(Context context,String PersonId){//indicator value start from 1.in db table there is no indicator 1. instead null value is there. but we require indicator as 1 when indicator is null so by default we are sending value 1 as default.
         Database db=Database.getInstance(context);
         try(Cursor cursor = db.getData("SELECT "+Database.COL_39_INDICATOR+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + PersonId + "'")) {//for sure it will return  skill
-            if (cursor != null) {
-                cursor.moveToFirst();
-                if (cursor.getString(0) == null) {//if null then indicator should be 1
+            if (cursor != null && cursor.moveToFirst()){
+
+                if (cursor.getString(0) == null) {//initially if indicator is null then  it is considered as 1
                     return 1;
                 } else {
                     return (byte) cursor.getShort(0);
@@ -789,9 +788,9 @@ public class MyUtility {
 
         }catch(Exception ex){
             ex.printStackTrace();
-            return 1;//potential may cause error
+            return -1;//potential may cause error
         }
-        return 1;//by default 1
+        return -1;//by default -1
     }
     public static String[][] makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
         if(!(indicator >= 1 && indicator <=4)) return new String[][]{new String[]{"error"},new String[]{"error"},new String[]{"error"}};//if indicator is not in range 1 to 4 then return
@@ -880,12 +879,12 @@ public class MyUtility {
                 String bankAccount, aadhaar;
                 int pdfSequenceNo;
 
-                if (cursor1.getString(1).length() > 4) {
+                if (cursor1.getString(1)!=null && cursor1.getString(1).length() > 4) {
                     bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
                 } else {
                     bankAccount = "";
                 }
-                if (cursor1.getString(2).length() > 5) {
+                if (cursor1.getString(2)!=null && cursor1.getString(2).length() > 5) {
                     aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
                 } else {
                     aadhaar = "";
@@ -1549,7 +1548,7 @@ public class MyUtility {
 //                } else {
 //                    pdfSequenceNo = -1;
 //                }
-                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
+                return new String[]{"NAME: "+((cursor1.getString(0)!=null)?cursor1.getString(0):""),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
             }else{
                 return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
             }

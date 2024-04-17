@@ -2,8 +2,11 @@
     <string name="app_name">AC Book</string>
     <string name="update">UPDATE</string>
 
+    <!--common-->
+    <string name="set_rate_to_id_colon">SET RATE TO ID:</string>
     <!--person details-->
-
+    <string name="account_number_already_exists">ACCOUNT NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
+    <string name="aadhaar_number_already_exists">AADHAAR NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
     <string name="phone_number_already_exists">PHONE NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
     <string name="please_add_father_name_to_person_name">PLEASE ADD FATHER NAME TO PERSON NAME</string>
     <string name="should_be_12_digits">SHOULD BE 12 DIGITS</string>

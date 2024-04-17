@@ -293,8 +293,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             cursorDefault.close();
 
             Cursor skillsCursor = db.getData("SELECT "+Database.COL_36_SKILL2 +" , "+Database.COL_37_SKILL3 +" , "+Database.COL_38_SKILL4 +" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + data.getId() + "'");
-            if (skillsCursor != null) {
-                skillsCursor.moveToFirst();
+            if (skillsCursor != null && skillsCursor.moveToFirst()) {
                 if (indicator == 2) {//two person
                     // hardcodedP1,inputP1 by default visible so no need to mention
                     hardcodedP2.setVisibility(View.VISIBLE);

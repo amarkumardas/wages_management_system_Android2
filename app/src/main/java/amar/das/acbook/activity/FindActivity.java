@@ -68,7 +68,7 @@ TextView searchHint;
             model.setAccount(cursor.getString(2));
             model.setAadhaar(cursor.getString(3));
             model.setSkill(cursor.getString(4));
-            model.setActive(cursor.getString(5).equals(GlobalConstants.ACTIVE.getValue())?true:false);
+            model.setActive(cursor.getString(5).equals(GlobalConstants.ACTIVE.getValue()));
             dataList.add(model);
         }
         cursor.close();
@@ -167,14 +167,14 @@ TextView searchHint;
             MLGAllRecordModel model=new MLGAllRecordModel();
             model.setId(cursor2.getString(0));
             model.setName(cursor2.getString(1));
-            model.setActive(cursor2.getString(2).equals(GlobalConstants.ACTIVE.getValue())?true:false);//to set view red if inactive
+            model.setActive(cursor2.getString(2).equals(GlobalConstants.ACTIVE.getValue()));//to set view red if inactive
             model.setLatestDate(cursor2.getString(3));//to display inactive duration
             allMLGList.add(model);
         }
         cursor2.close();
         //sorting according to name IN accenting order by default or natural sorting order
         //anonymous inner class Lambda expression can be used
-        allMLGList.sort(Comparator.comparing(MLGAllRecordModel::getName));//name should not be null
+        allMLGList.sort(Comparator.comparing(mlgAllRecordModel -> ((mlgAllRecordModel.getName()!=null)?mlgAllRecordModel.getName():"")));//name should not be null
 
         SeparateAllMLGRecordAdapter allMLGRecordAdapter=new SeparateAllMLGRecordAdapter(this,allMLGList);
         searchRecycler.setHasFixedSize(true);

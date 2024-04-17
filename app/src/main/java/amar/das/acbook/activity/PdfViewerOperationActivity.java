@@ -7,7 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -155,7 +155,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     File pdfFile=null;
 
                     if(whichPdfIndicatorChangesDynamically == (byte) 1 || whichPdfIndicatorChangesDynamically == (byte) 2){//1 or 2
-                        boolean largeFileSizeIndicator[]={false};
+                        boolean[] largeFileSizeIndicator ={false};
                         pdfFile= convertBytesToFileForSharingAndReturnFile(getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator), GlobalConstants.CALCULATED_INVOICE_FILE_NAME.getValue(), fromIntentPersonId);
                        // absolutePathArrayToDelete[0]=pdfFile.getAbsolutePath();
                     }else if(whichPdfIndicatorChangesDynamically == (byte) 3){
@@ -438,9 +438,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         try(Database db=Database.getInstance(getBaseContext());
             Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
 
-            if(cursor != null){
-                cursor.moveToFirst();
-            }else return false;
+//            if(cursor != null ){
+//                cursor.moveToFirst();
+//            }else return false;
+
+            if(cursor != null && !cursor.moveToFirst()) return false;
 
             byte[] image=cursor.getBlob(0);
             if (image!=null) {
@@ -814,10 +816,10 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
             StringBuilder sb = new StringBuilder(idNamePhone);
             if (cursor != null && cursor.moveToFirst()) {
-                sb.append("\nBANK NAME: ").append(cursor.getString(2) != null ? cursor.getString(2) : "").append("\n");
-                sb.append("A/C HOLDER NAME: ").append(cursor.getString(3) != null ? cursor.getString(3) : "").append("\n");
-                sb.append("A/C: ").append(cursor.getString(0) != null ? MyUtility.convertToReadableNumber(cursor.getString(0)) : "").append("\n");
-                sb.append("IFSC CODE: ").append(cursor.getString(1) != null ? cursor.getString(1) : "");
+                sb.append("\nBANK NAME: ").append((cursor.getString(2) != null ? cursor.getString(2) : "")).append("\n");
+                sb.append("A/C HOLDER NAME: ").append((cursor.getString(3) != null ? cursor.getString(3) : "")).append("\n");
+                sb.append("A/C: ").append((cursor.getString(0) != null ? MyUtility.convertToReadableNumber(cursor.getString(0)) : "")).append("\n");
+                sb.append("IFSC CODE: ").append((cursor.getString(1) != null ? cursor.getString(1) : ""));
             }
             return sb.toString();
         } catch (Exception ex) {
@@ -833,9 +835,9 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             if (cursor != null && cursor.moveToFirst()) {//which ever phone is available that phone will be send
 
                 sb.append("ID: ").append(id).append("\n");
-                sb.append("NAME: ").append(cursor.getString(0)!= null?cursor.getString(0):"").append("\n");
+                sb.append("NAME: ").append((cursor.getString(0)!= null?cursor.getString(0):"")).append("\n");
                 String activePhoneNumber=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),forOnlyOneActiveNumberTrue);
-                sb.append("PHONE: ").append(activePhoneNumber!= null? activePhoneNumber:"");
+                sb.append("PHONE: ").append((activePhoneNumber!= null? activePhoneNumber:""));
             }
             return sb.toString().trim();
         }catch(Exception ex){

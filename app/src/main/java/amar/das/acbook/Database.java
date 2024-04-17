@@ -255,7 +255,7 @@ public class Database extends SQLiteOpenHelper {
             //newelyCreatedId=(dB.insert(TABLE_NAME1, null, cv) == -1)? false: true;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
             newelyCreatedId=String.valueOf(dB.insert(TABLE_NAME1, null, cv));// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
 
-            if(newelyCreatedId!=null && !newelyCreatedId.equals(-1)){//inserting data to rate table
+            if(newelyCreatedId!=null && !newelyCreatedId.equals("-1")){//inserting data to rate table
                 cv = new ContentValues();//to enter data at once it is like hash map
                 cv.put(COL_31_ID, newelyCreatedId);
                 cv.put(COL_32_R1, (String) null);
@@ -921,7 +921,7 @@ public class Database extends SQLiteOpenHelper {
        }
         Cursor updatedDataFromActiveTableCursor=null;
         try{
-            updatedDataFromActiveTableCursor= getDataFromActiveTableForHistory(id,activeNewSystemDateTime);;
+            updatedDataFromActiveTableCursor= getDataFromActiveTableForHistory(id,activeNewSystemDateTime);
 
             if(updatedDataFromActiveTableCursor != null && updatedDataFromActiveTableCursor.getCount()==1){//if one row then only insert to history table
                 updatedDataFromActiveTableCursor.moveToFirst();
@@ -1739,7 +1739,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
-    private byte getTableNumber(String activeOrInactiveAndSkill[]){
+    private byte getTableNumber(String [] activeOrInactiveAndSkill){
         if (activeOrInactiveAndSkill[0].equals("1")) {//active
             if (activeOrInactiveAndSkill[1].equals(context.getResources().getString(R.string.mestre))) {
                 return 0;
@@ -1955,12 +1955,12 @@ public class Database extends SQLiteOpenHelper {
                 String bankAccount, aadhaar;
                 int pdfSequenceNo;
 
-                if (cursor1.getString(1).length() > 4) {
+                if (cursor1.getString(1)!=null && cursor1.getString(1).length() > 4) {
                     bankAccount = cursor1.getString(1).substring(cursor1.getString(1).length() - 4);
                 } else {
                     bankAccount = "";
                 }
-                if (cursor1.getString(2).length() > 5) {
+                if (cursor1.getString(2)!=null && cursor1.getString(2).length() > 5) {
                     aadhaar = cursor1.getString(2).substring(cursor1.getString(2).length() - 5);
                 } else {
                     aadhaar = "";
@@ -2990,6 +2990,38 @@ public class Database extends SQLiteOpenHelper {
         Cursor cursor=null;
         try {
             cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_7_ACTIVE_PHONE1+" = '" + phoneNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (cursor != null && !cursor.isClosed()) { // Ensure that the cursor is closed even if an exception occurs
+                cursor.close();
+            }
+        }
+    }
+    public boolean isAadhaarNumberMatching(String aadhaarNumber) {
+        if(TextUtils.isEmpty(aadhaarNumber)) return false;
+
+        Cursor cursor=null;
+        try {
+            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_6_AADHAAR_NUMBER+" = '" + aadhaarNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (cursor != null && !cursor.isClosed()) { // Ensure that the cursor is closed even if an exception occurs
+                cursor.close();
+            }
+        }
+    }
+    public boolean isAccountNumberMatching(String accountNumber) {
+        if(TextUtils.isEmpty(accountNumber)) return false;
+
+        Cursor cursor=null;
+        try {
+            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_3_BANKAC+" = '" + accountNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
             return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
         } catch (Exception e) {
             e.printStackTrace();

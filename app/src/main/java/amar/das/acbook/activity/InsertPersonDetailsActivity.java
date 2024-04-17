@@ -29,7 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -175,8 +175,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
 
                 if(db.isNameMatching(userInput)){
                     name.setError(getString(R.string.please_add_father_name_to_person_name));
-                   // Toast.makeText(InsertPersonDetailsActivity.this, getString(R.string.please_add_father_name_to_person_name), Toast.LENGTH_LONG).show();
-                }
+                 }
 
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
@@ -210,10 +209,8 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                     add.setBackgroundResource(R.drawable.green_color_bg);
                     add.setEnabled(true);
                 }
-                boolean isMatching=db.isActivePhoneNumberMatching(userInput);
-                if(isMatching){
-                    activephone1.setError(getString(R.string.phone_number_already_exists));
-                }
+                boolean isMatching=false;
+                if((userInput.length()==10) && (isMatching=db.isActivePhoneNumberMatching(userInput))) activephone1.setError(getString(R.string.phone_number_already_exists));
 
                 if(isMatching || !(userInput.matches("[0-9]+") || userInput.isEmpty())){//only digits
                     if(!isMatching) {
@@ -314,7 +311,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String string= aadhaarNumber.getText().toString().trim();
+                String userInput=aadhaarNumber.getText().toString().trim();
                 aadhaarNumber.setTextColor(Color.BLACK);
                 correctInputArr[5]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
@@ -324,11 +321,17 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                     add.setBackgroundResource(R.drawable.green_color_bg);
                     add.setEnabled(true);
                 }
+                boolean isMatching=false;
+                 if((userInput.length()==12) && (isMatching=db.isAadhaarNumberMatching(userInput))){
+                     aadhaarNumber.setError(getString(R.string.aadhaar_number_already_exists));
+                 }
 
-                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
-                    aadhaarNumber.setTextColor(Color.RED);
-                    add.setText(getString(R.string.wrong_input));
-                    add.setBackgroundResource(R.drawable.red_color_background);
+                if(isMatching || !(userInput.matches("[0-9]+") || userInput.isEmpty())){//only digits
+                    if(!isMatching) {
+                        aadhaarNumber.setTextColor(Color.RED);
+                        add.setText(getString(R.string.wrong_input));
+                        add.setBackgroundResource(R.drawable.red_color_background);
+                    }
                     add.setEnabled(false);
                     correctInputArr[5]=2;//means wrong data
                 }
@@ -368,7 +371,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String string= account.getText().toString().trim();
+                String userInput= account.getText().toString().trim();
                 account.setTextColor(Color.BLACK);
                 correctInputArr[7]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
@@ -378,11 +381,17 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                     add.setBackgroundResource(R.drawable.green_color_bg);
                     add.setEnabled(true);
                 }
+                boolean isMatching=false;
+                if((userInput.length() > 9) && (isMatching=db.isAccountNumberMatching(userInput))){
+                    account.setError(getString(R.string.account_number_already_exists));//after 9 digits only checking will start
+                }
 
-                if(!(string.matches("[0-9]+")|| string.isEmpty())){//only digits
-                    account.setTextColor(Color.RED);
-                    add.setText(getString(R.string.wrong_input));
-                    add.setBackgroundResource(R.drawable.red_color_background);
+                if(isMatching || !(userInput.matches("[0-9]+") || userInput.isEmpty())){//only digits
+                    if(!isMatching) {
+                        account.setTextColor(Color.RED);
+                        add.setText(getString(R.string.wrong_input));
+                        add.setBackgroundResource(R.drawable.red_color_background);
+                    }
                     add.setEnabled(false);
                     correctInputArr[7]=2;//means wrong data
                 }

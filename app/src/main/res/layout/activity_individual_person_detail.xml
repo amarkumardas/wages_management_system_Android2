@@ -65,6 +65,8 @@
             android:layout_width="85dp"
             android:layout_height="83dp"
             android:layout_gravity="start"
+              android:paddingTop="1dp"
+              android:paddingStart="1dp"
             android:src="@drawable/defaultprofileimage"
             android:scaleType="fitXY"
             android:id="@+id/image_img"/>
@@ -80,9 +82,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:gravity="start"
-                android:padding="1dp"
+               android:layout_marginTop="2dp"
+                android:paddingStart="2dp"
                 android:textColor="@color/black"
                 android:layout_marginLeft="1dp"
                 android:id="@+id/active_phone2_tv"/>
@@ -93,7 +96,8 @@
                 android:textSize="13dp"
                 android:textColor="@color/black"
                 android:gravity="start"
-                android:padding="1dp"
+
+                android:paddingStart="2dp"
                 android:layout_marginLeft="1dp"
                 android:id="@+id/aadhar_tv"/>
             <LinearLayout
@@ -108,7 +112,8 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
                     android:singleLine="true"
-                    android:textSize="12dp"
+                    android:textSize="13dp"
+                    android:paddingStart="2dp"
                     android:layout_marginLeft="1dp"
                     android:gravity="start"
                     android:id="@+id/active_phone1_tv"/>
@@ -129,6 +134,8 @@
                 android:textSize="13dp"
                 android:textColor="@color/black"
                 android:gravity="start"
+                android:paddingStart="2dp"
+                android:layout_marginTop="1dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginLeft="2dp"
                 android:id="@+id/account_tv"/>

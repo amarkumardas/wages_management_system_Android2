@@ -2,7 +2,7 @@ package amar.das.acbook.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -60,7 +60,10 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             //getting bytearray image from DB and converting  to bitmap to set in imageview
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
             holder.profileImg.setImageBitmap(bitmap);
+        }else{
+            holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
         }
+
         holder.name.setText(data.getName());
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
             holder.amountAdvance.setText(""+data.getAdvanceAmount());

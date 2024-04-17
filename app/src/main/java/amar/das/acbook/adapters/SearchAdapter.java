@@ -41,7 +41,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
        SearchModel data= dataList.get(position);
 
        holder.id.setText("ID: "+data.getId());
-       holder.name.setText(HtmlCompat.fromHtml("NAME: "+"<b>"+data.getName()+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
+       holder.name.setText(HtmlCompat.fromHtml("NAME: "+"<b>"+((data.getName()!=null)?data.getName():"")+"</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
        holder.acHolderName.setText(""+context.getString(R.string.skill)+": "+data.getSkill());
 
        if(data.isActive()){

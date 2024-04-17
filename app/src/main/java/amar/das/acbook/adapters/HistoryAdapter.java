@@ -26,7 +26,7 @@ import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
-import amar.das.acbook.activity.PdfViewerOperationActivity;
+
 import amar.das.acbook.model.HistoryModel;
 import amar.das.acbook.ui.history.HistoryFragment;
 import amar.das.acbook.utility.MyUtility;

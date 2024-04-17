@@ -39,6 +39,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.io.File;
 
 import java.time.LocalDate;
@@ -109,14 +111,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                  binding.totalDepositAmountLayout.setVisibility(View.GONE);
 
             Cursor skillNRateCursor=db.getData("SELECT "+Database.COL_36_SKILL2 +","+Database.COL_37_SKILL3 +","+Database.COL_38_SKILL4 +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
-            if(skillNRateCursor != null) {
-                skillNRateCursor.moveToFirst();
+            if(skillNRateCursor != null && skillNRateCursor.moveToFirst()) {
+
                 int indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
-                                //R1
+
                 if(skillNRateCursor.getInt(3) != 0) {
-                                                    //R1
+
                     binding.p1RateTv.setText(skillNRateCursor.getString(3));//default skill
-                                                                       //    R1 * p1
+                    //    R1 * p1
                     binding.totalP1AmountTv.setText("= "+MyUtility.convertToIndianNumberSystem(skillNRateCursor.getInt(3)*sumData[1]));//default skill
                 }else {
                     binding.totalP1AmountTv.setText(getResources().getString(R.string.equal_new_person_provide_rate));//default skill
@@ -261,66 +263,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                   Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
               }
             //*******************done Recycler view********************************************
-            //retrieving data from db
-            Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-            if (cursor != null) {
-                cursor.moveToFirst();
-                binding.nameTv.setText(cursor.getString(0));
-                binding.accountTv.setText(HtmlCompat.fromHtml("A/C:  " + "<b>" + cursor.getString(1) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-               // binding.ifscCodeTv.setText("IFSC-  " + cursor.getString(2));
-               // binding.bankNameTv.setText("BANK- " + cursor.getString(3));
-                binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD:  " + "<b>" + cursor.getString(2) + "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.activePhone1Tv.setText(HtmlCompat.fromHtml("ACTIVE PHONE1:  " + "<b>" + cursor.getString(3)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-              //  binding.acHolderNameTv.setText("A/C HOLDER- " + cursor.getString(6));
 
-//                if (cursor.getString(5).length() == 10 || (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null)) {//if there is no phone number then show default icon color black else green icon
-//                    binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
-//                }
-
-                if (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId,getBaseContext(),true) != null) {//if there is no phone number then show default icon color black else green icon
-                    binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
-                }
-
-                byte[] image = cursor.getBlob(4);//getting image from db as blob
-                if(image!= null) {
-                    //getting bytearray image from DB and converting  to bitmap to set in imageview
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                    binding.imageImg.setImageBitmap(bitmap);
-                }
-
-                binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2: " + "<b>" + cursor.getString(5)+ "</b>",HtmlCompat.FROM_HTML_MODE_LEGACY));
-                binding.idTv.setText("ID " + cursor.getString(6));
-            }else{
-                Toast.makeText(this, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
-            }
-             //setting star rating
-            try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
-                  cursor2.moveToFirst();
-                if (cursor2.getString(0) != null || cursor2.getString(1) != null){
-
-                    binding.starRatingTv.setText((cursor2.getString(0)!=null)?(cursor2.getString(0) +" *"):"0 *");//when leaving date is more the 21 days then show star
-
-                    if (cursor2.getString(1) != null) {//when there is leaving date https://www.youtube.com/watch?v=VmhcvoenUl0
-                        LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
-                        String[] dateArray = cursor2.getString(1).split("-");
-
-                        dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
-                        //between (2022-05-01,2022-05-01) like
-                        // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
-                        //between (2022-05-01,2022-05-01) like
-
-                        //to show how many days left to leave
-                       // binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
-
-                        if (ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave){//if true then update text
-                            binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
-                            binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_to_leave));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
-                        }
-                    }
-                }else{
-                    binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
-                }
-            }
+             if(!setStarAndLeavingDate()){
+                Toast.makeText(this, "Exception occurred in fetching star and leaving date", Toast.LENGTH_LONG).show();
+              }
+             if(!setNameImageIdPhoneAadhaar()){
+                 Toast.makeText(this, "Exception occurred in fetching person details", Toast.LENGTH_SHORT).show();
+             }
             binding.starRatingTv.setOnClickListener(view ->{//it will work when only few days left to leave less than 21 days
                 try(Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")){
                     cursor2.moveToFirst();
@@ -332,12 +281,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
 
                             if(ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave){//if true then update text
-                                MyUtility.snackBar(view,getString(R.string.person_will_leave_on_date_colon)+cursor2.getString(0));
+                                MyUtility.snackBar(view,getString(R.string.person_will_leave_on_date_colon)+" "+cursor2.getString(0));
                              }
                     }
+                }catch (Exception x){
+                    x.printStackTrace();
+                    Toast.makeText(this, "Exception occurred while fetching skill and leaving date", Toast.LENGTH_LONG).show();
                 }
             });
-            //cursor2.close();
             binding.p1RateTv.setOnClickListener(view -> {
                 Dialog dialog=new Dialog(this,fromIntentPersonId);
                 dialog.openUpdateRatesDialogSaveAndRefresh(true);
@@ -441,34 +392,40 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                }
 //                cursor1.close();
                 //---------------------------------------------------------------------------------------------------------------------------
-                Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_PERSON_REMARKS +" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'");
-                cursor21.moveToFirst();
+                try(Cursor cursor21 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+","+Database.COL_393_PERSON_REMARKS +" , "+Database.COL_397_TOTAL_WORKED_DAYS+" , "+Database.COL_398_RETURNINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId + "'")) {
+                    cursor21.moveToFirst();
 
-                //total worked days
-                totalWorkDaysMetadata.setText(cursor21.getString(3));
+                        totalWorkDaysMetadata.setText(cursor21.getString(3));  //total worked days
 
-                String[] ratingStar =getResources().getStringArray(R.array.star);
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1,ratingStar);
-                starSpinner.setAdapter(adapter);
-                if(cursor21.getString(0) != null){//rating star
-                    int spinnerPosition = adapter.getPosition(cursor21.getString(0));
-                    starSpinner.setSelection(spinnerPosition);
-                }else if(cursor21.getString(0) == null){
-                    int spinnerPosition = adapter.getPosition("1");//1 star by default
-                    starSpinner.setSelection(spinnerPosition);
-                }
+                        String[] ratingStar = getResources().getStringArray(R.array.star);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, ratingStar);
+                        starSpinner.setAdapter(adapter);
+                        if (cursor21.getString(0) != null) {//rating star
+                            int spinnerPosition = adapter.getPosition(cursor21.getString(0));
+                            starSpinner.setSelection(spinnerPosition);
+                        } else if (cursor21.getString(0) == null) {
+                            int spinnerPosition = adapter.getPosition("1");//1 star by default
+                            starSpinner.setSelection(spinnerPosition);
+                        }
 
-                if(cursor21.getString(1) != null){//leaving date
-                    leavingDateTv.setText(cursor21.getString(1));
-                }else if(cursor21.getString(1) == null) {
-                    leavingDateTv.setText("");
-                }
+                        if (cursor21.getString(1) != null) {//leaving date
+                            leavingDateTv.setText(cursor21.getString(1));
+                        } else if (cursor21.getString(1) == null) {
+                            leavingDateTv.setText("");
+                        }
+                        if (cursor21.getString(2) != null) {//remarksMetaData
+                            remarksMetaData.setText(cursor21.getString(2));
+                        }
 
-                if(cursor21.getString(4) != null){//leaving date
-                    returningDate.setText(cursor21.getString(4));
-                }else if(cursor21.getString(4) == null) {
-                    returningDate.setText("");
-                }
+                        if (cursor21.getString(4) != null) {//leaving date
+                            returningDate.setText(cursor21.getString(4));
+                        } else if (cursor21.getString(4) == null) {
+                            returningDate.setText("");
+                        }
+                    }catch (Exception x){
+                     x.printStackTrace();
+                     Toast.makeText(this, "Exception occurred failed to fetch data", Toast.LENGTH_LONG).show();
+                    }
 
                 final Calendar current=Calendar.getInstance();//to get current date and time
                 leavingDateTv.setOnClickListener(view13 -> {//leaving date
@@ -491,8 +448,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 //------------------------------------------------------------------------------------
                 try(Cursor locationAndReligionCursor=db.getData("SELECT "+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'")) {//to close cursor automatically
                     locationAndReligionCursor.moveToFirst();//because we get only 1 row
-                    locationAutoComplete.setText(locationAndReligionCursor.getString(0));//set data
-                    religionAutoComplete.setText(locationAndReligionCursor.getString(1));//set data
+                    locationAutoComplete.setText((locationAndReligionCursor.getString(0)!=null?locationAndReligionCursor.getString(0):""));//set data
+                    religionAutoComplete.setText((locationAndReligionCursor.getString(1)!=null?locationAndReligionCursor.getString(1):""));//set data
+                }catch (Exception x){
+                    x.printStackTrace();
+                    Toast.makeText(this, "Exception occurred in fetching location and religion", Toast.LENGTH_LONG).show();
                 }
                 //location
                 locationHashSet=new HashSet<>(Arrays.asList(MyUtility.getLocationFromDb(getBaseContext())));//hashset is taken to insert only unique data in table
@@ -503,11 +463,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(IndividualPersonDetailActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
                 religionAutoComplete.setAdapter(religionAdapter);
                 //-------------------------------------------------------------------------------------
-
-                if(cursor21.getString(2) != null){//remarksMetaData
-                    remarksMetaData.setText(cursor21.getString(2));
-                }
-                cursor21.close();
 
                 //****************************************************setting adapter for addOrRemoveMLG spinner*****************************************
                 String[] addOrRemoveMLG = getResources().getStringArray(R.array.addOrRemoveMlG);
@@ -638,6 +593,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             }
                         }catch (Exception x){
                             x.printStackTrace();
+                            Toast.makeText(IndividualPersonDetailActivity.this, "Exception occurred", Toast.LENGTH_LONG).show();
                         }
                         if(editOrNot[1]) {
                             dialog.dismiss();//closing dialog to prevent window leak.whenever user select any option then editOrNot[1]=true; will be set.so if it is true then dismiss dialog before going to IndividualPersonDetailActivity.java from displayResult method
@@ -1273,9 +1229,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
             });
-            if (cursor != null) {
-                cursor.close();
-            }
             binding.gobackIndividualPersonDetails.setOnClickListener(view -> {
 //                        if (getIntent().hasExtra("FromMesterLaberGAdapter")) {
 //                            finish();//first destroy current activity then go back
@@ -1290,14 +1243,79 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         super.onBackPressed();// This calls finish() on this activity and pops the back stack.
                     });
         } else
-            Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_LONG).show();
         //to insert data in recyclerview
          binding.fab.setOnClickListener(view -> {
             correctInputArr =new int[7];//so that when again enter data fresh array will be created
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
-//    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
+
+    private boolean setNameImageIdPhoneAadhaar() {
+        try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
+            if (cursor != null && cursor.moveToFirst()) {
+
+                binding.nameTv.setText(cursor.getString(0));
+                binding.accountTv.setText(HtmlCompat.fromHtml("A/C:  " + "<b>" + (cursor.getString(1) != null ? cursor.getString(1) : "") + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                binding.aadharTv.setText(HtmlCompat.fromHtml("AADHAAR CARD:  " + "<b>" + (cursor.getString(2) != null ? cursor.getString(2) : "") + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                binding.activePhone1Tv.setText(HtmlCompat.fromHtml("ACTIVE PHONE1:  " + "<b>" + (cursor.getString(3) != null ? cursor.getString(3) : "") + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+
+                if (MyUtility.getActiveOrBothPhoneNumber(fromIntentPersonId, getBaseContext(), true) != null) {//if there is no phone number then show default icon color black else green icon
+                    binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
+                }
+
+                byte[] image = cursor.getBlob(4);//getting image from db as blob
+                if (image != null) {
+                    //getting bytearray image from DB and converting  to bitmap to set in imageview
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                    binding.imageImg.setImageBitmap(bitmap);
+                }
+
+                binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2: " + "<b>" + (cursor.getString(5) != null ? cursor.getString(5) : "") + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
+                binding.idTv.setText("ID " + cursor.getString(6));
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean setStarAndLeavingDate() {
+        try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId +"'")){
+            cursor2.moveToFirst();
+            if(cursor2.getString(0) != null || cursor2.getString(1) != null){
+
+                binding.starRatingTv.setText((cursor2.getString(0) != null) ? (cursor2.getString(0) + " *") : "0 *");//when leaving date is more the 21 days then show star
+
+                if (cursor2.getString(1) != null) {//when there is leaving date https://www.youtube.com/watch?v=VmhcvoenUl0
+                    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
+                    String[] dateArray = cursor2.getString(1).split("-");
+
+                    dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
+                    //between (2022-05-01,2022-05-01) like
+                    // Toast.makeText(contex, ""+ ChronoUnit.DAYS.between(todayDate,dbDate)+" DAYS LEFT TO LEAVE", Toast.LENGTH_SHORT).show();//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+                    //between (2022-05-01,2022-05-01) like
+
+                    //to show how many days left to leave
+                    // binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_left));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+
+                    if (ChronoUnit.DAYS.between(todayDate, dbDate) <= redIndicatorToLeave) {//if true then update text
+                        binding.leavingOrNotColorIndicationLayout.setBackgroundColor(Color.RED);//red color indicate person going to leave within 3 weeks
+                        binding.starRatingTv.setText(ChronoUnit.DAYS.between(todayDate, dbDate) + " " + getResources().getString(R.string.days_to_leave));//HERE dbDate will always be higher then todayDate because user will leave in forward date so in method Chrono Unit todayDate is written first and second dbDate to get right days
+                    }
+                }
+            }else{
+                binding.starRatingTv.setText("0 *");//if user has never press save button on Meta data then by default 0* will be shown
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    //    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
 //        StringBuilder sb=new StringBuilder();
 //        switch (indicator){
 //            case 1:{

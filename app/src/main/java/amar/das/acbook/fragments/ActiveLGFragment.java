@@ -65,7 +65,7 @@ public class ActiveLGFragment extends Fragment {
             balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
             advanceBalanceCursor.close();
         }else{
-            advance.setText("SET RATE TO ID:"+noRateIds);
+            advance.setText(getString(R.string.set_rate_to_id_colon)+noRateIds);
             balance.setText("");
         }
 //        LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01

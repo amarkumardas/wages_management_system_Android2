@@ -39,8 +39,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.jetbrains.annotations.TestOnly;
-
 import java.io.File;
 
 import java.time.LocalDate;
@@ -536,7 +534,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         if (cursorIndicator != null && cursorIndicator.moveToFirst()) {
 
                                             if (cursorIndicator.getString(0) == null) {//person1
-                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_main_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
 
                                             } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                                 // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
@@ -584,7 +582,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                                 if (result != null) result.close();
 
                                             } else
-                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
+                                                displayResultAndRefresh(getResources().getString(R.string.cant_remove_main_skill), getResources().getString(R.string.status_colon_failed));
                                         } else
                                             Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
                                     }
@@ -1250,7 +1248,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
-
     private boolean setNameImageIdPhoneAadhaar() {
         try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
             if (cursor != null && cursor.moveToFirst()) {
@@ -1280,7 +1277,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
         return true;
     }
-
     private boolean setStarAndLeavingDate() {
         try(Cursor cursor2 = db.getData("SELECT "+Database.COL_391_STAR +","+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"='" + fromIntentPersonId +"'")){
             cursor2.moveToFirst();
@@ -1441,13 +1437,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p1 =inputP1Rate.getText().toString().trim();
-                inputP1Rate.setTextColor(getColor(R.color.purple_700));
+                inputP1Rate.setTextColor(getColor(R.color.black));
                 checkCorrectionArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                      saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p1.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP1Rate.setTextColor(Color.RED);
                      saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[0]=2;//means data is inserted wrong
@@ -1456,10 +1452,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 try{
-                    userInputRateArray[0] = Integer.parseInt(inputP1Rate.getText().toString().trim());
-
-                }catch(Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    if(!TextUtils.isEmpty(inputP1Rate.getText().toString().trim())) {//
+                        userInputRateArray[0] = Integer.parseInt(inputP1Rate.getText().toString().trim());
+                    }
+                }catch(Exception e){//when user enter wrong input
+                    e.printStackTrace();
+                   // Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -1472,15 +1470,15 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP2Rate.getText().toString().trim();
-                inputP2Rate.setTextColor(getColor(R.color.purple_700));
+                String p1 =inputP2Rate.getText().toString().trim();
+                inputP2Rate.setTextColor(getColor(R.color.black));
                 checkCorrectionArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
 
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP2Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[1]=2;//means data is inserted wrong
@@ -1490,10 +1488,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 try{
-                    userInputRateArray[1]  = Integer.parseInt(inputP2Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP2Rate.getText().toString().trim())) {
+                        userInputRateArray[1] = Integer.parseInt(inputP2Rate.getText().toString().trim());
+                    }
 
                 }catch(Exception x){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    x.printStackTrace();
+                    //Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -1506,14 +1507,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP3Rate.getText().toString().trim();
-                inputP3Rate.setTextColor(getColor(R.color.purple_700));
+                String p1 =inputP3Rate.getText().toString().trim();
+                inputP3Rate.setTextColor(getColor(R.color.black));
                 checkCorrectionArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))){//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP3Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[2]=2;//means data is inserted wrong
@@ -1523,9 +1524,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 try {
-                    userInputRateArray[2]= Integer.parseInt(inputP3Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP3Rate.getText().toString().trim())) {
+                        userInputRateArray[2] = Integer.parseInt(inputP3Rate.getText().toString().trim());
+                    }
                 }catch (Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    e.printStackTrace();
+                   // Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -1537,14 +1541,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP4Rate.getText().toString().trim();
-                inputP4Rate.setTextColor(getColor(R.color.purple_700));
+                String p1 =inputP4Rate.getText().toString().trim();
+                inputP4Rate.setTextColor(getColor(R.color.black));
                 checkCorrectionArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))){//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP4Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[3]=2;//means data is inserted wrong
@@ -1553,9 +1557,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 try {
-                    userInputRateArray[3] = Integer.parseInt(inputP4Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP4Rate.getText().toString().trim())) {
+                        userInputRateArray[3] = Integer.parseInt(inputP4Rate.getText().toString().trim());
+                    }
                 }catch(Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    e.printStackTrace();
+                   // Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -1654,12 +1661,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         EditText inputP2=myView.findViewById(R.id.input_p2_et);
         EditText inputP3=myView.findViewById(R.id.input_p3_et);
         EditText inputP4=myView.findViewById(R.id.input_p4_et);
-        EditText toGive_Amount=myView.findViewById(R.id.wages_et);
+        EditText toGiveWages=myView.findViewById(R.id.wages_et);
         EditText description=myView.findViewById(R.id.enter_description_et);
         Button save=myView.findViewById(R.id.save_btn);
         save.setVisibility(View.GONE);//initially save button is disabled it is enabled when user enter any data and its important otherwise app crash
         Button cancel=myView.findViewById(R.id.cancel_btn);
-
 
         //****************************************************setting adapter for addOrRemoveMLG spinner*****************************************
         String[] addOrRemoveMLG = getResources().getStringArray(R.array.addOrRemoveMlG);
@@ -1730,7 +1736,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                 if (cursorIndicator != null && cursorIndicator.moveToFirst()) {
 
                                     if (cursorIndicator.getString(0) == null) {//null or 1 person1
-                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_main_skill), getResources().getString(R.string.status_colon_failed));//default M or L or G
 
                                     } else if (cursorIndicator.getString(0).equals("2")) {//person2
                                         // Cursor result = db.getData("SELECT SUM(" + Database.COL_99_P2 + ") FROM " + Database.TABLE_NAME2 + " WHERE " + Database.COL_11_ID + "= '" + fromIntentPersonId + "'");
@@ -1778,7 +1784,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                                         if (result != null) result.close();
 
                                     } else
-                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_default_skill), getResources().getString(R.string.status_colon_failed));
+                                        displayResultAndRefresh(getResources().getString(R.string.cant_remove_main_skill), getResources().getString(R.string.status_colon_failed));
                                 } else
                                     Toast.makeText(IndividualPersonDetailActivity.this, "NO DATA IN CURSOR", Toast.LENGTH_SHORT).show();
                             }break;
@@ -1930,12 +1936,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             //To get exact time so write code in save button
             String time = MyUtility.getOnlyTime();
 
-
             if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
                 correctInputArr[5]=1;//1 means data present
-             }
-            else
+             }else
                 correctInputArr[5]=0;// 0 means data not present
 
             if(description.getText().toString().length() >=1){//to prevent null pointer exception
@@ -1950,11 +1954,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
               isWrongData= MyUtility.isEnterDataIsWrong(correctInputArr);
               isDataPresent= MyUtility.isDataPresent(correctInputArr);
             if(isDataPresent==true && isWrongData==false ) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
-                if (toGive_Amount.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
-                    wages = Integer.parseInt(toGive_Amount.getText().toString().trim());
+                if (!TextUtils.isEmpty(toGiveWages.getText().toString().trim())) {//to prevent null pointer exception
+                    wages = Integer.parseInt(toGiveWages.getText().toString().trim());
                 }
                 //>= if user enter only one digit then >= is important otherwise default value will be set
-                if(inputP1.getText().toString().trim().length() >=1) {//to prevent null pointer exception
+//                if(inputP1.getText().toString().trim().length() >=1) {//to prevent null pointer exception
+//                    p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
+//                }
+                if(!TextUtils.isEmpty(inputP1.getText().toString().trim())) {//to prevent null pointer exception
                     p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                 }
             }
@@ -1962,7 +1969,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              if(indicator==1){
                 if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0,  "0")) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0,GlobalConstants.WAGES_CODE.getValue())) {
                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -1979,11 +1986,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }else if(indicator==2){
                 //p1 is automatically added
                 if(isDataPresent==true && isWrongData==false ) {
-                    if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0,  "0")) {
+                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0,  GlobalConstants.WAGES_CODE.getValue())) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                        }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -1998,14 +2005,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             }else if(indicator==3){
                 if(isDataPresent==true && isWrongData==false ){
-                    if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP3.getText().toString().trim())) {//to prevent null pointer exception
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0,"0")) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0,GlobalConstants.WAGES_CODE.getValue())) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2020,17 +2027,17 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             }else if(indicator==4) {
                 if (isDataPresent == true && isWrongData == false) {
-                    if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that time it will save from crashing app.So due to this condition if field is empty then default value will be taken
+                    if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP3.getText().toString().trim())) {//to prevent null pointer exception
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
-                    if (inputP4.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP4.getText().toString().trim())) {//to prevent null pointer exception
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4,"0")) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4,GlobalConstants.WAGES_CODE.getValue())) {
                         Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2114,13 +2121,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             customDialog.dismiss();
         });
         customDialog.show();
-        toGive_Amount.addTextChangedListener(new TextWatcher() {
+        toGiveWages.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String amount=toGive_Amount.getText().toString().trim();
-                toGive_Amount.setTextColor(Color.BLACK);
+                String amount=toGiveWages.getText().toString().trim();
+                toGiveWages.setTextColor(Color.BLACK);
                 correctInputArr[4]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
@@ -2128,9 +2135,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     save.setVisibility(View.VISIBLE);
                  }
 
-                if(!amount.matches("[0-9]+")){//no space or . or ,
+                if(!(amount.matches("[0-9]+") || TextUtils.isEmpty(amount))){//no space or . or ,
                     //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPlease Correct", Toast.LENGTH_LONG).show();
-                    toGive_Amount.setTextColor(Color.RED);
+                    toGiveWages.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
                     correctInputArr[4]=2;//means wrong data
                 }
@@ -2156,7 +2163,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
-                if(!p11.matches("[0-9]+")){//"[.]?[0-9]+[.]?[0-9]*" for float
+                if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//"[.]?[0-9]+[.]?[0-9]*" for float
                     inputP1.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
                     correctInputArr[0]=2;//means wrong data
@@ -2182,7 +2189,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     save.setVisibility(View.VISIBLE);
                 }
 
-                if(!p11.matches("[0-9]+")){// "[.]?[0-9]+[.]?[0-9]*"
+                if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){// "[.]?[0-9]+[.]?[0-9]*"
                     inputP2.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
                     correctInputArr[1]=2;//means wrong data
@@ -2210,7 +2217,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     save.setVisibility(View.VISIBLE);
                 }
 
-                if(!p11.matches("[0-9]+")){//space or , or - is restricted
+                if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//space or , or - is restricted
                     inputP3.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
                     correctInputArr[2]=2;//means wrong data
@@ -2235,7 +2242,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
-                if(!p11.matches("[0-9]+")){//space or , or - is restricted
+                if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//space or , or - is restricted
                     inputP4.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
                     correctInputArr[3]=2;//means wrong data

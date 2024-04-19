@@ -3,7 +3,9 @@ package amar.das.acbook.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.text.HtmlCompat;
 
 import android.Manifest;
@@ -18,9 +20,12 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -35,8 +40,11 @@ import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 import amar.das.acbook.ImageResizer;
@@ -597,7 +605,6 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             });
             detailsReview.create().show();
     }
-
     private boolean checkCredentials(EditText activePhone1, EditText phone2, EditText aadhaarNumber,String skill, EditText personName,View view,EditText ifscCode) {
         boolean isValid = true;
 
@@ -627,17 +634,6 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         }
         return isValid;
     }
-//    private boolean checkSkillAndNameIsEmpty(View view, String skill, String name) {
-//        if(TextUtils.isEmpty(skill)){
-//            MyUtility.snackBar(view,getString(R.string.please_select_skill));
-//            return false;
-//        }
-//        if(TextUtils.isEmpty(name) || name.matches("[a-zA-Z ]+")){
-//            this.name.setError(getString(R.string.please_enter_name));//MyUtility.snackBar(view,getString(R.string.please_enter_name));
-//           return  false;
-//        }
-//        return true;
-//    }
     private boolean isImageViewNull(ImageView imageView) {//if getDrawable() returns non-null, it means an image has been set by user, and if it returns null, no image has been set.
         try {
             BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();//If imageView.getDrawable() returns null, it means that there is no image or drawable set to the ImageView. In such a case, attempting to cast null to BitmapDrawable would result in a NullPointerException.
@@ -647,11 +643,6 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
            return false;
         }
     }
-
-//    private void setDefaultRateToId(String id) {
-//        if(!db.insertDataTable3( id,null,null,null,null,null,null,null,null))//default values
-//            Toast.makeText(this, "Not Inserted to table 3", Toast.LENGTH_LONG).show();
-//    }
     private byte[] convertBitmapToByteArray(ImageView imageView) {//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
         if(imageView==null) return null;
         byte[] image=null;
@@ -719,9 +710,9 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
     private void showImagePicDialog() {
         String []options = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pick Image From");
+        builder.setTitle("PICK IMAGE FROM");
         builder.setCancelable(true);
-        builder.setNegativeButton("CANCEL", (dialogInterface, i) -> dialogInterface.dismiss());
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
                 if (!checkCameraPermission()) {
@@ -739,11 +730,44 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         });
         builder.create().show();
     }
+    private void pickFromCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Check if camera app is available
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create a temporary file to store the captured image
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Handle IOException (e.g., disk full)
+                System.out.println("error------------------------------");
+                return;
+            }
+            // Set the file URI as the output for the camera intent
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
+            }
+        }
+    }
+
+    // Method to create a temporary image file
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        // Important: Set file permissions to allow app to write to external storage
+        image.setWritable(true);
+        return image;
+    }
+
     // checking storage permissions
     @NonNull
-    private Boolean checkStoragePermission() {
+    private boolean checkStoragePermission() {
         boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
-        Toast.makeText(this, ""+result, Toast.LENGTH_SHORT).show();
+
         return result;
     }
     // Requesting  gallery permission
@@ -752,12 +776,13 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
     }
     // checking camera permissions
     @NonNull
-    private Boolean checkCameraPermission() {
-        boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);
-        boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
+    private boolean checkCameraPermission() {
+        boolean permission1= ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        boolean permission2= ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+//        boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);//older version
+//        boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);//older version
 
-        Toast.makeText(this, ""+result1+result, Toast.LENGTH_SHORT).show();
-        return result && result1;
+        return permission1 && permission2;
     }
     // Requesting camera permission
     private void requestCameraPermission() {

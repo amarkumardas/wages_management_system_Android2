@@ -28,8 +28,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             android:layout_gravity="center"
             android:background="@drawable/baseline_arrow_goback"
-             android:id="@+id/goback_individual_person_details"
-            />
+            android:id="@+id/goback_individual_person_details" />
         <TextView
             android:layout_weight="15"
             android:layout_width="0dp"
@@ -65,8 +64,9 @@
             android:layout_width="85dp"
             android:layout_height="83dp"
             android:layout_gravity="start"
-              android:paddingTop="1dp"
-              android:paddingStart="1dp"
+            android:paddingTop="1dp"
+            android:paddingStart="1dp"
+            android:paddingBottom="1dp"
             android:src="@drawable/defaultprofileimage"
             android:scaleType="fitXY"
             android:id="@+id/image_img"/>
@@ -84,7 +84,7 @@
                 android:singleLine="true"
                 android:textSize="13sp"
                 android:gravity="start"
-               android:layout_marginTop="2dp"
+                android:layout_marginTop="2dp"
                 android:paddingStart="2dp"
                 android:textColor="@color/black"
                 android:layout_marginLeft="1dp"
@@ -96,7 +96,6 @@
                 android:textSize="13dp"
                 android:textColor="@color/black"
                 android:gravity="start"
-
                 android:paddingStart="2dp"
                 android:layout_marginLeft="1dp"
                 android:id="@+id/aadhar_tv"/>
@@ -326,10 +325,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/single_record_recy"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="350dp"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp">
-
         </androidx.recyclerview.widget.RecyclerView>
 
         <RelativeLayout
@@ -506,7 +504,7 @@
                 android:background="@color/white"
                 android:textColor="@color/black"
                 android:textAlignment="textEnd"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:id="@+id/default_skill_text_tv"/>
             <LinearLayout
                 android:layout_weight="5"
@@ -576,7 +574,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textAlignment="textEnd"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:id="@+id/skill1_text_tv"/>
             <LinearLayout
                 android:layout_weight="5"
@@ -639,7 +637,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textAlignment="textEnd"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:id="@+id/skill2_text_tv"/>
             <LinearLayout
                 android:layout_weight="5"
@@ -707,7 +705,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textAlignment="textEnd"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:id="@+id/skill3_text_tv"/>
             <LinearLayout
                 android:layout_weight="5"
@@ -860,7 +858,7 @@
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:text="@string/total_wages"
-                    android:textSize="10dp"/>
+                    android:textSize="10sp"/>
 
                 <TextView
                     android:layout_marginTop="2dp"
@@ -949,15 +947,14 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/total_calculation_layout"
                 android:layout_centerInParent="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="19dp"
+                android:layout_marginTop="18dp"
                 android:layout_marginBottom="25dp"
                 android:background="@drawable/dark_blue_buttonbg"
                 android:drawableStart="@drawable/ic_round_calculate_24"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:text="FINAL TOTAL"
+                android:text="@string/calculate"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
         </RelativeLayout>

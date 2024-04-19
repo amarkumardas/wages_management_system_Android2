@@ -14,6 +14,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
@@ -27,6 +28,7 @@ import java.util.Calendar;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.ActivityCustomizeLayoutOrDepositAmountBinding;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.utility.MyUtility;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
@@ -82,7 +84,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 if(!MyUtility.isEnterDataIsWrong(arr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     binding.customSaveBtn.setVisibility(View.VISIBLE);
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     binding.customDepositEt.setTextColor(Color.RED);
                     binding.customSaveBtn.setVisibility(View.GONE);
                     arr[0]=2;//means data is inserted wrong
@@ -197,10 +199,10 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                   isDataPresent= MyUtility.isDataPresent(arr);
                 if(isDataPresent==true && isWrongData==false ) {  //means if data is present then check is it right data or not
 
-                    if(binding.customDepositEt.getText().toString().trim().length() >= 1) {
+                    if(!TextUtils.isEmpty(binding.customDepositEt.getText().toString().trim())) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
-                    success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,depositAmount,0,0,0,0,"1");
+                    success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,depositAmount,0,0,0,0,GlobalConstants.DEPOSIT_CODE.getValue());
                     if(!success){
                         Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                     }
@@ -311,7 +313,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //                        Toast.makeText(this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
 //                    }
 
-                    if(binding.customDepositEt.getText().toString().trim().length() >= 1) {
+                    if(!TextUtils.isEmpty(binding.customDepositEt.getText().toString().trim())) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
 

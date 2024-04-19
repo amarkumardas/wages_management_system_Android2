@@ -27,9 +27,7 @@
             android:textAlignment="center"
             android:textColor="@color/green"
             android:textSize="13sp"
-
-            android:id="@+id/active_l_g_balance"
-            />
+            android:id="@+id/active_l_g_balance" />
     </LinearLayout>
 
     <ScrollView

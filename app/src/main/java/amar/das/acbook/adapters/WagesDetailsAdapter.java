@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.os.SystemClock;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -393,11 +394,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 isWrongData = MyUtility.isEnterDataIsWrong(correctInputArray);
                 isDataPresent = MyUtility.isDataPresent(correctInputArray);
                 if (isDataPresent == true && isWrongData == false) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
-                    if (toGive_Amount.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(toGive_Amount.getText().toString().trim())) {//to prevent null pointer exception
                         wages = Integer.parseInt(toGive_Amount.getText().toString().trim());
                     }
                     //>= if user enter only one digit then >= is important otherwise default value will be set
-                    if (inputP1.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                    if (!TextUtils.isEmpty(inputP1.getText().toString().trim())) {//to prevent null pointer exception
                         p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                     }
                 }else
@@ -436,7 +437,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 } else if (indicator == 2) {
                     //p1 is automatically added
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                        if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
                         //UPDATE to database
@@ -466,10 +467,10 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 } else if (indicator == 3) {
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                        if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
                             p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
-                        if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                        if (!TextUtils.isEmpty(inputP3.getText().toString().trim())) {//to prevent null pointer exception
                             p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                         }
                         //UPDATE to database
@@ -501,13 +502,13 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 } else if (indicator == 4) {
                     if (isDataPresent && isWrongData == false) {
-                        if (inputP2.getText().toString().trim().length() >= 1) {//to prevent null pointer exception.If user do not enter any data then that onlyTime it will save from crashing app.So due to this condition if field is empty then default value will be taken
-                            p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to INT and stored
+                        if (!TextUtils.isEmpty(inputP2.getText().toString().trim())) {//to prevent null pointer exception
+                            p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                         }
-                        if (inputP3.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
-                            p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to INT and stored
+                        if (!TextUtils.isEmpty(inputP3.getText().toString().trim())) {//to prevent null pointer exception
+                            p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                         }
-                        if (inputP4.getText().toString().trim().length() >= 1) {//to prevent null pointer exception
+                        if (!TextUtils.isEmpty(inputP4.getText().toString().trim())) {//to prevent null pointer exception
                             p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to INT and stored
                         }
                         //UPDATE to database
@@ -556,7 +557,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
-                    if (!amount.matches("[0-9]+")) {//no space or . or ,
+                    if (!(amount.matches("[0-9]+") || TextUtils.isEmpty(amount))) {//no space or . or ,
                        // Toast.makeText(context, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                         toGive_Amount.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
@@ -567,7 +568,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 public void afterTextChanged(Editable editable) {
                 }
             });
-
             int rateArray[]=MyUtility.getRateArray(data.getId(),context);
             inputP1.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -622,7 +622,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
-                    if (!p11.matches("[0-9]+")) {//"[.]?[0-9]+[.]?[0-9]*" for float
+                    if (!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))) {//"[.]?[0-9]+[.]?[0-9]*" for float
                         inputP1.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
                         correctInputArray[0] = 2;//means wrong data
@@ -688,7 +688,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
-                    if (!p11.matches("[0-9]+")) {// "[.]?[0-9]+[.]?[0-9]*"
+                    if (!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))) {// "[.]?[0-9]+[.]?[0-9]*"
                         inputP2.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
                         correctInputArray[1] = 2;//means wrong data
@@ -748,7 +748,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
-                    if (!p11.matches("[0-9]+")) {//space or , or - is restricted
+                    if (!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))) {//space or , or - is restricted
                         inputP3.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
                         correctInputArray[2] = 2;//means wrong data
@@ -796,7 +796,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                         save.setVisibility(View.VISIBLE);
                     }
-                    if (!p11.matches("[0-9]+")) {//space or , or - is restricted
+                    if (!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))) {//space or , or - is restricted
                         inputP4.setTextColor(Color.RED);
                         save.setVisibility(View.GONE);
                         correctInputArray[3] = 2;//means wrong data

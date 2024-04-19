@@ -1418,7 +1418,7 @@ public class MyUtility {
     }
     public static void p1_p2_p3_p4_Change_Tracker(int correctInput[],int [] cursorRate, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
         String p1, p2, p3, p4;
-        p1 = inputP1.getText().toString().trim();
+        p1 = ((!TextUtils.isEmpty(inputP1.getText().toString().trim()))?inputP1.getText().toString().trim() : String.valueOf(0));
         try {
             //all 15 combination
             //only p1
@@ -1427,82 +1427,82 @@ public class MyUtility {
             }
             //only p1 p2
             else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] != 1) {
-                p2 = inputP2.getText().toString().trim();
+                p2 =((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2))));
             }
             //only p1 p2,p3
             else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] != 1) {
-                p2 = inputP2.getText().toString().trim();
-                p3 = inputP3.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3))));
             }
             //only p1 p2,p3,p4
             else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] == 1) {
-                p2 = inputP2.getText().toString().trim();
-                p3 = inputP3.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //only p1 p3 p4
             else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] == 1) {
-                p3 = inputP3.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //only p1 p2 p4
             else if (correctInput[0] == 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] == 1) {
-                p2 = inputP2.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //only p2 p3 p4
             else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] == 1) {
-                p2 = inputP2.getText().toString().trim();
-                p3 = inputP3.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //only p1 P4
             else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] != 1 && correctInput[3] == 1) {
-                p4 = inputP4.getText().toString().trim();
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //only p1 P3
             else if (correctInput[0] == 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] != 1) {
-                p3 = inputP3.getText().toString().trim();
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[0] * Integer.parseInt(p1)) + (cursorRate[2] * Integer.parseInt(p3))));
             }
             //Only p3,p4
             else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] == 1) {
-                p3 = inputP3.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[2] * Integer.parseInt(p3)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //Only p2,p4
             else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] == 1) {
-                p2 = inputP2.getText().toString().trim();
-                p4 = inputP4.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[3] * Integer.parseInt(p4))));
             }
             //Only p2,p3
             else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] == 1 && correctInput[3] != 1) {
-                p2 = inputP2.getText().toString().trim();
-                p3 = inputP3.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf((cursorRate[1] * Integer.parseInt(p2)) + (cursorRate[2] * Integer.parseInt(p3))));
             }
             //only p2
             else if (correctInput[0] != 1 && correctInput[1] == 1 && correctInput[2] != 1 && correctInput[3] != 1) {
-                p2 = inputP2.getText().toString().trim();
+                p2 = ((!TextUtils.isEmpty(inputP2.getText().toString().trim()))?inputP2.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[1] * Integer.parseInt(p2)));
             }
             //only p3
             else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] == 1 && correctInput[3] != 1) {
-                p3 = inputP3.getText().toString().trim();
+                p3 = ((!TextUtils.isEmpty(inputP3.getText().toString().trim()))?inputP3.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[2] * Integer.parseInt(p3)));
             }
             //only p4
             else if (correctInput[0] != 1 && correctInput[1] != 1 && correctInput[2] != 1 && correctInput[3] == 1) {
-                p4 = inputP4.getText().toString().trim();
+                p4 = ((!TextUtils.isEmpty(inputP4.getText().toString().trim()))?inputP4.getText().toString().trim() : String.valueOf(0));
                 runtimeSuggestionAmountToGive.setText(String.valueOf(cursorRate[3] * Integer.parseInt(p4)));
             }
             //if any wrong data then this will execute

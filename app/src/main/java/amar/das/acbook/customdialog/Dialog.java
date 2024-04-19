@@ -197,13 +197,13 @@ public class Dialog {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p1 =inputP1Rate.getText().toString().trim();
-                inputP1Rate.setTextColor(context.getColor(R.color.purple_700));
+                inputP1Rate.setTextColor(context.getColor(R.color.black));
                 checkCorrectionArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p1.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP1Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[0]=2;//means data is inserted wrong
@@ -212,10 +212,12 @@ public class Dialog {
             @Override
             public void afterTextChanged(Editable editable) {
                 try{
-                    userInputRateArray[0] = Integer.parseInt(inputP1Rate.getText().toString().trim());
-
+                    if(!TextUtils.isEmpty(inputP1Rate.getText().toString().trim())) {
+                        userInputRateArray[0] = Integer.parseInt(inputP1Rate.getText().toString().trim());
+                    }
                 }catch(Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    e.printStackTrace();
+                    //Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -228,15 +230,15 @@ public class Dialog {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP2Rate.getText().toString().trim();
-                inputP2Rate.setTextColor(context.getColor(R.color.purple_700));
+                String p1 =inputP2Rate.getText().toString().trim();
+                inputP2Rate.setTextColor(context.getColor(R.color.black));
                 checkCorrectionArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
 
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP2Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[1]=2;//means data is inserted wrong
@@ -246,10 +248,13 @@ public class Dialog {
             @Override
             public void afterTextChanged(Editable editable) {
                 try{
-                    userInputRateArray[1]  = Integer.parseInt(inputP2Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP2Rate.getText().toString().trim())) {
+                        userInputRateArray[1] = Integer.parseInt(inputP2Rate.getText().toString().trim());
+                    }
 
                 }catch(Exception x){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    x.printStackTrace();
+                    //Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -262,14 +267,14 @@ public class Dialog {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP3Rate.getText().toString().trim();
-                inputP3Rate.setTextColor(context.getColor(R.color.purple_700));
+                String p1 =inputP3Rate.getText().toString().trim();
+                inputP3Rate.setTextColor(context.getColor(R.color.black));
                 checkCorrectionArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP3Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[2]=2;//means data is inserted wrong
@@ -279,9 +284,12 @@ public class Dialog {
             @Override
             public void afterTextChanged(Editable editable) {
                 try {
-                    userInputRateArray[2]= Integer.parseInt(inputP3Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP3Rate.getText().toString().trim())) {
+                        userInputRateArray[2] = Integer.parseInt(inputP3Rate.getText().toString().trim());
+                    }
                 }catch (Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    e.printStackTrace();
+                   // Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });
@@ -293,14 +301,14 @@ public class Dialog {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String p11 =inputP4Rate.getText().toString().trim();
-                inputP4Rate.setTextColor(context.getColor(R.color.purple_700));
+                String p1 =inputP4Rate.getText().toString().trim();
+                inputP4Rate.setTextColor(context.getColor(R.color.black));
                 checkCorrectionArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
                 if(!MyUtility.isEnterDataIsWrong(checkCorrectionArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.
                     saveButton.setVisibility(View.VISIBLE);
                 }
-                if (!p11.matches("[0-9]+")) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
+                if (!(p1.matches("[0-9]+") || TextUtils.isEmpty(p1))) {//space or , or - is restricted"[.]?[0-9]+[.]?[0-9]*"
                     inputP4Rate.setTextColor(Color.RED);
                     saveButton.setVisibility(View.GONE);
                     checkCorrectionArray[3]=2;//means data is inserted wrong
@@ -309,9 +317,12 @@ public class Dialog {
             @Override
             public void afterTextChanged(Editable editable) {
                 try {
-                    userInputRateArray[3] = Integer.parseInt(inputP4Rate.getText().toString().trim());
+                    if(!TextUtils.isEmpty(inputP4Rate.getText().toString().trim())) {
+                        userInputRateArray[3] = Integer.parseInt(inputP4Rate.getText().toString().trim());
+                    }
                 }catch(Exception e){
-                    Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    e.printStackTrace();
+                   //Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
                 }
             }
         });

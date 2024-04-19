@@ -140,6 +140,7 @@
     <string name="up">UP: Means Updated Payment. User Has Updated Previous day Data And Paid Amount After Subtracting Previous Day Amount.</string>
 
     <!--IndividualPersonDetailActivity-->
+    <string name="calculate">CALCULATE</string>
     <string name="person_will_leave_on_date_colon">PERSON WILL  LEAVE  ON DATE:</string>
     <string name="not_saved">NOT SAVED</string>
     <string name="days">DAYS</string>
@@ -156,7 +157,7 @@
     <string name="value_out_of_range_please_check_total_wages">VALUE OUT OF RANGE PLEASE CHECK TOTAL WAGES</string>
     <string name="only_4_person_allowed_to_add">ONLY 4 PERSON ALLOWED TO ADD</string>
     <string name="status_cant_add_more">STATUS: CAN\'T ADD MORE:</string>
-    <string name="cant_remove_default_skill">CAN\'T REMOVE DEFAULT SKILL</string>
+    <string name="cant_remove_main_skill">CAN\'T REMOVE MAIN SKILL</string>
     <string name="cant_remove">CAN\'T REMOVE</string>
     <string name="status_colon_failed">STATUS: FAILED</string>
     <string name="no_data_present_so_removed">NO DATA PRESENT SO REMOVED</string>

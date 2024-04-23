@@ -446,6 +446,7 @@ public class Database extends SQLiteOpenHelper {
         return success;
     }
     private boolean insertWagesOrDepositToActiveTableDirectly(SQLiteDatabase db,String systemDateTime,String skill, String id, String userGivenDate, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
+               if(skill==null) return false;
                 ContentValues cv = new ContentValues();//to enter data at once it is like hash map
                 if(skill.equals(context.getResources().getString(R.string.laber)) || skill.equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
                     if (id != null) {
@@ -1500,6 +1501,7 @@ public class Database extends SQLiteOpenHelper {
         return success;
     }
     private boolean shiftDataToInActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateActive,String skill) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
+        if(skill==null) return false;
         boolean success=false;
         SQLiteDatabase dB=null;
         try {
@@ -1755,7 +1757,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return -1;//means incorrect table number
     }
-    public String getOnlyMainSkill(String id){
+    public String getOnlyMainSkill(String id){//if exception return null
         db = this.getReadableDatabase();
         Cursor cursor=null;
         try {

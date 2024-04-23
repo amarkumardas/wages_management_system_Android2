@@ -37,11 +37,12 @@ dependencies {
     //fom open camera
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     implementation 'com.squareup.picasso:picasso:2.5.2'
-
+    //glide
+//    implementation 'com.github.bumptech.glide:glide:4.14.2'  // Glide
+//    implementation 'com.github.bumptech.glide:okhttp3-integration:4.14.2' // Glide OkHttp integration
+//    implementation 'jp.wasabeef:glide-transformations:4.3.0' // Glide Transformations for cropping
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
-
-
     implementation 'com.google.android.material:material:1.4.0' //from this dependencies coordinate layout and floating action is used
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'

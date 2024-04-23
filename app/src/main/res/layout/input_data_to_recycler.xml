@@ -188,15 +188,39 @@
             android:foreground="?android:attr/selectableItemBackground"/>
     </LinearLayout>
         <LinearLayout
-            android:id="@+id/suggestion_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/border_outline_while_bg"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:padding="4dp"
-            android:weightSum="20">
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="20">
+                <TextView
+                    android:layout_weight="13"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"/>
+            <TextView
+                android:textSize="10sp"
+                android:id="@+id/wages_input_text_advance_or_balance_tv"
+                android:layout_weight="7"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_marginTop="2dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                tools:ignore="RtlCompat"/>
+            </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/suggestion_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="3dp"
+            android:weightSum="20">
             <TextView
                 android:id="@+id/no_of_days"
                 android:layout_width="0dp"
@@ -212,10 +236,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="10"
                 android:text="@string/days_required_to_work_for"
-                android:textColor="@color/purple_700"
+
                 android:layout_gravity="center_vertical"
                 android:textAlignment="center"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:id="@+id/only_used_while_updating"
                 tools:ignore="RtlCompat"/>
 
@@ -228,9 +252,10 @@
                 android:textAlignment="center"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="17sp"
                 tools:ignore="RtlCompat" />
         </LinearLayout>
+    </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -247,25 +272,23 @@
                 android:layout_weight="5"
                 android:text="@string/work_amount"
                 android:layout_gravity="center_vertical"
-                android:textColor="@color/purple_700"
-                android:textSize="11sp"
 
-                />
+                android:textSize="10sp"/>
 
             <TextView
                 android:layout_weight="4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="#0DAF07"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textStyle="bold"
-                android:textSize="20dp"
+                android:textSize="17dp"
                 android:id="@+id/work_amount_tv"/>
             <EditText
                 android:layout_weight="6"
                 android:layout_width="0dp"
                 android:layout_height="45dp"
-                android:layout_marginTop="1dp"
+
                 android:background="@drawable/white_detailsbg"
                 android:textStyle="bold"
                 android:singleLine="true"
@@ -283,7 +306,7 @@
             android:id="@+id/date_mic_chronometer_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="18dp"
             android:orientation="horizontal"
             android:padding="4dp"
             android:weightSum="21"
@@ -354,7 +377,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/write_remarks"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="18dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:id="@+id/enter_description_et"
@@ -365,7 +388,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="28dp"
             android:layout_marginBottom="10dp"
             android:layout_marginRight="4dp"
             android:orientation="horizontal"

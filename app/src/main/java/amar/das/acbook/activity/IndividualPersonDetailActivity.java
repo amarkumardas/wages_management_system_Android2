@@ -21,7 +21,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
-import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -71,7 +71,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     Database db;
     int cYear;
     byte cMonth,cDayOfMonth;
-    int [] correctInputArr =new int[7];
+    int [] correctInputArray =new int[7];
     String active =GlobalConstants.INACTIVE.getValue();
     byte redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
     ArrayList<WagesDetailsModel> dataList;
@@ -127,7 +127,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                    //by default= deposit,totalP2CountTv,defaultHardcodedTv,defaultSkillTextTv,p1RateTv,totalP1AmountTv is set automatically
                      if(indicate==1) {
-                         indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],0,0,0);
+                         indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],0,0,0,indicate,fromIntentPersonId);
                      }
 
                 binding.p2Layout.setVisibility(View.GONE);//initially invisible according to indicator it will customize
@@ -151,7 +151,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.blueTotalp2Tv.setText(sumData[2]+"");
                     binding.p2Layout.setVisibility(View.VISIBLE);
 
-                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],0,0);
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],0,0,indicate,fromIntentPersonId);
 
                 } else if (indicate == 3) {
                     if(skillNRateCursor.getInt(4) != 0) {
@@ -181,7 +181,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.p2Layout.setVisibility(View.VISIBLE);
                     binding.p3Layout.setVisibility(View.VISIBLE);
 
-                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],0);
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],0,indicate,fromIntentPersonId);
 
                 }else if(indicate == 4) {
                     if(skillNRateCursor.getInt(4) != 0) {
@@ -223,7 +223,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.p2Layout.setVisibility(View.VISIBLE);
                     binding.p3Layout.setVisibility(View.VISIBLE);
                     binding.p4Layout.setVisibility(View.VISIBLE);
-                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],skillNRateCursor.getInt(6) * sumData[4]);
+                    indicator1234CalculateAndUpdate(sumData,skillNRateCursor.getInt(3) * sumData[1],skillNRateCursor.getInt(4) * sumData[2],skillNRateCursor.getInt(5) * sumData[3],skillNRateCursor.getInt(6) * sumData[4],indicate,fromIntentPersonId);
                 }
             }
             if (skillNRateCursor != null) {
@@ -285,6 +285,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }catch (Exception x){
                     x.printStackTrace();
                     Toast.makeText(this, "Exception occurred while fetching skill and leaving date", Toast.LENGTH_LONG).show();
+                }
+            });
+            binding.advanceOrBalanceTv.setOnClickListener(view -> {
+                if(!isAllRateSet(MyUtility.getRateArray(fromIntentPersonId,getBaseContext()),MyUtility.get_indicator(getBaseContext(),fromIntentPersonId))){//when there is no rate
+                    Dialog dialog = new Dialog(this, fromIntentPersonId);
+                    dialog.openUpdateRatesDialogSaveAndRefresh(true);
                 }
             });
             binding.p1RateTv.setOnClickListener(view -> {
@@ -689,13 +695,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
             });
             binding.finalCalculationBtn.setOnClickListener(new View.OnClickListener() {
-                TextView defaultSkillTextTv,totalP1CountTv,workTotalAmountTv,totalP1AmountTv,advanceOrBalanceTv,totalDepositAmountTv,wagesTotalAmountTv,skill1TextTv,totalP2CountTv,totalP2AmountTv,skill2TextTv,totalP3CountTv,totalP3AmountTv,skill3TextTv,totalP4CountTv,totalP4AmountTv;
+                TextView mainSkillTextTv,totalP1CountTv,workTotalAmountTv,totalP1AmountTv,advanceOrBalanceTv,totalDepositAmountTv,wagesTotalAmountTv,skill1TextTv,totalP2CountTv,totalP2AmountTv,skill2TextTv,totalP3CountTv,totalP3AmountTv,skill3TextTv,totalP4CountTv,totalP4AmountTv;
                 LinearLayout p2Layout,p3Layout,p4Layout,totalDepositAmountLayout;
                 EditText p1RateTv,p2RateTv,p3RateTv,p4RateTv;
                 Button longPressToSaveAndCreatePdf,cancel;
                 int []innerArray=new int[4];
                 int totalDeposit=0,totalWages=0,p1=0,p2=0,p3=0,p4=0,r1=0,r2=0,r3=0,r4=0;//while saving this variable required
-                byte indicate=0;
+                byte indicate =MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                 @Override
                 public void onClick(View view){
                     AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(IndividualPersonDetailActivity.this);
@@ -707,12 +713,19 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     initialiseIDs(myView);//ids
                     cancel.setOnClickListener(view15 -> finalDialog.dismiss());
 
-                    Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
-                    defaultSkillCursor.moveToFirst();
-                    defaultSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
-                    defaultSkillCursor.close();
+                    //Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+                    //defaultSkillCursor.moveToFirst();
+                    //mainSkillTextTv.setText(defaultSkillCursor.getString(0)+" =");//default calculation skill
+                    //mainSkillTextTv.setText(db.getOnlyMainSkill(fromIntentPersonId)+" =");//default calculation skill
 
-                   // Cursor sumData=db.getData("SELECT SUM("+Database.COL_26_WAGES+"),SUM("+Database.COL_28_P1+"),SUM("+Database.COL_29_P2+"),SUM("+Database.COL_291_P3+"),SUM("+Database.COL_292_P4+"),SUM("+Database.COL_27_DEPOSIT+") FROM "+Database.TABLE_NAME2+" WHERE "+Database.COL_21_ID+"= '"+fromIntentPersonId +"'");
+                    String mainSkill = db.getOnlyMainSkill(fromIntentPersonId);
+                    if (mainSkill != null) {
+                        mainSkillTextTv.setText(mainSkill + " =");
+                    }else{
+                        mainSkillTextTv.setText("ERROR");
+                    }
+
+                   // defaultSkillCursor.close();
                     Integer[] sumArr=db.getSumOfWagesP1P2P3P4Deposit(fromIntentPersonId);
 
                     //initializing this variable to take during saving
@@ -749,8 +762,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.value_out_of_range_please_check_total_work_amount), Toast.LENGTH_LONG).show();
                             longPressToSaveAndCreatePdf.setVisibility(View.GONE);//its important otherwise save option will be unable when user enter rate
                         }
-
-                        indicate = MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                         //R1
                         if (skillNRateCursor.getInt(3) != 0) {
                             //R1
@@ -1059,6 +1070,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                    return false;
                     });
+
+                    //this code should  be here because ontextchange listerner is called before this code.so if condition is true it will override that value
+                    if(!isAllRateSet(MyUtility.getRateArray(fromIntentPersonId,getBaseContext()),indicate)){//when there is no rate
+                        advanceOrBalanceTv.setTextColor(getColor(R.color.purple_700));
+                        advanceOrBalanceTv.setText("="+getString(R.string.set_rate));//when there is no rate
+                    }
                     finalDialog.show();
                 }
                 private boolean dataBaseDeleteAndCreatePdfOperation() {
@@ -1179,7 +1196,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                 }
                 private void initialiseIDs(View myView) {
-                      defaultSkillTextTv=myView.findViewById(R.id.default_skill_text_tv_final);
+                      mainSkillTextTv =myView.findViewById(R.id.default_skill_text_tv_final);
                       totalP1CountTv=myView.findViewById(R.id.total_p1_count_tv_final);
                       p1RateTv=myView.findViewById(R.id.p1_rate_tv_final);
                       totalP1AmountTv=myView.findViewById(R.id.total_p1_amount_tv_final);
@@ -1244,7 +1261,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_LONG).show();
         //to insert data in recyclerview
          binding.fab.setOnClickListener(view -> {
-            correctInputArr =new int[7];//so that when again enter data fresh array will be created
+            correctInputArray =new int[7];//so that when again enter data new array will be created with new values
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
@@ -1340,6 +1357,9 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
             if(rateCursor1 != null) rateCursor1.moveToFirst();
             String mainSkill=db.getOnlyMainSkill(id);
+            if(mainSkill==null){
+               mainSkill="error";
+            }
 
             Cursor skillNRateCursor=null;
             if(indicator > 1) {//if indicator more than 1 then get all skill and rate
@@ -1567,7 +1587,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-    private void indicator1234CalculateAndUpdate(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4) {
+    private void indicator1234CalculateAndUpdate(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4,int indicator,String id) {
         boolean bool;
         int  totalDeposit,totalWages;
         int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
@@ -1584,43 +1604,44 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
         binding.workAndDepositTotalAmountTv.setText(MyUtility.convertToIndianNumberSystem(totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)));
         //    totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-        if ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) < totalWages) {
+        if (((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) < totalWages) && isAllRateSet(MyUtility.getRateArray(id,getBaseContext()),indicator)) {//if all rate is there than only show output
+
             binding.textAdvanceOrBalanceTv.setText(getResources().getString(R.string.advance_due));
             binding.advanceOrBalanceTv.setTextColor(Color.RED);
             //                                        total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
             binding.advanceOrBalanceTv.setText(MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
 
             //updating Advance to db                                                    total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-            bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-            if(bool){
-                /*Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance column will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
-                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                if (bool == false)
-                    Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+            if(!(db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){/*Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance column will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
+                Toast.makeText(this, "BALANCE AND ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+//                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                if (bool == false)
+//                    Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
             }
-            //else if (bool == false)
-            else {
-                Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
-            }
+//            else{
+//                Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+//            }
             //totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) >= totalWages
-        }else if((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) >= totalWages) {//>= is given because of green color and when calculation is 0
+        }else if(((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) >= totalWages) && isAllRateSet(MyUtility.getRateArray(id,getBaseContext()),indicator)) {//>= is given because of green color and when calculation is 0
             binding.textAdvanceOrBalanceTv.setText(getResources().getString(R.string.balance));
             binding.advanceOrBalanceTv.setTextColor(getColor(R.color.green));
             //                                           totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4) -total wages
             binding.advanceOrBalanceTv.setText(MyUtility.convertToIndianNumberSystem((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) - totalWages));
 
             //updating balance to db if greater then or equal to 0
-            bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-            if(bool){
-                //if there is balance then update advance column should be 0
-                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-                if (bool == false)
-                    Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+           // bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+            if(!(db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){ //if there is balance then update advance column should be 0
+                Toast.makeText(this, "BALANCE AND ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+//                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+//                if (bool == false)
+//                    Toast.makeText(this, "ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
             }
-            //else if(bool == false)
-            else {
-                Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
-            }
+//            else{
+//                Toast.makeText(this, "BALANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
+//            }
+        }else{
+            binding.advanceOrBalanceTv.setTextColor(getColor(R.color.purple_700));
+            binding.advanceOrBalanceTv.setText(getString(R.string.set_rate));
         }
     }
     private void insertDataToRecyclerView_AlertDialogBox(int indicator) {
@@ -1648,7 +1669,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         TextView noOfDaysToWork=myView.findViewById(R.id.no_of_days);
         TextView inputDate=myView.findViewById(R.id.input_date_tv);
         TextView saveAudio=myView.findViewById(R.id.save_audio_tv);
-
+        TextView advanceOrBalanceText=myView.findViewById(R.id.wages_input_text_advance_or_balance_tv);
         Chronometer playAudioChronometer =myView.findViewById(R.id.chronometer);
 
         EditText inputP1=myView.findViewById(R.id.input_p1_et);
@@ -1803,41 +1824,30 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //****************************************************done setting adapter for addOrRemoveMLG spinner*****************************************
 
         //***********************setting no of days and warning Total advance amount********************************************
+        int rateArray[]=MyUtility.getRateArray(fromIntentPersonId,getBaseContext());//it should be here
         Cursor  advanceAmountCursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" , "+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");
         advanceAmountCursor.moveToFirst();
         if(advanceAmountCursor.getInt(0) > 0) {//advance
-            advanceOrBalanceWarring.setTextColor(Color.RED);
-            advanceOrBalanceWarring.setText(advanceAmountCursor.getString(0));
+            if(isAllRateSet(rateArray,indicator)){
+                advanceOrBalanceText.setText(getString(R.string.advance_due));
+                advanceOrBalanceWarring.setTextColor(Color.RED);
+                advanceOrBalanceWarring.setText(advanceAmountCursor.getString(0));
+                numberOfDaysToWorkSuggestion(indicator, noOfDaysToWork, advanceAmountCursor.getInt(0), rateArray);
+            }else{//if there is no rate
+                advanceOrBalanceWarring.setText(getString(R.string.set_rate));//if there is no rate than dont show advance or balance
+                noOfDaysToWork.setText(getString(R.string.set_rate));//if there is no rate than dont show no. of days to work
+            }
 
-            Cursor sum1DayAmountCursor=db.getData("SELECT  "+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + fromIntentPersonId +"'");
-                   sum1DayAmountCursor.moveToFirst();
-           // int howManyPerson=get_indicator(fromIntentPersonId);
-            int howManyPerson=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
-             if(howManyPerson==1) {
-                 if(sum1DayAmountCursor.getInt(0) !=0) {//to avoid arithmetic exception 1/0
-                                                                   //total advance / r1
-                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / sum1DayAmountCursor.getInt(0))+1));//1 is added to get right days because we are not considering point values when dividing
-                 }
-             }else if(howManyPerson==2){//to avoid arithmetic exception 1/0
-                 if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1) != 0) {
-                           //                                         total advance/(R1+R1)
-                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1)))+1));//1 is added to get right days because we are not considering point values when dividing
-                 }
-             }else if(howManyPerson==3){//to avoid arithmetic exception 1/0
-                 if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2) != 0) {
-                     //                                               total advance/(R1+R2+R3)
-                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2)))+1));//1 is added to get right days because we are not considering point values when dividing
-                 }
-             }else if(howManyPerson==4){//to avoid arithmetic exception 1/0
-                 if(sum1DayAmountCursor.getInt(0)+sum1DayAmountCursor.getInt(1)+sum1DayAmountCursor.getInt(2)+sum1DayAmountCursor.getInt(3) != 0) {
-                     //                                                total advance/(R1+R2+R3+R4)
-                     noOfDaysToWork.setText(String.valueOf((advanceAmountCursor.getInt(0) / (sum1DayAmountCursor.getInt(0) + sum1DayAmountCursor.getInt(1) + sum1DayAmountCursor.getInt(2) + sum1DayAmountCursor.getInt(3)))+1));//1 is added to get right days because we are not considering point values when dividing
-                 }
-             }
-            sum1DayAmountCursor.close();
         }else if(advanceAmountCursor.getInt(1) >= 0 ){//balance
-            advanceOrBalanceWarring.setTextColor(getColor(R.color.green));
-            advanceOrBalanceWarring.setText(advanceAmountCursor.getString(1));
+            noOfDaysToWork.setText("0");//if balance then show 0 days
+            if(isAllRateSet(rateArray,indicator)) {
+                advanceOrBalanceText.setText(getString(R.string.balance));
+                advanceOrBalanceWarring.setTextColor(getColor(R.color.green));
+                advanceOrBalanceWarring.setText(advanceAmountCursor.getString(1));
+            }else{//if there is no rate
+                advanceOrBalanceWarring.setText(getString(R.string.set_rate));//if there is no rate than dont show advance or balance
+                noOfDaysToWork.setText(getString(R.string.set_rate));//if there is no rate than dont show no. of days to work
+            }
         }
         advanceAmountCursor.close();
         //***********************done setting no of days and warring Total advance amount********************************************
@@ -1938,21 +1948,21 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
-                correctInputArr[5]=1;//1 means data present
+                correctInputArray[5]=1;//1 means data present
              }else
-                correctInputArr[5]=0;// 0 means data not present
+                correctInputArray[5]=0;// 0 means data not present
 
             if(description.getText().toString().length() >=1){//to prevent null pointer exception
                 remarks="["+time+getResources().getString(R.string.hyphen_entered)+"\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
-                correctInputArr[6]=1;//means data present
+                correctInputArray[6]=1;//means data present
             }
             else {//if user don't enter anything then time will set automatically
                 remarks="["+time+getResources().getString(R.string.hyphen_entered);
-                correctInputArr[6] = 0;
+                correctInputArray[6] = 0;
             }
             boolean isWrongData, isDataPresent;
-              isWrongData= MyUtility.isEnterDataIsWrong(correctInputArr);
-              isDataPresent= MyUtility.isDataPresent(correctInputArr);
+              isWrongData= MyUtility.isEnterDataIsWrong(correctInputArray);
+              isDataPresent= MyUtility.isDataPresent(correctInputArray);
             if(isDataPresent==true && isWrongData==false ) {//means if data is present then check is it right data or not .if condition is false then default value will be taken
                 if (!TextUtils.isEmpty(toGiveWages.getText().toString().trim())) {//to prevent null pointer exception
                     wages = Integer.parseInt(toGiveWages.getText().toString().trim());
@@ -2100,7 +2110,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
         saveAudio.setOnClickListener(view -> {
             if(mediaRecorder !=null ){
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                  }
 
@@ -2128,10 +2138,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String amount=toGiveWages.getText().toString().trim();
                 toGiveWages.setTextColor(Color.BLACK);
-                correctInputArr[4]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                correctInputArray[4]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                  }
 
@@ -2139,40 +2149,38 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPlease Correct", Toast.LENGTH_LONG).show();
                     toGiveWages.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
-                    correctInputArr[4]=2;//means wrong data
+                    correctInputArray[4]=2;//means wrong data
                 }
             }
             @Override
             public void afterTextChanged(Editable editable) { }
         });
-        int rateArray[]=MyUtility.getRateArray(fromIntentPersonId,getBaseContext());
         inputP1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p11= inputP1.getText().toString().trim();
-//                if(p11.length()==0){
-//                    p11="0";
-//                   //inputP1.setText("");
-//                }
+
                 inputP1.setTextColor(Color.BLACK);
-                correctInputArr[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                correctInputArray[0]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
                 if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//"[.]?[0-9]+[.]?[0-9]*" for float
                     inputP1.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
-                    correctInputArr[0]=2;//means wrong data
+                    correctInputArray[0]=2;//means wrong data
                      //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
             public void afterTextChanged(Editable editable) {//after text changed for suggestion calculate based on previous rate
-                MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArr,rateArray,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
+                if(isAllRateSet(rateArray,indicator)){
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                }else runtimeSuggestionAmountToGive.setText(getString(R.string.set_rate));//if there is no rate then don't show suggestion
             }
         });
         inputP2.addTextChangedListener(new TextWatcher() {
@@ -2182,24 +2190,25 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p11= inputP2.getText().toString().trim();
                 inputP2.setTextColor(Color.BLACK);
-                correctInputArr[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                correctInputArray[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
 
                 if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){// "[.]?[0-9]+[.]?[0-9]*"
                     inputP2.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
-                    correctInputArr[1]=2;//means wrong data
+                    correctInputArray[1]=2;//means wrong data
                    // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
             public void afterTextChanged(Editable editable) {
-
-                MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArr,rateArray,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
+                if(isAllRateSet(rateArray,indicator)){
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                }else runtimeSuggestionAmountToGive.setText(getString(R.string.set_rate));//if there is no rate then don't show suggestion
             }
         });
         inputP3.addTextChangedListener(new TextWatcher() {
@@ -2209,25 +2218,26 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p11= inputP3.getText().toString().trim();
                 inputP3.setTextColor(Color.BLACK);
-                correctInputArr[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                correctInputArray[2]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
 
                 //this will check if other data is right or wrong
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
 
                 if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//space or , or - is restricted
                     inputP3.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
-                    correctInputArr[2]=2;//means wrong data
+                    correctInputArray[2]=2;//means wrong data
                    // Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
             public void afterTextChanged(Editable editable) {
-
-                MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArr,rateArray,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
+                if(isAllRateSet(rateArray,indicator)){
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                }else runtimeSuggestionAmountToGive.setText(getString(R.string.set_rate));//if there is no rate then don't show suggestion
             }
         });
         inputP4.addTextChangedListener(new TextWatcher() {
@@ -2237,24 +2247,58 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String p11= inputP4.getText().toString().trim();
                 inputP4.setTextColor(Color.BLACK);
-                correctInputArr[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
+                correctInputArray[3]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
                 //this will check if other data is right or wrong
-                if(!MyUtility.isEnterDataIsWrong(correctInputArr)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
+                if(!MyUtility.isEnterDataIsWrong(correctInputArray)) {//this is important if in field data is wrong then save button will not enabled until data is right.if save button is enabled with wrong data then if user has record audio then it will not be saved it will store null so to check right or wrong data this condition is important
                     save.setVisibility(View.VISIBLE);
                 }
                 if(!(p11.matches("[0-9]+") || TextUtils.isEmpty(p11))){//space or , or - is restricted
                     inputP4.setTextColor(Color.RED);
                     save.setVisibility(View.GONE);
-                    correctInputArr[3]=2;//means wrong data
+                    correctInputArray[3]=2;//means wrong data
                     //Toast.makeText(IndividualPersonDetailActivity.this, "NOT ALLOWED(space  .  ,  -)\nPLEASE CORRECT", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
             public void afterTextChanged(Editable editable) {
-
-               MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArr,rateArray,inputP1,inputP2,inputP3,inputP4,runtimeSuggestionAmountToGive);
+                if(isAllRateSet(rateArray,indicator)){
+                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                }else runtimeSuggestionAmountToGive.setText(getString(R.string.set_rate));//if there is no rate then don't show suggestion
             }
         });
+    }
+
+    private boolean isAllRateSet(int[] rateArray, int indicator) {
+        if((indicator >=1 && indicator<=4) && rateArray != null){
+            if((indicator == 1 && rateArray[0] != 0) || (indicator == 2 && rateArray[0] != 0 && rateArray[1] != 0) || (indicator == 3 && rateArray[0] != 0 && rateArray[1] != 0 && rateArray[2] != 0) || (indicator == 4 && rateArray[0] != 0 && rateArray[1] != 0 && rateArray[2] != 0 && rateArray[3] != 0)){
+                return true;//if all rate is set
+            }
+        }
+       return false;//if there is no rate and incorrect parameters
+    }
+
+    private void numberOfDaysToWorkSuggestion(int indicator, TextView noOfDaysToWork,int advance,int []rateArray) {
+        if(indicator==1) {
+            if(rateArray[0] !=0) {//to avoid arithmetic exception 1/0
+                //total advance / r1
+                noOfDaysToWork.setText(String.valueOf((advance / rateArray[0])+1));//1 is added to get right days because we are not considering point values when dividing
+            }
+        }else if(indicator==2){//to avoid arithmetic exception 1/0
+            if(rateArray[0]+rateArray[1] != 0) {
+                //                                         total advance/(R1+R1)
+                noOfDaysToWork.setText(String.valueOf((advance / (rateArray[0]+rateArray[1]))+1));//1 is added to get right days because we are not considering point values when dividing
+            }
+        }else if(indicator==3){//to avoid arithmetic exception 1/0
+            if(rateArray[0]+rateArray[1]+rateArray[2] != 0) {
+                //                                               total advance/(R1+R2+R3)
+                noOfDaysToWork.setText(String.valueOf((advance / (rateArray[0]+rateArray[1]+rateArray[2]))+1));//1 is added to get right days because we are not considering point values when dividing
+            }
+        }else if(indicator==4){//to avoid arithmetic exception 1/0
+            if(rateArray[0]+rateArray[1]+rateArray[2]+rateArray[3] != 0) {
+                //                                                total advance/(R1+R2+R3+R4)
+                noOfDaysToWork.setText(String.valueOf((advance / (rateArray[0]+rateArray[1]+rateArray[2]+rateArray[3]))+1));//1 is added to get right days because we are not considering point values when dividing
+            }
+        }
     }
     public void refreshCurrentActivity(String id) {
         Intent intent=new Intent(IndividualPersonDetailActivity.this,IndividualPersonDetailActivity.class);

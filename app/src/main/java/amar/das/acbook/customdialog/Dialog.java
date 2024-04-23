@@ -55,6 +55,7 @@ public class Dialog {
 
 
         int indicator=MyUtility.get_indicator(context,id);
+        if(!(indicator>=1 && indicator <=4)) return false;//if incorrect indicator than return fasle
         setRateComponentAccordingToId(hardcodedP1Tv,inputP1Et,hardcodedP2Tv,inputP2Et,hardcodedP3Tv,inputP3Et,hardcodedP4Tv,inputP4Et,infoSave,new int[indicator],new int[indicator],indicator,id);
 
         infoSave.setOnClickListener(view -> {
@@ -100,6 +101,9 @@ public class Dialog {
             Cursor rateCursor1 = db.getData("SELECT " + Database.COL_32_R1 + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
             if(rateCursor1 != null) rateCursor1.moveToFirst();
             String mainSkill=db.getOnlyMainSkill(id);
+            if (mainSkill == null) {
+               mainSkill="error";//to prevent null pointer exception
+            }
 
             Cursor skillNRateCursor=null;
             if(indicator > 1) {//if indicator more than 1 then get  other skill and rate

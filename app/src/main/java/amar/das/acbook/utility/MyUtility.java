@@ -1417,7 +1417,7 @@ public class MyUtility {
         }
     }
     public static void p1_p2_p3_p4_Change_Tracker(int correctInput[],int [] cursorRate, EditText inputP1, EditText inputP2, EditText inputP3, EditText inputP4, TextView runtimeSuggestionAmountToGive) {
-        String p1, p2, p3, p4;
+        String p1, p2, p3, p4;//CHECKING byt using correctInput[0] == 1 so that exception will not occur while using String.valueOf() on wrong data
         p1 = ((!TextUtils.isEmpty(inputP1.getText().toString().trim()))?inputP1.getText().toString().trim() : String.valueOf(0));
         try {
             //all 15 combination

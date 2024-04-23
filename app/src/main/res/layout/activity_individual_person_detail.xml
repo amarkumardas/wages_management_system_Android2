@@ -89,16 +89,6 @@
                 android:textColor="@color/black"
                 android:layout_marginLeft="1dp"
                 android:id="@+id/active_phone2_tv"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textSize="13dp"
-                android:textColor="@color/black"
-                android:gravity="start"
-                android:paddingStart="2dp"
-                android:layout_marginLeft="1dp"
-                android:id="@+id/aadhar_tv"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,6 +115,17 @@
                     android:id="@+id/call_tv"
                     android:foreground="?android:attr/selectableItemBackground"/>
             </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="13dp"
+                android:textColor="@color/black"
+                android:gravity="start"
+                android:paddingStart="2dp"
+                android:layout_marginLeft="1dp"
+                android:id="@+id/aadhar_tv"/>
+
 
             <TextView
                 android:layout_width="match_parent"
@@ -532,6 +533,7 @@
                     android:textSize="10dp"
                     />
                 <TextView
+                    android:hint="@string/rate"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_weight="2"
                     android:layout_width="0dp"
@@ -600,16 +602,18 @@
                     android:textColor="@color/black"
                     android:textSize="10dp"
                     />
+
                 <TextView
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:layout_weight="2"
+                    android:id="@+id/p2_rate_tv"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:hint="@string/rate"
                     android:textAlignment="textStart"
                     android:textColor="@color/purple_700"
-                    android:textStyle="bold"
                     android:textSize="14dp"
-                    android:id="@+id/p2_rate_tv"/>
+                    android:textStyle="bold" />
             </LinearLayout>
             <TextView
                 android:layout_weight="9"
@@ -664,6 +668,7 @@
                     android:textSize="10dp"
                     />
                 <TextView
+                    android:hint="@string/rate"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_weight="2"
                     android:layout_width="0dp"
@@ -732,6 +737,7 @@
                     android:textSize="10dp"
                     />
                 <TextView
+                    android:hint="@string/rate"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_weight="2"
                     android:layout_width="0dp"
@@ -922,7 +928,7 @@
                     android:layout_width="0dp"
                     android:layout_height="25dp"
                     android:layout_weight="9"
-
+                    android:foreground="?android:attr/selectableItemBackground"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="17dp"
@@ -948,7 +954,7 @@
                 android:layout_below="@+id/total_calculation_layout"
                 android:layout_centerInParent="true"
                 android:layout_marginTop="18dp"
-                android:layout_marginBottom="25dp"
+                android:layout_marginBottom="20dp"
                 android:background="@drawable/dark_blue_buttonbg"
                 android:drawableStart="@drawable/ic_round_calculate_24"
                 android:foreground="?android:attr/selectableItemBackground"

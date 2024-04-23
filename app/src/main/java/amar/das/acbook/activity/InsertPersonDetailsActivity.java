@@ -34,25 +34,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-
 import android.widget.Toast;
-
 import com.theartofdev.edmodo.cropper.CropImage;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
-
 import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
-
 import amar.das.acbook.utility.MyUtility;
-
 
 public class InsertPersonDetailsActivity extends AppCompatActivity {
   int [] correctInputArr =new int[10];
@@ -715,6 +706,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         builder.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
+
                 if (!checkCameraPermission()) {
                     requestCameraPermission();
                 } else {
@@ -730,43 +722,9 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         });
         builder.create().show();
     }
-    private void pickFromCamera() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Check if camera app is available
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create a temporary file to store the captured image
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Handle IOException (e.g., disk full)
-                System.out.println("error------------------------------");
-                return;
-            }
-            // Set the file URI as the output for the camera intent
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
-            }
-        }
-    }
-
-    // Method to create a temporary image file
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-        // Important: Set file permissions to allow app to write to external storage
-        image.setWritable(true);
-        return image;
-    }
-
-    // checking storage permissions
     @NonNull
     private boolean checkStoragePermission() {
-        boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
+        boolean result = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
 
         return result;
     }
@@ -821,18 +779,18 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
     }
     // Here we will pick image from gallery or camera
     private void pickFromGallery() {
-        CropImage.activity().start(InsertPersonDetailsActivity.this);
+      CropImage.activity().start(InsertPersonDetailsActivity.this);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            Toast.makeText(this, "CROP OUT", Toast.LENGTH_SHORT).show();
+
             if (resultCode == RESULT_OK) {
                 Uri resultUri = result.getUri();
                 imageView.setImageURI(resultUri);
-                Toast.makeText(this, "crop if", Toast.LENGTH_SHORT).show();
+
             }else if(resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
                 Toast.makeText(this, "Failed to crop image", Toast.LENGTH_SHORT).show();
         }

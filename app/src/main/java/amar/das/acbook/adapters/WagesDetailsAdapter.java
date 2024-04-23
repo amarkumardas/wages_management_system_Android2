@@ -183,48 +183,6 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
         //for updating
         holder.itemView.setOnLongClickListener(view -> {
-//            AlertDialog.Builder updateCustomDialog = new AlertDialog.Builder(view.getContext());
-//            LayoutInflater inflater = LayoutInflater.from(view.getContext());
-//
-//            View myView = inflater.inflate(R.layout.input_data_to_recycler, null);//myView contain all layout view ids
-//            updateCustomDialog.setView(myView);//set custom layout to alert dialog
-//            updateCustomDialog.setCancelable(false);//if user touch to other place then dialog will be close
-//
-//            IndividualPersonDetailActivity.adapterDialog= updateCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
-//
-//            mediaRecorder=null;//so that it not take previous VALUE
-//            IndividualPersonDetailActivity.audioPath=null;//so that it not take previous VALUE
-//
-//            TextView deposit_btn_tv = myView.findViewById(R.id.to_deposit_tv);
-//            Spinner customSpinnerRemoveOrAddMlg=myView.findViewById(R.id.info_spinner_add_lmg_or_remove);
-//            deposit_btn_tv.setVisibility(View.GONE);//initially no deposit button because we are updating only wages p1,p2...etc
-//            customSpinnerRemoveOrAddMlg.setVisibility(View.GONE);
-//            TextView hardcodedP1 = myView.findViewById(R.id.hardcoded_p1_tv);
-//            TextView hardcodedP2 = myView.findViewById(R.id.hardcoded_p2_tv);
-//            TextView hardcodedP3 = myView.findViewById(R.id.hardcoded_p3_tv);
-//            TextView hardcodedP4 = myView.findViewById(R.id.hardcoded_p4_tv);
-//            TextView micIcon = myView.findViewById(R.id.mic_tv);
-//            TextView inputDate = myView.findViewById(R.id.input_date_tv);
-//            TextView saveAudio = myView.findViewById(R.id.save_audio_tv);
-//
-//            Chronometer playAudioChronometer = myView.findViewById(R.id.chronometer);
-//
-//            EditText inputP1 = myView.findViewById(R.id.input_p1_et);
-//            TextView runtimeSuggestionAmountToGive = myView.findViewById(R.id.work_amount_tv);
-//            EditText inputP2 = myView.findViewById(R.id.input_p2_et);
-//            EditText inputP3 = myView.findViewById(R.id.input_p3_et);
-//            EditText inputP4 = myView.findViewById(R.id.input_p4_et);
-//            EditText toGive_Amount = myView.findViewById(R.id.wages_et);
-//            EditText description = myView.findViewById(R.id.enter_description_et);
-//            TextView message_tv = myView.findViewById(R.id.only_used_while_updating);
-//            Button save = myView.findViewById(R.id.save_btn);
-//            Button cancel = myView.findViewById(R.id.cancel_btn);
-//            cancel.setOnClickListener(view13 -> {
-//                VoiceRecorder.stopAudioPlayer();//when audio is playing and   user clock  cancel then stop audio also
-//                MyUtility.deletePdfOrRecordingUsingPathFromDevice(IndividualPersonDetailActivity.audioPath);//delete Audio If Not user Saved
-//                IndividualPersonDetailActivity.adapterDialog.dismiss();
-//            });
-
             if (!data.getIsdeposited()) {// 0 means not deposited it is important because it will open window to enter deposit or wages.wrong window should not be opened.
                 AlertDialog.Builder updateCustomDialog = new AlertDialog.Builder(view.getContext());
                 LayoutInflater inflater = LayoutInflater.from(view.getContext());
@@ -631,8 +589,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
                 @Override
                 public void afterTextChanged(Editable editable){//after text changed for suggestion calculate based on previous rate
-
-                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    if((indicator==1 && rateArray[0]!=0) || (indicator==2 && rateArray[0]!=0 && rateArray[1]!=0) || (indicator==3 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0) || (indicator==4 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0 && rateArray[3]!=0)){//if there is no rate then don't show suggestion
+                        MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    }else runtimeSuggestionAmountToGive.setText(context.getString(R.string.set_rate));
                 }
             });
             inputP2.addTextChangedListener(new TextWatcher() {
@@ -698,8 +657,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-
-                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    if((indicator==1 && rateArray[0]!=0) || (indicator==2 && rateArray[0]!=0 && rateArray[1]!=0) || (indicator==3 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0) || (indicator==4 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0 && rateArray[3]!=0)){//if there is no rate then don't show suggestion
+                        MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    }else runtimeSuggestionAmountToGive.setText(context.getString(R.string.set_rate));
                 }
             });
             inputP3.addTextChangedListener(new TextWatcher() {
@@ -757,8 +717,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
                 @Override
                 public void afterTextChanged(Editable editable) {
-
-                   MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    if((indicator==1 && rateArray[0]!=0) || (indicator==2 && rateArray[0]!=0 && rateArray[1]!=0) || (indicator==3 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0) || (indicator==4 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0 && rateArray[3]!=0)){//if there is no rate then don't show suggestion
+                        MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    }else runtimeSuggestionAmountToGive.setText(context.getString(R.string.set_rate));
                 }
             });
             inputP4.addTextChangedListener(new TextWatcher() {
@@ -805,7 +766,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray,rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    if((indicator==1 && rateArray[0]!=0) || (indicator==2 && rateArray[0]!=0 && rateArray[1]!=0) || (indicator==3 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0) || (indicator==4 && rateArray[0]!=0 && rateArray[1]!=0 && rateArray[2]!=0 && rateArray[3]!=0)){//if there is no rate then don't show suggestion
+                        MyUtility.p1_p2_p3_p4_Change_Tracker(correctInputArray, rateArray, inputP1, inputP2, inputP3, inputP4, runtimeSuggestionAmountToGive);
+                    }else runtimeSuggestionAmountToGive.setText(context.getString(R.string.set_rate));
                 }
             });
             micIcon.setOnClickListener(view15 -> {

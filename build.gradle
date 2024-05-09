@@ -1,17 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
+//all repositories and dependency that would be common to all modules/sub-projects
+buildscript {// buildscript block: This section tells Gradle to specifically look at dependencies required to build itself, rather than the project itself. These dependencies are typically plugins that provide functionalities for Gradle to process your project's code.
+    repositories {//repositories block: Within buildscript, this block defines locations where Gradle should look for these build dependencies. Here, it includes two repositories:
+        google()// google(): This refers to the Google Maven repository, which contains official Android tools and libraries from Google.
+        mavenCentral()//mavenCentral(): This is the central repository for Maven packages, a widely used dependency management system in Java. Many third-party libraries you might use in your project are likely hosted here.
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1'
+    dependencies {//it configures the dependencies gradle needs to build the project
+        classpath 'com.android.tools.build:gradle:8.3.2' //android gradle plugin
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
+//allprojects {
+//    repositories {
+//        mavenCentral() // For ImagePicker library, this line is enough. Although, it has been published on jitpack as well
+//        maven { url "https://jitpack.io" }  //Make sure to add this in your project for uCrop - an internal library
+//    }
+//}
+
 task clean(type: Delete) {
-    delete rootProject.buildDir
+    //delete rootProject.buildDir deprecated
+    delete rootProject.layout.buildDirectory
 }

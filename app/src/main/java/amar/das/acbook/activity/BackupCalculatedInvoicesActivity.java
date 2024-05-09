@@ -128,7 +128,8 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 }
             }else{
                 Toast.makeText(BackupCalculatedInvoicesActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(BackupCalculatedInvoicesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+               //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+               // ActivityCompat.requestPermissions(BackupCalculatedInvoicesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
              }
             return absolutePathList;
         }catch (Exception x){

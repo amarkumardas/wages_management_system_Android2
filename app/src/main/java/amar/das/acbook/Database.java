@@ -1897,9 +1897,9 @@ public class Database extends SQLiteOpenHelper {
         return false;//if delete operation 8 method produce error then this will execute and success will be false from before
     }finally {
         if(!success){//if any operation fail
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(TextFile.textFileAbsolutePathInDevice);//if any operation fail then delete the created text file alse from device
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(TextFile.textFileAbsolutePathInDevice);//if any operation fail then delete the created text file alse from device
             TextFile.textFileAbsolutePathInDevice=null;//setting null to static variable for save
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//if any operation fail then delete the created pdf from device
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(pdfAbsolutePath);//if any operation fail then delete the created pdf from device
         }
         if (dB != null){
             if(success){//if success then only commit
@@ -2117,7 +2117,7 @@ public class Database extends SQLiteOpenHelper {
                 ex.printStackTrace();
                 return false;
             }finally{
-                MyUtility.deletePdfOrRecordingUsingPathFromDevice(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
+                MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(pdfAbsolutePath);//after saving created pdf in db and device then delete that pdf from device.not returning true or false because it is not important.but if we return then it will override return value of try or catch block
                if (cursor != null){
                    cursor.close();
                }
@@ -2302,7 +2302,7 @@ public class Database extends SQLiteOpenHelper {
         if(allAudio==null) return false;//means error occurred while fetching audio from db
         if(allAudio.size() != 0) {//allAudio.size() will be 0 when no single audio present in db but allAudio reference will not be null
              for (String audio : allAudio) {
-                 if (!MyUtility.deletePdfOrRecordingUsingPathFromDevice(audio)) {
+                 if (!MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audio)) {
                      return false;
                  }
              }

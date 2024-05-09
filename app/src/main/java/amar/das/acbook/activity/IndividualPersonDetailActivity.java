@@ -1039,7 +1039,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                          if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {//Take permission
                            Toast.makeText(IndividualPersonDetailActivity.this, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                           ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                             //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                            // ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
                            return false;
                          }
 
@@ -1853,7 +1854,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //***********************done setting no of days and warring Total advance amount********************************************
 
         deposit_btn_tv.setOnClickListener(view -> {
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//before going to other activity .delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//before going to other activity .delete Audio If Not user Saved
             Intent intent=new Intent(IndividualPersonDetailActivity.this,CustomizeLayoutOrDepositAmount.class);
             intent.putExtra("ID",fromIntentPersonId);
             customDialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
@@ -2064,7 +2065,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
           audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
         });
         micIcon.setOnClickListener(view -> {
-            if(MyUtility.checkPermissionAudioAndExternal(getBaseContext())){//checking for permission
+            if(MyUtility.checkAudioPermission(getBaseContext())){//checking for permission
                 if (toggleToStartRecording) {//initially false
 
                     save.setVisibility(View.GONE);
@@ -2094,8 +2095,8 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
                 toggleToStartRecording = !toggleToStartRecording;//so that user should click 2 times to start recording
             }else {//request for permission
-                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.audio_permission_required), Toast.LENGTH_SHORT).show();
-                ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
+                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.enable_audio_permission), Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(IndividualPersonDetailActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, 21);
             }
         });
         playAudioChronometer.setOnClickListener(view -> {
@@ -2127,7 +2128,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
         cancel.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
             customDialog.dismiss();
         });
         customDialog.show();
@@ -2335,7 +2336,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             adapterDialog.dismiss();//dialog will be close when adapter is destroyed
             adapterDialog=null;
         }
-        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
         Database.closeDatabase();
     }
 }

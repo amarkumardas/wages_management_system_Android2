@@ -203,7 +203,9 @@ public class HistoryFragment extends Fragment {
                    backgroundTask.execute(()->{
                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
                           // runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());//not working
-                           ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+
+                           //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                           //ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                            return;
                        }
                     //background task

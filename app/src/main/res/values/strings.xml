@@ -73,7 +73,7 @@
     <string name="play">PLAY</string>
     <string name="recording_started">RECORDING STARTED</string>
     <string name="again_tab_on_mic_to_start_recording">AGAIN TAB ON MIC TO START RECORDING</string>
-    <string name="audio_permission_required">AUDIO PERMISSION REQUIRED</string>
+    <string name="enable_audio_permission">ENABLE AUDIO PERMISSION</string>
     <string name="tab_on_mic_to_start_recording">TAB ON MIC TO START RECORDING</string>
     <string name="hyphen_entered">-ENTERED]</string>
     <string name="deposited_with_hyphen">[DEPOSITED]-</string>

@@ -1,7 +1,5 @@
 package amar.das.acbook.ui.ml;
-
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -17,17 +15,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import amar.das.acbook.Database;
+
 import amar.das.acbook.activity.FindActivity;
 import amar.das.acbook.activity.InsertPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.FragmentAdapter;
-import amar.das.acbook.backupdata.AllDataBackup;
+import amar.das.acbook.takebackupdata.AllDataBackup;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
 import amar.das.acbook.globalenum.GlobalConstants;
@@ -48,7 +44,7 @@ public class MLDrawerFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMlTabBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        takeAllAppPermissionAtOnce();
+        //takeAllAppPermissionAtOnce();
         //for drawer toggle
         ActionBarDrawerToggle  drawerToggle=new ActionBarDrawerToggle(getActivity(),binding.drawerLayout,R.string.open,R.string.close);
         binding.drawerLayout.addDrawerListener(drawerToggle);
@@ -74,79 +70,151 @@ public class MLDrawerFragment extends Fragment {
 
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
             ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
-            switch (item.getItemId()){
-                case R.id.backup_active_mlg:{
-                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                    backgroundTask.execute(() -> {
-                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                            return;
-                        }
+            if(item.getItemId() == R.id.backup_active_mlg){
+                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                backgroundTask.execute(() -> {
+                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                        return;
+                    }
 
-                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
-                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-                        if(!dataBackup.backupActiveMLGDataInPDFFormat()){
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                        }
-                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                    });backgroundTask.shutdown();//when all task completed then only shutdown
-                }break;
-                case R.id.backup_inactive_m:{
-                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                    backgroundTask.execute(() -> {
-                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                            return;
-                        }
+                    AllDataBackup dataBackup=new AllDataBackup(getContext());
+                    if(!dataBackup.backupActiveMLGDataInPDFFormat()){
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                    }
+                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                });backgroundTask.shutdown();//when all task completed then only shutdown
+            } else if (item.getItemId() == R.id.backup_inactive_m) {
+                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                backgroundTask.execute(() -> {
+                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                        //ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                        return;
+                    }
 
-                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
-                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                        }
-                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                    });backgroundTask.shutdown();//when all task completed then only shutdown
-                }break;
-                case R.id.backup_inactive_l:{
-                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                    backgroundTask.execute(() -> {
-                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                            return;
-                        }
-                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+                    AllDataBackup dataBackup=new AllDataBackup(getContext());
+                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                    }
+                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                });backgroundTask.shutdown();//when all task completed then only shutdown
+            } else if (item.getItemId() == R.id.backup_inactive_l) {
+                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                backgroundTask.execute(() -> {
+                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                        return;
+                    }
+                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
-                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                        }
-                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                    });backgroundTask.shutdown();//when all task completed then only shutdown
-                }break;
-                case R.id.backup_inactive_g:{
-                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                    backgroundTask.execute(() -> {
-                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                            return;
-                        }
-                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+                    AllDataBackup dataBackup=new AllDataBackup(getContext());
+                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                    }
+                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                });backgroundTask.shutdown();//when all task completed then only shutdown
+            }else if (item.getItemId() == R.id.backup_inactive_g) {
+                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+                backgroundTask.execute(() -> {
+                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                        return;
+                    }
+                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
-                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
-                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                        }
+                    AllDataBackup dataBackup=new AllDataBackup(getContext());
+                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                    }
 
-                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                    });backgroundTask.shutdown();//when all task completed then only shutdown
-                }break;
+                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+                });backgroundTask.shutdown();//when all task completed then only shutdown
             }
+//            switch (item.getItemId()){
+//                case R.id.backup_active_mlg:{
+//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+//                    backgroundTask.execute(() -> {
+//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                            return;
+//                        }
+//
+//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+//
+//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+//                        if(!dataBackup.backupActiveMLGDataInPDFFormat()){
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                        }
+//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+//                    });backgroundTask.shutdown();//when all task completed then only shutdown
+//                }break;
+//                case R.id.backup_inactive_m:{
+//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+//                    backgroundTask.execute(() -> {
+//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                            return;
+//                        }
+//
+//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+//
+//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                        }
+//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+//                    });backgroundTask.shutdown();//when all task completed then only shutdown
+//                }break;
+//                case R.id.backup_inactive_l:{
+//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+//                    backgroundTask.execute(() -> {
+//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                            return;
+//                        }
+//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+//
+//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                        }
+//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+//                    });backgroundTask.shutdown();//when all task completed then only shutdown
+//                }break;
+//                case R.id.backup_inactive_g:{
+//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+//                    backgroundTask.execute(() -> {
+//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+//                            return;
+//                        }
+//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
+//
+//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
+//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
+//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                        }
+//
+//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
+//                    });backgroundTask.shutdown();//when all task completed then only shutdown
+//                }break;
+//            }
           //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;});
 
@@ -254,24 +322,26 @@ public class MLDrawerFragment extends Fragment {
 
         return sb.toString();
     }
-
     private void takeAllAppPermissionAtOnce() {
-        //Taking multiple permission at once by user https://www.youtube.com/watch?v=y0gX4FD3nxk or  https://www.youtube.com/watch?v=y0gX4FD3nxk
-        //CHECKING ALL PERMISSION IS GRANTED OR NOT
-        if((getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
-                (getContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
-                (getContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) &&
-                (getContext().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) &&
-                (getContext().checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED)){
-
-        }else{//if user not granted permission then request for permission
-            Toast.makeText(getContext(), "ALL PERMISSION REQUIRED PLEASE ENABLE PERMISSION", Toast.LENGTH_LONG).show();
-            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.SEND_SMS}, 80);
-        }
+//        //Taking multiple permission at once by user https://www.youtube.com/watch?v=y0gX4FD3nxk or  https://www.youtube.com/watch?v=y0gX4FD3nxk
+//        //CHECKING ALL PERMISSION IS GRANTED OR NOT
+//        if((getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
+//                (getContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
+//                (getContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) &&
+//                (getContext().checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) &&
+//                (getContext().checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED)){
+//
+//        }else{//if user not granted permission then request for permission
+//            Toast.makeText(getContext(), "ALL PERMISSION REQUIRED PLEASE ENABLE PERMISSION", Toast.LENGTH_LONG).show();
+//            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.RECORD_AUDIO,
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                    Manifest.permission.READ_EXTERNAL_STORAGE,
+//                    Manifest.permission.CAMERA,
+//                    Manifest.permission.SEND_SMS}, 80);
+//        }
+//        if(!(getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)){
+//            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},80);
+//        }
     }
     @Override
     public void onDestroyView() {

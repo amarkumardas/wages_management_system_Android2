@@ -29,14 +29,12 @@ import amar.das.acbook.utility.MyUtility;
 
 
 public class ActiveLGFragment extends Fragment {
-
     private FragmentActiveLGBinding binding;
     ArrayList<MestreLaberGModel> lGArrayList;
     RecyclerView lGRecyclerView;
     MestreLaberGAdapter mestreLaberGAdapter;
     Database db;
     TextView advance,balance;
-
     Boolean isScrolling1 =false;
     LinearLayoutManager layoutManager;
     int currentItem1, totalItem1, scrollOutItems1;
@@ -211,14 +209,12 @@ public class ActiveLGFragment extends Fragment {
         }
         mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() every time the list is updated,or inserted or deleted
 
-
         arraylist.trimToSize();//to free space
         MyUtility.sortArrayList(arraylist);
         cursorMestre.close();
         //db.close();//closing database
         Database.closeDatabase();
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

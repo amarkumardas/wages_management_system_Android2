@@ -4,12 +4,15 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteBlobTooBigException;
 import android.graphics.Bitmap;
@@ -37,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -107,7 +111,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 boolean largeFileSizeIndicator[]={false};//by default no error
                 //directly taking pdfByte SO THAT we don't need to create extra file and deleted
                 if(downloadPdfUsingAbsPathOrByte(null,getPdfByteFromDb(whichPdfIndicatorChangesDynamically, fromIntentPersonId,largeFileSizeIndicator),fromIntentPersonId)){
-                    displayDialogMessage("DOWNLOADED","CALCULATED INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
+                    displayDialogMessage("DOWNLOADED","ID: "+fromIntentPersonId+"\nCALCULATED INVOICE\nIN DOWNLOAD FOLDER");
                 }else{
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
@@ -124,7 +128,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
                 String pdfAbsolutePath= createRunningPDFInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
                 if(downloadPdfUsingAbsPathOrByte(pdfAbsolutePath,null,fromIntentPersonId)){
-                    displayDialogMessage("DOWNLOADED","RUNNING INVOICE\nID: "+fromIntentPersonId+"\nIN DOWNLOAD FOLDER");
+                    displayDialogMessage("DOWNLOADED","ID: "+fromIntentPersonId+"\nRUNNING INVOICE\nIN DOWNLOAD FOLDER");
                 }else{
                     Toast.makeText(this, "SOMETHING WENT WRONG CANNOT DOWNLOAD", Toast.LENGTH_LONG).show();
                 }
@@ -143,7 +147,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             backgroundTask.execute(() -> {
                 if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                     runOnUiThread(() -> Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                    //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                    //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                     return;
                 }
                 //pre execute
@@ -191,21 +196,23 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 try {
                     String itemName = adapterView.getItemAtPosition(position).toString();
                     boolean errorIndicator=false;
-                    switch (itemName) {
-                        case "A/C": {
+                    switch (itemName){
+                        case "A/C":{
                             if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                                 Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                                //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
                                 return;
                             }
                             if (!openCustomAlertDialogToShareTextToAnyAppOrDirectlyToWhatsApp(getAccountDetails(fromIntentPersonId,getIdNamePhone(fromIntentPersonId,true)), getResources().getString(R.string.enter_amount), fromIntentPersonId, true)) { //getAccountDetailsFromDb()if this method return null then alertdialog will return false
                                 errorIndicator=true;
                             }
                         }break;
-                        case "PHONE NUMBER": {
+                        case "PHONE NUMBER":{
                             if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                                  Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                                ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                                // ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
                                 return;
                             }
                             String message = activePhoneNumberToShare(fromIntentPersonId);//if there is no phone number then return null also when exception
@@ -221,7 +228,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                             //MyUtility.snackBar(view,getResources().getString(R.string.please_wait_a_few_seconds));
                             if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                                Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                               ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                                //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
                                 return;
                             }
 
@@ -234,12 +242,13 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                                 errorIndicator=true;
                             }
                         }break;
-                        case "SHARE ALL": {
+                        case "SHARE ALL":{
                             ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
                              backgroundTask.execute(() -> {
                                  if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
                                      runOnUiThread(() -> Toast.makeText(getBaseContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                                      ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                                     //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                                     //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                                      return;
                                  }
                                  //pre execute
@@ -339,7 +348,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
         try {
-          if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getApplicationContext())){
+          if(checkPermissionForDownload(getBaseContext())){
                File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                File pdfFile = new File(downloadsFolder, filename);
 
@@ -349,7 +358,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return true;
         }else{
             Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-            ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
+              //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+              //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
             return false;
             }
         }catch (IOException e) {
@@ -360,6 +370,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
+
+    private boolean checkPermissionForDownload(Context baseContext) {
+        return true;//after android 10+ no need of permission to download files in device
+    }
+
     private boolean shareAllDataAsTextFile(String id) {
         StringBuilder sb=new StringBuilder();
         try{
@@ -388,48 +403,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-//    private String getOtherDetails(String id){//which ever data is not present that column data is not included
-//        try(Database db=new Database(getBaseContext());
-//            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-//            Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-//            String skills[]=db.getAllSkill(id);
-//
-//            StringBuilder sb=new StringBuilder();
-//            if(cursor1 != null && cursor1.moveToFirst()){
-//             sb.append(!TextUtils.isEmpty(cursor1.getString(0)) ?("AADHAAR NO: " + cursor1.getString(0)+"\n") : "")//!TextUtils.isEmpty() checks for null and ""
-//               .append(!TextUtils.isEmpty(cursor1.getString(1)) ? ("LOCATION: " + cursor1.getString(1)+" , ") : "")
-//               .append(!TextUtils.isEmpty(cursor1.getString(2)) ? ("RELIGION: " + cursor1.getString(2)+"\n") :"");
-//            }
-//
-//            if(cursor2 != null && cursor2.moveToFirst()){
-//              sb.append(!TextUtils.isEmpty(cursor2.getString(0)) ? ("LEAVING DATE: " + cursor2.getString(0)+" , ") : "")
-//                .append(!TextUtils.isEmpty(cursor2.getString(1)) ? ("RETURN DATE: " + cursor2.getString(1)+"\n") : "")
-//                .append(!TextUtils.isEmpty(cursor2.getString(2)) ? ("TOTAL WORKED DAYS: " + cursor2.getString(2)+" , ") : "")
-//                .append(!TextUtils.isEmpty(cursor2.getString(3)) ? ("STAR: " + cursor2.getString(3)+"\n\n") : "");
-//
-//            }
-//            switch (MyUtility.get_indicator(getBaseContext(),id)){
-//                case 1:{
-//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append("\n");
-//                }break;
-//                case 2:{
-//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append("\n");
-//                }break;
-//                case 3:{
-//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append("\n");
-//                }break;
-//                case 4:{
-//                    sb.append(skills[0]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(4))?cursor2.getString(4):"0")).append(" , "+skills[1]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(5))?cursor2.getString(5):"0")).append(" , "+skills[2]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(6))?cursor2.getString(6):"0")).append(" , "+skills[3]).append(":RATE "+(!TextUtils.isEmpty(cursor2.getString(7))?cursor2.getString(7):"0")).append("\n");
-//                }break;
-//            }
-//                sb.append(!TextUtils.isEmpty(cursor2.getString(8)) ? ("REMARKS: " + cursor2.getString(8)+"\n\n") : "");
-//            return sb.toString();
-//
-//        }catch (Exception x){
-//            x.printStackTrace();
-//            return "error";
-//        }
-//    }
     private boolean shareImageAndMessageToAnyApp(String message, String id) {
         //if(message==null|| id==null || sharePdfLauncher ==null){
         if(message==null|| id==null){
@@ -476,18 +449,31 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     //In Android 12, you cannot use Uri.fromFile() to get the URI for a file. Instead, you should use FileProvider.getUriForFile() to get the URI for the file.This method is used to share a file with another app using a content URI
                     Uri fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
 
-                    Intent shareIntent = new Intent(Intent.ACTION_SEND);//sharing
-                    shareIntent.setType("image/*");//No, there is no need to add flags to the intent. The intent created is simply used to share the text file, and the file is deleted after sharing. Adding flags to the intent would not have any impact on sharing the file.
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);//EXTRA_STREAM FOR SHARE LARGE DATA like image ,text
-                    shareIntent.putExtra(Intent.EXTRA_TEXT,message);
+//                    Intent shareIntent = new Intent(Intent.ACTION_SEND);//sharing
+//                    shareIntent.setType("image/*");//No, there is no need to add flags to the intent. The intent created is simply used to share the text file, and the file is deleted after sharing. Adding flags to the intent would not have any impact on sharing the file.
+//                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);//EXTRA_STREAM FOR SHARE LARGE DATA like image ,text
+//                    shareIntent.putExtra(Intent.EXTRA_TEXT,message);
+//
+//                    Intent chooser=Intent.createChooser(shareIntent, getResources().getString(R.string.share_image_using));//Intent.createChooser creates dialog to choose app to share data
+//                    chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(chooser);//start chooser dialog
 
-                    Intent chooser=Intent.createChooser(shareIntent, getResources().getString(R.string.share_image_using));//Intent.createChooser creates dialog to choose app to share data
-                    chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(chooser);//start chooser dialog
+                    Intent intent = new ShareCompat.IntentBuilder(this)
+                            .setType("image/*") // Set the MIME type to image
+                            .setStream(fileUri) // Add the URI of the image file
+                            .getIntent() // Get the underlying Intent
+                            .setAction(Intent.ACTION_SEND) // Set the action to send
+                            .putExtra(Intent.EXTRA_TEXT,message)//for message
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Grant temporary read permission
+
+                    Intent chooser = Intent.createChooser(intent, getResources().getString(R.string.share_image_using));
+                    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Use this flag if starting a new activity from outside an Activity context
+                    startActivity(chooser);
 
                 }else{
                     Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                    ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                    //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                    //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
                     return false;
                 }
             }else{

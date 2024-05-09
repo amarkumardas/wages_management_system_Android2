@@ -411,7 +411,7 @@
             android:text="@string/m"
 
             android:layout_weight="1"
-            android:id="@+id/mestre"
+            android:id="@+id/mestre_skill"
             android:textStyle="bold"
             android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"
@@ -422,7 +422,7 @@
             android:text="@string/l"
 
             android:layout_weight="1"
-            android:id="@+id/laber"
+            android:id="@+id/laber_skill"
             android:textStyle="bold"
             android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"/>
@@ -433,7 +433,7 @@
 
             android:layout_weight="1"
             android:textStyle="bold"
-            android:id="@+id/women_laber"
+            android:id="@+id/women_laber_skill"
             android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"
             />

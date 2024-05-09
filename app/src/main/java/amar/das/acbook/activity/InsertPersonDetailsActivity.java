@@ -1,11 +1,12 @@
 package amar.das.acbook.activity;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.core.text.HtmlCompat;
 
 import android.Manifest;
@@ -18,14 +19,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -35,17 +36,30 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-import com.theartofdev.edmodo.cropper.CropImage;
+//import com.theartofdev.edmodo.cropper.CropImage;
+import com.github.drjacky.imagepicker.ImagePicker;
+import com.github.drjacky.imagepicker.constant.ImageProvider;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+
 import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.utility.MyUtility;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.internal.Intrinsics;
 
 public class InsertPersonDetailsActivity extends AppCompatActivity {
+  //if you really want to write files, either make sure you're only writing to your app's designated storage directories, in which case you won't need any permissions at all, or if you really need to write to a directory your app doesn't own get that file manager permission from Google (how to get that permission)
   int [] correctInputArr =new int[10];
   Button add;
   EditText name,account, phone2, ifscCode, aadhaarNumber, activephone1, accountHolderName;
@@ -85,25 +99,19 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         activephone1 =findViewById(R.id.phonenumber_et);
         accountHolderName =findViewById(R.id.fathername_et);
         radioGroup=findViewById(R.id.skill_radiogp);
-        laberRadio =findViewById(R.id.laber);//required when updating
-        womenRadio=findViewById(R.id.women_laber);//required when updating
-        mestreRadio=findViewById(R.id.mestre);//required when updating
+        laberRadio =findViewById(R.id.laber_skill);//required when updating
+        womenRadio=findViewById(R.id.women_laber_skill);//required when updating
+        mestreRadio=findViewById(R.id.mestre_skill);//required when updating
        // laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
         //skill=getResources().getString(R.string.laber);//skill default value otherwise null will be set as default so its important
+
         radioGroup.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
-            switch(checkedIdOfRadioBtn){
-                case R.id.mestre:{
-                    skill=getResources().getString(R.string.mestre);//updating skill variable
-                    break;
-                }
-                case R.id.laber:{
-                    skill=getResources().getString(R.string.laber);
-                    break;
-                }
-                case R.id.women_laber:{
-                    skill=getResources().getString(R.string.women_laber);
-                    break;
-                }
+            if(checkedIdOfRadioBtn == R.id.mestre_skill){
+                skill=getResources().getString(R.string.mestre);//updating skill variable
+            } else if (checkedIdOfRadioBtn == R.id.laber_skill) {
+                skill=getResources().getString(R.string.laber);
+            }else if (checkedIdOfRadioBtn == R.id.women_laber_skill) {
+                skill=getResources().getString(R.string.women_laber);
             }
         });
 
@@ -119,16 +127,73 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
         location_autoComplete.setAdapter(locationAdapter);
 
-        //For camera and galary*********************************************************************************
         imageView = findViewById(R.id.imageview);
 
-        // allowing permissions of gallery and camera
         cameraPermission = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        // After clicking on text we will have
-        // to choose whether to
-        // select image from camera and gallery
-        imageView.setOnClickListener(view -> showImagePicDialog());
+
+       // imageView.setOnClickListener(view -> showImagePicDialog());
+        ActivityResultLauncher<Intent> launcher= registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),(ActivityResult result)->{
+                if(result.getResultCode()==RESULT_OK){
+                        Uri uri=result.getData().getData();
+                            imageView.setImageURI(uri);
+
+                        File file= ImagePicker.Companion.getFile(getIntent());
+                        if(file!=null && file.exists()) file.delete();//delete the crop image but selected image is not deleted
+//                        String multipleFilesPath = ImagePicker.MULTIPLE_FILES_PATH;
+//                        System.out.println(multipleFilesPath+"--------------");
+               //   MyUtility.deleteFolderAllFiles(ImagePicker.Companion.)
+                  // ArrayList<Uri> uris=ImagePicker.Companion.getAllFilePath(result.getData());
+                      // System.out.println(ImagePicker.Companion.getFilePath(result.getData()));
+
+//                        for (Uri s:uris) {
+//                            System.out.println(s!=null?s.toString():"");
+//                        }
+
+                        // Use the uri to load the image
+                    }else if(result.getResultCode()== ImagePicker.RESULT_ERROR){
+                        // Use ImagePicker.Companion.getError(result.getData()) to show an error
+                        ImagePicker.Companion.getError(result.getData());
+                        Toast.makeText(this, "IMAGE ERROR", Toast.LENGTH_LONG).show();
+                    }
+                });
+        imageView.setOnClickListener(view -> {
+            if(!checkCameraPermission()){
+                requestCameraPermission();
+                return;
+            }
+            if(!checkImageStoragePermission()){
+                requestImageStoragePermission();
+                return;
+            }
+            try {
+                ImagePicker.Companion.with(this)
+                        //...
+                        .provider(ImageProvider.BOTH) //Or bothCameraGallery()
+                        .setMultipleAllowed(false) //by default it is false
+                        .crop(12f, 5f)
+                        //.cropSquare()
+                        .cropFreeStyle()//Let the user to resize crop bounds:
+                        .maxResultSize(350, 350, true) //true: Keep Ratio.Set Max Width and Height of final image. When the user picks an image from the gallery or captures a new image using the camera, the library ensures that the resulting image does not exceed the specified resolution. This is useful for scenarios where you want to limit the image size for storage, display, or other purposes.
+                        .setOutputFormat(Bitmap.CompressFormat.JPEG)//compress
+                        .createIntentFromDialog((Function1) new Function1() {
+                            public Object invoke(Object var1) {
+                                this.invoke((Intent) var1);
+                                return Unit.INSTANCE;
+                            }
+                            public final void invoke(@NotNull Intent it) {
+                                Intrinsics.checkNotNullParameter(it, "it");
+                                launcher.launch(it);
+                            }
+                        });
+            }catch(Exception x){
+                x.printStackTrace();
+                Toast.makeText(this, "Exception occurred Image picker", Toast.LENGTH_LONG).show();
+                //provide alternative way to set image in imageview
+            }
+
+        });
+
         if(getIntent().hasExtra("ID")){//while updating. after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
 
@@ -538,7 +603,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                         add.setEnabled(true);//after all execution done
                     }
                 }
-                private void checkForDuplicate() {
+                private void checkForDuplicate() {//very rare to execute
                     Database db=Database.getInstance(getBaseContext());
                     Cursor result = db.getId(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, personPhoneNumber2, location, religion);
                     StringBuilder buffer;//because it is not synchronized and efficient then string buffer and no need to lock and unlock
@@ -698,103 +763,135 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-    private void showImagePicDialog() {
-        String []options = {"Camera", "Gallery"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("PICK IMAGE FROM");
-        builder.setCancelable(true);
-        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
-        builder.setItems(options, (dialog, which) -> {
-            if (which == 0) {
+//    private void showImagePicDialog() {
+//        String []options = {"CAMERA", "GALLERY"};
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("PICK IMAGE FROM");
+//        builder.setCancelable(true);
+//        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> dialogInterface.dismiss());
+//        builder.setItems(options, (dialog, which) -> {
+//            if (which == 0) {
+//                if (!checkCameraPermission()) {
+//                    requestCameraPermission();
+//                } else {
+//                   // pickFromGallery();
+//                }
+//            } else if (which == 1) {
+//                if (!checkImageStoragePermission()) {
+//                    requestImageStoragePermission();
+//                } else {
+//                   // pickFromGallery();
+//                }
+//            }
+//        });
+//        builder.create().show();
+//    }
+    @NonNull
+    private boolean checkImageStoragePermission() {//we need permission to read other app files
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){//if it is android 13 or above
+            return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED);
+        }
 
-                if (!checkCameraPermission()) {
-                    requestCameraPermission();
-                } else {
-                    pickFromGallery();
-                }
-            } else if (which == 1) {
-                if (!checkStoragePermission()) {
-                    requestStoragePermission();
-                } else {
-                    pickFromGallery();
-                }
-            }
-        });
-        builder.create().show();
+        // If it is Android 10,11,12 (R) or above required only READ_EXTERNAL_STORAGE permission only to read and write
+        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);//for below android 13 ie. sdk version 33
+        //return ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);//for below android 13 ie. sdk version 33
+
+        // If it is Android 10  required  READ_EXTERNAL_STORAGE or  WRITE_EXTERNAL_STORAGE permission when accessing other app files but since here we want to read only image so taking READ_EXTERNAL_STORAGE
+
+        // return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&  (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+    private void requestImageStoragePermission() {
+         Toast.makeText(this, "ENABLE MEDIA PERMISSION TO ACCESS IMAGE ", Toast.LENGTH_LONG).show();
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {//if it is android 13 or above
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, 311);
+        }
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // If it is Android 11 (R) or above required only READ_EXTERNAL_STORAGE permission
+//              ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},311);
+//        }
+
+        //If it is Android 10  required TO REQUEST READ_EXTERNAL_STORAGE or  WRITE_EXTERNAL_STORAGE permission when accessing other app files but since here we want to read only image so REQUESTING READ_EXTERNAL_STORAGE
+        ActivityCompat.requestPermissions(this,new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE},311);
+
+        //below android 13
+         // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 311);
+       // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE}, 311);
     }
     @NonNull
-    private boolean checkStoragePermission() {
-        boolean result = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
+    private boolean checkCameraPermission(){ //Requesting camera permission
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;//IT IS CAMERA PERMISSION not storage permission
 
-        return result;
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){//if it is android 13 or above
+//            //return (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+//            return ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+//        }
+//        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
     }
-    // Requesting  gallery permission
-    private void requestStoragePermission() {
-        requestPermissions(storagePermission, STORAGE_REQUEST);
-    }
-    // checking camera permissions
-    @NonNull
-    private boolean checkCameraPermission() {
-        boolean permission1= ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-        boolean permission2= ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-//        boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);//older version
-//        boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);//older version
-
-        return permission1 && permission2;
-    }
-    // Requesting camera permission
     private void requestCameraPermission() {
-        requestPermissions(cameraPermission, CAMERA_REQUEST);
+        //requestPermissions(cameraPermission, CAMERA_REQUEST);
+       Toast.makeText(this, "ENABLE CAMERA PERMISSION TO TAKE PHOTO", Toast.LENGTH_LONG).show();
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 311);
+
+        // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 311);
     }
     // Requesting camera and gallery
     // permission if not given
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case CAMERA_REQUEST: {
-                if (grantResults.length > 0) {
-                    boolean camera_accepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean writeStorageaccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (camera_accepted && writeStorageaccepted) {
-                        pickFromGallery();
-                    } else {
-                        Toast.makeText(this, "Please Enable Camera and Storage Permissions", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-            break;
-            case STORAGE_REQUEST: {
-                if (grantResults.length > 0) {
-                    boolean writeStorageaccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    if (writeStorageaccepted) {
-                        pickFromGallery();
-                    } else {
-                        Toast.makeText(this, "Please Enable Storage Permissions", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-            break;
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case CAMERA_REQUEST: {
+//                if (grantResults.length > 0) {
+//                    boolean camera_accepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    boolean writeStorageaccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+//                    if (camera_accepted && writeStorageaccepted) {
+//                      //  pickFromGallery();
+//                    } else {
+//                        Toast.makeText(this, "Please Enable Camera and Storage Permissions", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            }
+//            break;
+//            case STORAGE_REQUEST: {
+//                if (grantResults.length > 0) {
+//                    boolean writeStorageaccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    if (writeStorageaccepted) {
+//                      //  pickFromGallery();
+//                    } else {
+//                        Toast.makeText(this, "Please Enable Storage Permissions", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            }
+//            break;
+//        }
+//    }
     // Here we will pick image from gallery or camera
-    private void pickFromGallery() {
-      CropImage.activity().start(InsertPersonDetailsActivity.this);
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-
-            if (resultCode == RESULT_OK) {
-                Uri resultUri = result.getUri();
-                imageView.setImageURI(resultUri);
-
-            }else if(resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
-                Toast.makeText(this, "Failed to crop image", Toast.LENGTH_SHORT).show();
-        }
-    }
+//       imageView.setOnClickListener(view -> {
+//        ImagePicker.Companion.with(InsertPersonDetailsActivity.this)
+//                .bothCameraGallery()
+//                .crop()
+//                .cropOval()
+//                .maxResultSize(1080,1080,true)
+//                .createIntent();
+//
+//    });
+//    private void pickFromGallery() {
+//      CropImage.activity().start(InsertPersonDetailsActivity.this);
+//    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+//            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+//
+//            if (resultCode == RESULT_OK) {
+//                Uri resultUri = result.getUri();
+//                imageView.setImageURI(resultUri);
+//
+//            }else if(resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
+//                Toast.makeText(this, "Failed to crop image", Toast.LENGTH_SHORT).show();
+//        }
+//    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

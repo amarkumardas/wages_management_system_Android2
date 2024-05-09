@@ -1,46 +1,40 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.application'//This line applies the com.android.application plugin from the Android Gradle plugin set. This plugin is essential for building Android applications.
 }
 
 android {
-    compileSdk 31
-    defaultConfig {
+    namespace 'amar.das.acbook'//This defines the unique namespace for your application's package. This helps prevent naming conflicts with other applications.
+    compileSdk 33
+    defaultConfig {//This section defines various default configurations for your app:
         applicationId "amar.das.acbook"
-        minSdk 26
-        targetSdk 31
+        minSdk 29 //android 10
+        targetSdk 33 //android 13
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
-    buildTypes {
+    buildTypes {//This section allows you to configure different build variants of your app, such as a release and debug version. Here, a single release build type is defined:
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
+            minifyEnabled false// This disables code shrinking and obfuscation techniques to improve app size and potentially make it harder to reverse engineer. This might be useful for development builds where you want easier debugging.
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' // This configures ProGuard, a tool that can shrink, obfuscate, and optimize your code during the release build process. The first file (proguard-android-optimize.txt) is a default configuration from Android, and the second file (proguard-rules.pro) allows you to define custom ProGuard rules for your project.
         }
     }
 
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+    compileOptions {//This block sets the source and target compatibility for compiling your Java code:
+        sourceCompatibility JavaVersion.VERSION_11//This specifies that your code is written for Java 11.
+        targetCompatibility JavaVersion.VERSION_11//This tells Gradle to generate bytecode compatible with Java 11 devices.
     }
-    buildFeatures {
-        viewBinding true
+    buildFeatures {// This block enables specific features for your project:
+        viewBinding true //This enables View Binding, a feature that simplifies the process of finding views in your layouts.
     }
 }
 
-dependencies {
+dependencies {//this block defines the external libraries your project relies on
+     implementation 'com.github.Drjacky:ImagePicker:2.3.22' //for open camera and gallery
     //fom open camera
-    api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
-    implementation 'com.squareup.picasso:picasso:2.5.2'
-    //glide
-//    implementation 'com.github.bumptech.glide:glide:4.14.2'  // Glide
-//    implementation 'com.github.bumptech.glide:okhttp3-integration:4.14.2' // Glide OkHttp integration
-//    implementation 'jp.wasabeef:glide-transformations:4.3.0' // Glide Transformations for cropping
+    //api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
+   // implementation 'com.squareup.picasso:picasso:2.5.2'
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0' //from this dependencies coordinate layout and floating action is used
@@ -55,6 +49,4 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2' //pdf viewer
-    
-
 }

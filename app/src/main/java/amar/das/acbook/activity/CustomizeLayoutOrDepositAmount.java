@@ -54,7 +54,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 
         binding.customCancelBtn.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
 
             goBackToIndividualPersonActivity(fromIntentPersonId);
 //            finish();//destroy current activity
@@ -64,7 +64,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         });
         binding.gobackDeposit.setOnClickListener(view -> {
             VoiceRecorder.stopAudioPlayer();//when audio is playing and   user click  cancel then stop audio also
-            MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
             goBackToIndividualPersonActivity(fromIntentPersonId);
 //            finish();//destroy current activity
 //            Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
@@ -94,7 +94,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             public void afterTextChanged(Editable editable) { }
         });
         binding.customMicIconTv.setOnClickListener(view -> {
-            if(MyUtility.checkPermissionAudioAndExternal(getApplicationContext())){//checking for permission
+            if(MyUtility.checkAudioPermission(getApplicationContext())){//checking for permission
                 if (toggleToStartRecording) {//initially false
                     binding.customSaveBtn.setVisibility(View.GONE);
 
@@ -121,8 +121,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 toggleToStartRecording = !toggleToStartRecording;//so that user should click 2 times to start recording
 
             }else {//request for permission
-                Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.audio_permission_required), Toast.LENGTH_SHORT).show();
-                ActivityCompat.requestPermissions(CustomizeLayoutOrDepositAmount.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
+                Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.enable_audio_permission), Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(CustomizeLayoutOrDepositAmount.this, new String[]{Manifest.permission.RECORD_AUDIO}, 21);
             }
         });
 
@@ -161,7 +161,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 
         //if (getIntent().hasExtra("ID") && !getIntent().hasExtra("DATE") &&  !getIntent().hasExtra("TIME")) {//if id present than only operation will be performed
         if (getIntent().hasExtra("ID") && !getIntent().hasExtra("SYSTEM_DATETIME")) {//if id present than only operation will be performed
-            db = new Database(this);//on start only database should be create
+//            db = new Database(this);//on start only database should be create
+            db = Database.getInstance(this);//on start only database should be create
             binding.customDateTv.setText(cDayOfMonth+"-"+(cMonth+1)+"-"+cYear);
             binding.customSaveBtn.setOnClickListener(view -> {
                 binding.customSaveBtn.setVisibility(View.GONE);//to avoid when user click multiple times
@@ -231,7 +232,8 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             binding.customDepositAmountTv.setText(getResources().getString(R.string.update_deposit_amount));
             binding.customSaveBtn.setText(getResources().getString(R.string.long_press_to_update));
 
-            db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
+           // db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
+            db = Database.getInstance(CustomizeLayoutOrDepositAmount.this);//we can take any field context
             Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
             cursorData.moveToFirst();//this cursor is not closed
             String cDescription,cDeposit,cMicPath;
@@ -373,7 +375,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     @Override
     public void onBackPressed() {//on back press button
         super.onBackPressed();
-        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
         finish();//destroy current activity
         Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",fromIntentPersonId);
@@ -382,7 +384,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyUtility.deletePdfOrRecordingUsingPathFromDevice(audioPath);//delete Audio If Not user Saved
+        MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
         Database.closeDatabase();
     }
 }

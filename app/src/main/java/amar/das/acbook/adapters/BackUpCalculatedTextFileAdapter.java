@@ -3,6 +3,8 @@ package amar.das.acbook.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.view.ActionMode;
@@ -17,10 +19,12 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -104,62 +108,58 @@ public class BackUpCalculatedTextFileAdapter extends RecyclerView.Adapter<BackUp
                    @Override
                    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {//when click on action mode item
                        int id= menuItem.getItemId();  //Get item id
-                       switch (id){
-                           case R.id.menu_share:{
-                               if(userSelectedFiles.size() != 0) {
-                                   if(!shareMultipleFilesToAnyApp(getUserSelectedFiles(userSelectedFiles), "text/plain", "SHARE "+userSelectedFiles.size()+" INVOICE USING")){
-                                       MyUtility.snackBar(view,"CANNOT SHARE INVOICE");
-                                   }
-                               }else {
-                                   MyUtility.snackBar(view,"SELECT INVOICE");
+                       if(id==R.id.menu_share){
+                           if(userSelectedFiles.size() != 0) {
+                               if(!shareMultipleFilesToAnyApp(getUserSelectedFiles(userSelectedFiles), "text/plain", "SHARE "+userSelectedFiles.size()+" INVOICE USING")){
+                                   MyUtility.snackBar(view,"CANNOT SHARE INVOICE");
                                }
-                               //don't update the adapter here because when user return back after sharing file then in activity user can see selected file.so this can help to delete selected shared file
-                           }break;
-                           case R.id.menu_delete:{
-                                if(userSelectedFiles.size() > 0){
-                                  AlertDialog.Builder detailsReview = new AlertDialog.Builder(context);
-                                  detailsReview.setCancelable(true);
-                                  detailsReview.setTitle(context.getResources().getString(R.string.delete)+" PERMANENTLY");// Html tags video- https://www.youtube.com/watch?v=98BD6IjQQkE
-                                  detailsReview.setMessage(userSelectedFiles.size()+" INVOICE");
+                           }else {
+                               MyUtility.snackBar(view,"SELECT INVOICE");
+                           }
+                           //don't update the adapter here because when user return back after sharing file then in activity user can see selected file.so this can help to delete selected shared file
+                       } else if (id == R.id.menu_delete) {
+                           if(userSelectedFiles.size() > 0){
+                               AlertDialog.Builder detailsReview = new AlertDialog.Builder(context);
+                               detailsReview.setCancelable(true);
+                               detailsReview.setTitle(context.getResources().getString(R.string.delete)+" PERMANENTLY");// Html tags video- https://www.youtube.com/watch?v=98BD6IjQQkE
+                               detailsReview.setMessage(userSelectedFiles.size()+" INVOICE");
 
-                                  detailsReview.setNegativeButton(context.getResources().getString(R.string.cancel), (dialogInterface, i) -> {
-                                      dialogInterface.dismiss();
-                                      actionMode.finish();//FINISH ACTION MODE
-                                  });
-                                  detailsReview.setPositiveButton(context.getResources().getString(R.string.delete), (dialogInterface, i) -> {
-                                       for (TextFileModel object: userSelectedFiles) {
-                                           if(MyUtility.deletePdfOrRecordingUsingPathFromDevice(object.getAbsolutePath())){//deleting files
-                                               dataList.remove(object);//remove selected object from the adapter one by one because when 1 file is not deleted then that file will not be removed from datalist
-                                               backupData.remove(object);//backupData also contain object so removed
-                                           }
+                               detailsReview.setNegativeButton(context.getResources().getString(R.string.cancel), (dialogInterface, i) -> {
+                                   dialogInterface.dismiss();
+                                   actionMode.finish();//FINISH ACTION MODE
+                               });
+                               detailsReview.setPositiveButton(context.getResources().getString(R.string.delete), (dialogInterface, i) -> {
+                                   for (TextFileModel object: userSelectedFiles) {
+                                       if(MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(object.getAbsolutePath())){//deleting files
+                                           dataList.remove(object);//remove selected object from the adapter one by one because when 1 file is not deleted then that file will not be removed from datalist
+                                           backupData.remove(object);//backupData also contain object so removed
                                        }
-                                       MyUtility.snackBar(view, userSelectedFiles.size()+" DELETED");//this should be call here because when all files deleted then this line produce error
-                                       userSelectedFiles.clear();//clear user selected files
-                                       notifyDataSetChanged();//notify adapter
-                                       dialogInterface.dismiss();
-                                       listener.updatedCount(backupData.size());//callback sending this updated data activity
-                                       actionMode.finish();//FINISH ACTION MODE
-                                   });
-                                   detailsReview.create().show();
-                              }else if(userSelectedFiles.size() == 0){//when data list is empty visible text view
-                                    MyUtility.snackBar(view,"SELECT INVOICE");
-                              }
-                           }break;
-                           case R.id.menu_select_all:{
-                               if(userSelectedFiles.size() == dataList.size()){//when user manually selected all item and then clicked on select all icon
-                                   isSelectAll=false;   //when all item selected
-                                   userSelectedFiles.clear();
-                               }else{
-                                   isSelectAll=true; //when all item unselect
-                                   userSelectedFiles.clear(); //clear selected item
-                                   userSelectedFiles.addAll(dataList);
-                               }
+                                   }
+                                   MyUtility.snackBar(view, userSelectedFiles.size()+" DELETED");//this should be call here because when all files deleted then this line produce error
+                                   userSelectedFiles.clear();//clear user selected files
+                                   notifyDataSetChanged();//notify adapter
+                                   dialogInterface.dismiss();
+                                   listener.updatedCount(backupData.size());//callback sending this updated data activity
+                                   actionMode.finish();//FINISH ACTION MODE
+                               });
+                               detailsReview.create().show();
+                           }else if(userSelectedFiles.size() == 0){//when data list is empty visible text view
+                               MyUtility.snackBar(view,"SELECT INVOICE");
+                           }
+                       } else if (id == R.id.menu_select_all) {
+                           if(userSelectedFiles.size() == dataList.size()){//when user manually selected all item and then clicked on select all icon
+                               isSelectAll=false;   //when all item selected
+                               userSelectedFiles.clear();
+                           }else{
+                               isSelectAll=true; //when all item unselect
+                               userSelectedFiles.clear(); //clear selected item
+                               userSelectedFiles.addAll(dataList);
+                           }
 
-                               if(actionMode != null){
-                                   actionMode.setTitle(userSelectedFiles.size()+" SELECTED");//set text on view model
-                               }
-                                 notifyDataSetChanged();//notify adapter
-                           }break;
+                           if(actionMode != null){
+                               actionMode.setTitle(userSelectedFiles.size()+" SELECTED");//set text on view model
+                           }
+                           notifyDataSetChanged();//notify adapter
                        }
                        return true;
                    }
@@ -306,24 +306,51 @@ public class BackUpCalculatedTextFileAdapter extends RecyclerView.Adapter<BackUp
         }
     }
     public boolean shareMultipleFilesToAnyApp(List<File> files, String mimeType, String title) {
-        if (files == null || files.isEmpty() || mimeType==null) {
+        if (files == null || files.isEmpty() || mimeType==null || mimeType.isEmpty()) {
             return false;
         }
         try {
-            ArrayList<Uri> uris = new ArrayList<>();
+            //error in android 12
+//            ArrayList<Uri> uris = new ArrayList<>();
+//
+//            for (File file : files) {
+//                Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+//                uris.add(uri);
+//            }
+//
+//            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+//            intent.setType(mimeType);
+//            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris); // for multiple files
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // add this line
+//
+//            Intent chooser = Intent.createChooser(intent, title);
+//            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            context.startActivity(chooser);
 
+            ShareCompat.IntentBuilder shareIntent = new ShareCompat.IntentBuilder(context)//ShareCompat.IntentBuilder is a helper for constructing sharing intents.
+                    .setType(mimeType);
+            Uri uri=null;
             for (File file : files) {
-                Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
-                uris.add(uri);
+                try {
+                    uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+                    shareIntent.addStream(uri);
+                }catch (Exception x){
+                    x.printStackTrace();
+                    Toast.makeText(context, "Error in creating uri", Toast.LENGTH_SHORT).show();
+                }
             }
-            Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            intent.setType(mimeType);
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);//for multiple files
+            shareIntent.getIntent()
+                    .setAction(Intent.ACTION_SEND_MULTIPLE)//is used for sharing multiple pieces of content..setAction(Intent.ACTION_SEND) is used for sharing a single piece of content.
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//rants temporary read permission to the recipient of the intent for the content URIs in the intent.
 
-            Intent chooser = Intent.createChooser(intent, title);
-            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(chooser);
-
+            Intent chooser = Intent.createChooser(shareIntent.getIntent(), title);
+           //This code queries the package manager for activities that can handle the chooser intent.It then iterates over the list of ResolveInfo objects, each representing an app that can handle the intent.grantUriPermission grants temporary read and write permissions to each app for the last URI added to the intent.
+            List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                //String packageName = resolveInfo.activityInfo.packageName;
+                context.grantUriPermission(resolveInfo.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
+           context.startActivity(chooser);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

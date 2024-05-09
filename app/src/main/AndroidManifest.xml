@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="amar.das.acbook">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <queries> <!-- Specific apps you interact with -->
         <package android:name="com.whatsapp" /> <!-- we have to mention here otherwise it will not show package name from android 11 downwards:this is use to share on whatsapp -->
     </queries>
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- TO USE connectivity manager this permission required -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> <!-- **********88Removed android.permission.ACCESS_NETWORK_STATE: Starting with Android 6.0 (API level 23), your app no longer needs to declare ACCESS_NETWORK_STATE permission to use the Connectivity Manager. The system automatically grants this permission at runtime.TO USE connectivity manager this permission required -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/> <!--to record audio -->
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"/> <!--true means camera permission required and false means this permission is optional -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- permission to read external storage ilke sd card -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="true" /><!-- true means camera permission required and false means this permission is optional -->
     <uses-permission android:name="android.permission.SEND_SMS" />
+
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> this permission not required when minsdk is 29 and above-->
+<!-- WRITE_EXTERNAL_STORAGE
+Pre-Android 10 (API level 28):
+
+This permission granted apps broad write access to the entire external storage (usually an SD card).
+It was considered a risky permission as apps could potentially access and modify user data stored on the SD card.
+Android 10 and Above (API level 29 and higher):
+
+While the permission still exists, it no longer provides direct write access to the entire external storage due to Scoped Storage.
+Instead, apps can only write to their own designated app-specific directory within the external storage.-->
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:minSdkVersion="32"/> <!--this permission not required when minsdk is 29 and above.if sdkVersion is 32 or below than grant this permission permission to read external storage or else this permission ignore -->
+<!--    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" android:minSdkVersion="33"/> &lt;!&ndash;if sdkVersion is 33 or above than grant this permission&ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" android:minSdkVersion="33"/>&lt;!&ndash;if sdkVersion is 33 or above than grant this permission&ndash;&gt;-->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" android:minSdkVersion="33"/><!--if sdkVersion is 33 or above than grant this permission-->
 
     <application
         android:allowBackup="true"
@@ -63,9 +84,11 @@
             android:name=".activity.InsertPersonDetailsActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat" /> <!-- provider is compulsory when targetSdk version 24 or greater -->
+<!--        <activity-->
+<!--            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"-->
+<!--            android:theme="@style/Base.Theme.AppCompat" /> &lt;!&ndash; provider is compulsory when targetSdk version 24 or greater &ndash;&gt;-->
+
+<!--        This configuration enables you to share files within your app's storage with other apps in a secure manner.-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

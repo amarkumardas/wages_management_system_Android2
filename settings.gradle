@@ -1,10 +1,15 @@
+//settings.gradle is always executed first during a Gradle build.
+
+//The settings.gradle file is located at the root of your Gradle project. It serves two main purposes:
+//The dependencyResolutionManagement block configures repositories where Gradle will look for dependencies to download
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)//This line enforces that projects can only use repositories defined in this settings.gradle file and not in individual project's build.gradle files. This helps centralize dependency management and avoid conflicts.
+    repositories {//his block defines the list of repositories Gradle should use.
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }  //Make sure to add this in your project for uCrop - an internal library
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
 rootProject.name = "AC Book"
-include ':app'
+include ':app'//include line tells Gradle which subdirectories are considered subprojects within your larger project. Here, it includes the subproject named :app.

@@ -24,7 +24,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -222,7 +221,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 Button cancel = myView.findViewById(R.id.cancel_btn);
                 cancel.setOnClickListener(view13 -> {
                     VoiceRecorder.stopAudioPlayer();//when audio is playing and   user clock  cancel then stop audio also
-                    MyUtility.deletePdfOrRecordingUsingPathFromDevice(IndividualPersonDetailActivity.audioPath);//delete Audio If Not user Saved
+                    MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(IndividualPersonDetailActivity.audioPath);//delete Audio If Not user Saved
                     IndividualPersonDetailActivity.adapterDialog.dismiss();
                 });
                 message_tv.setText(view.getContext().getResources().getString(R.string.you_are_updating));
@@ -772,7 +771,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
             });
             micIcon.setOnClickListener(view15 -> {
-                if(MyUtility.checkPermissionAudioAndExternal(context)){ //checking for permission
+                if(MyUtility.checkAudioPermission(context)){ //checking for permission
                     if (toggleToStartRecording) {//initially false
                         save.setVisibility(View.GONE);
 
@@ -801,8 +800,8 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                     toggleToStartRecording = !toggleToStartRecording;//so that user should click 2 times to start recording
 
                 }else {//request for permission
-                    Toast.makeText(context,context.getResources().getString(R.string.audio_permission_required), Toast.LENGTH_SHORT).show();
-                    ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 21);
+                    Toast.makeText(context,context.getResources().getString(R.string.enable_audio_permission), Toast.LENGTH_LONG).show();
+                    ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.RECORD_AUDIO}, 21);
                 }
             });
 

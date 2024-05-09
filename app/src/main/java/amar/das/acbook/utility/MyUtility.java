@@ -1,5 +1,6 @@
 package amar.das.acbook.utility;
 
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -184,7 +186,7 @@ public class MyUtility {
             bool= true;
         return bool;
     }
-    public static boolean deletePdfOrRecordingUsingPathFromDevice(String pdfPath){
+    public static boolean deletePdfOrRecordingUsingPathFromAppStorage(String pdfPath){
         if(pdfPath != null){
             try {
                 File filePath = new File(pdfPath);//file to be delete
@@ -912,10 +914,11 @@ public class MyUtility {
             return new String[]{"[ERROR]","[ERROR]","[ERROR]","[ERROR]","[ERROR]","[ERROR]","[ERROR]"};
         }
     }
-    public static boolean checkPermissionAudioAndExternal(Context context) {//checking for permission of mic and external storage
+    public static boolean checkAudioPermission(Context context) {//checking for permission of mic and external storage
         try {
-            return (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) &&
-                    (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+//            return (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) &&
+//                    (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+           return ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -936,8 +939,9 @@ public class MyUtility {
     }
     public static boolean checkPermissionForReadAndWriteToExternalStorage(Context context) {
         try {
-            return (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
-                    (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+//            return (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
+//                    (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+            return true; //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -1192,7 +1196,8 @@ public class MyUtility {
                  if(data !=null){//best code
                      if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(view.getContext())) {
                          Toast.makeText(view.getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                         ActivityCompat.requestPermissions((Activity) view.getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
+                         //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                         //ActivityCompat.requestPermissions((Activity) view.getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);//in thread cannot cast this view
                          return;
                      }
                      try(Database db=Database.getInstance(context)){//share to whats app if not contact open any app to share
@@ -1365,7 +1370,8 @@ public class MyUtility {
                 }
             }else{
                 Toast.makeText(context, "READ,WRITE EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
+                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                //ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 20);
                 return false;
             }
             return true;
@@ -1390,15 +1396,27 @@ public class MyUtility {
 //            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
 //            sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
 
+//not working in android 12
+//            Intent intent = new Intent(Intent.ACTION_SEND);
+//            intent.setType(mimeType);
+//            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
+//            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
+//            intent.putExtra(Intent.EXTRA_STREAM, uri);
+//            Intent chooser = Intent.createChooser(intent, title);
+//            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            context.startActivity(chooser);// Start the chooser dialog
 
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType(mimeType);
-            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
-            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            Intent chooser = Intent.createChooser(intent, title);
-            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-           context.startActivity(chooser);// Start the chooser dialog
+            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);
+            Intent intent = new ShareCompat.IntentBuilder(context)// Create the intent using ShareCompat.IntentBuilder
+                    .setType(mimeType)
+                    .setStream(uri)
+                    .getIntent()
+                    .setAction(Intent.ACTION_SEND)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            Intent chooser = Intent.createChooser(intent, title);//Start the chooser dialog
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(chooser);
 
             return true;
         }catch (Exception e){

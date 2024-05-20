@@ -1,5 +1,6 @@
 package amar.das.acbook.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.FragmentTransaction;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -182,10 +184,12 @@ TextView searchHint;
         bool=true;//to set adapter recycler view on onQueryTextChange method
         Database.closeDatabase();
     }
-    public void goto_back(View view) {
-        finish();//first destroy then go back
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.find_layout, new MLDrawerFragment()).commit();
+    public void goto_back(View view){
+        finish();//first destroy current activity then go back
+//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//        transaction.replace(R.id.find_layout, new MLDrawerFragment()).commit();
+        Intent intent = new Intent(this,NavigationActivity.class);//unless user signin cant use the app
+        startActivity(intent);
     }
     /*In some situations, we need to recall activity again from onCreate(). This example demonstrates how to reload activity
     whenever we return back to this activity we will always get refreshed activity
@@ -202,10 +206,20 @@ TextView searchHint;
 //        overridePendingTransition(0, 0);
 //        //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.This can be done only in activity
 //    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Database.closeDatabase();
     }
+//    @NonNull
+//    @Override
+//    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+//        finish();
+//        Intent intent = new Intent(this, NavigationActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent);
+//
+//        OnBackInvokedDispatcher dispatcher = super.getOnBackInvokedDispatcher();
+//        return dispatcher;
+//    }
 }

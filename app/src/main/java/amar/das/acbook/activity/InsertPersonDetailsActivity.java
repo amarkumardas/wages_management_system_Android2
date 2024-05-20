@@ -793,8 +793,8 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         }
 
         // If it is Android 10,11,12 (R) or above required only READ_EXTERNAL_STORAGE permission only to read and write
-        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);//for below android 13 ie. sdk version 33
-        //return ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);//for below android 13 ie. sdk version 33
+        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);//for below android 12 ie. sdk version 32
+        //return ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);//for below android 12 ie. sdk version 32
 
         // If it is Android 10  required  READ_EXTERNAL_STORAGE or  WRITE_EXTERNAL_STORAGE permission when accessing other app files but since here we want to read only image so taking READ_EXTERNAL_STORAGE
 

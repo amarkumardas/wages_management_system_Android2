@@ -4,6 +4,7 @@ buildscript {// buildscript block: This section tells Gradle to specifically loo
     repositories {//repositories block: Within buildscript, this block defines locations where Gradle should look for these build dependencies. Here, it includes two repositories:
         google()// google(): This refers to the Google Maven repository, which contains official Android tools and libraries from Google.
         mavenCentral()//mavenCentral(): This is the central repository for Maven packages, a widely used dependency management system in Java. Many third-party libraries you might use in your project are likely hosted here.
+
     }
     dependencies {//it configures the dependencies gradle needs to build the project
         classpath 'com.android.tools.build:gradle:8.3.2' //android gradle plugin
@@ -12,7 +13,6 @@ buildscript {// buildscript block: This section tells Gradle to specifically loo
         // in the individual module build.gradle files
     }
 }
-
 //allprojects {
 //    repositories {
 //        mavenCentral() // For ImagePicker library, this line is enough. Although, it has been published on jitpack as well

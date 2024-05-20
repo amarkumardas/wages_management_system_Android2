@@ -142,82 +142,8 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
                 });backgroundTask.shutdown();//when all task completed then only shutdown
             }
-//            switch (item.getItemId()){
-//                case R.id.backup_active_mlg:{
-//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-//                    backgroundTask.execute(() -> {
-//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-//                            return;
-//                        }
-//
-//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-//
-//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-//                        if(!dataBackup.backupActiveMLGDataInPDFFormat()){
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                        }
-//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-//                    });backgroundTask.shutdown();//when all task completed then only shutdown
-//                }break;
-//                case R.id.backup_inactive_m:{
-//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-//                    backgroundTask.execute(() -> {
-//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-//                            return;
-//                        }
-//
-//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-//
-//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                        }
-//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-//                    });backgroundTask.shutdown();//when all task completed then only shutdown
-//                }break;
-//                case R.id.backup_inactive_l:{
-//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-//                    backgroundTask.execute(() -> {
-//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-//                            return;
-//                        }
-//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-//
-//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                        }
-//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-//                    });backgroundTask.shutdown();//when all task completed then only shutdown
-//                }break;
-//                case R.id.backup_inactive_g:{
-//                    ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-//                    backgroundTask.execute(() -> {
-//                        if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-//                            ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-//                            return;
-//                        }
-//                        getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-//
-//                        AllDataBackup dataBackup=new AllDataBackup(getContext());
-//                        if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
-//                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                        }
-//
-//                        getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-//                    });backgroundTask.shutdown();//when all task completed then only shutdown
-//                }break;
-//            }
           //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;});
-
 
         binding.searchClickTv.setOnClickListener(view -> {
             Intent intent=new Intent(getContext(),FindActivity.class);
@@ -226,23 +152,6 @@ public class MLDrawerFragment extends Fragment {
 
         binding.viewPager2.setAdapter(new FragmentAdapter(getActivity()));
         new TabLayoutMediator(binding.tabLayout, binding.viewPager2,((tab,position)-> tab.setText(titles[position]))).attach();//set text to page according to position
-//        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {//when tab select or swipe it will perform operation so we are getting position
-//            @Override
-//            public void onTabSelected(TabLayout.Tab tab) {
-//
-//            }
-//
-//            @Override
-//            public void onTabUnselected(TabLayout.Tab tab) {
-//
-//            }
-//
-//            @Override
-//            public void onTabReselected(TabLayout.Tab tab) {
-//
-//            }
-//        });
-
 
 //        binding.verticleMenu.setOnClickListener(view -> {
 //            PopupMenu popup=new PopupMenu(getContext(),binding.verticleMenu);
@@ -306,7 +215,6 @@ public class MLDrawerFragment extends Fragment {
         TextView businessAddress= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_address_tv);
         businessAddress.setText(getResources().getString(R.string.address)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.ADDRESS.name(),""));
     }
-
     private String getWhatsappOrPhoneNumber(String whatsappNo, String phoneNo) {
         StringBuilder sb = new StringBuilder(getResources().getString(R.string.whatsapp)+": ");
 

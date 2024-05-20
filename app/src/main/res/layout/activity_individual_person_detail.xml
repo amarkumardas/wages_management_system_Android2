@@ -851,38 +851,40 @@
                 android:layout_marginRight="2dp"
                 android:background="@color/white"
                 android:orientation="horizontal"
-                android:layout_marginTop="4dp"
+
                 android:weightSum="28">
 
                 <TextView
                     android:layout_gravity="center"
                     android:id="@+id/text_wages_tv"
                     android:layout_width="0dp"
-                    android:layout_height="15dp"
+                    android:layout_height="19dp"
                     android:layout_weight="7"
-                    android:layout_marginTop="2dp"
+                    android:paddingTop="5dp"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:text="@string/total_wages"
                     android:textSize="10sp"/>
 
                 <TextView
-                    android:layout_marginTop="2dp"
+                    android:paddingTop="5dp"
                     android:layout_gravity="center"
                     android:id="@+id/text_work_deposit_tv"
                     android:layout_width="0dp"
-                    android:layout_height="15dp"
+                    android:layout_height="19dp"
                     android:layout_weight="14"
+
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="10dp"/>
                 <TextView
-                    android:layout_marginTop="2dp"
+                    android:paddingTop="5dp"
                     android:layout_gravity="center"
                     android:id="@+id/text_advance_or_balance_tv"
                     android:layout_width="0dp"
-                    android:layout_height="15dp"
+                    android:layout_height="19dp"
                     android:layout_weight="7"
+
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="10dp"/>

@@ -5,11 +5,19 @@
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)//This line enforces that projects can only use repositories defined in this settings.gradle file and not in individual project's build.gradle files. This helps centralize dependency management and avoid conflicts.
     repositories {//his block defines the list of repositories Gradle should use.
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io" }  //Make sure to add this in your project for uCrop - an internal library
-        jcenter() // Warning: this repository is going to shut down soon
+        google()// google(): This refers to the Google Maven repository, which contains official Android tools and libraries from Google.
+        mavenCentral()//mavenCentral(): This is the central repository for Maven packages, a widely used dependency management system in Java. Many third-party libraries you might use in your project are likely hosted here.
+        maven { url "https://jitpack.io" }  //Make sure to add this in your project for uCrop - an internal library. is a way to add the JitPack maven repository to a list of repositories
+        jcenter() // Warning: this repository is going to shut down soon.jCenter is the public repository hosted at bintray that is free to use for open source library publishers.
+
     }
 }
+//allprojects {
+//    repositories {
+//        //  mavenCentral() // For ImagePicker library, this line is enough. Although, it has been published on jitpack as well
+//        maven {
+//            url "https://maven.google.com" }  //Make sure to add this in your project for uCrop - an internal library
+//    }
+//}
 rootProject.name = "AC Book"
 include ':app'//include line tells Gradle which subdirectories are considered subprojects within your larger project. Here, it includes the subproject named :app.

@@ -7,7 +7,7 @@ public class SharedPreferencesHelper {
 
     public enum Keys { // Enum declaration inside the class for keys
         HISTORY_KEEPING_DAYS,
-        BUSINESS_NAME,WHATSAPP_NUMBER,PHONE_NUMBER,EMAIL,GST_NUMBER,ADDRESS
+        BUSINESS_NAME,WHATSAPP_NUMBER,PHONE_NUMBER,EMAIL,GST_NUMBER,ADDRESS,GOOGLE_SIGNIN_EMAIL
     }
 
     //Common types of data that can be stored include boolean, int, long, float, and String.

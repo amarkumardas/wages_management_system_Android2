@@ -75,7 +75,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
                 android:textSize="17sp"
-                android:text="RATE"
+                android:hint="@string/rate"
                 android:inputType="numberDecimal"
 
                 android:id="@+id/p1_rate_tv_final"/>
@@ -151,7 +151,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
                 android:textSize="17sp"
-                android:text="RATE"
+                android:hint="@string/rate"
                 android:inputType="numberDecimal"
 
                 android:id="@+id/p2_rate_tv_final"/>
@@ -226,7 +226,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
                 android:textSize="17sp"
-                android:text="RATE"
+                android:hint="@string/rate"
                 android:inputType="numberDecimal"
 
                 android:id="@+id/p3_rate_tv_final"/>
@@ -300,7 +300,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
                 android:textSize="17sp"
-                android:text="RATE"
+                android:hint="@string/rate"
                 android:inputType="numberDecimal"
 
                 android:id="@+id/p4_rate_tv_final"/>
@@ -330,7 +330,7 @@
             android:layout_weight="5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="DEPOSIT AMOUNT "
+            android:text="@string/deposit_amount"
             android:textAlignment="textEnd"
             android:layout_gravity="center_vertical"
             android:textSize="12sp"
@@ -362,8 +362,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="TOTAL ="
-            android:textAlignment="textEnd"
+            android:text="@string/total"
+            android:textAlignment="center"
             android:textSize="10sp"
             android:layout_gravity="center_vertical"
             tools:ignore="RtlCompat"/>

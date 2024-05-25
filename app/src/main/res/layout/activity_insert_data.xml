@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activity.InsertPersonDetailsActivity"
+    tools:context=".activity.RegisterPersonDetailsActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/yellow_for_input">
@@ -30,7 +30,7 @@
             android:layout_gravity="center_vertical"
             android:background="@drawable/baseline_arrow_goback"
             android:layout_marginLeft="5dp"
-            android:onClick="go_back"
+            android:onClick="go_back_btn"
             android:foreground="?android:attr/selectableItemBackground"/>
 
         <TextView
@@ -443,7 +443,7 @@
         android:layout_width="230dp"
         android:layout_height="45dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="25dp"
         android:layout_marginBottom="50dp"
         android:background="@drawable/green_color_bg"
         android:onClick="insert_click"

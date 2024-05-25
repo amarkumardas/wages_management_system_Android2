@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,36 +21,62 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="horizontal">
-            <TextView
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="60dp"
-                android:id="@+id/search_id_tv"
-                android:layout_width="130dp"
-                android:paddingStart="2dp"
-                android:layout_height="wrap_content"
-                android:text="ID: 12345678910"
-                android:textSize="16sp"
-                android:layout_marginRight="2dp"
-                android:layout_gravity="end"
-                android:background="@drawable/yellow_background"
-                android:textColor="#000000"
-                android:textStyle="bold"/>
                 <TextView
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="1dp"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/search_id_tv"
+                    android:layout_width="130dp"
+                    android:paddingStart="2dp"
+                    android:layout_height="wrap_content"
+                    android:text="ID: 12345678910"
+                    android:textSize="16sp"
+                    android:background="@drawable/yellow_background"
+                     android:textColor="@color/black"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="70dp"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
-                    android:paddingStart="2dp"
-                    android:paddingEnd="2dp"
+                    android:layout_marginStart="4dp"
                     android:textSize="12dp"
-                    android:layout_centerVertical="true"
-                    android:id="@+id/search_inactive_or_active_tv"/>
-            </RelativeLayout>
+                    android:layout_gravity="center_vertical"
+                     android:textAlignment="center"
+                    android:id="@+id/search_inactive_or_active_tv"
+                    tools:ignore="RtlCompat" />
+
+            </LinearLayout>
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal">-->
+<!--            <TextView-->
+<!--                android:layout_alignParentEnd="true"-->
+<!--                android:layout_marginEnd="60dp"-->
+<!--                android:id="@+id/xsearch_id_tv"-->
+<!--                android:layout_width="130dp"-->
+<!--                android:paddingStart="2dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="ID: 12345678910"-->
+<!--                android:textSize="16sp"-->
+<!--                android:layout_marginRight="2dp"-->
+<!--                android:layout_gravity="end"-->
+<!--                android:background="@drawable/yellow_background"-->
+<!--                android:textColor="#000000"-->
+<!--                android:textStyle="bold"/>-->
+<!--                <TextView-->
+<!--                    android:layout_alignParentEnd="true"-->
+<!--                    android:layout_marginEnd="1dp"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:paddingStart="2dp"-->
+<!--                    android:paddingEnd="2dp"-->
+<!--                    android:textSize="12dp"-->
+<!--                    android:layout_centerVertical="true"-->
+<!--                    android:id="@+id/xsearch_inactive_or_active_tv"/>-->
+<!--            </RelativeLayout>-->
 
             <TextView
                 android:id="@+id/search_name_tv"

@@ -1,19 +1,19 @@
 package amar.das.acbook.activity;
 
-import androidx.annotation.NonNull;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.window.OnBackInvokedDispatcher;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +25,6 @@ import amar.das.acbook.adapters.SearchAdapter;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MLGAllRecordModel;
 import amar.das.acbook.model.SearchModel;
-import amar.das.acbook.ui.ml.MLDrawerFragment;
 import amar.das.acbook.utility.MyUtility;
 
 public class FindActivity extends AppCompatActivity {
@@ -111,7 +110,13 @@ TextView searchHint;
             }
         });
 
-
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { // Code to execute when back button is pressed
+              onClickGotoBackButton(getCurrentFocus());
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);//add it to the OnBackPressedDispatcher using getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback).This ensures that your custom back button handling logic is invoked when the back button is pressed.
     }
 //    public void showSoftKeyboard(View searchView) {//code link https://developer.android.com/training/keyboard-input/visibility#java
 //        if (searchView.requestFocus()) {
@@ -184,42 +189,17 @@ TextView searchHint;
         bool=true;//to set adapter recycler view on onQueryTextChange method
         Database.closeDatabase();
     }
-    public void goto_back(View view){
+    public void onClickGotoBackButton(View view){
         finish();//first destroy current activity then go back
 //        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //        transaction.replace(R.id.find_layout, new MLDrawerFragment()).commit();
         Intent intent = new Intent(this,NavigationActivity.class);//unless user signin cant use the app
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);//This line ensures that when you start the NavigationActivity using the intent, any existing activities on top of it will be cleared (if they belong to the same task), and the NavigationActivity will be brought to the foreground. If no task exists, a new task will be created for the NavigationActivity.
         startActivity(intent);
     }
-    /*In some situations, we need to recall activity again from onCreate(). This example demonstrates how to reload activity
-    whenever we return back to this activity we will always get refreshed activity
-    Disadvantage is whenever we press back button then it will load all data eg:50000 then it will take time to return back because we are refreshing
-    This feature is added to see only update of Name,Aadhaar card and Account number but this situation is very rare because people name,dharma,account would rarely change 1 time so removing this feature*/
-//    @Override
-//    protected void onRestart() {
-//        super.onRestart();
-//        //we have used Intent to recreate an activity as shown below -
-//        Intent i = new Intent(FindActivity.this, FindActivity.class);
-//        finish();//destroying current/same activity
-//        overridePendingTransition(0, 0);
-//        startActivity(i);//starting same/current activity ie. refreshed activity
-//        overridePendingTransition(0, 0);
-//        //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.This can be done only in activity
-//    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Database.closeDatabase();
     }
-//    @NonNull
-//    @Override
-//    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-//        finish();
-//        Intent intent = new Intent(this, NavigationActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent);
-//
-//        OnBackInvokedDispatcher dispatcher = super.getOnBackInvokedDispatcher();
-//        return dispatcher;
-//    }
 }

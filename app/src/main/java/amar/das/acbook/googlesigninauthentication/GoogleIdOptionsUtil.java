@@ -38,7 +38,6 @@ public class GoogleIdOptionsUtil {
 
         createCredentialRequest(signInWithGoogleOption);
     }
-
     private void createCredentialRequest(GetSignInWithGoogleOption signInWithGoogleOption) {
         GetCredentialRequest getCredentialRequest = getCredentialRequest(signInWithGoogleOption);
         CredentialManager credentialManager = CredentialManager.create(context);
@@ -65,7 +64,6 @@ public class GoogleIdOptionsUtil {
                 }
         );
     }
-
     private void handleNotSignedInUser() {
 //        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()//GetSignInWithGoogleOption
 //                .setFilterByAuthorizedAccounts(false)//First,check if the user has any accounts that have previously been used to sign in to your app by calling the API with the setFilterByAuthorizedAccounts parameter set to true. Users can choose between available accounts to sign in. If no authorized Google Accounts are available, the user should be prompted to sign up with any of their available accounts. To do this, prompt the user by calling the API again and setting setFilterByAuthorizedAccounts to false

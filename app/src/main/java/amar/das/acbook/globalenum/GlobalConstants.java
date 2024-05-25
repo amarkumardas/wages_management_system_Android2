@@ -6,6 +6,7 @@ public enum GlobalConstants {
      INACTIVE("0"),
 
      BACKUP_ACTIVE_MLG_PDF_FILE_NAME("ACTIVE_SKILL_MLG_BACKUP"),
+     BACKUP_ACTIVE_MLG_TEXT_FILE_NAME("ACTIVE_SKILL_MLG_BACKUP"),
      BACKUP_INACTIVE_M_TEXT_FILE_NAME("INACTIVE_SKILL_M_BACKUP"),
     BACKUP_INACTIVE_L_TEXT_FILE_NAME("INACTIVE_SKILL_L_BACKUP"),
     BACKUP_INACTIVE_G_TEXT_FILE_NAME("INACTIVE_SKILL_G_BACKUP"),
@@ -18,13 +19,12 @@ public enum GlobalConstants {
     CALCULATED_INVOICE_FILE_NAME("_CALCULATED_INVOICE"),
     DEFAULT_BUSINESS_NAME("CONSTRUCTION WORK"),
     DEPOSIT_CODE("1"),//to indicate amount is deposited
-    WAGES_CODE("0");//to indicate amount is wages
+    WAGES_CODE("0"),//to indicate amount is wages
+    USER_SELECTED_PDF_FORMAT("1"), USER_SELECTED_TEXT_FORMAT("2"), USER_SELECTED_EXCEL_FORMAT("3");
     private final String value;
-
     GlobalConstants(String value) {
         this.value = value;
     }
-
     public String getValue() {
         return value;
     }

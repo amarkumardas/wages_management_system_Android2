@@ -51,6 +51,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import amar.das.acbook.Database;
+//import amar.das.acbook.GoogleDrive.DriveQuickstart;
 import amar.das.acbook.R;
 import amar.das.acbook.adapters.WagesDetailsAdapter;
 import amar.das.acbook.customdialog.Dialog;
@@ -81,6 +82,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         binding = ActivityIndividualPersonDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+//        try {
+//            DriveQuickstart.mains();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } catch (GeneralSecurityException e) {
+//            throw new RuntimeException(e);
+//        }
 
         if (getIntent().hasExtra("ID")) {//every operation will be perform based on id
              db=Database.getInstance(this);
@@ -1240,23 +1248,14 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.no_phone_number), Toast.LENGTH_SHORT).show();
             });
             binding.editTv.setOnClickListener(view -> {
-                Intent intent = new Intent(getBaseContext(), InsertPersonDetailsActivity.class);
+                Intent intent = new Intent(getBaseContext(), RegisterPersonDetailsActivity.class);
                 intent.putExtra("ID", fromIntentPersonId);
                 startActivity(intent);
                 finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
             });
             binding.gobackIndividualPersonDetails.setOnClickListener(view -> {
-//                        if (getIntent().hasExtra("FromMesterLaberGAdapter")) {
-//                            finish();//first destroy current activity then go back
-//                            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                            transaction.replace(R.id.individual_person_details_activity, new SearchFragment()).commit();
-//                            Toast.makeText(this, "if", Toast.LENGTH_SHORT).show();
-//                           // getSupportFragmentManager().beginTransaction().detach(new ActiveLGFragment()).attach(new ActiveLGFragment()).commit();
-//                        } else {
-//                            Toast.makeText(this, "else", Toast.LENGTH_SHORT).show();
-//                            super.onBackPressed();// This calls finish() on this activity and pops the back stack.
-//                        }
-                        super.onBackPressed();// This calls finish() on this activity and pops the back stack.
+                finish();
+                  //super.onBackPressed();// This calls finish() on this activity and pops the back stack.
                     });
         } else
             Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_LONG).show();
@@ -1589,7 +1588,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
     }
     private void indicator1234CalculateAndUpdate(Integer[] sumCursor, int rate1IntoSump1, int rate2IntoSump2, int rate3IntoSump3, int rate4IntoSump4,int indicator,String id) {
-        boolean bool;
+//        boolean bool;
         int  totalDeposit,totalWages;
         int totalr1r2r3r4sum1sum2sum3sum4=rate1IntoSump1+rate2IntoSump2+rate3IntoSump3+rate4IntoSump4;
         totalWages=sumCursor[0];
@@ -1953,11 +1952,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              }else
                 correctInputArray[5]=0;// 0 means data not present
 
-            if(description.getText().toString().length() >=1){//to prevent null pointer exception
+            //if(description.getText().toString().length() >=1){//to prevent null pointer exception
+            if(!TextUtils.isEmpty(description.getText().toString().trim())){//to prevent null pointer exception
                 remarks="["+time+getResources().getString(R.string.hyphen_entered)+"\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
                 correctInputArray[6]=1;//means data present
-            }
-            else {//if user don't enter anything then time will set automatically
+            } else {//if user don't enter anything then time will set automatically
                 remarks="["+time+getResources().getString(R.string.hyphen_entered);
                 correctInputArray[6] = 0;
             }

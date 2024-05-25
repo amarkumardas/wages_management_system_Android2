@@ -38,7 +38,7 @@ public class NavigationActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(!isUserSignIn()){
+        if(!isUserSignIn()){//if you want to remove signin feature then remove this signin code
          Intent intent = new Intent(this,SignInWithGoogleActivity.class);//unless user signin cant use the app
          startActivity(intent);
         }

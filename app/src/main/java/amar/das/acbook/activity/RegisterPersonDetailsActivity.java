@@ -1,10 +1,10 @@
 package amar.das.acbook.activity;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.text.HtmlCompat;
@@ -19,11 +19,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -45,10 +43,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import amar.das.acbook.ImageResizer;
 import amar.das.acbook.Database;
@@ -58,7 +54,7 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.internal.Intrinsics;
 
-public class InsertPersonDetailsActivity extends AppCompatActivity {
+public class RegisterPersonDetailsActivity extends AppCompatActivity {
   //if you really want to write files, either make sure you're only writing to your app's designated storage directories, in which case you won't need any permissions at all, or if you really need to write to a directory your app doesn't own get that file manager permission from Google (how to get that permission)
   int [] correctInputArr =new int[10];
   Button add;
@@ -116,15 +112,15 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         });
 
         indianBank =getResources().getStringArray(R.array.indian_bank_names); //get bank names
-        ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, indianBank);
+        ArrayAdapter<String> bankAdapter=new ArrayAdapter<>(RegisterPersonDetailsActivity.this, android.R.layout.simple_list_item_1, indianBank);
         bankName_autoComplete.setAdapter(bankAdapter);
 
         religionHashSet=new HashSet<>(Arrays.asList(MyUtility.getReligionFromDb(getBaseContext()))); //hashset is taken to insert only unique data in table
-        ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
+        ArrayAdapter<String> religionAdapter=new ArrayAdapter<>(RegisterPersonDetailsActivity.this, android.R.layout.simple_list_item_1, religionHashSet.toArray(new String[religionHashSet.size()]));
         religion_autoComplete.setAdapter(religionAdapter);
 
         locationHashSet=new HashSet<>(Arrays.asList(MyUtility.getLocationFromDb(getBaseContext())));//hashset is taken to insert only unique data in table
-        ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(InsertPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
+        ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(RegisterPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
         location_autoComplete.setAdapter(locationAdapter);
 
         imageView = findViewById(R.id.imageview);
@@ -517,6 +513,15 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) { }
         });
+
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { // Code to execute when back button is pressed
+                refreshIndividualPersonDetailActivity(fromIntentPersonId);
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);//add it to the OnBackPressedDispatcher using getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback).This ensures that your custom back button handling logic is invoked when the back button is pressed.
+
     }
     public void insert_click(View view) { //action while clicking insert button
 
@@ -563,14 +568,14 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                     if(getIntent().hasExtra("ID")){//will execute only when updating
                         boolean success = false;
                         if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
-                            Toast.makeText(InsertPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
                             return;
                         }
                         if (db.updatePersonSkillAndShiftData(personSkill, fromIntentPersonId)) {//if skill get updated then only all data will be updated its important
                             success = db.updateAllPersonDetails(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, fromIntentPersonId, location, religion);
                         }
                         if(success){//if it is updated then show successfully message
-                             Toast.makeText(InsertPersonDetailsActivity.this, "ID: " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
+                             Toast.makeText(RegisterPersonDetailsActivity.this, "ID: " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
 
                             //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
 //                            final Calendar current=Calendar.getInstance();//to get current date
@@ -583,13 +588,13 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();//destroy current activity
                         }else
-                            Toast.makeText(InsertPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
                     }else{
                       //this will execute only when adding new person
                       //  for (int k = 1; k <= 50; k++) {
                         String newelyCreatedId=null;
                         if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
-                            Toast.makeText(InsertPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                             return;
                         }
                         if((newelyCreatedId= db.insertDataToDetailsAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, location, religion))==null){//if null means error
@@ -631,7 +636,7 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
                         displayResult("SUCCESSFULLY ADDED NEW PERSON", personName+" BUT QUERY NOT RETURNED ANY DATA OF THAT PERSON");
                 }
                 private void displayResult(String title, String message) {
-                    AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(InsertPersonDetailsActivity.this);
+                    AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(RegisterPersonDetailsActivity.this);
                     showDataFromDataBase.setCancelable(false);
                     showDataFromDataBase.setTitle(title);
                     showDataFromDataBase.setMessage(message);
@@ -730,37 +735,21 @@ public class InsertPersonDetailsActivity extends AppCompatActivity {
         }
         return image;
     }
-    public void go_back(View view){//when user press back arrow
-         //from activity to activity
-//        if(getIntent().hasExtra("ID")){//execute when it is called from other activity with ID intent
-//            Intent intent=new Intent(getBaseContext(),IndividualPersonDetailActivity.class); //go back
-//            intent.putExtra("ID",fromIntentPersonId);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
-//            startActivity(intent);
-//            finish();//destroy current activity
-//        }else{//go from activity to fragment
-//            finish();//first destroy current activity then go back
-//            //fragment not getting refresh
-////            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-////            transaction.replace(R.id.insert_detailsof_l_m_g, new MLFragment()).commit();
-//
-//            super.onBackPressed();
-//        }
-        refreshIndividualPersonDetailActivity(fromIntentPersonId);
-    }
-    @Override
-    public void onBackPressed(){//when user press back button
+    public void go_back_btn(View view){//when user press back arrow
         refreshIndividualPersonDetailActivity(fromIntentPersonId);
     }
     public void refreshIndividualPersonDetailActivity(String id){
         //from activity to activity
-        if(getIntent().hasExtra("ID")){//execute when it is called from other activity with ID intent
+        if(getIntent().hasExtra("ID")){//execute when it is called from IndividualPersonDetailActivity with ID intent only
             Intent intent=new Intent(getBaseContext(),IndividualPersonDetailActivity.class); //go back
             intent.putExtra("ID",id);//after going back to this IndividualPersonDetailActivity then it require ID so putExtra is used
             startActivity(intent);
             finish();//destroy current activity
-        }else {
+        }else {//if this activity is not called from IndividualPersonDetailActivity then execute this and go to navigation activity by refreshing so that user can see new register person name and photo.
             finish();//destroy current activity
-            super.onBackPressed();
+            Intent intent = new Intent(this,NavigationActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);//This line ensures that when you start the NavigationActivity using the intent, any existing activities on top of it will be cleared (if they belong to the same task), and the NavigationActivity will be brought to the foreground. If no task exists, a new task will be created for the NavigationActivity.
+            startActivity(intent);
         }
     }
 //    private void showImagePicDialog() {

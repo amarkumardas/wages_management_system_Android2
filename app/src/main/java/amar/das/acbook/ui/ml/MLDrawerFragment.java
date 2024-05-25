@@ -1,7 +1,5 @@
 package amar.das.acbook.ui.ml;
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -11,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -20,8 +17,9 @@ import java.util.concurrent.Executors;
 import amar.das.acbook.Database;
 
 import amar.das.acbook.activity.FindActivity;
-import amar.das.acbook.activity.InsertPersonDetailsActivity;
+import amar.das.acbook.activity.RegisterPersonDetailsActivity;
 import amar.das.acbook.R;
+import amar.das.acbook.activity.ManualBackupActivity;
 import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.takebackupdata.AllDataBackup;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
@@ -67,6 +65,11 @@ public class MLDrawerFragment extends Fragment {
         binding.verticleMenu.setOnClickListener(view -> {
            binding.drawerLayout.openDrawer(GravityCompat.START);//to open drawer
         });
+        binding.backupBtn.setOnClickListener(view -> {
+            //finish() no need to finish the current activity
+            Intent intent = new Intent(getContext(), ManualBackupActivity.class);
+            startActivity(intent);
+        });
 
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
             ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
@@ -83,7 +86,7 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                     AllDataBackup dataBackup=new AllDataBackup(getContext());
-                    if(!dataBackup.backupActiveMLGDataInPDFFormat()){
+                    if(!dataBackup.backupActiveMLGDataInPDFFormat(GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())){
                         getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
                     }
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
@@ -175,7 +178,7 @@ public class MLDrawerFragment extends Fragment {
 //            popup.show();
 //        });
         binding.addPerson.setOnClickListener(view -> {
-            Intent intent = new Intent(getContext(), InsertPersonDetailsActivity.class);
+            Intent intent = new Intent(getContext(), RegisterPersonDetailsActivity.class);
             startActivity(intent);
         });
         return root;

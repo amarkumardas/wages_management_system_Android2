@@ -7,7 +7,9 @@ public class SharedPreferencesHelper {
 
     public enum Keys { // Enum declaration inside the class for keys
         HISTORY_KEEPING_DAYS,
-        BUSINESS_NAME,WHATSAPP_NUMBER,PHONE_NUMBER,EMAIL,GST_NUMBER,ADDRESS,GOOGLE_SIGNIN_EMAIL
+        BUSINESS_NAME,WHATSAPP_NUMBER,PHONE_NUMBER,EMAIL,GST_NUMBER,ADDRESS,GOOGLE_SIGNIN_EMAIL,
+        FOR_SHARE_TRUE_AND_FOR_DOWNLOAD_FALSE,BACKUP_EACH_FILE_FORMAT;
+
     }
 
     //Common types of data that can be stored include boolean, int, long, float, and String.
@@ -37,7 +39,14 @@ public class SharedPreferencesHelper {
     public static int getInt(Context context, String key, int defaultValue) {
         return getSharedPreferences(context).getInt(key, defaultValue);
     }
-
+    public static void setBoolean(Context context, String key, boolean value) {
+        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+    public static boolean getBoolean(Context context, String key, boolean defaultValue) {
+        return getSharedPreferences(context).getBoolean(key, defaultValue);
+    }
     public static void clearSharedPreferences(Context context) {
         SharedPreferences.Editor editor = getSharedPreferences(context).edit();
         editor.clear();

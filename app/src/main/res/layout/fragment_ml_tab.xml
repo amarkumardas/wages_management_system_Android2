@@ -15,49 +15,60 @@
         android:orientation="vertical"
         android:background="@color/purple_700">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/frag1"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:orientation="horizontal"
         android:padding="2dp"
-        android:layout_marginTop="4dp"
-        android:weightSum="12">
+        android:layout_marginTop="4dp">
 
         <TextView
-            android:layout_weight="10"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginLeft="7dp"
             android:background="@drawable/white_detailsbg"
             android:drawableLeft="@drawable/ic_baseline_search_24"
-            android:drawablePadding="4dp"
+            android:layout_alignParentStart="true"
             android:gravity="center_vertical"
             android:hint="@string/by_name_phone_id_ac_aadhaar"
-            android:paddingLeft="4dp"
+            android:paddingLeft="2dp"
+            android:paddingEnd="4dp"
             android:textSize="15sp"
             android:id="@+id/search_click_tv"/>
+
         <Button
+            android:layout_marginTop="7dp"
+            android:id="@+id/backup_btn"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_toRightOf="@+id/search_click_tv"
+            android:layout_marginStart="15dp"
+            android:background="@drawable/baseline_person_add_alt_1_24"
+            android:foreground="?android:attr/selectableItemBackground" />
+
+        <Button
+            android:layout_marginTop="7dp"
             android:id="@+id/add_person"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:layout_marginStart="14dp"
-            android:layout_marginEnd="12dp"
-            android:layout_gravity="center_vertical"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_toRightOf="@+id/backup_btn"
+             android:layout_marginStart="15dp"
+
             android:foreground="?android:attr/selectableItemBackground"
             android:background="@drawable/baseline_person_add_alt_1_24"/>
         <Button
+            android:layout_marginTop="7dp"
             android:id="@+id/verticle_menu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="center_vertical"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="15dp"
+             android:layout_toRightOf="@id/add_person"
+
             android:foreground="?android:attr/selectableItemBackground"
             android:background="@drawable/baseline_menu_24"/>
 
-    </LinearLayout>
+    </RelativeLayout>
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"

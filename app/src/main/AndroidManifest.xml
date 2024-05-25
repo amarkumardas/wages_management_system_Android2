@@ -3,8 +3,7 @@
     <!-- package="amar.das.acbook"> -->
     <queries> <!-- Specific apps you interact with -->
         <package android:name="com.whatsapp" /> <!-- we have to mention here otherwise it will not show package name from android 11 downwards:this is use to share on whatsapp -->
-    </queries>
-<!--     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>-->
+    </queries> <!-- <uses-permission android:name="android.permission.USE_CREDENTIALS"/> -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- **********88Removed android.permission.ACCESS_NETWORK_STATE: Starting with Android 6.0 (API level 23), your app no longer needs to declare ACCESS_NETWORK_STATE permission to use the Connectivity Manager. The system automatically grants this permission at runtime.TO USE connectivity manager this permission required -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- to record audio -->
@@ -33,25 +32,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ACBook">
-
-<!--        <activity-->
-<!--            android:name=".activity.SignInWithGoogleActivity"-->
-<!--            android:exported="true"-->
-<!--            android:screenOrientation="portrait">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-
+        <activity
+            android:name=".activity.ManualBackupActivity"
+            android:exported="false" />
+        <!-- <activity -->
+        <!-- android:name=".activity.SignInWithGoogleActivity" -->
+        <!-- android:exported="true" -->
+        <!-- android:screenOrientation="portrait"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
         <activity
             android:name=".activity.SignInWithGoogleActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <!-- <activity -->
+            android:screenOrientation="portrait"></activity> <!-- <activity -->
         <!-- android:name=".HistoryActivity" -->
         <!-- android:exported="false" /> -->
         <activity
@@ -87,15 +83,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-<!--        <activity-->
-<!--            android:name=".activity.NavigationActivity"-->
-<!--            android:exported="false"-->
-<!--            android:screenOrientation="portrait"/>-->
-
+        </activity> <!-- <activity -->
+        <!-- android:name=".activity.NavigationActivity" -->
+        <!-- android:exported="false" -->
+        <!-- android:screenOrientation="portrait"/> -->
         <activity
-            android:name=".activity.InsertPersonDetailsActivity"
+            android:name=".activity.RegisterPersonDetailsActivity"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- <activity -->
         <!-- android:name="com.theartofdev.edmodo.cropper.CropImageActivity" -->

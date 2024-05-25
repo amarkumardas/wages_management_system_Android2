@@ -51,8 +51,21 @@ dependencies {//this block defines the external libraries your project relies on
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2' //pdf viewer
 
+    //google signin
     implementation 'androidx.credentials:credentials:1.2.2' //This library is part of Android Jetpack and provides unified access to a user’s credentials. It includes support for passwords, passkeys, and federated credentials.You can use this library to create seamless and secure sign-in experiences in your Android app.
     implementation 'androidx.credentials:credentials-play-services-auth:1.2.2' //Additionally, if you need credentials support from Play services for devices running Android 13 and below, you can include the following optional dependency:
     implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.0'//This library is related to Google Identity services.It’s used for managing user identities and authentication.If you’re integrating Google Sign-In or other identity-related features, you might need this library.
 
+//Drive
+//    implementation 'com.google.api-client:google-api-client:2.0.0'
+//    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+//    implementation 'com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0'
+
+//v3 indicates compatibility with Drive API version 3.
+//rev197 specifies a revision within version 3.
+//1.25.0 is the version number of the Google API Client Library.
+// https://mvnrepository.com/artifact/com.google.apis/google-api-services-drive
+  //  implementation group: 'com.google.apis', name: 'google-api-services-drive', version: 'v3-rev197-1.25.0'
+//    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+//    implementation 'com.google.api-client:google-api-client:2.0.0'
 }

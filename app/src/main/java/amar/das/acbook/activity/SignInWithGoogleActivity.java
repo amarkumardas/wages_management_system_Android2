@@ -2,6 +2,7 @@ package amar.das.acbook.activity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,7 +41,7 @@ public class SignInWithGoogleActivity extends AppCompatActivity {
         //}
     });
     binding.findBackupButton.setOnClickListener(view -> {
-
+        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
     });
     }
 //    private boolean isUserSignIn() {

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.history.HistoryFragment"
-    android:background="#D6DADF">
+    android:background="@color/background">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"

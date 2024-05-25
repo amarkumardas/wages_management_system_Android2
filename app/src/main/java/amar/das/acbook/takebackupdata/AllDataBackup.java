@@ -30,17 +30,74 @@ public class AllDataBackup{
         String[] personIds =db.getIdOfInActiveMOrLOrG(skillType); if(personIds==null) return  false;//if error
 
         this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+textFileName;//GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue()
+        backupFileName =MyUtility.backupDateTime()+textFileName;
         StringBuilder sb=new StringBuilder();
         sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append("\nBACKUP OF ").append(numberOfPerson).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
         sb.append(getTotalInActiveAdvanceAndBalance(skillType)).append("\n-----------------------------\n\n");
 
         for (String id:personIds){//loop
-            sb=createInActiveMOrLOrGInvoiceTextFile(id,sb);
+            sb= getDataOfSkillAccordingToId(id,sb);
             if(sb==null) return false;
         }
 
          if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain", "BACKUP INACTIVE SKILL "+skillType+" TEXT FILE",context)) return false;
+
+        Database.closeDatabase();
+        return true;//if everything goes fine
+    }
+    public boolean backupActiveMLGDataInPDFFormat(String pdfFileName){
+        Database db=Database.getInstance(context);
+        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
+
+        this.numberOfPerson=personIds.length;
+        backupFileName =MyUtility.backupDateTime()+pdfFileName;
+
+        MakePdf makePdf = new MakePdf();
+        if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return false;//created page 1
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+        if (!makePdf.writeSentenceWithoutLines(getActiveSkillCreatedInfo(numberOfPerson), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return false;
+        if (!makePdf.writeSentenceWithoutLines(getTotalActiveAdvanceAndBalanceInfo(), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
+
+        for (String id:personIds){//loop
+            if(!createActiveMLGInvoicePDF(id,makePdf)) return false;
+        }
+
+        if (!makePdf.createdPageFinish2()) return false;//after finish page we cannot write to it
+
+        File pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(context.getExternalFilesDir(null).toString(), backupFileName);//we have to return filename  view pdf using file path
+        if(pdfFile == null) return false;//means error
+
+        if (!makePdf.closeDocumentLastOperation4()) return false;
+
+        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" PDF FILE",context)) return false;//open intent to share
+
+        Database.closeDatabase();
+        return true;//if everything goes fine
+    }
+    public boolean backupActiveMLGDataInTextFormat(String textFileName){
+        Database db=Database.getInstance(context);
+        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
+
+        this.numberOfPerson=personIds.length;
+        backupFileName =MyUtility.backupDateTime()+textFileName;//GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue()
+        StringBuilder sb=new StringBuilder();
+        String[] array=getActiveSkillCreatedInfo(numberOfPerson);
+        sb.append(array[0]).append("\n").append(array[1]).append("\n\n");
+
+        array=getTotalActiveAdvanceAndBalanceInfo();
+        for (String str:array) {
+            sb.append(str);
+        }
+        sb.append("\n-----------------------------\n\n");
+        //sb.append(getTotalInActiveAdvanceAndBalance(skillType)).append("\n-----------------------------\n\n");
+
+        for (String id:personIds){//loop
+            sb= getDataOfSkillAccordingToId(id,sb);//this method fetch data according to id weather it is active or inactive
+            if(sb==null) return false;
+        }
+
+        if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain", context.getString(R.string.backup_active_m_l_g)+" TEXT FILE",context)) return false;
 
         Database.closeDatabase();
         return true;//if everything goes fine
@@ -93,37 +150,8 @@ public class AllDataBackup{
             return false;
         }
     }
-    public boolean backupActiveMLGDataInPDFFormat(){
-        Database db=Database.getInstance(context);
-        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
 
-        this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue();
-
-        MakePdf makePdf = new MakePdf();
-        if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return false;//created page 1
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-        if (!makePdf.writeSentenceWithoutLines(getPdfCreatedInfo(numberOfPerson), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return false;
-        if (!makePdf.writeSentenceWithoutLines(getTotalActiveAdvanceAndBalanceInfo(), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-
-        for (String id:personIds){//loop
-            if(!createActiveMLGInvoicePDF(id,makePdf)) return false;
-        }
-
-        if (!makePdf.createdPageFinish2()) return false;//after finish page we cannot write to it
-
-        File pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(context.getExternalFilesDir(null).toString(), backupFileName);//we have to return filename  view pdf using file path
-        if(pdfFile == null) return false;//means error
-
-        if (!makePdf.closeDocumentLastOperation4()) return false;
-
-        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" PDF FILE",context)) return false;//open intent to share
-
-        Database.closeDatabase();
-        return true;//if everything goes fine
-    }
-    public String[] getPdfCreatedInfo(int numberOfPerson) {
+    public String[] getActiveSkillCreatedInfo(int numberOfPerson) {
         String[] backupInfo = new String[2];
         StringBuilder sb1 = new StringBuilder();
         sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());
@@ -226,7 +254,7 @@ public class AllDataBackup{
         }
         return true;
     }
-    private StringBuilder createInActiveMOrLOrGInvoiceTextFile(String id,StringBuilder sb) {
+    private StringBuilder getDataOfSkillAccordingToId(String id, StringBuilder sb) {//this method fetch data according to id weather it is active or inactive
         try{
             String personDetails[]=MyUtility.getPersonDetailsForRunningPDFInvoice(id,context);//id ,name,invoice number
             sb.append(personDetails[1]).append(" , ").append(personDetails[0]).append(" , ").append(personDetails[2]).append("\n")

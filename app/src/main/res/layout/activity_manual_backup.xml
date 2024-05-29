@@ -87,13 +87,13 @@
         android:orientation="horizontal"
         android:layout_marginLeft="10dp"
         android:weightSum="3"
-        android:id="@+id/backup_radiogp">
+        android:id="@+id/backup_each_file_radiogroup">
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PDF"
             android:layout_weight="1"
-            android:id="@+id/backup_pdf"
+            android:id="@+id/backup_each_file_pdf"
             android:textSize="12sp"
             android:foreground="?android:attr/selectableItemBackground" />
         <RadioButton
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:text="TEXT"
             android:layout_weight="1"
-            android:id="@+id/backup_text"
+            android:id="@+id/backup_each_file_text"
             android:textSize="12sp"
             android:foreground="?android:attr/selectableItemBackground"/>
         <RadioButton
@@ -109,7 +109,7 @@
             android:layout_height="wrap_content"
             android:text="EXCEL"
             android:layout_weight="1"
-            android:id="@+id/backup_excel"
+            android:id="@+id/backup_each_file_excel"
             android:textSize="12dp"
             android:foreground="?android:attr/selectableItemBackground"
             />
@@ -123,7 +123,7 @@
     <Button
         android:id="@+id/backup_active_skill_mlg"
         android:layout_width="130dp"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:textSize="13dp"
         android:text="Active Skill M L G"
         android:textAllCaps="false"
@@ -145,7 +145,7 @@
     <Button
         android:id="@+id/backup_inactive_skill_m"
         android:layout_width="130dp"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:textSize="13dp"
         android:text="InActive Skill M"
         android:textAllCaps="false"
@@ -166,7 +166,7 @@
     <Button
         android:id="@+id/backup_inactive_skill_l"
         android:layout_width="130dp"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:text="InActive Skill L"
         android:textSize="13dp"
         android:textAllCaps="false"
@@ -187,7 +187,7 @@
     <Button
         android:id="@+id/backup_inactive_skill_g"
         android:layout_width="130dp"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:textSize="13dp"
         android:text="InActive Skill G"
         android:textAllCaps="false"

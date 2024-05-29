@@ -3,16 +3,11 @@ package amar.das.acbook.activity;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
-import android.Manifest;
-
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteBlobTooBigException;
 import android.graphics.Bitmap;
@@ -25,6 +20,7 @@ import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -40,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -876,7 +871,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 outputStream.close();
               // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
                 if (!MyUtility.shareFileToAnyApp(file , mimeType, title,getBaseContext())) {//open intent to share
-                    Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
+                    Log.e("ERROR OCCURRED","CANNOT SHARE FILE");
                     return false;
                 }
                 //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
@@ -1122,7 +1118,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     return null;//after finish page we cannot write to it
 
                 //while creating current pdf then its file name should be same because if user click on current PDF button repeatedly then many file will be create in device which is useless.so to avoid that file name is kept same so that whenever user click current pdf button then new file will be replaced with old file so it is necessary to keep same file name.if file name is unique then many file will be created in device
-                 pdfFile = makePdf.createFileToSavePdfDocumentAndReturnFile(getExternalFilesDir(null).toString(), MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue()));//we have to return filename  view pdf using file path
+                 pdfFile = makePdf.createPdfFileInExternalStorageAndReturnFile(getExternalFilesDir(null).toString(), MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue()));//we have to return filename  view pdf using file path
                 if (!makePdf.closeDocumentLastOperation4()) return null;
             }
             return pdfFile;
@@ -1208,11 +1204,11 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return null;
         }
         try {
-            File folder = new File(getExternalFilesDir(null) + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"");//create directory
+            File folder = new File(getExternalFilesDir(null) + File.separator +GlobalConstants.PDF_FOLDER_NAME.getValue());//create directory
             if (!folder.exists()) {//if folder not exist then create folder
                 folder.mkdir();//File createNewFile() method returns true if new file is created and false if file already exists.
             }
-            File file = new File(getExternalFilesDir(null) + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"/" + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
+            File file = new File(getExternalFilesDir(null) + File.separator +GlobalConstants.PDF_FOLDER_NAME.getValue()+ File.separator + MyUtility.generateUniqueFileNameByTakingDateTime(id,fileName) + ".pdf");//path of pdf file where it is saved in device and file is created
 
                 FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
                 fileOutputStream.write(pdfByte);

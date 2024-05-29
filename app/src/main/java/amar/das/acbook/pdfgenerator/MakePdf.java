@@ -14,7 +14,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.utility.MyUtility;
 
@@ -24,7 +23,7 @@ public class MakePdf{
     private PdfDocument.PageInfo myPageInfo;
     private Canvas canvas;
     private PdfDocument.Page myPage;
-
+    private String pdfExtension=".pdf";
     private static final byte defaultSideGab =4;//gab between data and page.its like padding
     public static int defaultPageWidth=380,defaultPageHeight=600;//350 was before
     private static final byte gabBetweenComponents=3;//gabBetweenComponents ensure gab between components
@@ -523,7 +522,7 @@ public class MakePdf{
          (metrics.descent - metrics.ascent) * lines.length + metrics.leading * (lines.length - 1): This adds together the total height of all the lines and
          the total height of all the gaps to get the total height of the block of text.*/
     }
-    public  File createFileToSavePdfDocumentAndReturnFile(String externalFileDir, String fileName){//return null when exception
+    public  File createPdfFileInExternalStorageAndReturnFile(String externalFileDir, String fileName){//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
 //            File folder = new File( externalFileDir + "/acBookPDF");   //https://stackoverflow.com/questions/65125446/cannot-resolve-method-getexternalfilesdir
 //            if (!folder.exists()) {//of folder not exist then create folder
@@ -531,7 +530,8 @@ public class MakePdf{
 //             }
 
             if(MyUtility.isFolderExistIfNotExistCreateIt(externalFileDir,GlobalConstants.PDF_FOLDER_NAME.getValue())) {
-                File filePath = new File(externalFileDir + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"/" + fileName + ".pdf");//path of pdf where it is saved in device
+               // File filePath = new File(externalFileDir + "/"+GlobalConstants.PDF_FOLDER_NAME.getValue()+"/" + fileName + ".pdf");//path of pdf where it is saved in device
+                File filePath = new File(externalFileDir + File.separator +GlobalConstants.PDF_FOLDER_NAME.getValue()+ File.separator + fileName + pdfExtension);//path of pdf where it is saved in device
                 myPdfDocument.writeTo(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
                // return filePath.getAbsolutePath();//returning created file absolute path
                 return filePath;

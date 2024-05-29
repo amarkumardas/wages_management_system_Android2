@@ -1,6 +1,5 @@
 package amar.das.acbook.ui.history;
 
-import android.Manifest;
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +35,6 @@ import java.util.concurrent.Executors;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 
-import amar.das.acbook.activity.PdfViewerOperationActivity;
 import amar.das.acbook.adapters.HistoryAdapter;
 import amar.das.acbook.databinding.FragmentHistoryTabBinding;
 import amar.das.acbook.globalenum.GlobalConstants;
@@ -431,7 +428,7 @@ public class HistoryFragment extends Fragment {
 
             if(!makePdf.createdPageFinish2()) return null;
 
-            fileAbsolutePath=makePdf.createFileToSavePdfDocumentAndReturnFile(getContext().getExternalFilesDir(null).toString(),historyFileName(startDate,endDate)).getAbsolutePath();
+            fileAbsolutePath=makePdf.createPdfFileInExternalStorageAndReturnFile(getContext().getExternalFilesDir(null).toString(),historyFileName(startDate,endDate)).getAbsolutePath();
 
             if(!makePdf.closeDocumentLastOperation4())return null;
 

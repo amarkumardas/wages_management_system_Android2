@@ -1925,7 +1925,7 @@ public class Database extends SQLiteOpenHelper {
 
             if(!makePdf.createdPageFinish2()) return null;
 
-            fileAbsolutePath =makePdf.createFileToSavePdfDocumentAndReturnFile(context.getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(context,id)).getAbsolutePath();
+            fileAbsolutePath =makePdf.createPdfFileInExternalStorageAndReturnFile(context.getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(context,id)).getAbsolutePath();
 
             if(!makePdf.closeDocumentLastOperation4())return null;
 

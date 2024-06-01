@@ -84,7 +84,7 @@ public class Dialog {
                    ((Activity) context).finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
                    context.startActivity(intent);
                }else{
-                   MyUtility.showDefaultDialog(context.getString(R.string.not_saved),context.getString(R.string.failed_to_update),context);
+                   MyUtility.showDefaultDialog(context.getString(R.string.not_saved),context.getString(R.string.failed_to_update),context,false);
                }
            }catch (Exception x){
                x.printStackTrace();

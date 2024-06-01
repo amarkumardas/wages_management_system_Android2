@@ -6,12 +6,10 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -53,7 +51,7 @@ TextView searchHint;
         searchHint=findViewById(R.id.search_hint);
 
         searchHint.setOnClickListener(view -> {//searchHint.setTooltipText("may name is amar\n kumar \n das");
-            MyUtility.showDefaultDialog(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext());
+            MyUtility.showDefaultDialog(getResources().getString(R.string.searching_tips),getResources().getString(R.string.searching_tips_info),view.getContext(),false);
          });
         searchRecycler.setHasFixedSize(true);
 
@@ -124,7 +122,7 @@ TextView searchHint;
 //            imm.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
 //        }
 //    }
-     public void invoiceBackupButton(View view){
+     public void calculatedInvoiceBackupButton(View view){
          Intent intent = new Intent(view.getContext(), BackupCalculatedInvoicesActivity.class);
          startActivity(intent);
      }

@@ -15,7 +15,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -120,7 +119,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                if(MyUtility.deletePdfOrRecordingUsingPathFromDevice(absolutePathArrayToDelete[1])){//manually delete the generated file from app private storage because this file is downloaded and stored in download folder so deleting it otherwise same file will be twice.it will be deleted when error occurred or not
 //                    absolutePathArrayToDelete[1]=null; //after file deleted set null
 //                }
-
                 String pdfAbsolutePath= createRunningPDFInvoiceAndReturnFile(fromIntentPersonId).getAbsolutePath();
                 if(downloadPdfUsingAbsPathOrByte(pdfAbsolutePath,null,fromIntentPersonId)){
                     displayDialogMessage("DOWNLOADED","ID: "+fromIntentPersonId+"\nRUNNING INVOICE\nIN DOWNLOAD FOLDER");
@@ -132,7 +130,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //                if(MyUtility.deletePdfOrRecordingUsingPathFromDevice(absolutePathArrayToDelete[1])){//manually delete the generated file from app private storage because this file is downloaded and stored in download folder so deleting it otherwise same file will be twice.it will be deleted when error occurred or not
 //                    absolutePathArrayToDelete[1]=null; //after file deleted set null
 //                 }
-
                 }else//when whichPdfIndicatorChangesDynamically is 4
                 displayDialogMessage("PLEASE SELECT","INVOICE TO DOWNLOAD");
         });
@@ -325,12 +322,12 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                 return false;
             }
             if(pdfByte!=null){
-               return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.CALCULATED_INVOICE_FILE_NAME.getValue())+".pdf",pdfByte);
+               return MyUtility.downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.CALCULATED_INVOICE_FILE_NAME.getValue())+".pdf",pdfByte,this);
             }
 
             if(absolutePath!= null){
                 byte[] convertedBytes = Files.readAllBytes(Paths.get(absolutePath));// This code uses the Files.readAllBytes() method from the java.nio.file package to read all the bytes from the file specified by the absolute path into a byte array. This method is more concise and efficient .
-                return downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue())+".pdf",convertedBytes);
+                return MyUtility.downloadPdfUsingByteInDownloadFolder(MyUtility.generateUniqueFileNameByTakingDateTime(id, GlobalConstants.RUNNING_INVOICE_FILE_NAME.getValue())+".pdf",convertedBytes,this);
             }
             return false;
         }catch(Exception x){
@@ -338,37 +335,37 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-    private boolean downloadPdfUsingByteInDownloadFolder(String filename, byte[] pdfContent) {//this method to save it to the download folder.
-        if(filename==null || pdfContent==null){
-            return false;
-        }
-        try {
-          if(checkPermissionForDownload(getBaseContext())){
-               File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-               File pdfFile = new File(downloadsFolder, filename);
-
-               FileOutputStream outputStream = new FileOutputStream(pdfFile);
-               outputStream.write(pdfContent);
-               outputStream.close();
-            return true;
-        }else{
-            Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-              //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-              //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
-            return false;
-            }
-        }catch (IOException e) {
-            e.printStackTrace();
-             return false;
-        }catch (Exception x){
-            x.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean checkPermissionForDownload(Context baseContext) {
-        return true;//after android 10+ no need of permission to download files in device
-    }
+//    private boolean downloadPdfUsingByteInDownloadFolder(String filename, byte[] pdfContent) {//this method to save it to the download folder.
+//        if(filename==null || pdfContent==null){
+//            return false;
+//        }
+//        try {
+//          if(checkPermissionForDownload(getBaseContext())){
+//               File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//               File pdfFile = new File(downloadsFolder, filename);
+//
+//               FileOutputStream outputStream = new FileOutputStream(pdfFile);
+//               outputStream.write(pdfContent);
+//               outputStream.close();
+//            return true;
+//        }else{
+//            Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+//              //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+//              //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
+//            return false;
+//            }
+//        }catch (IOException e) {
+//            e.printStackTrace();
+//             return false;
+//        }catch (Exception x){
+//            x.printStackTrace();
+//            return false;
+//        }
+//    }
+//
+//    private boolean checkPermissionForDownload(Context baseContext) {
+//        return true;//after android 10+ no need of permission to download files in device in download folder
+//    }
 
     private boolean shareAllDataAsTextFile(String id) {
         StringBuilder sb=new StringBuilder();
@@ -391,7 +388,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 
             sb.append(getAllSumAndDepositAndWagesDetails(id,getBaseContext()));//all wages and deposit data
             sb.append("------------FINISH--------------");
-            return shareLargeDataAsTextFileToAnyApp(id, GlobalConstants.ALL_DETAILS_TEXT_FILE_NAME.getValue(),sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
+            return shareLargeDataAsTextFileToAnyAppForId(id, GlobalConstants.ALL_DETAILS_TEXT_FILE_NAME.getValue(),sb.toString(),"text/plain","ID "+id+" SHARE TEXT FILE USING");//sharing all data excluding image
 
         }catch (Exception x){
             x.printStackTrace();
@@ -506,7 +503,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             dialogBuilder.setNegativeButton(getResources().getString(R.string.send_summary_to_contact), (dialogInterface, i) -> {
                 success[0]=MyUtility.sendMessageToContact(id,getMessageOnlyInvoiceDetailsAndTotalWagesAndDeposit(id),getBaseContext());//sending only total wages and deposit due to long text cannot send as sms
                       if(!success[0]){//if no contact then send full txt file message to any app
-                          success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
+                          success[0]= shareLargeDataAsTextFileToAnyAppForId(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                       }
                 dialogInterface.dismiss();
             });
@@ -514,7 +511,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
            // dialogBuilder.setPositiveButtonIcon(AppCompatResources.getDrawable(getBaseContext(),R.drawable.baseline_share_24));
             dialogBuilder.setPositiveButton( getResources().getString(R.string.share), (dialogInterface, i) -> {
                 if(defaultTrueForOpenAnyAppAndFalseForWhatsApp) {
-                    success[0]= shareLargeDataAsTextFileToAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
+                    success[0]= shareLargeDataAsTextFileToAnyAppForId(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                 }else{
                     success[0]= sendMessageDirectToWhatsAppOrAnyApp(id,fileName,message,"text/plain","ID "+id+" SHARE TEXT FILE USING");
                 }
@@ -544,10 +541,10 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             String activePhone=MyUtility.getActiveOrBothPhoneNumber(id,getBaseContext(),true);//for opening whatsapp we have to check phone number is available or not
             if(activePhone!=null) {
                 if(!MyUtility.shareMessageDirectlyToWhatsApp(message,activePhone,getBaseContext())){//if fail
-                     return shareLargeDataAsTextFileToAnyApp(id,fileName,message,mimeType,title);
+                     return shareLargeDataAsTextFileToAnyAppForId(id,fileName,message,mimeType,title);
                 }
             }else{//if no phone number then share text to any app
-                return shareLargeDataAsTextFileToAnyApp(id,fileName,message,mimeType,title);
+                return shareLargeDataAsTextFileToAnyAppForId(id,fileName,message,mimeType,title);
             }
         }catch (Exception x){
             x.printStackTrace();
@@ -859,7 +856,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
 //  }
 //  return false;
 //}
-    public boolean shareLargeDataAsTextFileToAnyApp(String id,String fileName,String message,String mimeType,String title){
+    public boolean shareLargeDataAsTextFileToAnyAppForId(String id, String fileName, String message, String mimeType, String title){
          if(id==null|| message==null|| mimeType==null||title==null){
             return false;
         }

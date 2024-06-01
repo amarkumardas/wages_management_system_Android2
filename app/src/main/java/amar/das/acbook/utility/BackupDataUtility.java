@@ -9,7 +9,30 @@ import amar.das.acbook.R;
 import amar.das.acbook.globalenum.GlobalConstants;
 
 public class BackupDataUtility {
-    public static String[] getTotalActiveAdvanceAndBalanceInfo(Context context){
+    public static String[] getTotalInActiveMOrLOrGAdvanceAndBalanceInfo(Context context, String skillType){//only 1 size of array
+        String[] ratesInfo = new String[1];
+        Database db=Database.getInstance(context);
+        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skillType,false);
+        if(noRateIds!=null){//means no rate ids are there
+            ratesInfo[0] ="FOR SEEING TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+            return ratesInfo;
+        }
+        StringBuilder sb = new StringBuilder();
+        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
+            cursor.moveToFirst();
+            sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE  Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
+                    .append(" , TOTAL BALANCE  Rs: ")
+                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
+
+            ratesInfo[0] = sb.toString();
+            return ratesInfo;
+        }catch (Exception x){
+            x.printStackTrace();
+            return new String[]{"error"};
+        }
+    }
+    public static String[] getTotalActiveMLGAdvanceAndBalanceInfo(Context context){//array of one size only
         String[] ratesInfo = new String[1];
         Database db=Database.getInstance(context);
         String noRateIds=db.getIdsAndReturnNullIfRateIsProvidedOfActiveMLG();
@@ -32,7 +55,21 @@ public class BackupDataUtility {
             return new String[]{"error"};
         }
     }
-    public static String[] getActiveSkillCreatedInfo(int numberOfPerson, Context context) {
+    public static String[] getInActiveSkillCreatedInfo(int numberOfPerson,String skillType) {//only 2 size
+        String[] backupInfo = new String[2];
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());
+        backupInfo[0] = sb1.toString();
+
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("BACKUP OF ").append(numberOfPerson)
+                .append(" INACTIVE  PEOPLE  SKILLED  IN ( ")
+                .append(skillType).append(" ")
+                .append("). SORTED ACCORDING TO  ID");
+        backupInfo[1] = sb2.toString();
+        return backupInfo;
+    }
+    public static String[] getActiveSkillCreatedInfo(int numberOfPerson,Context context) {
         String[] backupInfo = new String[2];
         StringBuilder sb1 = new StringBuilder();
         sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());

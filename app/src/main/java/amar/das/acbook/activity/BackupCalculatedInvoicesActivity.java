@@ -91,7 +91,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 }
             });
             binding.textfileCalculatedHint.setOnClickListener(view -> {
-                MyUtility.showDefaultDialog(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext());
+                MyUtility.showDefaultDialog(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext(),false);
             });
 
             if(allFilePathFromDevice.size() >= toDeleteOldInvoiceIndicator){

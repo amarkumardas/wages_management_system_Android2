@@ -7,19 +7,19 @@
     <item
         android:id="@+id/backup_active_mlg"
         android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_active_m_l_g"/>
+        android:title="@string/backup_active_skill_m_l_g"/>
 
     <item android:id="@+id/backup_inactive_m"
         android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_m"/>
+        android:title="@string/backup_inactive_skill_m"/>
 
     <item android:id="@+id/backup_inactive_l"
         android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_l"/>
+        android:title="@string/backup_inactive_skill_l"/>
 
     <item android:id="@+id/backup_inactive_g"
         android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_g"/>
+        android:title="@string/backup_inactive_skill_g"/>
       </menu>
         </item>
   </group>

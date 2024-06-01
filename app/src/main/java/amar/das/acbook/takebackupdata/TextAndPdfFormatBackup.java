@@ -1,158 +1,164 @@
 package amar.das.acbook.takebackupdata;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.PdfViewerOperationActivity;
-import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
 import amar.das.acbook.utility.BackupDataUtility;
 import amar.das.acbook.utility.MyUtility;
 
 public class TextAndPdfFormatBackup {
     private Context context;
-    private int numberOfPerson;
-    private String backupFileName;
+   // private int numberOfPerson;
+//    private String backupFileName;
     public TextAndPdfFormatBackup(Context context) {
         this.context = context;
     }
-
-    public boolean backupInActiveMOrLOrGDataInTextFormat(String textFileName, String skillType){
+    public String backupInActiveMOrLOrGDataInTextFormat(String skillType){
         Database db=Database.getInstance(context);
-        String[] personIds =db.getIdOfInActiveMOrLOrG(skillType); if(personIds==null) return  false;//if error
+        String[] personIds =db.getIdOfInActiveMOrLOrG(skillType); if(personIds==null) return  null;//if error
 
-        this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+textFileName;
+        //this.numberOfPerson=personIds.length;
         StringBuilder sb=new StringBuilder();
-        sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append("\nBACKUP OF ").append(numberOfPerson).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
-        sb.append(getTotalInActiveAdvanceAndBalance(skillType)).append("\n-----------------------------\n\n");
-
-        for (String id:personIds){//loop
-            sb= getDataOfSkillAccordingToId(id,sb);
-            if(sb==null) return false;
-        }
-
-         if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain", "BACKUP INACTIVE SKILL "+skillType+" TEXT FILE",context)) return false;
-
-        Database.closeDatabase();
-        return true;//if everything goes fine
-    }
-    public boolean backupActiveMLGDataInPDFFormat(String pdfFileName){
-        Database db=Database.getInstance(context);
-        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
-
-        this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+pdfFileName;
-
-        MakePdf makePdf = new MakePdf();
-        if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return false;//created page 1
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getActiveSkillCreatedInfo(numberOfPerson,context), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return false;
-        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getTotalActiveAdvanceAndBalanceInfo(context), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return false;//just for space
-
-        for (String id:personIds){//loop
-            if(!createActiveMLGInvoicePDF(id,makePdf)) return false;
-        }
-
-        if (!makePdf.createdPageFinish2()) return false;//after finish page we cannot write to it
-
-        File pdfFile = makePdf.createPdfFileInExternalStorageAndReturnFile(context.getExternalFilesDir(null).toString(), backupFileName);//we have to return filename  view pdf using file path
-        if(pdfFile == null) return false;//means error
-
-        if (!makePdf.closeDocumentLastOperation4()) return false;
-
-        if (!MyUtility.shareFileToAnyApp(pdfFile,"application/pdf", context.getString(R.string.backup_active_m_l_g)+" PDF FILE",context)) return false;//open intent to share
-
-        Database.closeDatabase();
-        return true;//if everything goes fine
-    }
-    public boolean backupActiveMLGDataInTextFormat(String textFileName){
-        Database db=Database.getInstance(context);
-        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  false;//if error
-
-        this.numberOfPerson=personIds.length;
-        backupFileName =MyUtility.backupDateTime()+textFileName;//GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue()
-        StringBuilder sb=new StringBuilder();
-        String[] array=BackupDataUtility.getActiveSkillCreatedInfo(numberOfPerson,context);
+        String[] array=BackupDataUtility.getInActiveSkillCreatedInfo(personIds.length,skillType);
         sb.append(array[0]).append("\n").append(array[1]).append("\n\n");
 
-        array=BackupDataUtility.getTotalActiveAdvanceAndBalanceInfo(context);
-        for (String str:array) {
-            sb.append(str);
+        //sb.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate()).append("\nBACKUP OF ").append(personIds.length).append(" INACTIVE PEOPLE SKILLED IN ( ").append(skillType).append(" ). SORTED  ACCORDING TO ID.\n\n");
+        sb.append(BackupDataUtility.getTotalInActiveMOrLOrGAdvanceAndBalanceInfo(context,skillType)[0]).append("\n-----------------------------\n\n");
+
+        for (String id:personIds){//loop
+            sb=getDataOfSkillAccordingToId(id,sb);
+            if(sb==null) return null;
         }
-        sb.append("\n-----------------------------\n\n");
+        Database.closeDatabase();
+        return sb.toString();//if everything goes fine
+    }
+    public File backupInActiveMOrLOrGDataInPDFFormat(String pdfFileName,String skillType){//if error return null
+        Database db=Database.getInstance(context);
+        String personIds[]=db.getIdOfInActiveMOrLOrG(skillType); if(personIds==null) return  null;//if error
+
+        MakePdf makePdf = new MakePdf();
+        if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getInActiveSkillCreatedInfo(personIds.length,skillType), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return null;
+        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getTotalInActiveMOrLOrGAdvanceAndBalanceInfo(context,skillType), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+
+        for (String id:personIds){//loop
+            if(!createPDFOfId(id,makePdf)) return null;//this createPDFOfSkillAccordingToId() method create pdf whether it is active or inactive
+        }
+
+        if (!makePdf.createdPageFinish2()) return null;//after finish page we cannot write to it
+
+        File pdfFile = makePdf.createPdfFileInExternalStorageAndReturnFile(context.getExternalFilesDir(null).toString(),pdfFileName);//we have to return filename  view pdf using file path
+        if(pdfFile == null) return null;//means error
+
+        if (!makePdf.closeDocumentLastOperation4()) return null;
+
+        Database.closeDatabase();
+        return pdfFile;//if everything goes fine
+    }
+    public File backupActiveMLGDataInPDFFormat(String pdfFileName){//if error return null
+        Database db=Database.getInstance(context);
+        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  null;//if error
+
+        MakePdf makePdf = new MakePdf();
+        if (!makePdf.createPage1(MakePdf.defaultPageWidth, MakePdf.defaultPageHeight, 1)) return null;//created page 1
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getActiveSkillCreatedInfo(personIds.length,context), new float[]{30f,70f}, true, (byte) 0, (byte) 0,true)) return null;
+        if (!makePdf.writeSentenceWithoutLines(BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context), new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+        if (!makePdf.writeSentenceWithoutLines(new String[]{""}, new float[]{100f}, true, (byte) 0, (byte) 0,true)) return null;//just for space
+
+        for (String id:personIds){//loop
+            if(!createPDFOfId(id,makePdf)) return null;//this createPDFOfSkillAccordingToId() method create pdf whether it is active or inactive
+        }
+
+        if (!makePdf.createdPageFinish2()) return null;//after finish page we cannot write to it
+
+        File pdfFile = makePdf.createPdfFileInExternalStorageAndReturnFile(context.getExternalFilesDir(null).toString(),pdfFileName);//we have to return filename  view pdf using file path
+        if(pdfFile == null) return null;//means error
+
+        if (!makePdf.closeDocumentLastOperation4()) return null;
+
+        Database.closeDatabase();
+        return pdfFile;//if everything goes fine
+    }
+    public String backupActiveMLGDataInTextFormat(){//if error return null
+        Database db=Database.getInstance(context);
+        String personIds[]=db.getIdOfActiveMLG(); if(personIds==null) return  null;//if error
+
+        StringBuilder sb=new StringBuilder();
+        String[] array=BackupDataUtility.getActiveSkillCreatedInfo(personIds.length,context);
+        sb.append(array[0]).append("\n").append(array[1]).append("\n\n");
+
+//        array=BackupDataUtility.getTotalActiveAdvanceAndBalanceInfo(context);
+//        for (String str:array) {
+//            sb.append(str);
+//        }
+        sb.append(BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context)[0]).append("\n-----------------------------\n\n");
 
         for (String id:personIds){//loop
             sb= getDataOfSkillAccordingToId(id,sb);//this method fetch data according to id weather it is active or inactive
-            if(sb==null) return false;
+            if(sb==null) return null;
         }
-
-        if(!shareLargeDataAsTextFileToAnyApp(backupFileName,sb.toString(),"text/plain", context.getString(R.string.backup_active_m_l_g)+" TEXT FILE",context)) return false;
-
-        Database.closeDatabase();
-        return true;//if everything goes fine
+         Database.closeDatabase();
+        return sb.toString();//if everything goes fine
     }
-    private String getTotalInActiveAdvanceAndBalance(String skillType) {
-        Database db=Database.getInstance(context);
-        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skillType,false);
-        if(noRateIds!=null){//means no rate ids are there
-            return "FOR SEEING TOTAL ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
-        }
-
-        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
-            cursor.moveToFirst();
-            StringBuilder sb = new StringBuilder();
-            sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE Rs: ")
-                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
-                    .append(" , TOTAL BALANCE Rs: ")
-                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
-            return sb.toString();
-        }catch(Exception x){
-            x.printStackTrace();
-            return "error";
-        }
-    }
-    private boolean shareLargeDataAsTextFileToAnyApp(String fileName,String message,String mimeType,String title,Context context){//if error return null
-        if(message==null|| mimeType==null||title==null){
-            return false;
-        }
-        try { // create a file to store the data
-//            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){
-                File file = new File(context.getExternalCacheDir(), fileName + ".txt");//creating txt file in cache directory file name  getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
-                FileOutputStream outputStream = new FileOutputStream(file);
-                outputStream.write(message.getBytes());
-                outputStream.close();
-                // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
-                if (!MyUtility.shareFileToAnyApp(file , mimeType, title,context)) {//open intent to share
-                    //Toast.makeText(context, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
-                   // Log.e("ERROR OCCURRED","CANNOT SHARE FILE");
-                    return false;
-                }
-                //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
-               // return file.getAbsolutePath();
-                return true;
-//            }else{
-//                Toast.makeText(context, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-//                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-//                return false;
-//            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-//    public String[] xgetActiveSkillCreatedInfo(int numberOfPerson) {
+//    private String getTotalInActiveAdvanceAndBalance(String skillType) {
+//        Database db=Database.getInstance(context);
+//        String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skillType,false);
+//        if(noRateIds!=null){//means no rate ids are there
+//            return "FOR SEEING TOTAL ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+//        }
+//
+//        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
+//            cursor.moveToFirst();
+//            StringBuilder sb = new StringBuilder();
+//            sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE Rs: ")
+//                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
+//                    .append(" , TOTAL BALANCE Rs: ")
+//                    .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(1)));
+//            return sb.toString();
+//        }catch(Exception x){
+//            x.printStackTrace();
+//            return "error";
+//        }
+//    }
+//    private boolean shareLargeDataAsTextFileToAnyApp(String fileName,String message,String mimeType,String title,Context context){//if error return null
+//        if(message==null|| mimeType==null||title==null){
+//            return false;
+//        }
+//        try { // create a file to store the data
+////            if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){
+//                File file = new File(context.getExternalCacheDir(), fileName + ".txt");//creating txt file in cache directory file name  getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
+//                FileOutputStream outputStream = new FileOutputStream(file);
+//                outputStream.write(message.getBytes());
+//                outputStream.close();
+//                // if (!shareFileToAnyApp(file.getAbsolutePath(), mimeType, title, sharePdfLauncher)) {//open intent to share
+//                if (!MyUtility.shareFileToAnyApp(file , mimeType, title,context)) {//open intent to share
+//                    //Toast.makeText(context, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show();
+//                   // Log.e("ERROR OCCURRED","CANNOT SHARE FILE");
+//                    return false;
+//                }
+//                //absolutePathArrayToDelete[3] = file.getAbsolutePath();//storing absolute path to delete the image
+//               // return file.getAbsolutePath();
+//                return true;
+////            }else{
+////                Toast.makeText(context, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+////                ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+////                return false;
+////            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+//    public String[] getActiveSkillCreatedInfo(int numberOfPerson) {
 //        String[] backupInfo = new String[2];
 //        StringBuilder sb1 = new StringBuilder();
 //        sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());
@@ -191,7 +197,7 @@ public class TextAndPdfFormatBackup {
 //            return new String[]{"error"};
 //        }
 //    }
-    private boolean createActiveMLGInvoicePDF(String id, MakePdf makePdf){
+    private boolean createPDFOfId(String id, MakePdf makePdf){////this createPDFOfSkillAccordingToId() method create pdf whether it is active or inactive
         try {
             byte indicator =  MyUtility.get_indicator(context,id);
             boolean[] errorDetection = {false};//when ever exception occur in one place it will be updated to true in method.if no exception array will not be updated. so if any where error occur it will hold value true

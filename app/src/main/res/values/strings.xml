@@ -4,6 +4,13 @@
 
     <!--common-->
     <string name="set_rate_to_id_colon">SET RATE TO ID:</string>
+
+    <!--ManualBackupActivity-->
+    <string name="you_can_backup_your_data_in_small_file_size_separately">You Can Backup Your Data In Small File Size Separately</string>
+    <string name="_1_dot_backup_each_file">1.Backup Each File</string>
+    <string name="backup_saved_in_download_folder">BACKUP SAVED IN DOWNLOAD FOLDER</string>Last Backup:
+    <string name="last_backup_colon">Last Backup:</string>
+
     <!--person details-->
     <string name="account_number_already_exists">ACCOUNT NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
     <string name="aadhaar_number_already_exists">AADHAAR NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
@@ -201,10 +208,10 @@
     <string name="balance">BALANCE</string>
 
     <!--Drawer-->
-    <string name="backup_active_m_l_g">BACKUP ACTIVE SKILL M L G</string>
-    <string name="backup_inactive_m">BACKUP INACTIVE SKILL M</string>
-    <string name="backup_inactive_l">BACKUP INACTIVE SKILL L</string>
-    <string name="backup_inactive_g">BACKUP INACTIVE SKILL G</string>
+    <string name="backup_active_skill_m_l_g">BACKUP ACTIVE SKILL M L G</string>
+    <string name="backup_inactive_skill_m">BACKUP INACTIVE SKILL M</string>
+    <string name="backup_inactive_skill_l">BACKUP INACTIVE SKILL L</string>
+    <string name="backup_inactive_skill_g">BACKUP INACTIVE SKILL G</string>
     <string name="backup_manually">Backup manually</string>
     <string name="backup_failed">BACKUP FAILED</string>
     <string name="no_data_present">NO DATA PRESENT</string>
@@ -435,6 +442,4 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
-
-
 </resources>

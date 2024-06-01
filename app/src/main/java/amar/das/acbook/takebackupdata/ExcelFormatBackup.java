@@ -36,28 +36,41 @@ public class ExcelFormatBackup{
         this.sheet = this.workBook.createSheet(EXCEL_SHEET_NAME);// Create a new sheet in a Workbook and assign a name to it
         this.excelRow=0;
     }
+    public File backupInActiveMOrLOrGDataInExcelFormat(String skillType){//return null if error
+        Database db=Database.getInstance(context);
+        excelRow=0;
+        String personIds[] = db.getIdOfInActiveMOrLOrG(skillType);
+        if (personIds == null) return null;//if error
+        createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(personIds.length,skillType);
+        excelRow=3;//updating excel row so that person data will be start from third line
+
+        for (String id:personIds){//loop
+            if(!createExcelOfEachId(id)) return null;
+        }
+
+        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupFileName,workBook);
+        if(excelFile == null){
+            return null;//means error Occurred
+        }else { return excelFile;}
+    }
     public File backupActiveMLGDataInExcelFormat(){//return null if error
-        try(Database db=Database.getInstance(context)){
+        Database db=Database.getInstance(context);
             excelRow=0;
             String personIds[] = db.getIdOfActiveMLG();
             if (personIds == null) return null;//if error
-            createRowHavingCreateInfoAndTotalAdvanceAndBalance(personIds.length);
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForActiveSkill(personIds.length);
             excelRow=3;//updating excel row so that person data will be start from third line
 
             for (String id:personIds){//loop
                 if(!createExcelOfEachId(id)) return null;
             }
 
-            File excelFile = createExcelFileInExternalAndReturnFile(backupFileName,workBook);
-            if (excelFile == null) {
+            File excelFile = createExcelFileInExternalStorageAndReturnFile(backupFileName,workBook);
+            if(excelFile == null){
                 return null;//means error Occurred
             }else { return excelFile;}
-        }catch (Exception x){
-            x.printStackTrace();
-            return null;
-        }
     }
-    private boolean createExcelOfEachId(String id) {
+    private boolean createExcelOfEachId(String id) {//it create excel fill wheather id is active or inactive
         byte indicator =  MyUtility.get_indicator(context,id);
         boolean[] errorDetection = {false};//when ever exception occur in one place it will be updated to true in method.if no exception array will not be updated. so if any where error occur it will hold value true
         try {
@@ -145,44 +158,59 @@ public class ExcelFormatBackup{
         }
         return true;
     }
-    private void createRowHavingCreateInfoAndTotalAdvanceAndBalance(int numberOfPerson) {
+    private void createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(int numberOfPerson,String skillType){
         Row row1 = sheet.createRow(excelRow++);
         cell = row1.createCell(0);
-        cell.setCellValue(getActiveCreatedInfo(numberOfPerson,true));
+        cell.setCellValue(getInActiveSkillCreatedInfo(numberOfPerson,skillType));
         cell.setCellStyle(getLongTextCellStyle());
 
         row1 = sheet.createRow(excelRow++);
         cell = row1.createCell(0);
-        cell.setCellValue(getActiveAdvanceAndBalance(true));
+        cell.setCellValue(getInActiveAdvanceAndBalance(skillType));
         cell.setCellStyle(getLongTextCellStyle());
     }
-    private String getActiveCreatedInfo(int numberOfPerson, boolean forExcelTrueForTextFalse) {
+    private void createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForActiveSkill(int numberOfPerson){
+        Row row1 = sheet.createRow(excelRow++);
+        cell = row1.createCell(0);
+        cell.setCellValue(getActiveSkillCreatedInfo(numberOfPerson));
+        cell.setCellStyle(getLongTextCellStyle());
+
+        row1 = sheet.createRow(excelRow++);
+        cell = row1.createCell(0);
+        cell.setCellValue(getActiveAdvanceAndBalance());
+        cell.setCellStyle(getLongTextCellStyle());
+    }
+    private String getInActiveSkillCreatedInfo(int numberOfPerson,String skillType) {
+        StringBuilder sb = new StringBuilder();
+        String[] array = BackupDataUtility.getInActiveSkillCreatedInfo(numberOfPerson,skillType);
+        sb.append(array[0]).append(" ").append(array[1]);
+        return sb.toString();
+    }
+    private String getActiveSkillCreatedInfo(int numberOfPerson) {
         StringBuilder sb = new StringBuilder();
         String[] array = BackupDataUtility.getActiveSkillCreatedInfo(numberOfPerson,context);
-        if(forExcelTrueForTextFalse){
-            sb.append(array[0]).append(" ").append(array[1]);
-        }else {
-            sb.append(array[0]).append("\n").append(array[1]).append("\n\n");
-        }
-        if(forExcelTrueForTextFalse){
-            return sb.toString();
-        }else{
-            return sb.append("\n").toString();
-        }
+        sb.append(array[0]).append(" ").append(array[1]);
+        return sb.toString();
     }
-    private String getActiveAdvanceAndBalance(boolean forExcelTrueForTextFalse){
+    private String getInActiveAdvanceAndBalance(String skillType){
         StringBuilder sb = new StringBuilder();
-        String[] array=BackupDataUtility.getTotalActiveAdvanceAndBalanceInfo(context);
-        for (String str:array) {
-            sb.append(str);
-        }
-        if(forExcelTrueForTextFalse){
-            return sb.toString();
-        }else{
-            return sb.append("\n").toString();
-        }
+        sb.append(BackupDataUtility.getTotalInActiveMOrLOrGAdvanceAndBalanceInfo(context,skillType)[0]);
+        return sb.toString();
+//        String[] array=BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context);
+//        for (String str:array) {
+//            sb.append(str);
+//        }
     }
-    private  File createExcelFileInExternalAndReturnFile(String uniqueFileName, XSSFWorkbook workBook) {//return null when exception
+    private String getActiveAdvanceAndBalance(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context)[0]);
+        return sb.toString();
+//        String[] array=BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context);
+//        for (String str:array) {
+//            sb.append(str);
+//        }
+    }
+    private File createExcelFileInExternalStorageAndReturnFile(String uniqueFileName, XSSFWorkbook workBook) {//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
 
             if (MyUtility.isFolderExistIfNotExistCreateIt(context.getExternalFilesDir(null).toString(),GlobalConstants.EXCEL_FOLDER_NAME.getValue())) {
@@ -192,7 +220,7 @@ public class ExcelFormatBackup{
                 return filePath;
             }else return null;//error
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
             return null;
         }

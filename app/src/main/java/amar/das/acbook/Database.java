@@ -2841,7 +2841,7 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
-    public String getIdsAndReturnNullIfRateIsProvidedOfActiveMLG(){//return null when all rate is provided else return string of ids of no rate is provided and return string of error occured when there is exception
+    public String getIdsAndReturnNullIfRateIsProvidedOfActiveMLG(){//return null when all rate is provided else return string of ids which have no rate and return string if error occurred when there is exception
         Cursor cursor=null;
         try{
             StringBuilder resultBuilder = new StringBuilder();
@@ -2873,12 +2873,12 @@ public class Database extends SQLiteOpenHelper {
                 }
             }cursor.close();
 
-            if(resultBuilder.length()==0) return null;
+            if(resultBuilder.length()==0) return null;//means all id having rate
             return resultBuilder.substring(0,resultBuilder.length()-2);//to remove last , and space
 
         }catch (Exception x){
             x.printStackTrace();
-            return "error occurred while calculating total advance and balance";
+            return ":error occurred while searching for ids which have no rate";
         }
 //        SELECT pd.id FROM person_details_table pd INNER JOIN rate_skills_indicator_table r ON pd.id = r.id
 //        WHERE pd.ACTIVE = 1

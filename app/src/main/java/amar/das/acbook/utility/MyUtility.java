@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,8 @@ import androidx.core.content.FileProvider;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -94,6 +97,17 @@ public class MyUtility {
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
         return formatter.format(new Date());
+    }
+    public static String getBackupDateFormat(String backupDate) {//if error return null
+        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
+        try {
+            Date date = formatter.parse(backupDate);
+            SimpleDateFormat timeFormatter = new SimpleDateFormat("dd - MM - yyyy");
+            return timeFormatter.format(date);
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
     }
     public static String getOnlyTime(){
         try{
@@ -1161,9 +1175,9 @@ public class MyUtility {
             end--;
         }
     }
-    public static void showDefaultDialog(String title, String message, Context context) {
+    public static void showDefaultDialog(String title, String message, Context context,boolean setCancelable) {
         AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(context);
-        showDataFromDataBase.setCancelable(false);
+        showDataFromDataBase.setCancelable(setCancelable);//when dialog is visible and user click other part of screen then dialog will disappear when value is true
         showDataFromDataBase.setTitle(title);
         showDataFromDataBase.setMessage(message);
         showDataFromDataBase.setPositiveButton(context.getResources().getString(R.string.ok), (dialogInterface, i) -> {
@@ -1187,7 +1201,7 @@ public class MyUtility {
             }break;
             case "REMARKS":{
                 if(remarks != null) {//checking remarks is present or not
-                    MyUtility.showDefaultDialog(view.getContext().getResources().getString(R.string.remarks),remarks,context);
+                    MyUtility.showDefaultDialog(view.getContext().getResources().getString(R.string.remarks),remarks,context,false);
                 }else{
                     MyUtility.snackBar(view,view.getResources().getString(R.string.no_remarks));
                 }
@@ -1380,7 +1394,7 @@ public class MyUtility {
             return false;
         }
     }
-    public static boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String title,Context context){// ActivityResultLauncher<Intent> sharePdfLauncher
+    public static boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String titleForSharing,Context context){// ActivityResultLauncher<Intent> sharePdfLauncher
         // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
         if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
             return false;
@@ -1394,7 +1408,7 @@ public class MyUtility {
 //            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
 //            intent.putExtra(Intent.EXTRA_STREAM, uri);
 //            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
-//            sharePdfLauncher.launch(Intent.createChooser(intent,title));//Intent.createChooser creates dialog to choose app to share data
+//            sharePdfLauncher.launch(Intent.createChooser(intent,titleForSharing));//Intent.createChooser creates dialog to choose app to share data
 
 //not working in android 12
 //            Intent intent = new Intent(Intent.ACTION_SEND);
@@ -1402,7 +1416,7 @@ public class MyUtility {
 //            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
 //            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
 //            intent.putExtra(Intent.EXTRA_STREAM, uri);
-//            Intent chooser = Intent.createChooser(intent, title);
+//            Intent chooser = Intent.createChooser(intent, titleForSharing);
 //            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            context.startActivity(chooser);// Start the chooser dialog
 
@@ -1414,7 +1428,7 @@ public class MyUtility {
                     .setAction(Intent.ACTION_SEND)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            Intent chooser = Intent.createChooser(intent, title);//Start the chooser dialog
+            Intent chooser = Intent.createChooser(intent, titleForSharing);//Start the chooser dialog
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(chooser);
 
@@ -1634,6 +1648,38 @@ public class MyUtility {
             x.printStackTrace();
             return "error";
         }
+    }
+
+    public static boolean downloadPdfUsingByteInDownloadFolder(String filename, byte[] pdfContent,Context context) {//this method to save it to the download folder.
+        if(filename==null || pdfContent==null){
+            return false;
+        }
+        try {
+            if(checkPermissionForDownload(context)){
+                File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File pdfFile = new File(downloadsFolder, filename);
+
+                FileOutputStream outputStream = new FileOutputStream(pdfFile);
+                outputStream.write(pdfContent);
+                outputStream.close();
+                return true;
+            }else{
+               // Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
+                Log.e("ERROR OCCURRED", "EXTERNAL STORAGE PERMISSION REQUIRED");
+                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
+                return false;
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }catch (Exception x){
+            x.printStackTrace();
+            return false;
+        }
+    }
+    private static boolean checkPermissionForDownload(Context baseContext) {
+        return true;//after android 10+ no need of permission to download files in device in download folder
     }
 
 }

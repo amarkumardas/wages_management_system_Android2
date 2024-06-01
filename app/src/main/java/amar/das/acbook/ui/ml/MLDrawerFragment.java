@@ -86,9 +86,9 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                     TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-                    if(!dataBackup.backupActiveMLGDataInPDFFormat(GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())){
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                    }
+//                    if(!dataBackup.backupActiveMLGDataInPDFFormat(GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())){
+//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                    }
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
                 });backgroundTask.shutdown();//when all task completed then only shutdown
             } else if (item.getItemId() == R.id.backup_inactive_m) {
@@ -104,9 +104,9 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                     TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                    }
+//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
+//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                    }
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
                 });backgroundTask.shutdown();//when all task completed then only shutdown
             } else if (item.getItemId() == R.id.backup_inactive_l) {
@@ -121,9 +121,9 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                     TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                    }
+//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
+//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                    }
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
                 });backgroundTask.shutdown();//when all task completed then only shutdown
             }else if (item.getItemId() == R.id.backup_inactive_g) {
@@ -138,9 +138,9 @@ public class MLDrawerFragment extends Fragment {
                     getActivity().runOnUiThread(() -> progressBar.showProgressBar());
 
                     TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-                    }
+//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
+//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+//                    }
 
                     getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
                 });backgroundTask.shutdown();//when all task completed then only shutdown

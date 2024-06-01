@@ -8,10 +8,9 @@ public class SharedPreferencesHelper {
     public enum Keys { // Enum declaration inside the class for keys
         HISTORY_KEEPING_DAYS,
         BUSINESS_NAME,WHATSAPP_NUMBER,PHONE_NUMBER,EMAIL,GST_NUMBER,ADDRESS,GOOGLE_SIGNIN_EMAIL,
-        FOR_SHARE_TRUE_AND_FOR_DOWNLOAD_FALSE, BACKUP_EACH_FILE_USER_SELECTED_FORMAT;
+        BACKUP_FILE_SHARE_OR_DOWNLOAD, BACKUP_EACH_FILE_USER_SELECTED_FORMAT,LAST_BACKUP_EACH_FILE;
 
     }
-
     //Common types of data that can be stored include boolean, int, long, float, and String.
     //SharedPreferences in Android is a mechanism to store and retrieve simple data in key-value pairs persistently. It's often used to store small pieces of information such as user preferences, settings, and other application-specific configurations. SharedPreferences are private to the application, meaning that other applications cannot access or modify the preferences of your app.
     private static final String PREFERENCE_NAME = "MyPreferences";

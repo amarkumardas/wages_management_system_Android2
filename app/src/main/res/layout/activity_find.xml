@@ -121,7 +121,7 @@ expanded automatically
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
-            android:onClick="invoiceBackupButton"
+            android:onClick="calculatedInvoiceBackupButton"
             android:text="@string/invoice"
             android:textAlignment="center"
             android:textColor="@color/black"

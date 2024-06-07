@@ -26,7 +26,7 @@
             android:layout_alignParentStart="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BACKUP YOUR DATA"
+            android:text="@string/backup_your_data"
             android:textStyle="bold"
             android:textColor="@color/black"
             android:layout_marginStart="50dp"
@@ -45,7 +45,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="3 WAYS FOR BACKUP"
+        android:text="@string/_3_ways_for_backup"
         android:textColor="@color/black"
         android:textSize="17sp"
         android:layout_marginTop="10dp"
@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
-            android:text="@string/_1_dot_backup_each_file"
+            android:text="@string/_1_backup_each_file"
             android:textColor="@color/purple_700"
             android:textSize="15sp"
             android:textStyle="bold"
@@ -68,16 +68,16 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textColor="@color/black"
             android:textSize="13sp"
             android:paddingTop="1dp"
+            android:textColor="@color/black"
             android:layout_marginStart="5dp"
-            android:id="@+id/backup_each_file_last_backup"/>
+            android:id="@+id/backup_each_file_user_last_backup"/>
     </LinearLayout>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select File Type"
+        android:text="@string/select_file_type"
         android:layout_marginLeft="13dp"
         android:layout_marginTop="8dp"
         android:textSize="10sp"/>
@@ -91,7 +91,7 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PDF"
+            android:text="@string/pdf"
             android:layout_weight="1"
             android:id="@+id/backup_each_file_pdf"
             android:textSize="12sp"
@@ -99,7 +99,7 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TEXT"
+            android:text="@string/text"
             android:layout_weight="1"
             android:id="@+id/backup_each_file_text"
             android:textSize="12sp"
@@ -107,7 +107,7 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EXCEL"
+            android:text="@string/excel"
             android:layout_weight="1"
             android:id="@+id/backup_each_file_excel"
             android:textSize="12dp"
@@ -125,7 +125,7 @@
         android:layout_width="130dp"
         android:layout_height="45dp"
         android:textSize="13dp"
-        android:text="Active Skill M L G"
+        android:text="@string/active_skill_m_l_g"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
@@ -146,7 +146,7 @@
         android:layout_width="130dp"
         android:layout_height="45dp"
         android:textSize="13dp"
-        android:text="InActive Skill M"
+        android:text="@string/inactive_skill_m"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
@@ -166,7 +166,7 @@
         android:id="@+id/backup_inactive_skill_l"
         android:layout_width="130dp"
         android:layout_height="45dp"
-        android:text="InActive Skill L"
+        android:text="@string/inactive_skill_l"
         android:textSize="13dp"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
@@ -188,11 +188,97 @@
         android:layout_width="130dp"
         android:layout_height="45dp"
         android:textSize="13dp"
-        android:text="InActive Skill G"
+        android:text="@string/inactive_skill_g"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
             android:id="@+id/backup_inactive_skill_g_green_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:text="@string/_2_single_file_backup"
+            android:textColor="@color/purple_700"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:id="@+id/single_file_backup_tv"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="13sp"
+            android:paddingTop="3dp"
+            android:textColor="@color/black"
+            android:layout_marginStart="5dp"
+            android:id="@+id/single_file_backup_user_last_backup"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/select_file_type"
+        android:layout_marginLeft="13dp"
+        android:layout_marginTop="8dp"
+        android:textSize="10sp"/>
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:weightSum="3"
+        android:id="@+id/single_file_backup_radiogroup">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pdf"
+            android:layout_weight="1"
+            android:id="@+id/single_file_backup_pdf_file_rb"
+            android:textSize="12sp"
+            android:foreground="?android:attr/selectableItemBackground" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text"
+            android:layout_weight="1"
+            android:id="@+id/single_file_backup_text_file_rb"
+            android:textSize="12sp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/excel"
+            android:layout_weight="1"
+            android:id="@+id/single_file_backup_excel_file_rb"
+            android:textSize="12dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+    </RadioGroup>
+    <LinearLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/single_file_backup_file"
+            android:layout_width="130dp"
+            android:layout_height="45dp"
+            android:textSize="13dp"
+            android:text="@string/single_file"
+            android:textAllCaps="false"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <TextView
+            android:id="@+id/single_file_backup_green_tick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_green_sharp_done_sharp_tick_20"

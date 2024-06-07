@@ -6,10 +6,26 @@
     <string name="set_rate_to_id_colon">SET RATE TO ID:</string>
 
     <!--ManualBackupActivity-->
-    <string name="you_can_backup_your_data_in_small_file_size_separately">You Can Backup Your Data In Small File Size Separately</string>
-    <string name="_1_dot_backup_each_file">1.Backup Each File</string>
+    <string name="single_pdf_file_backup">SINGLE PDF FILE BACKUP</string>
+    <string name="single_text_file_backup">SINGLE TEXT FILE BACKUP</string>
+    <string name="single_excel_file_backup">SINGLE EXCEL FILE BACKUP</string>
+    <string name="backup_your_data">BACKUP YOUR DATA</string>
+    <string name="_3_ways_for_backup">3 WAYS FOR BACKUP</string>
+    <string name="pdf">PDF</string>
+    <string name="text">TEXT</string>
+    <string name="excel">EXCEL</string>
+    <string name="active_skill_m_l_g">Active Skill M L G</string>
+    <string name="inactive_skill_m">InActive Skill M</string>
+    <string name="inactive_skill_l">InActive Skill L</string>
+    <string name="inactive_skill_g">InActive Skill G</string>
+    <string name="select_file_type">Select File Type</string>
+    <string name="single_file">Single File</string>
+    <string name="you_can_backup_your_aa_data_into_smaller_files_separately">You Can Backup Your All Data Into Smaller Files Separately.</string>
+    <string name="you_can_backup_your_all_data_in_a_single_file">You Can Backup Your All Data In a Single File.\n\nIt Will Contain\nActive Skill M L G\nInActive Skill M\nInActive Skill L\nInActive Skill G</string>
+    <string name="_1_backup_each_file">1 Backup Each File</string>
+    <string name="_2_single_file_backup">2 Single File Backup</string>
     <string name="backup_saved_in_download_folder">BACKUP SAVED IN DOWNLOAD FOLDER</string>Last Backup:
-    <string name="last_backup_colon">Last Backup:</string>
+    <string name="last_backup_colon_hyphen">Last Backup: -</string>
 
     <!--person details-->
     <string name="account_number_already_exists">ACCOUNT NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
@@ -50,7 +66,6 @@
     <string name="gst">GST</string>
     <string name="address">ADDRESS</string>
 
-
     <!--backup CalculatedInvoicesActivity-->
     <string name="calculated_invoice_files">CALCULATED INVOICE FILES</string>
     <string name="backup_calculated_invoice_and_delete_invoice_to_free_up_space">BACKUP CALCULATED INVOICE AND DELETE INVOICE TO FREE UP SPACE"</string>
@@ -60,6 +75,11 @@
     <string name="calculated_invoice_backup_hint">How To Back Up Calculated Invoice?\n\n1. Long-press On Any File.\n\n2. Select All The Files You Want To Back Up, Then Share Them To Google Drive Or Any Other Storage Location.\n\nHow To Free Up Space?\n\nAfter Taking Back Up, Delete All The Selected Files By Clicking The Delete Icon.</string>
 
     <!-- PdfViewerOperation Activity-->
+    <string name="last_invoice2">LAST INVOICE2</string>
+    <string name="last_invoice1">LAST INVOICE1</string>
+    <string name="running_invoice">RUNNING INVOICE</string>
+    <string name="download">DOWNLOAD</string>
+    <string name="share_invoice">SHARE INVOICE</string>
     <string name="enter_amount">ENTER AMOUNT</string>
     <string name="amount_rs">AMOUNT Rs.</string>
     <string name="remarks">REMARKS</string>

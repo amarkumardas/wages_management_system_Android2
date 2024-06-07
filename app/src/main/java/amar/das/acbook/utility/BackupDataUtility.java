@@ -69,7 +69,7 @@ public class BackupDataUtility {
         backupInfo[1] = sb2.toString();
         return backupInfo;
     }
-    public static String[] getActiveSkillCreatedInfo(int numberOfPerson,Context context) {
+    public static String[] getActiveSkillMLGCreatedInfo(int numberOfPerson, Context context) {//ONLY two size
         String[] backupInfo = new String[2];
         StringBuilder sb1 = new StringBuilder();
         sb1.append("CREATED ON: ").append(MyUtility.get12hrCurrentTimeAndDate());
@@ -133,6 +133,16 @@ public class BackupDataUtility {
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+    public static String[] getPersonIdsAccordingToFileIndicator(byte fileIndicator,Context context){//if error return null
+        Database db = Database.getInstance(context);
+        switch (fileIndicator) {
+            case 0: return db.getIdOfActiveMLG();
+            case 1: return db.getIdOfInActiveMOrLOrG(context.getString(R.string.mestre));
+            case 2: return db.getIdOfInActiveMOrLOrG(context.getString(R.string.laber));
+            case 3: return db.getIdOfInActiveMOrLOrG(context.getString(R.string.women_laber));
+            default:return null;
         }
     }
 }

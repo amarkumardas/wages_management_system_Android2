@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
@@ -60,10 +62,10 @@ public class MyUtility {
     public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
-    public static String backupDateTime(){
+    public static String dateTimeForBackupFile(){
        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
-    public static String getTime12hr(String systemDateTime) {//if error return null
+    public static String getTime12hrFromSystemDateTime(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = formatter.parse(systemDateTime);
@@ -74,7 +76,7 @@ public class MyUtility {
             return null;
         }
     }
-    public static String getDate(String systemDateTime) {//if error return null
+    public static String getDateFromSystemDateTime(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = formatter.parse(systemDateTime);
@@ -98,10 +100,14 @@ public class MyUtility {
         SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
         return formatter.format(new Date());
     }
-    public static String getBackupDateFormat(String backupDate) {//if error return null
-        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm a)");//MM is capital to represent month
+    public static String get12hrCurrentTimeAndDateForLastBackup(){
+        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm:ss a)");//MM is capital to represent month
+        return formatter.format(new Date());
+    }
+    public static String getDateFromLastBackupDate(String lastBackupDate) {//if error return null
+        SimpleDateFormat formatter = new SimpleDateFormat("dd - MM - yyyy (hh:mm:ss a)");//MM is capital to represent month
         try {
-            Date date = formatter.parse(backupDate);
+            Date date = formatter.parse(lastBackupDate);
             SimpleDateFormat timeFormatter = new SimpleDateFormat("dd - MM - yyyy");
             return timeFormatter.format(date);
         }catch (Exception x){
@@ -168,7 +174,7 @@ public class MyUtility {
             final Calendar current = Calendar.getInstance();//to get current date and time
             Date d = Calendar.getInstance().getTime();//To get time
             SimpleDateFormat sdf = new SimpleDateFormat("hhmmssa");//a stands for is AM or PM.example which make file unique 091659am which is unique
-            return "id" + id + "date" + current.get(Calendar.DAY_OF_MONTH) + "_" + (current.get(Calendar.MONTH) + 1) + "_" + current.get(Calendar.YEAR)+fileName+ "At" + sdf.format(d);
+            return "ID" + id + "_DATE_" + current.get(Calendar.DAY_OF_MONTH) + "_" + (current.get(Calendar.MONTH) + 1) + "_" + current.get(Calendar.YEAR)+fileName+ "_At" + sdf.format(d);
         }catch (Exception x){
             x.printStackTrace();
             return "error";
@@ -321,7 +327,7 @@ public class MyUtility {
             }else return false;
 
             textFile.appendText(sb.toString());
-          return textFile.createTextFile(externalFileDir,GlobalConstants.TEXT_FILE_FOLDER_NAME.getValue(),generateUniqueFileName(context,id));
+          return textFile.createTextFile(externalFileDir,GlobalConstants.BACKUP_CALCULATED_INVOICE_TEXT_FOLDER_NAME.getValue(),generateUniqueFileName(context,id));
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -331,21 +337,21 @@ public class MyUtility {
         Database db=Database.getInstance(context);
             try{
             StringBuilder fileName = new StringBuilder();
-            fileName.append("id").append(id);
+            fileName.append("id").append(id).append("_");
             Cursor cursor = db.getData("SELECT "+Database.COL_396_PDFSEQUENCE+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'");
             cursor.moveToFirst();//means only one row is returned
-            fileName.append("invoice").append(cursor.getInt(0) + 1); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
+            fileName.append("invoice").append(cursor.getInt(0) + 1).append("_"); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
 
             cursor =db.getData("SELECT "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'");
             cursor.moveToFirst();
             if(cursor.getString(0)!=null && cursor.getString(0).length()>4) {
-                fileName.append("ac").append(cursor.getString(0).substring(cursor.getString(0).length() - 4));//account
+                fileName.append("ac").append(cursor.getString(0).substring(cursor.getString(0).length() - 4)).append("_");//account
             }else{
                 fileName.append("acnull");
             }
 
             if(cursor.getString(1)!=null && cursor.getString(1).length()>5){
-                fileName.append("ad").append(cursor.getString(1).substring(cursor.getString(1).length() - 5));//aadhaar
+                fileName.append("ad").append(cursor.getString(1).substring(cursor.getString(1).length() - 5)).append("_");//aadhaar
             }
             else{
                 fileName.append("adnull");
@@ -1280,11 +1286,11 @@ public class MyUtility {
         }
     }
     public static  boolean shareMessageDirectlyToWhatsApp(String message,String indianWhatsappNumber,Context context){
-        if(message==null || indianWhatsappNumber==null){
-            return false;
-        }
-        try {
-            if (isInternetConnected(context)){//WE CAN SEND LARGE TEXT MESSAGE USING WHATSAPP
+        if(message==null || indianWhatsappNumber==null){return false;}
+
+        if (!isInternetConnected(context)) return false;//checking internet there or not
+
+        try {//WE CAN SEND LARGE TEXT MESSAGE USING WHATSAPP
                 if (isApplicationInstalled("com.whatsapp",context)) {//package name
                     indianWhatsappNumber = "91"+indianWhatsappNumber; // Add country code prefix for Indian numbers
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=" +indianWhatsappNumber+"&text="+message));
@@ -1292,7 +1298,6 @@ public class MyUtility {
                    context.startActivity(intent);//startActivity launch activity without expecting any result back we don't need any result back so using startActivity WITHOUT CHOOSER BECAUSE it will directly open whatsapp.//Including Intent.FLAG_ACTIVITY_NEW_TASK is necessary when you're trying to start an activity from a context that is not an activity
                     return true;
                 }
-            }
         }catch(Exception ex){
             ex.printStackTrace();
             return false;
@@ -1323,10 +1328,28 @@ public class MyUtility {
         }
     }
     public static boolean isInternetConnected(Context context) {//permission required in manifest file for accessing ConnectivityManager permission is ACCESS_NETWORK_STATE
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return (activeNetwork != null && activeNetwork.isConnected());
-        //note:this method only checks for the availability of an active network connection and does not verify if the connection can actually access the internet. It is possible to have an active network connection but not be able to access the internet due to network issues or other reasons.
+//        below api 29 code
+//        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();x
+//        return (activeNetwork != null && activeNetwork.isConnected());
+          //note:this method only checks for the availability of an active network connection and does not verify if the connection can actually access the internet. It is possible to have an active network connection but not be able to access the internet due to network issues or other reasons.
+   try {
+    //API level 29 (Android 10) and above.this code snippet effectively determines if an active network connection with a supported transport type (Cellular, Wifi, or Ethernet) is available on a device running Android API level 29 and above.
+    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    if (connectivityManager != null) {
+        NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+                return true;
+        }
+    }
+   }catch (Exception x){
+    x.printStackTrace();
+    return false;
+   }
+   return false;
     }
     public static boolean sendMessageToContact(String id, String message,Context context){
         if(id==null || message==null || context==null){

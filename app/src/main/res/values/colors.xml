@@ -12,7 +12,7 @@
     <color name="yellow">#FFE928</color>
     <color name="yellow_for_input">#ECB102</color>
     <color name="wagesSingleRecord">#FAFBF8F8</color>
-
+    <color name="dark_green">#E4238F0B</color>
 
         <!-- for image picker  -->
         <color name="ucrop_color_toolbar">@color/purple_700</color>

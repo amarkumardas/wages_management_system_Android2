@@ -172,9 +172,9 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             }
         }
          //************************SETTING BACKGROUND COLOR ACCORDING TO PREVIOUS AND TODAY'S DATE*******************************
-        if(MyUtility.getDate(data.getSystemDateAndTime()).equals(getPreviousDateFromCurrentDate((byte)1)))//if data has entered yesterday then set background to gray
+        if(MyUtility.getDateFromSystemDateTime(data.getSystemDateAndTime()).equals(getPreviousDateFromCurrentDate((byte)1)))//if data has entered yesterday then set background to gray
             holder.itemView.setBackgroundColor(context.getColor(R.color.background));
-        else if(getPreviousDateFromCurrentDate((byte) 0).equals(MyUtility.getDate(data.getSystemDateAndTime())))//if data has entered today then set background to yellow
+        else if(getPreviousDateFromCurrentDate((byte) 0).equals(MyUtility.getDateFromSystemDateTime(data.getSystemDateAndTime())))//if data has entered today then set background to yellow
         holder.itemView.setBackgroundColor(context.getColor(R.color.yellow));
         else//if we don't put else statement then other layout also color get change so else is important
         holder.itemView.setBackgroundColor(context.getColor(R.color.wagesSingleRecord));
@@ -300,7 +300,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                 }
 //********************************Done CUSTOMIZATION*******************************************************************************************
             previousDataHold[4] = "WAGES: " + (cursorData.getString(3)!=null?MyUtility.convertToIndianNumberSystem(Long.parseLong(cursorData.getString(3))):0);//wages to write previous record in description
-            previousDataHold[5] = "DATE: " + cursorData.getString(1)+" ("+MyUtility.getTime12hr(cursorData.getString(9))+")";//date to write previous record in description
+            previousDataHold[5] = "DATE: " + cursorData.getString(1)+" ("+MyUtility.getTime12hrFromSystemDateTime(cursorData.getString(9))+")";//date to write previous record in description
             previousDataHold[6] = "REMARKS: " + cursorData.getString(2);//description or remarks
 
                 String [] dateArray =cursorData.getString(1).split("-");

@@ -23,54 +23,94 @@ import amar.das.acbook.utility.MyUtility;
 
 public class ExcelFormatBackup{
     private Activity context;
-    private String backupFileName;
     private XSSFWorkbook workBook;//XSSFWorkbook is newer .xlsx format is recommended due to its advantages:Smaller file sizes,Better compatibility with other applications,Improved security features
     private Sheet sheet;
     private Cell cell;
-    static int excelRow;
-    private static String EXCEL_SHEET_NAME = "Sheet1";
-    public ExcelFormatBackup(Activity context,String backupFileName){
+    int excelRow;//it will change dynamically change,if ot execute sequentially then it will work.in multiple thread will not work
+
+    public ExcelFormatBackup(Activity context){
         this.context=context;
-        this.backupFileName=MyUtility.backupDateTime()+backupFileName;
         this.workBook = new XSSFWorkbook();// Creating a New HSSF Workbook (.xls format)
-        this.sheet = this.workBook.createSheet(EXCEL_SHEET_NAME);// Create a new sheet in a Workbook and assign a name to it
         this.excelRow=0;
     }
-    public File backupInActiveMOrLOrGDataInExcelFormat(String skillType){//return null if error
+    public File singleBackupExcelFile(String backupExcelFileName){//return null if error
+        String personIds[];
+        byte numberOfFiles=4;
+        for (byte fileIndicator = 0; fileIndicator < numberOfFiles; fileIndicator++){
+
+            createNewExcelSheetAndSetRowAs0(fileIndicator);//Create a new sheet in a Workbook and assign a name to it and set row to 0
+
+            if((personIds=BackupDataUtility.getPersonIdsAccordingToFileIndicator(fileIndicator,context)) == null) return null;//means error
+
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForSingleFileBackup(personIds.length,fileIndicator);
+            excelRow++;//updating excel for space
+
+            for (String id:personIds){//loop
+                if(!createExcelOfId(id)) return null;////it create excel fill whether id is active or inactive
+            }
+        }
+
+        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+        return (excelFile != null)?excelFile:null;//null means error Occurred
+    }
+    private void createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForSingleFileBackup(int numberOfPerson,byte fileIndicator) {
+        if(fileIndicator==0){//for active mlg
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForActiveSkill(numberOfPerson);
+        }else if (fileIndicator==1) {//for inactive skill m
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(numberOfPerson,context.getString(R.string.mestre));
+        }else if (fileIndicator==2) {//for inactive skill l
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(numberOfPerson,context.getString(R.string.laber));
+        }else if (fileIndicator==3) {//for inactive skill g
+            createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(numberOfPerson,context.getString(R.string.women_laber));
+        }
+    }
+    public File backupInActiveMOrLOrGDataInExcelFormat(String skillType,String backupExcelFileName){//return null if error
         Database db=Database.getInstance(context);
-        excelRow=0;
+
+        createNewExcelSheetAndSetRowAs0(context.getString(R.string.inactive)+" Skill "+skillType);
+
         String personIds[] = db.getIdOfInActiveMOrLOrG(skillType);
         if (personIds == null) return null;//if error
         createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForInActiveSkill(personIds.length,skillType);
-        excelRow=3;//updating excel row so that person data will be start from third line
+        excelRow++;//updating excel row so that person data will be start from third line
 
         for (String id:personIds){//loop
-            if(!createExcelOfEachId(id)) return null;
+            if(!createExcelOfId(id)) return null;
         }
 
-        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupFileName,workBook);
-        if(excelFile == null){
-            return null;//means error Occurred
-        }else { return excelFile;}
+        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+        return (excelFile != null)?excelFile:null;//null means error Occurred
     }
-    public File backupActiveMLGDataInExcelFormat(){//return null if error
-        Database db=Database.getInstance(context);
-            excelRow=0;
+    public File backupActiveMLGDataInExcelFormat(String backupExcelFileName){//return null if error
+            Database db=Database.getInstance(context);
+
+            createNewExcelSheetAndSetRowAs0(context.getString(R.string.active_skill_m_l_g));
+
             String personIds[] = db.getIdOfActiveMLG();
             if (personIds == null) return null;//if error
             createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForActiveSkill(personIds.length);
-            excelRow=3;//updating excel row so that person data will be start from third line
+            excelRow++;//updating excel row so that person data will be start from third line
 
             for (String id:personIds){//loop
-                if(!createExcelOfEachId(id)) return null;
+                if(!createExcelOfId(id)) return null;
             }
 
-            File excelFile = createExcelFileInExternalStorageAndReturnFile(backupFileName,workBook);
-            if(excelFile == null){
-                return null;//means error Occurred
-            }else { return excelFile;}
+            File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+            return (excelFile != null)?excelFile:null;//null means error Occurred
     }
-    private boolean createExcelOfEachId(String id) {//it create excel fill wheather id is active or inactive
+    private void createNewExcelSheetAndSetRowAs0(byte fileIndicator) {
+        switch (fileIndicator){
+            case 0:{this.sheet = this.workBook.createSheet(context.getString(R.string.active_skill_m_l_g)); excelRow=0;}break;//Create a new sheet in a Workbook and assign a name to it
+            case 1:{this.sheet = this.workBook.createSheet(context.getString(R.string.inactive_skill_m)); excelRow=0;}break;//Create a new sheet in a Workbook and assign a name to it
+            case 2:{this.sheet = this.workBook.createSheet(context.getString(R.string.inactive_skill_l)); excelRow=0;}break;//Create a new sheet in a Workbook and assign a name to it
+            case 3:{this.sheet = this.workBook.createSheet(context.getString(R.string.inactive_skill_g)); excelRow=0;}break;//Create a new sheet in a Workbook and assign a name to it
+        }
+    }
+    private void createNewExcelSheetAndSetRowAs0(String sheetName) {
+        this.sheet = this.workBook.createSheet(sheetName);//Create a new sheet in a Workbook and assign a name to it
+        excelRow=0;
+    }
+    private boolean createExcelOfId(String id) {//it create excel fill whether id is active or inactive
         byte indicator =  MyUtility.get_indicator(context,id);
         boolean[] errorDetection = {false};//when ever exception occur in one place it will be updated to true in method.if no exception array will not be updated. so if any where error occur it will hold value true
         try {
@@ -172,12 +212,12 @@ public class ExcelFormatBackup{
     private void createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForActiveSkill(int numberOfPerson){
         Row row1 = sheet.createRow(excelRow++);
         cell = row1.createCell(0);
-        cell.setCellValue(getActiveSkillCreatedInfo(numberOfPerson));
+        cell.setCellValue(getActiveSkillMLGCreatedInfo(numberOfPerson));
         cell.setCellStyle(getLongTextCellStyle());
 
         row1 = sheet.createRow(excelRow++);
         cell = row1.createCell(0);
-        cell.setCellValue(getActiveAdvanceAndBalance());
+        cell.setCellValue(getActiveSkillMLGAdvanceAndBalance());
         cell.setCellStyle(getLongTextCellStyle());
     }
     private String getInActiveSkillCreatedInfo(int numberOfPerson,String skillType) {
@@ -186,9 +226,9 @@ public class ExcelFormatBackup{
         sb.append(array[0]).append(" ").append(array[1]);
         return sb.toString();
     }
-    private String getActiveSkillCreatedInfo(int numberOfPerson) {
+    private String getActiveSkillMLGCreatedInfo(int numberOfPerson) {
         StringBuilder sb = new StringBuilder();
-        String[] array = BackupDataUtility.getActiveSkillCreatedInfo(numberOfPerson,context);
+        String[] array = BackupDataUtility.getActiveSkillMLGCreatedInfo(numberOfPerson,context);
         sb.append(array[0]).append(" ").append(array[1]);
         return sb.toString();
     }
@@ -201,7 +241,7 @@ public class ExcelFormatBackup{
 //            sb.append(str);
 //        }
     }
-    private String getActiveAdvanceAndBalance(){
+    private String getActiveSkillMLGAdvanceAndBalance(){
         StringBuilder sb = new StringBuilder();
         sb.append(BackupDataUtility.getTotalActiveMLGAdvanceAndBalanceInfo(context)[0]);
         return sb.toString();
@@ -217,7 +257,7 @@ public class ExcelFormatBackup{
                 File filePath = new File(context.getExternalFilesDir(null).toString() + File.separator + GlobalConstants.EXCEL_FOLDER_NAME.getValue() + File.separator  + uniqueFileName + ".xlsx");//.xlsx is new format.File.separator works consistently across different operating systems.On Windows systems, it's typically a backslash (\). On Unix-based systems (including macOS and Linux), it's a forward slash (/).Correct Path Construction: By using File.separator, you avoid hardcoding path separators in your code, making it more adaptable and less prone to errors when running on different platforms.
                  workBook.write(new FileOutputStream(filePath.getAbsolutePath()));//if FileOutputStream cannot find file then it will create automatically
                 // return filePath.getAbsolutePath();//returning created file absolute path
-                return filePath;
+                return (filePath != null)?filePath:null;//null means error Occurred
             }else return null;//error
 
         }catch (Exception e) {

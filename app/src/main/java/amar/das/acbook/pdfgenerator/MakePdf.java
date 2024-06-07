@@ -492,7 +492,6 @@ public class MakePdf{
 
          The method returns the number of characters that fit within the specified width. This can be used to break the text into multiple lines, if necessary*/
     }
-
     // Helper method to calculate the height of a line of text
     private float calculateLineHeight(String[] lines, Paint paint) {
         Paint.FontMetrics metrics = paint.getFontMetrics();

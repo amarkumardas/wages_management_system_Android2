@@ -1,5 +1,6 @@
 package amar.das.acbook.activity;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -315,6 +316,18 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             });backgroundTask.shutdown();//when all task completed then only shutdown
 
         });
+
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { // Code to execute when back button is pressed
+
+                finish();//destroy current activity
+                Intent intent=new Intent( PdfViewerOperationActivity.this,IndividualPersonDetailActivity.class);
+                intent.putExtra("ID",fromIntentPersonId);
+                startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);//add it to the OnBackPressedDispatcher using getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback).This ensures that your custom back button handling logic is invoked when the back button is pressed.
     }
     private boolean downloadPdfUsingAbsPathOrByte(String absolutePath, byte[] pdfByte,String id) {
         try{
@@ -1159,35 +1172,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
         return true;
     }
-//    public String[] getPersonDetailsForRunningPDFInvoice(String id) {
-//        try (Database db=new Database(getBaseContext());
-//             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-//            if (cursor1 != null){
-//                cursor1.moveToFirst();
-//
-//                int pdfSequenceNo=MyUtility.getPdfSequence(id,getBaseContext());
-//                if(pdfSequenceNo != -1){//if -1 means error
-//                    pdfSequenceNo = pdfSequenceNo+1;
-//                }
-////                else {
-////                    pdfSequenceNo=-1;//if errro
-////                }
-////                if (cursor2 != null) {
-////                    cursor2.moveToFirst();
-////                    pdfSequenceNo =(cursor2.getInt(0) + 1);//pdf sequence in db is updated and since it is for future invoice number so for now increasing manually
-////                } else {
-////                    pdfSequenceNo = -1;
-////                }
-//                return new String[]{"NAME: "+cursor1.getString(0),"ID: "+id,"RUNNING  INVOICE NO. "+pdfSequenceNo,"CREATED ON: "+MyUtility.get12hrCurrentTimeAndDate()};
-//             }else{
-//                return new String[]{"[NULL NO DATA IN CURSOR]",id,"[NULL NO DATA IN CURSOR]","[NULL NO DATA IN CURSOR]"};//no value present in db
-//            }
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//            Log.d(this.getClass().getSimpleName(),"exception occurred in method "+Thread.currentThread().getStackTrace()[2].getMethodName());
-//            return new String[]{"ERROR",id,"ERROR","ERROR"};//to avoid error
-//        }
-//    }
     public void displayDialogMessage(String title, String message) {
         AlertDialog.Builder showDataFromDataBase=new AlertDialog.Builder(PdfViewerOperationActivity.this);
         showDataFromDataBase.setCancelable(true);
@@ -1230,40 +1214,14 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
          Absolute path: /Users/username/myFile.txt Absolute file: /Users/username/myFile.txt
          As you can see, both methods return the same value in this case, but the first one returns a String while the second one returns a File object. Depending on your use case, you may prefer one over the other.*/
     }
-//    private boolean deletePdfFromDevice(String pdfPath){
-//        if(pdfPath != null){
-//            try {
-//                File filePath = new File(pdfPath);//file to be delete
-//                if (filePath.exists()) {//checks file is present in device  or not
-//                    return filePath.delete();//only this can return false
-//                }
-//            }catch (Exception ex) {
-//                ex.printStackTrace();
-//                Log.d(this.getClass().getSimpleName(), "exception occurred in method " + Thread.currentThread().getStackTrace()[2].getMethodName());
-//                return false;
-//            }
-//        }
-//        return true;//if user deleted file from device ie. file not exist in device so return true
+//    @Override
+//    public void onBackPressed() {
+//        super.onBackPressed();
+//        finish();//destroy current activity
+//        Intent intent=new Intent( PdfViewerOperationActivity.this,IndividualPersonDetailActivity.class);
+//        intent.putExtra("ID",fromIntentPersonId);
+//        startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
 //    }
-//    private String genersateUniqueFileNameByTakingDateTime(String id,String fileName) {//file name will always be unique
-//        try {
-//            final Calendar current = Calendar.getInstance();//to get current date and time
-//            Date d = Calendar.getInstance().getTime();//To get time
-//            SimpleDateFormat sdf = new SimpleDateFormat("hhmmssa");//a stands for is AM or PM.example which make file unique 091659am which is unique
-//            return "id" + id + "date" + current.get(Calendar.DAY_OF_MONTH) + "_" + (current.get(Calendar.MONTH) + 1) + "_" + current.get(Calendar.YEAR)+fileName+ "At" + sdf.format(d);
-//        }catch (Exception x){
-//            x.printStackTrace();
-//            return "error";
-//        }
-//    }
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();//destroy current activity
-        Intent intent=new Intent( PdfViewerOperationActivity.this,IndividualPersonDetailActivity.class);
-        intent.putExtra("ID",fromIntentPersonId);
-        startActivity(intent);// go back to previous Activity with updated activity so passing id to get particular person detail refresh
-    }
 //    private boolean checkPermissionForSMS() {
 //        return ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
 //    }
@@ -1293,7 +1251,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file
+        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file.text file is stored in cache area
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         Database.closeDatabase();

@@ -5,15 +5,13 @@ import android.media.MediaRecorder;
 
 import java.io.File;
 
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.utility.MyUtility;
 
 public class VoiceRecorder{
    private static MediaRecorder mediaRecorder;//it should be static
     private static MediaPlayer mediaPlayer;
     private  String audioAbsolutePath;
-    private String audioFolderName="acBookAudio";
-    private String audioFileName="audio";
-
   public VoiceRecorder(String id,String getExternalFilesDir){
       audioAbsolutePath=getRecordingAbsolutePath(getExternalFilesDir,id);
       mediaRecorder=new MediaRecorder();
@@ -71,8 +69,8 @@ public class VoiceRecorder{
         return mediaRecorder;
     }
     private String getRecordingAbsolutePath(String getExternalFilesDir,String id){//return null if error
-        if(MyUtility.isFolderExistIfNotExistCreateIt(getExternalFilesDir,"/"+audioFolderName+"")) {//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
-            return new File(getExternalFilesDir+"/"+audioFolderName+"/"+MyUtility.generateUniqueFileNameByTakingDateTime(id,audioFileName) +".mp3").getAbsolutePath();//path of audio where it is saved in device
+        if(MyUtility.isFolderExistIfNotExistCreateIt(getExternalFilesDir,"/"+ GlobalConstants.AUDIO_FOLDER_NAME.getValue())) {//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
+            return new File(getExternalFilesDir+"/"+GlobalConstants.AUDIO_FOLDER_NAME.getValue()+"/"+MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.AUDIO_FILE_NAME.getValue()) +".mp3").getAbsolutePath();//path of audio where it is saved in device
         }else{
             return null;
         }

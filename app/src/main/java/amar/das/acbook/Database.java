@@ -931,7 +931,7 @@ public class Database extends SQLiteOpenHelper {
                 if(cv==null) return false;//if error
 
 
-                if(MyUtility.getDate(prevSystemDateTime).equals(MyUtility.getDate(activeNewSystemDateTime))){//initially on new date while updating previous record then that record prevSystemDateTime would be different from now SystemDateTime
+                if(MyUtility.getDateFromSystemDateTime(prevSystemDateTime).equals(MyUtility.getDateFromSystemDateTime(activeNewSystemDateTime))){//initially on new date while updating previous record then that record prevSystemDateTime would be different from now SystemDateTime
 
                     //on same day user cant update the record that is automatically inserted by system but on next day user can update that record.this is done to keep track of changed date record
                    //boolean bool1=isThisRecordTodayAutomaticallyInsertedFromHistoryTable(id,prevSystemDateTime);

@@ -2267,7 +2267,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             }
         });
     }
-
     private boolean isAllRateSet(int[] rateArray, int indicator) {
         if((indicator >=1 && indicator<=4) && rateArray != null){
             if((indicator == 1 && rateArray[0] != 0) || (indicator == 2 && rateArray[0] != 0 && rateArray[1] != 0) || (indicator == 3 && rateArray[0] != 0 && rateArray[1] != 0 && rateArray[2] != 0) || (indicator == 4 && rateArray[0] != 0 && rateArray[1] != 0 && rateArray[2] != 0 && rateArray[3] != 0)){

@@ -35,9 +35,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="LAST INVOICE2"
+                android:text="@string/last_invoice2"
                 android:textSize="12sp"
-                android:textStyle="bold"
+
                 android:background="@drawable/white_detailsbg"
                 android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -46,9 +46,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="LAST INVOICE1"
+                android:text="@string/last_invoice1"
                 android:textSize="12sp"
-                android:textStyle="bold"
+
                 android:background="@drawable/white_detailsbg"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
@@ -59,9 +59,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="RUNNING INVOICE"
+                android:text="@string/running_invoice"
                 android:textSize="12sp"
-                android:textStyle="bold"
+
                 android:background="@drawable/white_detailsbg"
                 android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -91,9 +91,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/green_color_bg"
-                android:text="DOWNLOAD"
+                android:text="@string/download"
                 android:textSize="12sp"
-                android:textStyle="bold"
+
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:foreground="?android:attr/selectableItemBackground"/>
@@ -104,8 +104,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/green_color_bg"
-                android:text="SHARE INVOICE"
-                android:textStyle="bold"
+                android:text="@string/share_invoice"
+
                 android:textSize="12sp"
                 android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>

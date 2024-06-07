@@ -249,7 +249,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 
             binding.customDepositEt.setText(cDeposit);//fetching deposit
 
-             previousDataHold[0]="DATE: "+cursorData.getString(3)+" ("+MyUtility.getTime12hr(getIntent().getStringExtra("SYSTEM_DATETIME"))+")";
+             previousDataHold[0]="DATE: "+cursorData.getString(3)+" ("+MyUtility.getTime12hrFromSystemDateTime(getIntent().getStringExtra("SYSTEM_DATETIME"))+")";
              previousDataHold[1]="DEPOSIT: "+(cDeposit!=null?MyUtility.convertToIndianNumberSystem(Long.parseLong(cDeposit)):0);
              previousDataHold[2]="REMARKS: "+cDescription;
             cursorData.close();

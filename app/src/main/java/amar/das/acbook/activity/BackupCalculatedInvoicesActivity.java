@@ -2,11 +2,9 @@ package amar.das.acbook.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.Manifest;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -35,7 +33,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
         binding = ActivityBackupCalculatedInvoicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(GlobalConstants.TEXT_FILE_FOLDER_NAME.getValue());
+        ArrayList<String> allFilePathFromDevice=getAllAbsolutePathOfFilesFromFolderDevice(GlobalConstants.BACKUP_CALCULATED_INVOICE_TEXT_FOLDER_NAME.getValue());
         if(allFilePathFromDevice != null){//if null means error
 
           if(allFilePathFromDevice.size()==0){
@@ -59,7 +57,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
             binding.textFileRecyclerview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             binding.textFileRecyclerview.setAdapter(textFileAdapter);
             binding.textFileRecyclerview.setHasFixedSize(true);
-            textFileAdapter.RecyclerViewListener(new BackUpCalculatedTextFileAdapter.RecyclerViewListener() {//this is automatically triggered when in adapter class any event or click happen
+            textFileAdapter.RecyclerViewListener(new BackUpCalculatedTextFileAdapter.RecyclerViewListener(){//this is automatically triggered when in adapter class any event or click happen
                 @Override
                 public void updatedCount(int count) {
                     if(count == 0){
@@ -83,7 +81,7 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 }
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    newText=newText.replaceAll("[^a-zA-Z0-9]", "");//replace all special character with ""
+                    newText=newText.replaceAll("[^a-zA-Z0-9_]","");//replace all special character with ""
                     binding.textFileRecyclerview.setAdapter(textFileAdapter);
 
                     textFileAdapter.getFilter().filter(newText);

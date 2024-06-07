@@ -244,7 +244,7 @@ public class HistoryFragment extends Fragment {
                         isScrolling1 = false;
                        // progressDialogHelper.showProgressBar();
 
-                     fetchDataAccoprdingToIndicator(historyArraylist,totalNumberOfLoadedData,eachTimeDataToLoad);//dont send cursor to this function otherwise it will give error connection closed.because this function will create new thread and in new thread we have to create new connection
+                     fetchDataAccordingToIndicator(historyArraylist,totalNumberOfLoadedData,eachTimeDataToLoad);//dont send cursor to this function otherwise it will give error connection closed.because this function will create new thread and in new thread we have to create new connection
 
 
                         totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
@@ -500,7 +500,7 @@ public class HistoryFragment extends Fragment {
            return true;
         }
 
-        String formattedHistoryData[][]=formateHistoryDataAccordingToColumn(origionalHistoryData);//formatted data-"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKING DAYS","REMARKS","UPDATED PAYMENT","UPDATED PAYMENT RECEIVED"
+        String formattedHistoryData[][]= formatHistoryDataAccordingToColumn(origionalHistoryData);//formatted data-"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKING DAYS","REMARKS","UPDATED PAYMENT","UPDATED PAYMENT RECEIVED"
         if(formattedHistoryData==null) return false;
 
         if(!makePdf.makeTable(new String[]{"STATUS","DATE","ID","NAME","WAGES","DEPOSIT","WORKED DAYS","UP","UAR"},new String[][]{{}},getColumnWidth(), 9, true)) {
@@ -536,7 +536,7 @@ public class HistoryFragment extends Fragment {
     private float[] getColumnWidth() {
         return new float[]{11f,10f,7f,28f,10f,6f,14f,7f,7f};
     }
-    private String[][] formateHistoryDataAccordingToColumn(String[][] origionalData){//if error return null
+    private String[][] formatHistoryDataAccordingToColumn(String[][] origionalData){//if error return null
         //column original Data received in this order-"STATUS","DATE","ID","NAME","2000","0","M","L","S3","S4","6",null,"P3","P4","REMARKS","100"
         try{
             String formattedData[][]=new String[origionalData.length][10];//10 cloumns
@@ -614,7 +614,7 @@ public class HistoryFragment extends Fragment {
         int sumM=0,sumL=0,sumG=0;
 
         HashMap<Character,Integer> skill1data=db.getTotalPeopleWorked(year,month,day,Database.COL_14_P1_SKILL_H,Database.COL_8_P1_H);
-        if(skill1data == null) return "error in getting total worked people";
+        if(skill1data == null){ return "error in getting total worked people";}
 
             if(skill1data.containsKey(G)){
                  sumG=sumG+skill1data.get(G);
@@ -717,7 +717,7 @@ public class HistoryFragment extends Fragment {
         StringBuilder sb=new StringBuilder(25).append(dayOfMonth+"-"+(month)+"-"+year+" , "+currentDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()).toUpperCase());
         return sb.toString();
     }
-    private void fetchDataAccoprdingToIndicator(ArrayList<HistoryModel> arraylist, int skip, int fetch) {
+    private void fetchDataAccordingToIndicator(ArrayList<HistoryModel> arraylist, int skip, int fetch) {
         new Handler().postDelayed(() -> {
             dataLoad(arraylist,skip,fetch);
             //progressDialogHelper.hideProgressBar();//after data loading progressbar disabled

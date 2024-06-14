@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background"
+    android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:text="@string/backup_file_setting"
+            android:paddingTop="1dp"
+            android:background="@color/purple_700"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:layout_marginTop="12dp"
+            android:id="@+id/hardcoded_p1_tv_rate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/would_you_like_to_share_or_download_backup_file"
+            android:textColor="@color/black"
+            android:textSize="17sp"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="25dp"
+        android:id="@+id/backup_setting_radiogp">
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/share_recommended"
+            android:id="@+id/share_backup_file"
+
+            android:layout_gravity="center_horizontal"
+            android:textSize="15dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <RadioButton
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/download"
+            android:id="@+id/download_backup_file"
+
+            android:layout_gravity="center_horizontal"
+            android:textSize="15dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+    </RadioGroup>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="4dp"
+        android:orientation="horizontal"
+        android:weightSum="4">
+        <Button
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/cancel"
+            android:textSize="15dp"
+            android:textColor="#FF0000"
+            android:textAlignment="center"
+            android:background="@drawable/graycolor_bg"
+            android:id="@+id/cancel_btn_backup_setting"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <Button
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/save"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@drawable/green_color_bg"
+            android:id="@+id/save_btn_backup_setting"
+            android:foreground="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
+
+</LinearLayout>

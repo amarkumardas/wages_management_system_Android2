@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
-        <item android:title="@string/backup_manually">
-      <menu>
-    <item
-        android:id="@+id/backup_active_mlg"
-        android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_active_skill_m_l_g"/>
+<!--    <group android:checkableBehavior="single">-->
+<!--        <item android:title="@string/backup_manually">-->
+<!--      <menu>-->
+<!--    <item-->
+<!--        android:id="@+id/backup_active_mlg"-->
+<!--        android:icon="@drawable/baseline_share_24"-->
+<!--        android:title="@string/backup_active_skill_m_l_g"/>-->
 
-    <item android:id="@+id/backup_inactive_m"
-        android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_skill_m"/>
+<!--    <item android:id="@+id/backup_inactive_m"-->
+<!--        android:icon="@drawable/baseline_share_24"-->
+<!--        android:title="@string/backup_inactive_skill_m"/>-->
 
-    <item android:id="@+id/backup_inactive_l"
-        android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_skill_l"/>
+<!--    <item android:id="@+id/backup_inactive_l"-->
+<!--        android:icon="@drawable/baseline_share_24"-->
+<!--        android:title="@string/backup_inactive_skill_l"/>-->
 
-    <item android:id="@+id/backup_inactive_g"
-        android:icon="@drawable/baseline_share_24"
-        android:title="@string/backup_inactive_skill_g"/>
-      </menu>
-        </item>
-  </group>
+<!--    <item android:id="@+id/backup_inactive_g"-->
+<!--        android:icon="@drawable/baseline_share_24"-->
+<!--        android:title="@string/backup_inactive_skill_g"/>-->
+<!--      </menu>-->
+<!--        </item>-->
+<!--  </group>-->
+
+    <item android:id="@+id/backup_manually"
+        android:icon="@drawable/baseline_cloud_upload_24"
+        android:title="@string/backup_manually"/>
 
 </menu>

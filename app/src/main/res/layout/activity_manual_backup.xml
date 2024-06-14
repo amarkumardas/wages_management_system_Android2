@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/manual_backup_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".activity.ManualBackupActivity">
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
@@ -32,24 +34,35 @@
             android:layout_marginStart="50dp"
             android:textSize="20sp"/>
         <TextView
-            android:id="@+id/backup_setting"
+            android:id="@+id/backup_setting_for_share_and_download"
             android:layout_marginTop="11dp"
             android:layout_alignParentEnd="true"
             android:layout_width="30dp"
             android:layout_height="28dp"
             android:background="@drawable/baseline_settings_suggest_24"
             android:textSize="20sp"
+            android:foreground="?android:attr/selectableItemBackground"
             android:layout_marginEnd="20dp"
             android:layout_gravity="center_vertical"/>
     </RelativeLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="@string/backup_your_data_suggestion"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        android:layout_marginTop="10dp"
+        android:textAlignment="center"/>
+    <TextView
+        android:layout_marginStart="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/_3_ways_for_backup"
         android:textColor="@color/black"
         android:textSize="17sp"
-        android:layout_marginTop="10dp"
-        android:textAlignment="center"/>
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,151 +72,48 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
-            android:text="@string/_1_backup_each_file"
+            android:text="@string/_1_database_backup"
             android:textColor="@color/purple_700"
             android:textSize="15sp"
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"
-            android:id="@+id/backup_each_file"/>
+            android:id="@+id/database_backup_tv"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="13sp"
-            android:paddingTop="1dp"
+            android:paddingTop="3dp"
             android:textColor="@color/black"
             android:layout_marginStart="5dp"
-            android:id="@+id/backup_each_file_user_last_backup"/>
+            android:id="@+id/database_last_backup"/>
     </LinearLayout>
-    <TextView
+    <LinearLayout
+        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/select_file_type"
-        android:layout_marginLeft="13dp"
-        android:layout_marginTop="8dp"
-        android:textSize="10sp"/>
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginLeft="10dp"
-        android:weightSum="3"
-        android:id="@+id/backup_each_file_radiogroup">
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pdf"
-            android:layout_weight="1"
-            android:id="@+id/backup_each_file_pdf"
-            android:textSize="12sp"
-            android:foreground="?android:attr/selectableItemBackground" />
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text"
-            android:layout_weight="1"
-            android:id="@+id/backup_each_file_text"
-            android:textSize="12sp"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+        <Button
+            android:layout_marginTop="5dp"
+            android:id="@+id/database_backup_file"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:textSize="13dp"
+            android:text="@string/database_file_backup"
+            android:textAllCaps="false"
             android:foreground="?android:attr/selectableItemBackground"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/excel"
-            android:layout_weight="1"
-            android:id="@+id/backup_each_file_excel"
-            android:textSize="12dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            />
-    </RadioGroup>
-    <LinearLayout
-        android:layout_marginTop="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:orientation="horizontal">
-    <Button
-        android:id="@+id/backup_active_skill_mlg"
-        android:layout_width="130dp"
-        android:layout_height="45dp"
-        android:textSize="13dp"
-        android:text="@string/active_skill_m_l_g"
-        android:textAllCaps="false"
-        android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
-            android:id="@+id/backup_active_skill_mlg_green_tick"
+            android:id="@+id/database_backup_green_tick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
             android:layout_marginStart="10dp"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:orientation="horizontal">
-    <Button
-        android:id="@+id/backup_inactive_skill_m"
-        android:layout_width="130dp"
-        android:layout_height="45dp"
-        android:textSize="13dp"
-        android:text="@string/inactive_skill_m"
-        android:textAllCaps="false"
-        android:foreground="?android:attr/selectableItemBackground"/>
-        <TextView
-            android:id="@+id/backup_inactive_skill_m_green_tick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
-            android:layout_marginStart="10dp"
-            android:layout_gravity="center_vertical"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:orientation="horizontal">
-    <Button
-        android:id="@+id/backup_inactive_skill_l"
-        android:layout_width="130dp"
-        android:layout_height="45dp"
-        android:text="@string/inactive_skill_l"
-        android:textSize="13dp"
-        android:textAllCaps="false"
-        android:foreground="?android:attr/selectableItemBackground"/>
-        <TextView
-            android:id="@+id/backup_inactive_skill_l_green_tick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
-            android:layout_marginStart="10dp"
-            android:layout_gravity="center_vertical"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:orientation="horizontal">
-    <Button
-        android:id="@+id/backup_inactive_skill_g"
-        android:layout_width="130dp"
-        android:layout_height="45dp"
-        android:textSize="13dp"
-        android:text="@string/inactive_skill_g"
-        android:textAllCaps="false"
-        android:foreground="?android:attr/selectableItemBackground"/>
-        <TextView
-            android:id="@+id/backup_inactive_skill_g_green_tick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
-            android:layout_marginStart="10dp"
-            android:layout_gravity="center_vertical"/>
-    </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
@@ -270,8 +180,9 @@
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
         <Button
+            android:layout_marginTop="5dp"
             android:id="@+id/single_file_backup_file"
-            android:layout_width="130dp"
+            android:layout_width="200dp"
             android:layout_height="45dp"
             android:textSize="13dp"
             android:text="@string/single_file"
@@ -285,5 +196,154 @@
             android:layout_marginStart="10dp"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:text="@string/_3_backup_each_file"
+            android:textColor="@color/purple_700"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:id="@+id/backup_each_file_tv"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="13sp"
+            android:paddingTop="1dp"
+            android:textColor="@color/black"
+            android:layout_marginStart="5dp"
+            android:id="@+id/backup_each_file_user_last_backup"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/select_file_type"
+        android:layout_marginLeft="13dp"
+        android:layout_marginTop="8dp"
+        android:textSize="10sp"/>
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:weightSum="3"
+        android:id="@+id/backup_each_file_radiogroup">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pdf"
+            android:layout_weight="1"
+            android:id="@+id/backup_each_file_pdf"
+            android:textSize="12sp"
+            android:foreground="?android:attr/selectableItemBackground" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text"
+            android:layout_weight="1"
+            android:id="@+id/backup_each_file_text"
+            android:textSize="12sp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/excel"
+            android:layout_weight="1"
+            android:id="@+id/backup_each_file_excel"
+            android:textSize="12dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            />
+    </RadioGroup>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+    <Button
+        android:id="@+id/backup_active_skill_mlg"
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:textSize="13dp"
+        android:text="@string/active_skill_m_l_g"
+        android:textAllCaps="false"
+        android:foreground="?android:attr/selectableItemBackground"/>
+        <TextView
+            android:id="@+id/backup_active_skill_mlg_green_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+    <Button
+        android:id="@+id/backup_inactive_skill_m"
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:textSize="13dp"
+        android:text="@string/inactive_skill_m"
+        android:textAllCaps="false"
+        android:foreground="?android:attr/selectableItemBackground"/>
+        <TextView
+            android:id="@+id/backup_inactive_skill_m_green_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+    <Button
+        android:id="@+id/backup_inactive_skill_l"
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:text="@string/inactive_skill_l"
+        android:textSize="13dp"
+        android:textAllCaps="false"
+        android:foreground="?android:attr/selectableItemBackground"/>
+        <TextView
+            android:id="@+id/backup_inactive_skill_l_green_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+    <Button
+        android:id="@+id/backup_inactive_skill_g"
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:textSize="13dp"
+        android:text="@string/inactive_skill_g"
+        android:textAllCaps="false"
+        android:foreground="?android:attr/selectableItemBackground"/>
+        <TextView
+            android:id="@+id/backup_inactive_skill_g_green_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_green_sharp_done_sharp_tick_20"
+            android:layout_marginStart="10dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
 </LinearLayout>
+</ScrollView>

@@ -6,6 +6,7 @@ public enum GlobalConstants {
      INACTIVE("0"),
      DEPOSIT_CODE("1"),//to indicate amount is deposited
      WAGES_CODE("0"),//to indicate amount is wages
+     DATABASE_BACKUP_FILE_NAME("DATABASE_BACKUP"),
      SINGLE_BACKUP_PDF_FILE_NAME("ALL_DATA_SINGLE_FILE_BACKUP"),
      SINGLE_BACKUP_TEXT_FILE_NAME("ALL_DATA_SINGLE_FILE_BACKUP"),
      SINGLE_BACKUP_EXCEL_FILE_NAME("ALL_DATA_SINGLE_FILE_BACKUP"),
@@ -30,6 +31,7 @@ public enum GlobalConstants {
     PDF_FOLDER_NAME("Pdf_Folder"),
     EXCEL_FOLDER_NAME("Excel_Folder"),
     AUDIO_FOLDER_NAME("Audio_Folder"),
+    DATABASE_FOLDER_NAME("Database_Folder"),
 
     AUDIO_FILE_NAME("audio"),
     USER_SELECTED_PDF_FORMAT("1"), USER_SELECTED_TEXT_FORMAT("2"), USER_SELECTED_EXCEL_FORMAT("3"),

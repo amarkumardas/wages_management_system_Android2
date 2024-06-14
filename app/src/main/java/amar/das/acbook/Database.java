@@ -12,6 +12,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -19,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
@@ -3034,16 +3042,118 @@ public class Database extends SQLiteOpenHelper {
             }
         }
     }
-
-//    public boolean isDataOfDatePresentInHistoryTable(int year, byte month, byte day){
-//        try(Cursor cursor = getData("SELECT EXISTS (SELECT 1 FROM " + Database.TABLE_HISTORY + " WHERE "+Database.COL_13_SYSTEM_DATETIME_H+" LIKE '"+String.format("%04d-%02d-%02d", year, month, day)+"%')")){//This query only checks for the existence of a row with the specified condition. It doesn't need to retrieve any actual data; it just needs to determine if any matching row exists
-//            cursor.moveToFirst();
-//            return (cursor.getShort(0) == 1)? true:false;//if getShort(0) is 1 that means data is present in table.
-//        }catch (Exception x){
+//    public File databaseBackup(String uniqueDatabaseFileName) {
+//        try {
+//            File dataBaseFile = context.getDatabasePath(DATABASE_NAME); // Get the database file path
+//
+//            if(!dataBaseFile.exists()) return null; // Check if database exists
+//
+//            File backupFile=null;
+//            if((backupFile=createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName)) == null) return null;//Create a backup file name
+//
+//            FileInputStream fis = null; // Create streams for copying
+//            try {
+//                fis = new FileInputStream(dataBaseFile);
+//            } catch (FileNotFoundException e) {
+//                throw new RuntimeException(e);
+//            }
+//            FileOutputStream fos = null;
+//            try {
+//                fos = new FileOutputStream(backupFile);
+//            } catch (FileNotFoundException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            // Transfer bytes from database file to backup file
+//            byte[] buffer = new byte[1024];
+//            int length;
+//            while ((length = fis.read(buffer)) > 0) {
+//                fos.write(buffer, 0, length);
+//            }
+//
+//            // Close streams
+//            fis.close();
+//            fos.close();
+//
+//            return backupFile;
+//        }catch (Exception x) {
 //            x.printStackTrace();
-//            return false;
+//            return null;
 //        }
 //    }
+    public File databaseBackup(String uniqueDatabaseFileName){
+        File databaseFile = context.getDatabasePath(DATABASE_NAME);
+
+        if (!databaseFile.exists()) {return null;} // Check if database exists and return null if not
+
+        File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName,".db");//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
+        if (backupFile == null) {return null;}
+
+        //this approach is fast so no need to compress file it make it slower while sharing
+        try(FileInputStream fis = new FileInputStream(databaseFile); // Use try-with-resources for automatic stream closure
+            FileOutputStream fos = new FileOutputStream(backupFile);
+            FileChannel sourceChannel=fis.getChannel();//FileChannel can be faster than the one using a loop and byte buffer for large file copies
+            FileChannel destinationChannel=fos.getChannel()){
+
+            destinationChannel.transferFrom(sourceChannel,0,sourceChannel.size());//copying db to backupFile very FAST
+
+            //Transfer bytes from database file to backup file it is slower
+//            byte[] buffer = new byte[1024];//The array has a size of 1024 bytes. This buffer will be used to hold chunks of data while copying from the source to the destination file.
+//            int length;
+//            while ((length = fis.read(buffer)) > 0) {
+//                fos.write(buffer, 0, length);
+//            }
+            return backupFile;
+
+//        try (FileInputStream fis = new FileInputStream(databaseFile);
+//             FileOutputStream fos = new FileOutputStream(backupFile);
+//             GZIPOutputStream gos = new GZIPOutputStream(fos)) { // GZIPOutputStream for compression
+//
+//            // Transfer bytes from database to compressed backup using streams
+//            byte[] buffer = new byte[1024];
+//            int length;
+//            while ((length = fis.read(buffer)) > 0) {
+//                gos.write(buffer, 0, length);
+//            }
+//
+//            return backupFile;
+
+
+//        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backupFile))) { // Use ZipOutputStream for ZIP compression
+//            zos.putNextEntry(new ZipEntry(uniqueDatabaseFileName)); // Define entry name in ZIP file
+//
+//            try (FileInputStream fis = new FileInputStream(databaseFile)) { // Stream for database file
+//                byte[] buffer = new byte[1024];
+//                int length;
+//                while ((length = fis.read(buffer)) > 0) {
+//                    zos.write(buffer, 0, length);
+//                }
+//            }
+//
+//            zos.closeEntry(); // Close entry after writing database data
+//            return backupFile;
+
+        }catch (Exception x) {
+            x.printStackTrace();
+            return null;
+        }
+    }
+    private File createDbFolderInExternalStorageAndReturnFile(String uniqueFileName,String fileExtension) {//return null when exception
+        try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
+            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)) return null;
+
+            if(!MyUtility.isFolderExistIfNotExistCreateIt(context.getExternalFilesDir(null).toString(),GlobalConstants.DATABASE_FOLDER_NAME.getValue())) return  null;
+
+              File filePath = new File(context.getExternalFilesDir(null).toString() + File.separator + GlobalConstants.DATABASE_FOLDER_NAME.getValue() + File.separator  + uniqueFileName + fileExtension);
+                //return filePath.getAbsolutePath();//returning created file absolute path
+                return (filePath != null)?filePath:null;//null means error Occurred
+
+
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 //    One common cause of database locking is that you are using multiple instances of SQLiteOpenHelper to access the same database file. This can create conflicts and inconsistencies in the database state, and prevent other instances from accessing it. To avoid this, you should use only one instance of SQLiteOpenHelper throughout your application, and make sure to close it when you are done with it
 //        ChatGPT

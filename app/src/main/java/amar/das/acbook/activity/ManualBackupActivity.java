@@ -4,8 +4,14 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
@@ -30,6 +36,7 @@ public class ManualBackupActivity extends AppCompatActivity {
     String defaultBackupEachFileFormat = GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue();//DEFAULT VALUE
     String defaultSingleBackupFileFormat = GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue();//DEFAULT VALUE
     boolean forShareTrueForDownloadFalse=true;//default value
+    boolean userLastBackUpEachFileIndicator[]=new boolean[4];//kept here so when this activity is in resume then oncreate will be called than this array need to be updated.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,14 +49,14 @@ public class ManualBackupActivity extends AppCompatActivity {
 //            return insets;
 //        });
         ProgressDialogHelper progressBar = new ProgressDialogHelper(this);
-        boolean userLastBackUpEachFileIndicator[]=new boolean[4];
-        
+
         setBackupEachFileUserSelectedFileFormat();//backup each file
         setSingleBackupFileUserSelectedFileFormat();//single file backup
         
         setLastSyncDateOfBackupEachFile();
         setLastSyncDateOfSingleBackupFile();
-        
+        setLastSyncDateOfDatabaseBackup();
+
         binding.backupEachFileRadiogroup.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
             if(checkedIdOfRadioBtn == R.id.backup_each_file_pdf){
                 SharedPreferencesHelper.setString(this,SharedPreferencesHelper.Keys.BACKUP_EACH_FILE_USER_SELECTED_FORMAT.name(), GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue());
@@ -161,11 +168,57 @@ public class ManualBackupActivity extends AppCompatActivity {
             }
         });
         
-        binding.backupEachFile.setOnClickListener(view -> {
-            MyUtility.showDefaultDialog(getString(R.string._1_backup_each_file),getString(R.string.you_can_backup_your_aa_data_into_smaller_files_separately),this,true);//it is activity so we have to pass this
+        binding.backupEachFileTv.setOnClickListener(view -> {
+            MyUtility.showDefaultDialog(getString(R.string._3_backup_each_file),getString(R.string.you_can_backup_your_aa_data_into_smaller_files_separately),this,true);//it is activity so we have to pass this
         });
         binding.singleFileBackupTv.setOnClickListener(view -> {
             MyUtility.showDefaultDialog(getString(R.string._2_single_file_backup),getString(R.string.you_can_backup_your_all_data_in_a_single_file),this,true);//it is activity so we have to pass this
+        });
+        binding.databaseBackupTv.setOnClickListener(view -> {
+            MyUtility.showDefaultDialog(getString(R.string._1_database_backup),getString(R.string.you_can_backup_your_database),this,true);//it is activity so we have to pass this
+        });
+        binding.backupSettingForShareAndDownload.setOnClickListener(view -> {
+            AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(this);
+            LayoutInflater inflater=LayoutInflater.from(this);
+            View myView=inflater.inflate(R.layout.dialog_share_or_download_backup_file,null);//myView contain all layout view ids
+
+            myCustomDialog.setView(myView);//set custom layout to alert dialog
+            myCustomDialog.setCancelable(true);//if false user touch to other place then dialog will not be close
+
+            final AlertDialog dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
+            RadioGroup radioGroups=myView.findViewById(R.id.backup_setting_radiogp);
+            Button save=myView.findViewById(R.id.save_btn_backup_setting);
+            Button cancel=myView.findViewById(R.id.cancel_btn_backup_setting);
+            boolean trueForShareFalseForDownload[]=new boolean[1];
+            setUserSelectedRadioButton(myView);
+            radioGroups.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
+                if(checkedIdOfRadioBtn == R.id.share_backup_file){
+                    trueForShareFalseForDownload[0]=true;
+                }else if (checkedIdOfRadioBtn == R.id.download_backup_file) {
+                    trueForShareFalseForDownload[0]=false;
+                }
+
+            });
+            cancel.setOnClickListener(view12 -> {dialog.dismiss();});
+            save.setOnClickListener(view1 -> {
+                if(trueForShareFalseForDownload[0]){
+                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),true);//true value is for sharing
+                }else{
+                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),false);//true value is for download
+                }
+                dialog.dismiss();//after user click save btn then close the dialog
+            });
+            dialog.show();
+        });
+
+        binding.databaseBackupFile.setOnClickListener(view ->{
+            Database.closeDatabase();//before backing up database close all the resources other storage issue will occur
+            if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {// Check if available and not read only.In summary, these methods act as safeguards for your application's interaction with external storage. By using them effectively, you can prevent errors, improve user experience, and gracefully handle situations where external storage isn't available or writable.
+                Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
+                return ;
+            }
+            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            dataBaseBackup(progressBar,forShareTrueForDownloadFalse);
         });
         
         binding.gobackBackupActivity.setOnClickListener(view -> {
@@ -174,6 +227,54 @@ public class ManualBackupActivity extends AppCompatActivity {
 //            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //            transaction.replace(R.id.manual_backup_layout,new MLDrawerFragment()).commit();
         });
+    }
+
+    private void setUserSelectedRadioButton(View myView) {
+        RadioButton shareRadio=myView.findViewById(R.id.share_backup_file);
+        RadioButton downloadRadio=myView.findViewById(R.id.download_backup_file);
+
+        if(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse)){//default value true for sharing
+            shareRadio.setChecked(true);
+        }else {
+            downloadRadio.setChecked(true);
+        }
+    }
+
+    private void dataBaseBackup(ProgressDialogHelper progressBar, boolean forShareTrueForDownloadFalse) {
+        ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
+        backgroundTask.execute(() -> {
+            if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(this)){
+                this.runOnUiThread(() -> Toast.makeText(this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
+                //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
+                // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
+                return;
+            }
+
+            this.runOnUiThread(() -> progressBar.showProgressBar());
+
+            Database db=Database.getInstance(getBaseContext());//opening new instance
+            File dataBaseFile=null;
+
+            if((dataBaseFile=db.databaseBackup(MyUtility.getDateTimeForBackupFile()+GlobalConstants.DATABASE_BACKUP_FILE_NAME.getValue())) !=null){
+                if(forShareTrueForDownloadFalse){
+                    if (MyUtility.shareFileToAnyApp(dataBaseFile, "application/x-sqlite3",getString(R.string.database_file_backup), this)) {//open intent to share
+                        updateUserLastBackForDatabaseBackup();
+                    }else {
+                        this.runOnUiThread(() -> Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show());
+                    }
+                }else{//download
+                    if(download(dataBaseFile,this)){
+                        this.runOnUiThread(() -> Toast.makeText(this, this.getString(R.string.backup_saved_in_download_folder), Toast.LENGTH_LONG).show());
+                         updateUserLastBackForDatabaseBackup();
+                    }else{
+                        this.runOnUiThread(() -> Toast.makeText(this, this.getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+                    }
+                }
+            }else{
+                this.runOnUiThread(() -> Toast.makeText(this, this.getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
+            }
+            this.runOnUiThread(() -> progressBar.hideProgressBar());
+        });backgroundTask.shutdown();//when all task completed then only shutdown
     }
     private void singleBackupExcelFormat(ProgressDialogHelper progressBar, boolean forShareTrueForDownloadFalse) {
         ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
@@ -190,7 +291,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.singleBackupExcelFile(MyUtility.dateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.singleBackupExcelFile(MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", getString(R.string.single_excel_file_backup), this)) {//open intent to share
                         updateUserLastBackForSingleBackupFile();
@@ -224,7 +325,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.singleBackupTextFile(),MyUtility.dateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.singleBackupTextFile(),MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -261,7 +362,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.singleBackupPdfFile(MyUtility.dateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_PDF_FILE_NAME.getValue())) !=null){
+            if((pdfFile=dataBackup.singleBackupPdfFile(MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_PDF_FILE_NAME.getValue())) !=null){
 
                 if(forShareTrueForDownloadFalse){//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf",getString(R.string.single_pdf_file_backup), this)) {
@@ -283,6 +384,18 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             this.runOnUiThread(() -> progressBar.hideProgressBar());
         });backgroundTask.shutdown();//when all task completed then only shutdown
+    }
+    private void setLastSyncDateOfDatabaseBackup() {
+        String userBackupDate=SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.LAST_DATABASE_BACKUP.name(),null);
+        if( userBackupDate != null ){
+
+            checkIfUserBackupDataTodayThanMakeGreenTickVisibleAndChangeTextColorForBackupDatabase(userBackupDate);
+            binding.databaseLastBackup.setText(userBackupDate);
+
+        }else{
+            binding.databaseLastBackup.setText(getString(R.string.last_backup_colon_hyphen));
+            makeGreenTickInVisibleForDatabaseBackup();
+        }
     }
     private void setLastSyncDateOfBackupEachFile() {
         String userBackupDate=SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.LAST_BACKUP_EACH_FILE.name(),null);
@@ -316,6 +429,14 @@ public class ManualBackupActivity extends AppCompatActivity {
             makeGreenTickInVisibleForBackupEachFile();
         }
     }
+    private void checkIfUserBackupDataTodayThanMakeGreenTickVisibleAndChangeTextColorForBackupDatabase(String userBackupDate){//checking user has backup its data today or not.if date matches today date then make green tick visible else invisible
+        if(MyUtility.getDateFromLastBackupDate(userBackupDate).equals(MyUtility.getDateFromLastBackupDate(MyUtility.get12hrCurrentTimeAndDateForLastBackup()))) {//checking by taking today date
+            makeGreenTickVisibleForDatabaseBackup();
+            binding.databaseLastBackup.setTextColor(getColor(R.color.dark_green));//if user has backup its data today then set text to green
+        }else{
+            makeGreenTickInVisibleForDatabaseBackup();
+        }
+    }
     private void checkIfUserBackupDataTodayThanMakeGreenTickVisibleAndChangeTextColorForSingleBackupFile(String userBackupDate){//checking user has backup its data today or not.if date matches today date then make green tick visible else invisible
         if(MyUtility.getDateFromLastBackupDate(userBackupDate).equals(MyUtility.getDateFromLastBackupDate(MyUtility.get12hrCurrentTimeAndDateForLastBackup()))) {//checking by taking today date
             makeGreenTickVisibleForSingleBackupFile();
@@ -330,6 +451,7 @@ public class ManualBackupActivity extends AppCompatActivity {
         binding.backupInactiveSkillLGreenTick.setVisibility(View.VISIBLE);
         binding.backupInactiveSkillMGreenTick.setVisibility(View.VISIBLE);
     }
+
     private void makeGreenTickVisibleForSingleBackupFile(){
         binding.singleFileBackupGreenTick.setVisibility(View.VISIBLE);
     }
@@ -338,6 +460,12 @@ public class ManualBackupActivity extends AppCompatActivity {
         binding.backupInactiveSkillGGreenTick.setVisibility(View.GONE);
         binding.backupInactiveSkillLGreenTick.setVisibility(View.GONE);
         binding.backupInactiveSkillMGreenTick.setVisibility(View.GONE);
+    }
+    private void makeGreenTickInVisibleForDatabaseBackup() {
+        binding.databaseBackupGreenTick.setVisibility(View.GONE);
+    }
+    private void makeGreenTickVisibleForDatabaseBackup(){
+        binding.databaseBackupGreenTick.setVisibility(View.VISIBLE);
     }
     private void makeGreenTickInVisibleForSingleBackupFile() {
         binding.singleFileBackupGreenTick.setVisibility(View.GONE);
@@ -355,7 +483,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -393,7 +521,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL G EXCEL FILE", this)) {//open intent to share
                        updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 4);
@@ -428,7 +556,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_g) + " PDF FILE", this)) {
@@ -466,7 +594,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if(MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL L EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 3);
@@ -500,7 +628,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -537,7 +665,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_l) + " PDF FILE", this)) {
@@ -575,7 +703,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL M EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 2);
@@ -611,7 +739,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupActiveMLGDataInExcelFormat(MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupActiveMLGDataInExcelFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP ACTIVE SKILL MLG EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 1);
@@ -646,7 +774,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_m) + " PDF FILE", this)) {
@@ -683,7 +811,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupActiveMLGDataInPDFFormat(MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())) !=null){
+            if((pdfFile=dataBackup.backupActiveMLGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_active_skill_m_l_g) + " PDF FILE", this)) {
@@ -712,6 +840,14 @@ public class ManualBackupActivity extends AppCompatActivity {
             binding.singleFileBackupGreenTick.setVisibility(View.VISIBLE);//make green tick visible
             binding.singleFileBackupUserLastBackup.setText(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.LAST_SINGLE_BACKUP_FILE.name(), null));
             binding.singleFileBackupUserLastBackup.setTextColor(getColor(R.color.dark_green));//set color to green
+        });
+    }
+    private void updateUserLastBackForDatabaseBackup() {
+        SharedPreferencesHelper.setString(this,SharedPreferencesHelper.Keys.LAST_DATABASE_BACKUP.name(),MyUtility.get12hrCurrentTimeAndDateForLastBackup());//update value.   12 - 12 - 2024 (11:59:54 am)
+        runOnUiThread(() -> {//is a method provided by the Activity class that allows you to safely update the user interface (UI) from a background thread.
+            binding.databaseBackupGreenTick.setVisibility(View.VISIBLE);//make green tick visible
+            binding.databaseLastBackup.setText(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.LAST_DATABASE_BACKUP.name(), null));
+            binding.databaseLastBackup.setTextColor(getColor(R.color.dark_green));//set color to green
         });
     }
     private void updateLastBackEachFile(boolean[] lastBackUpEachFileIndicator, byte fileNumber) {
@@ -762,7 +898,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -798,7 +934,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupActiveMLGDataInTextFormat(),MyUtility.dateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupActiveMLGDataInTextFormat(),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                if(forShareTrueForDownloadFalse){
@@ -893,6 +1029,9 @@ public class ManualBackupActivity extends AppCompatActivity {
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         if(!MyUtility.deleteFolderAllFiles(GlobalConstants.EXCEL_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
+        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.DATABASE_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         Database.closeDatabase();

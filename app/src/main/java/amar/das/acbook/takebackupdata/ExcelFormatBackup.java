@@ -50,7 +50,7 @@ public class ExcelFormatBackup{
             }
         }
 
-        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+        File excelFile = createExcelFolderInExternalStorageAndReturnFile(backupExcelFileName,workBook);
         return (excelFile != null)?excelFile:null;//null means error Occurred
     }
     private void createFirst2RowOfCreateInfoAndTotalAdvanceAndBalanceForSingleFileBackup(int numberOfPerson,byte fileIndicator) {
@@ -78,7 +78,7 @@ public class ExcelFormatBackup{
             if(!createExcelOfId(id)) return null;
         }
 
-        File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+        File excelFile = createExcelFolderInExternalStorageAndReturnFile(backupExcelFileName,workBook);
         return (excelFile != null)?excelFile:null;//null means error Occurred
     }
     public File backupActiveMLGDataInExcelFormat(String backupExcelFileName){//return null if error
@@ -95,7 +95,7 @@ public class ExcelFormatBackup{
                 if(!createExcelOfId(id)) return null;
             }
 
-            File excelFile = createExcelFileInExternalStorageAndReturnFile(backupExcelFileName,workBook);
+            File excelFile = createExcelFolderInExternalStorageAndReturnFile(backupExcelFileName,workBook);
             return (excelFile != null)?excelFile:null;//null means error Occurred
     }
     private void createNewExcelSheetAndSetRowAs0(byte fileIndicator) {
@@ -250,7 +250,7 @@ public class ExcelFormatBackup{
 //            sb.append(str);
 //        }
     }
-    private File createExcelFileInExternalStorageAndReturnFile(String uniqueFileName, XSSFWorkbook workBook) {//return null when exception
+    private File createExcelFolderInExternalStorageAndReturnFile(String uniqueFileName, XSSFWorkbook workBook) {//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
 
             if (MyUtility.isFolderExistIfNotExistCreateIt(context.getExternalFilesDir(null).toString(),GlobalConstants.EXCEL_FOLDER_NAME.getValue())) {

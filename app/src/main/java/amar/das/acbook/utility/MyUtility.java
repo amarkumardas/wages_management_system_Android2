@@ -11,9 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -62,7 +60,7 @@ public class MyUtility {
     public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
-    public static String dateTimeForBackupFile(){
+    public static String getDateTimeForBackupFile(){
        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
     public static String getTime12hrFromSystemDateTime(String systemDateTime) {//if error return null
@@ -1417,33 +1415,33 @@ public class MyUtility {
             return false;
         }
     }
-    public static boolean shareFileToAnyApp(File pdfOrTextFile, String mimeType, String titleForSharing,Context context){// ActivityResultLauncher<Intent> sharePdfLauncher
-        // if(pdfOrTextFile==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
-        if(pdfOrTextFile==null ){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+    public static boolean shareFileToAnyApp(File file, String mimeType, String titleForSharing,Context context){// ActivityResultLauncher<Intent> sharePdfLauncher
+        // if(file==null || sharePdfLauncher==null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
+        if(file == null){//sharePdfLauncher is launcher of intent and get result after successful operation completed
             return false;
         }
         try {
             //this code is used when sharePdfLauncher
 //            Intent intent = new Intent(Intent.ACTION_SEND);
 //            intent.setType(mimeType);
-//           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+//           // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(file));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
 //
-//            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
+//            Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
 //            intent.putExtra(Intent.EXTRA_STREAM, uri);
 //            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//If we don't add the chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK) line to set the FLAG_ACTIVITY_NEW_TASK flag, the behavior of the app when launching the chooser intent may depend on the context in which the sendMessageToAnyApp method is called.If the method is called from an activity that is already the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will simply add the chosen activity to the current task stack. This can lead to unexpected back stack behavior and may not be desirable if the user is expected to return to the same activity after sharing the message.On the other hand, if the method is called from an activity that is not the root of a task, launching the chooser without the FLAG_ACTIVITY_NEW_TASK flag will create a new task for the chooser and clear the previous task. This can also be unexpected and disruptive to the user's workflow.Therefore, setting the FLAG_ACTIVITY_NEW_TASK flag ensures consistent behavior regardless of the context in which the method is called, and is generally a good practice when launching chooser intents from an app
 //            sharePdfLauncher.launch(Intent.createChooser(intent,titleForSharing));//Intent.createChooser creates dialog to choose app to share data
 
-//not working in android 12
+            //not working in android 12
 //            Intent intent = new Intent(Intent.ACTION_SEND);
 //            intent.setType(mimeType);
-//            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(pdfOrTextFile));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
-//            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
+//            // Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", new File(file));//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.T
+//            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access.this method is used to share a file with another app using a content URI
 //            intent.putExtra(Intent.EXTRA_STREAM, uri);
 //            Intent chooser = Intent.createChooser(intent, titleForSharing);
 //            chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            context.startActivity(chooser);// Start the chooser dialog
 
-            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", pdfOrTextFile);
+            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
             Intent intent = new ShareCompat.IntentBuilder(context)// Create the intent using ShareCompat.IntentBuilder
                     .setType(mimeType)
                     .setStream(uri)
@@ -1680,9 +1678,9 @@ public class MyUtility {
         try {
             if(checkPermissionForDownload(context)){
                 File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                File pdfFile = new File(downloadsFolder, filename);
+                File file = new File(downloadsFolder, filename);
 
-                FileOutputStream outputStream = new FileOutputStream(pdfFile);
+                FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(pdfContent);
                 outputStream.close();
                 return true;

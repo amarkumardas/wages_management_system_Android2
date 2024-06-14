@@ -4,13 +4,8 @@
     android:layout_height="wrap_content"
     android:background="@color/background"
     android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/background"
-        android:orientation="vertical">
 
-        <TextView
+           <TextView
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:text="@string/set_rate"
@@ -19,9 +14,8 @@
             android:textAlignment="center"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:textSize="15sp"
-            />
-    </LinearLayout>
+            android:textSize="15sp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,8 +36,7 @@
             android:textAlignment="center"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:textSize="12dp"
-            />
+            android:textSize="12dp"/>
 
         <TextView
             android:layout_weight="2"

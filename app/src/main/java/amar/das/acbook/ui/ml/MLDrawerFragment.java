@@ -30,7 +30,7 @@ import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class MLDrawerFragment extends Fragment {
-    private   FragmentMlTabBinding binding ;
+    private  FragmentMlTabBinding binding ;
 
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
@@ -73,80 +73,14 @@ public class MLDrawerFragment extends Fragment {
 
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
             ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
-            if(item.getItemId() == R.id.backup_active_mlg){
-                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                backgroundTask.execute(() -> {
-                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                        return;
-                    }
-
-                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-
-                    TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-//                    if(!dataBackup.backupActiveMLGDataInPDFFormat(GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())){
-//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                    }
-                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                });backgroundTask.shutdown();//when all task completed then only shutdown
-            } else if (item.getItemId() == R.id.backup_inactive_m) {
-                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                backgroundTask.execute(() -> {
-                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-                        //ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                        return;
-                    }
-
-                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-
-                    TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),getString(R.string.mestre))){
-//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                    }
-                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                });backgroundTask.shutdown();//when all task completed then only shutdown
-            } else if (item.getItemId() == R.id.backup_inactive_l) {
-                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                backgroundTask.execute(() -> {
-                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                        return;
-                    }
-                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-
-                    TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),getString(R.string.laber))){
-//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                    }
-                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                });backgroundTask.shutdown();//when all task completed then only shutdown
-            }else if (item.getItemId() == R.id.backup_inactive_g) {
-                ExecutorService backgroundTask = Executors.newSingleThreadExecutor();//Executors.newSingleThreadExecutor() creates a thread pool with a single thread. This means that only one task can be executed at a time. If there are more than one task waiting to be executed, the remaining tasks will be queued until the current task is finished.
-                backgroundTask.execute(() -> {
-                    if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(getContext())) {
-                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show());
-                        //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-                       // ActivityCompat.requestPermissions((Activity)getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 41);
-                        return;
-                    }
-                    getActivity().runOnUiThread(() -> progressBar.showProgressBar());
-
-                    TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(getContext());
-//                    if(!dataBackup.backupInActiveMOrLOrGDataInTextFormat(GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),getString(R.string.women_laber))){
-//                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getContext().getString(R.string.backup_failed), Toast.LENGTH_LONG).show());
-//                    }
-
-                    getActivity().runOnUiThread(() -> progressBar.hideProgressBar());
-                });backgroundTask.shutdown();//when all task completed then only shutdown
+            if(item.getItemId() == R.id.backup_manually){
+                //finish() no need to finish the current activity
+                Intent intent = new Intent(getContext(), ManualBackupActivity.class);
+                startActivity(intent);
             }
           //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
-            return true;});
+            return true;
+        });
 
         binding.searchClickTv.setOnClickListener(view -> {
             Intent intent=new Intent(getContext(),FindActivity.class);

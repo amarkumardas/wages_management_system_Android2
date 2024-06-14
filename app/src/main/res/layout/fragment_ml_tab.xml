@@ -9,66 +9,130 @@
     android:id="@+id/drawer_layout">
 <!--    android:fitsSystemWindows="true"-->
     <!-- background content layout here -->
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="vertical"-->
+<!--        android:background="@color/purple_700">-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/frag1"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:padding="2dp"-->
+<!--            android:layout_marginTop="4dp">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_marginLeft="2dp"-->
+<!--                android:background="@drawable/white_detailsbg"-->
+<!--                android:drawableLeft="@drawable/ic_baseline_search_24"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:hint="@string/by_name_phone_id_ac_aadhaar"-->
+<!--                android:paddingLeft="2dp"-->
+<!--                android:paddingEnd="4dp"-->
+<!--                android:textSize="13sp"-->
+<!--                android:id="@+id/search_click_tv"/>-->
+
+<!--            <Button-->
+<!--                android:layout_marginTop="7dp"-->
+<!--                android:id="@+id/add_person"-->
+<!--                android:layout_width="28dp"-->
+<!--                android:layout_height="28dp"-->
+<!--                android:layout_marginStart="13dp"-->
+<!--                android:background="@drawable/baseline_person_add_alt_1_24"-->
+<!--                android:foreground="?android:attr/selectableItemBackground" />-->
+
+<!--            <Button-->
+<!--                android:layout_marginTop="7dp"-->
+<!--                android:id="@+id/backup_btn"-->
+<!--                android:layout_width="28dp"-->
+<!--                android:layout_height="28dp"-->
+
+<!--                android:layout_marginStart="15dp"-->
+
+<!--                android:foreground="?android:attr/selectableItemBackground"-->
+<!--                android:background="@drawable/baseline_cloud_upload_24"/>-->
+<!--            <Button-->
+<!--                android:layout_marginTop="7dp"-->
+<!--                android:id="@+id/verticle_menu"-->
+<!--                android:layout_width="28dp"-->
+<!--                android:layout_height="28dp"-->
+<!--                android:layout_marginStart="15dp"-->
+<!--                android:foreground="?android:attr/selectableItemBackground"-->
+<!--                android:background="@drawable/baseline_menu_24"/>-->
+<!--        </LinearLayout>-->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/purple_700">
 
-    <RelativeLayout
-        android:id="@+id/frag1"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:orientation="horizontal"
-        android:padding="2dp"
-        android:layout_marginTop="4dp">
+        <RelativeLayout
+            android:id="@+id/frag1"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:padding="2dp"
+            android:layout_marginTop="4dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginLeft="7dp"
-            android:background="@drawable/white_detailsbg"
-            android:drawableLeft="@drawable/ic_baseline_search_24"
-            android:layout_alignParentStart="true"
-            android:gravity="center_vertical"
-            android:hint="@string/by_name_phone_id_ac_aadhaar"
-            android:paddingLeft="2dp"
-            android:paddingEnd="4dp"
-            android:textSize="15sp"
-            android:id="@+id/search_click_tv"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
 
-        <Button
-            android:layout_marginTop="7dp"
-            android:id="@+id/backup_btn"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_toRightOf="@+id/search_click_tv"
-            android:layout_marginStart="15dp"
-            android:background="@drawable/baseline_person_add_alt_1_24"
-            android:foreground="?android:attr/selectableItemBackground" />
+                android:background="@drawable/white_detailsbg"
+                android:drawableLeft="@drawable/ic_baseline_search_24"
+                android:layout_marginStart="2dp"
 
-        <Button
-            android:layout_marginTop="7dp"
-            android:id="@+id/add_person"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_toRightOf="@+id/backup_btn"
-             android:layout_marginStart="15dp"
+                android:layout_marginEnd="150dp"
+                android:layout_alignParentStart="true"
 
-            android:foreground="?android:attr/selectableItemBackground"
-            android:background="@drawable/baseline_person_add_alt_1_24"/>
-        <Button
-            android:layout_marginTop="7dp"
-            android:id="@+id/verticle_menu"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginStart="15dp"
-             android:layout_toRightOf="@id/add_person"
+                android:gravity="center_vertical"
+                android:hint="@string/by_name_phone_id_ac_aadhaar"
+                android:paddingStart="2dp"
+                android:paddingEnd="4dp"
+                android:textSize="13sp"
+                android:id="@+id/search_click_tv"/>
 
-            android:foreground="?android:attr/selectableItemBackground"
-            android:background="@drawable/baseline_menu_24"/>
+            <Button
+                android:layout_marginTop="7dp"
+                android:id="@+id/add_person"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
 
-    </RelativeLayout>
+                android:layout_marginEnd="105dp"
+                android:layout_alignParentEnd="true"
+
+
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@drawable/baseline_person_add_alt_1_24"/>
+            <Button
+                android:layout_marginTop="7dp"
+                android:id="@+id/backup_btn"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="58dp"
+
+                android:background="@drawable/baseline_cloud_upload_24"
+                android:foreground="?android:attr/selectableItemBackground" />
+            <Button
+                android:layout_marginTop="7dp"
+                android:id="@+id/verticle_menu"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="9dp"
+
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@drawable/baseline_menu_24"/>
+
+        </RelativeLayout>
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"

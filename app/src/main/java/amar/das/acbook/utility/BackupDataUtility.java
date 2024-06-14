@@ -14,7 +14,7 @@ public class BackupDataUtility {
         Database db=Database.getInstance(context);
         String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skillType,false);
         if(noRateIds!=null){//means no rate ids are there
-            ratesInfo[0] ="FOR SEEING TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+            ratesInfo[0] ="TO KNOW TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
             return ratesInfo;
         }
         StringBuilder sb = new StringBuilder();
@@ -37,7 +37,7 @@ public class BackupDataUtility {
         Database db=Database.getInstance(context);
         String noRateIds=db.getIdsAndReturnNullIfRateIsProvidedOfActiveMLG();
         if(noRateIds!=null){//means no rate ids are there
-            ratesInfo[0] ="FOR SEEING TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
+            ratesInfo[0] ="TO KNOW TOTAL  ADVANCE  AND  BALANCE  PLEASE  SET  RATE  TO  IDs: "+noRateIds;
             return ratesInfo;
         }
         StringBuilder sb = new StringBuilder();

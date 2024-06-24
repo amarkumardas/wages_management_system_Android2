@@ -8,6 +8,15 @@ public class SearchModel implements Serializable {
     private String account;
     private String aadhaar;
     private String skill;
+    private String latestDate;
+
+    public String getLatestDate() {
+        return latestDate;
+    }
+
+    public void setLatestDate(String latestDate) {
+        this.latestDate = latestDate;
+    }
 
     public boolean isActive() {
         return activeOrInactive;

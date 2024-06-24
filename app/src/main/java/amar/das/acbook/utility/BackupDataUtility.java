@@ -2,7 +2,12 @@ package amar.das.acbook.utility;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Environment;
+import android.os.StatFs;
 import android.text.TextUtils;
+import android.text.format.Formatter;
+
+import java.io.File;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -18,7 +23,7 @@ public class BackupDataUtility {
             return ratesInfo;
         }
         StringBuilder sb = new StringBuilder();
-        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'")){
+        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillType+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"'")){
             cursor.moveToFirst();
             sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE  Rs: ")
                     .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
@@ -41,7 +46,7 @@ public class BackupDataUtility {
             return ratesInfo;
         }
         StringBuilder sb = new StringBuilder();
-        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.TABLE_NAME1+" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'")){
+        try(Cursor cursor=db.getData("SELECT SUM("+Database.COL_13_ADVANCE+") , SUM("+Database.COL_14_BALANCE+") FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"'")){
             cursor.moveToFirst();
             sb.append("BASED ON PREVIOUS CALCULATED RATE. TOTAL ADVANCE  Rs: ")
                     .append(MyUtility.convertToIndianNumberSystem(cursor.getLong(0)))
@@ -101,7 +106,7 @@ public class BackupDataUtility {
     public static String getAccountDetailsIfDataIsNotNull(String id,Context context) {//if error return null
         // try (Database db = new Database(context);
         try (Database db =Database.getInstance(context);
-             Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
+             Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
 
             StringBuilder sb = new StringBuilder("\n");
             if (cursor != null && cursor.moveToFirst()) {
@@ -144,5 +149,26 @@ public class BackupDataUtility {
             case 3: return db.getIdOfInActiveMOrLOrG(context.getString(R.string.women_laber));
             default:return null;
         }
+    }
+    public static long checkDeviceInternalStorageAvailabilityInMB(Context context){
+        try {
+            File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
+            StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
+            long blockSize = stat.getBlockSizeLong();//The size, in bytes, of a block on the file system. This corresponds to the Unix statvfs.f_frsize field.
+            long availableBlocks = stat.getAvailableBlocksLong();//The number of bytes that are free on the file system and available to applications.
+            String format = Formatter.formatFileSize(context, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
+            format = format.trim();//for safer side
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < format.length(); i++) {
+                if (format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
+                    break;
+                stringBuilder.append(format.charAt(i));
+            }
+            return (long) (Float.parseFloat(stringBuilder.toString())*1024);//converted to mb
+        }catch (Exception x){
+            x.printStackTrace();
+        }
+        return 0;
     }
 }

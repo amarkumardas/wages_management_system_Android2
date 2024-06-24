@@ -52,7 +52,7 @@ public class SeparateAllMLGRecordAdapter extends RecyclerView.Adapter<SeparateAl
     public void onBindViewHolder(@NonNull SeparateAllMLGRecordAdapter.ViewHolder holder, int position) {
         MLGAllRecordModel data=arrayList.get(position);
         holder.name.setText(data.getName());
-        holder.inactiveDuration.setText(GlobalConstants.ACTIVE.name());//when user is active then it show active
+        holder.inactiveDuration.setText(context.getString(R.string.active));//when user is active then it show active
         if(!data.isActive()) { //if account is not active then view will be in red color which indicate inactive
            // holder.name.setTextColor(Color.RED);
            //if they are not active then only it will show months

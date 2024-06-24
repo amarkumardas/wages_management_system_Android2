@@ -29,13 +29,17 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
     @Override
     public InactiveAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater=LayoutInflater.from(parent.getContext());
-        View view=inflater.inflate(R.layout.inactive_single_person_profile,parent,false);
+       // View view=inflater.inflate(R.layout.inactive_single_person_profile,parent,false);
+        View view=inflater.inflate(R.layout.single_person_profile,parent,false);
         return new InactiveAdapter.ViewHolder(view);//constructor  public ViewHolder(@NonNull View itemView)
     }
 
     @Override
     public void onBindViewHolder(@NonNull InactiveAdapter.ViewHolder holder, int position) {//to fill data on every view filed
         MestreLaberGModel data=arrayList.get(position);
+
+        holder.name.setText(data.getName());
+
         byte[] image=data.getPerson_img();//getting image from db
         if(image!=null) {
             //getting bytearray image from DB and converting  to bitmap to set in imageview
@@ -44,6 +48,7 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
         }else{
             holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
         }
+
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
             holder.amountAdvance.setText(""+data.getAdvanceAmount());
             holder.amountAdvance.setTextColor(Color.RED);
@@ -68,12 +73,17 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
     }
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view
         ImageView profileImg;
-        TextView amountAdvance;
+        TextView amountAdvance,name;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            profileImg =itemView.findViewById(R.id.profile_img_inactive);
-            amountAdvance =itemView.findViewById(R.id.advance_amount_tv_inactive);
+//            profileImg =itemView.findViewById(R.id.profile_img_inactive);
+//            amountAdvance =itemView.findViewById(R.id.advance_amount_tv_inactive);
+//            name=itemView.findViewById(R.id.inactive_names_tv);
+
+            profileImg =itemView.findViewById(R.id.profile_img);
+            amountAdvance =itemView.findViewById(R.id.advance_amount_tv);
+            name=itemView.findViewById(R.id.names_tv);
         }
     }
 

@@ -363,7 +363,7 @@ public class HistoryFragment extends Fragment {
        }
         arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much
 
-         if(cursor == null) return arraylist;//cursor may be null if error occur when fetching data from db so return empty arraylist
+         if(cursor == null) {return arraylist;}//cursor may be null if error occur when fetching data from db so return empty arraylist
 
             while (cursor.moveToNext()) {
                 HistoryModel model = new HistoryModel();
@@ -627,7 +627,7 @@ public class HistoryFragment extends Fragment {
             }
 
         HashMap<Character,Integer> skill2data=db.getTotalPeopleWorked(year,month,day,Database.COL_15_P2_SKILL_H,Database.COL_9_P2_H);
-        if(skill2data == null) return "error in getting total worked people";
+        if(skill2data == null){ return "error in getting total worked people";}
             if(skill2data.containsKey(G)){
                 sumG=sumG+skill2data.get(G);
             }
@@ -639,7 +639,7 @@ public class HistoryFragment extends Fragment {
             }
 
         HashMap<Character,Integer> skill3data=db.getTotalPeopleWorked(year,month,day,Database.COL_16_P3_SKILL_H,Database.COL_10_P3_H);
-        if(skill3data == null) return "error in getting total worked people";
+        if(skill3data == null){ return "error in getting total worked people";}
             if(skill3data.containsKey(G)){
                 sumG=sumG+skill3data.get(G);
             }
@@ -789,7 +789,7 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete pdf folder all files
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete pdf folder all files
             Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         binding = null;

@@ -414,7 +414,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
         try(Database db=Database.getInstance(getBaseContext());
-            Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+            Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
 
 //            if(cursor != null ){
 //                cursor.moveToFirst();
@@ -802,7 +802,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     public String getAccountDetails(String id, String idNamePhone) {//if error return null
         try (Database db = new Database(getBaseContext());
-             Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
+             Cursor cursor = db.getData("SELECT " + Database.COL_3_BANKAC + ", " + Database.COL_4_IFSCCODE + ", " + Database.COL_5_BANKNAME + ", " + Database.COL_9_ACCOUNT_HOLDER_NAME + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
 
             StringBuilder sb = new StringBuilder(idNamePhone);
             if (cursor != null && cursor.moveToFirst()) {
@@ -819,7 +819,7 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     }
     public String getIdNamePhone(String id,boolean forOnlyOneActiveNumberTrue) {
         try (Database db=new Database(getApplicationContext());
-             Cursor cursor = db.getData("SELECT " +Database.COL_2_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
+             Cursor cursor = db.getData("SELECT " +Database.COL_2_NAME+ " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'"))
         {
             StringBuilder sb=new StringBuilder();
             if (cursor != null && cursor.moveToFirst()) {//which ever phone is available that phone will be send
@@ -1248,10 +1248,10 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file.text file is stored in cache area
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(null,false,getBaseContext())){//delete cache file.text file is stored in cache area
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         Database.closeDatabase();

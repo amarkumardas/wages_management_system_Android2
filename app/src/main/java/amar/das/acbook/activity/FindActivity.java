@@ -56,7 +56,7 @@ TextView searchHint;
         searchRecycler.setHasFixedSize(true);
 
         //getting all data
-        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_8_MAINSKILL1+" , "+Database.COL_12_ACTIVE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_12_ACTIVE+"='"+GlobalConstants.ACTIVE.getValue()+"' OR "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE.getValue()+"'");
+        Cursor cursor=db.getData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_8_MAINSKILL1+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_12_ACTIVE+"='"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' OR "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"'");
         dataList =new ArrayList<>();
 
         while(cursor.moveToNext()){
@@ -67,7 +67,8 @@ TextView searchHint;
             model.setAccount(cursor.getString(2));
             model.setAadhaar(cursor.getString(3));
             model.setSkill(cursor.getString(4));
-            model.setActive(cursor.getString(5).equals(GlobalConstants.ACTIVE.getValue()));
+            model.setActive(cursor.getString(5).equals(GlobalConstants.ACTIVE_PEOPLE.getValue()));
+            model.setLatestDate(cursor.getString(6));
             dataList.add(model);
         }
         cursor.close();
@@ -136,7 +137,7 @@ TextView searchHint;
         btn1.setBackgroundResource(R.drawable.graycolor_bg);
         btn3.setBackgroundResource(R.drawable.white_detailsbg);
         btn2.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"'");
     }
     public void maleLaberButton(View view) {
         //setting back ground color
@@ -148,7 +149,7 @@ TextView searchHint;
         btn2.setBackgroundResource(R.drawable.graycolor_bg);
         btn3.setBackgroundResource(R.drawable.white_detailsbg);
         btn1.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.laber)+"'");
     }
     public void womenLaberButton(View view) {
         //setting back ground color
@@ -160,7 +161,7 @@ TextView searchHint;
         btn3.setBackgroundResource(R.drawable.graycolor_bg);
         btn1.setBackgroundResource(R.drawable.white_detailsbg);
         btn2.setBackgroundResource(R.drawable.white_detailsbg);
-        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"'");
+        btnData("SELECT "+Database.COL_1_ID+" , "+Database.COL_2_NAME+" , "+Database.COL_12_ACTIVE+" , "+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.women_laber)+"'");
     }
 
     public void btnData(String query){
@@ -172,7 +173,7 @@ TextView searchHint;
             MLGAllRecordModel model=new MLGAllRecordModel();
             model.setId(cursor2.getString(0));
             model.setName(cursor2.getString(1));
-            model.setActive(cursor2.getString(2).equals(GlobalConstants.ACTIVE.getValue()));//to set view red if inactive
+            model.setActive(cursor2.getString(2).equals(GlobalConstants.ACTIVE_PEOPLE.getValue()));//to set view red if inactive
             model.setLatestDate(cursor2.getString(3));//to display inactive duration
             allMLGList.add(model);
         }

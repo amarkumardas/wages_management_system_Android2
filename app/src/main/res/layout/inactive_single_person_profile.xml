@@ -5,21 +5,32 @@
     android:layout_gravity="center_horizontal"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center"
-                android:padding="2dp"
-                android:layout_marginTop="4dp"
-                android:src="@drawable/defaultprofileimage"
-                android:id="@+id/profile_img_inactive"
-                android:foreground="?android:attr/selectableItemBackground"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:id="@+id/advance_amount_tv_inactive"/>
+
+<!--    we can delete this file-->
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:maxLength="12"-->
+<!--        android:textSize="10sp"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textColor="@color/white"-->
+<!--        android:layout_marginTop="2dp"-->
+<!--        android:id="@+id/inactive_names_tv"/>-->
+<!--    <ImageView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="80dp"-->
+<!--                android:scaleType="fitCenter"-->
+<!--                android:layout_gravity="center"-->
+
+<!--                android:layout_marginTop="3dp"-->
+<!--                android:src="@drawable/defaultprofileimage"-->
+<!--                android:id="@+id/profile_img_inactive"-->
+<!--                android:foreground="?android:attr/selectableItemBackground"/>-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textAlignment="center"-->
+<!--                android:id="@+id/advance_amount_tv_inactive"/>-->
 </LinearLayout>
     <!-- change fitcenter attribute change in tablet view
 

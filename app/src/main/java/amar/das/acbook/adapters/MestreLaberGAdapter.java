@@ -18,13 +18,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.R;
+import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapter.ViewHolder> {
@@ -33,16 +34,15 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     //final Calendar current=Calendar.getInstance();//to get current date
     // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
     String []dateArray;
-    byte monthsInactive=1;//if 1 months inactive then make id inactive
-    //int d,m,y;
-    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01
-    String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
+    byte daysToBecomeInactive= Byte.parseByte(GlobalConstants.TWO_WEEKS_DEFAULT.getValue());//default value if days inactive then make id inactive
+    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01 added 0 automatically//for performance this variable is declare here
+    String currentDateDBPattern =todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022 remove 0.//for performance this variable is declare here
     Database db;
 
     public MestreLaberGAdapter(Context context, ArrayList<MestreLaberGModel> arrayList){
         this.context =context;
         this.arrayList=arrayList;
-       // db=new Database(this.context);//we cant give this at class level
+        this.daysToBecomeInactive=(byte)SharedPreferencesHelper.getInt(context,SharedPreferencesHelper.Keys.INACTIVE_DAYS.name(),daysToBecomeInactive);//if 1 months inactive then make id inactive
         db=Database.getInstance(this.context);
     }
     @NonNull
@@ -75,7 +75,9 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             holder.amountAdvance.setText("0");//if no advance or balance then set to zero
             holder.amountAdvance.setTextColor(context.getColor(R.color.green));
         }
+
         if(data.getLatestDate() !=null) {//for null pointer exception//https://www.youtube.com/watch?v=VmhcvoenUl0
+
             if (data.getLatestDate().equals(currentDateDBPattern)) //if profile color is yellow that means on current day some data is entered
                 holder.yellowBg.setBackgroundColor(context.getColor(R.color.yellow));
              else
@@ -84,21 +86,24 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             //if user is not active for 1 month then it will become inactive based on latest date
             dateArray = data.getLatestDate().split("-");
             dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
-            // making it active or inactive using latest date (2022-05-01,2022-05-01)
-            if(ChronoUnit.MONTHS.between(dbDate, todayDate) >= monthsInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+            // making it active or inactive using latest date (2022-05-01,2022-05-01) 0 is added to date
+
+
+            if(MyUtility.daysBetweenDate(dbDate,todayDate) >= daysToBecomeInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+
                 if(!db.makeIdInActive(data.getId())){//if latest date is one month old
                     Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_inactive), Toast.LENGTH_LONG).show();
                 }
+
             }else{
                 if(db.isActiveOrInactive(data.getId())){//to make id inactive change to false if(!db.isActiveOrInactive(data.getId())){
-                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_12_ACTIVE+"='" + 1 +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
+                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_12_ACTIVE+"='" + GlobalConstants.ACTIVE_PEOPLE.getValue() +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
                  }else{
                     //for testing make if condition false and next if comment it
 //                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
 //                    }
-
                     if(!db.makeIdActive(data.getId())){
                         Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
                     }
@@ -112,31 +117,13 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
        if(!MyUtility.updateLeavingDate(data.getId(),context,todayDate)){//update leaving date
            Toast.makeText(context, "LEAVING DATE NOT UPDATED", Toast.LENGTH_LONG).show();
        }
-//        Cursor cursor2 = db.getData("SELECT "+Database.COL_392_LEAVINGDATE+" FROM " + Database.TABLE_NAME3 + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
-//        cursor2.moveToFirst();
-//        if (cursor2.getString(0) != null) {
-//            dateArray = cursor2.getString(0).split("-");
-////                    d = Integer.parseInt(dateArray[0]);
-////                    m = Integer.parseInt(dateArray[1]);
-////                    y = Integer.parseInt(dateArray[2]);//dbDate is leaving date
-//            dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
-//            //between (2022-05-01,2022-05-01) like
-//            if (ChronoUnit.DAYS.between(dbDate, todayDate) >= 0) {//if days between leaving date and today date is 0 then leaving date will set null automatically
-//                db.updateTable("UPDATE " + Database.TABLE_NAME3 + " SET "+Database.COL_392_LEAVINGDATE+"=" + null + " WHERE "+Database.COL_31_ID+"='" + data.getId() + "'");
-//            }
-//        }
-//        cursor2.close();
+
         //**************************************************************************************************************
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID", data.getId());
             intent.putExtra("FromMesterLaberGAdapter", 1);
             context.startActivity(intent);
-
-            //optional to know only
-//            Cursor cursor5 = db.getData("SELECT "+Database.COL_15_LATESTDATE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");
-//            cursor5.moveToFirst();
-//            Toast.makeText(context, "showLatestdate" + cursor5.getString(0), Toast.LENGTH_SHORT).show();
         });
     }
     @Override

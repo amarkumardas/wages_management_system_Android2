@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
-                tools:listitem="@layout/inactive_single_person_profile"></androidx.recyclerview.widget.RecyclerView>
+                tools:listitem="@layout/single_person_profile"></androidx.recyclerview.widget.RecyclerView>
 
             <ProgressBar
                 android:id="@+id/progress_bar_inactive"

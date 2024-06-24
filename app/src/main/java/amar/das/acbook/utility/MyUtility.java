@@ -57,14 +57,15 @@ import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
 public class MyUtility {
+    private static String systemCurrentDateTime24hrPattern ="yyyy-MM-dd HH:mm:ss";
     public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        return new SimpleDateFormat(systemCurrentDateTime24hrPattern).format(new Date());
     }
-    public static String getDateTimeForBackupFile(){
+    public static String getDateTime12hrForBackupFile(){
        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
     public static String getTime12hrFromSystemDateTime(String systemDateTime) {//if error return null
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat(systemCurrentDateTime24hrPattern);
         try {
             Date date = formatter.parse(systemDateTime);
             SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss a");
@@ -75,7 +76,7 @@ public class MyUtility {
         }
     }
     public static String getDateFromSystemDateTime(String systemDateTime) {//if error return null
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat(systemCurrentDateTime24hrPattern);
         try {
             Date date = formatter.parse(systemDateTime);
             SimpleDateFormat timeFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -124,9 +125,9 @@ public class MyUtility {
             return "00:00:00: pm";//error
         }
     }
-    public static String getOnlyCurrentDate(){//latest date not contain 0
+    public static String getOnlyCurrentDateForLatestDate(){//latest date not contain 0
         try{
-            Calendar currentDate =Calendar.getInstance();//to get current date like 1-2-2021 or 11-22-2023 no zero
+            Calendar currentDate =Calendar.getInstance();//to get current date like 1-2-2021 or 11-22-2023 no 0 added
             return currentDate.get(Calendar.DAY_OF_MONTH)+"-"+(currentDate.get(Calendar.MONTH)+1)+"-"+ currentDate.get(Calendar.YEAR);
         }catch (Exception x){
             x.printStackTrace();
@@ -146,7 +147,6 @@ public class MyUtility {
         return false;
     }
     public static boolean updateLeavingDate(String id,Context context,LocalDate todayDate){
-      //  try(Database db=new Database (context);
           try(Database db=Database.getInstance(context);
             Cursor cursor2 = db.getData("SELECT " + Database.COL_392_LEAVINGDATE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "='" + id + "'")){
             if (cursor2.getCount() == 0) { return false; }// or throw an exception this will occur when there is no id in db or no data in db or table
@@ -157,7 +157,7 @@ public class MyUtility {
                 String [] dateArray = cursor2.getString(0).split("-");
                 LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
                 //between (2022-05-01,2022-05-01) like
-                if(ChronoUnit.DAYS.between(dbDate, todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
+                if(daysBetweenDate(dbDate,todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
                    return db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
                 }
             }
@@ -166,6 +166,10 @@ public class MyUtility {
             x.printStackTrace();
             return false;
         }
+    }
+    public static int daysBetweenDate(LocalDate lowerDate, LocalDate forwardDate) {//if date is same return it 0
+        return (int) ChronoUnit.DAYS.between(lowerDate,forwardDate);//ChronoUnit.DAYS it give total months.here lowerDate is first and lowerDate will always be lower then today date even if we miss to open app for long days
+        //ChronoUnit.MONTHS.between(lowerDate,forwardDate)
     }
     public static String generateUniqueFileNameByTakingDateTime(String id,String fileName) {//file name will always be unique
         try {
@@ -340,7 +344,7 @@ public class MyUtility {
             cursor.moveToFirst();//means only one row is returned
             fileName.append("invoice").append(cursor.getInt(0) + 1).append("_"); /*pdf sequence in db is updated when pdf is generated successfully so for now increasing manually so that if pdf generation is failed sequence should not be updated in db*/
 
-            cursor =db.getData("SELECT "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'");
+            cursor =db.getData("SELECT "+Database.COL_3_BANKAC+" , "+Database.COL_6_AADHAAR_NUMBER+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id + "'");
             cursor.moveToFirst();
             if(cursor.getString(0)!=null && cursor.getString(0).length()>4) {
                 fileName.append("ac").append(cursor.getString(0).substring(cursor.getString(0).length() - 4)).append("_");//account
@@ -625,7 +629,7 @@ public class MyUtility {
 
         Cursor cursor2=null;//returnOnlySkill will return only string of array
         Database db=Database.getInstance(context);
-        try(Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.TABLE_NAME1+ " WHERE "+Database.COL_1_ID+"= '" + id +"'")){
+        try(Cursor cursor1=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " +Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id +"'")){
             cursor1.moveToFirst();
             switch (indicator) {
                 case 1: {return new String[]{"DATE", "WAGES", cursor1.getString(0), "REMARKS"};}
@@ -816,7 +820,7 @@ public class MyUtility {
         if(!(indicator >= 1 && indicator <=4)) return new String[][]{new String[]{"error"},new String[]{"error"},new String[]{"error"}};//if indicator is not in range 1 to 4 then return
         Database db=Database.getInstance(context);
         try(
-            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
+            Cursor cursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned
             String[] header =null,totalCalculationForSummary =null,finalMessage =null;
 
@@ -892,8 +896,8 @@ public class MyUtility {
     public static String[] fetchPersonDetailOfPDF(String id, Context context){
         Database db=Database.getInstance(context);
           try(
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
-             Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
+                  Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+                  Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -1016,7 +1020,7 @@ public class MyUtility {
         String activePhone1 = null;
         String phone2 = null;
 
-        try (Cursor cursor = db.getData("SELECT " + Database.COL_7_ACTIVE_PHONE1 + " , " + Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.TABLE_NAME1 + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
+        try (Cursor cursor = db.getData("SELECT " + Database.COL_7_MAIN_ACTIVE_PHONE1 + " , " + Database.COL_11_ACTIVE_PHONE2 + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " + Database.COL_1_ID + "='" + id + "'")) {
             if (cursor != null && cursor.moveToFirst()) {
                 activePhone1 = cursor.getString(0);
                 phone2 = cursor.getString(1);
@@ -1379,7 +1383,7 @@ public class MyUtility {
     public static boolean checkPermissionForSMS(Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
     }
-    public static boolean deleteFolderAllFiles(String folderName,boolean trueForExternalFileDirAndFalseForCacheFileDir,Context context){
+    public static boolean deleteFolderAndSubFolderAllFiles(String folderName, boolean trueForExternalFileDirAndFalseForCacheFileDir, Context context){//it will delete all file of folder and if folder contain folder then sub folder file will also be deleted
         try{
             if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)){//checking permission
                 File folder;
@@ -1393,11 +1397,23 @@ public class MyUtility {
 
                     File[] listOfFiles = folder.listFiles();//getting all files present in folder
                     if (listOfFiles != null && listOfFiles.length > 0) {
-                        for (File file : listOfFiles){
+                        for (File file : listOfFiles) {
 
-                            if (file.isFile()) {//file.isFile() is a method call on the File object, specifically the isFile() method. This method returns true if the File object refers to a regular file and false if it refers to a directory, a symbolic link, or if the file doesn't exist.
+                            if (file.isFile()) {//file.isFile() is a method call on the File object,This method returns true if the File object refers to a regular file and false if it refers to a directory,  or if the file doesn't exist.
                                 if (!file.delete()) {// File deleted successfully
                                     return false; // Failed to delete the file
+                                }
+                            } else if (file.isDirectory()) {//if it is directory or subfolder
+
+                                File[] listFiles = file.listFiles();//getting all files present in folder
+                                for (File files : listFiles) {
+                                    if (files.isFile()) {//file.isFile() is a method call on the File object,This method returns true if the File object refers to a regular file and false if it refers to a directory,  or if the file doesn't exist.
+                                        if (!files.delete()) {// File deleted successfully
+                                            return false; // Failed to delete the file
+                                        }
+                                    } else {//if it is again folder
+                                        return false;
+                                    }
                                 }
                             }
                         }
@@ -1584,7 +1600,7 @@ public class MyUtility {
     public static String[] getPersonDetailsForRunningPDFInvoice(String id,Context context) {
        // try (Database db=new Database(context);
         try (Database db=Database.getInstance(context);
-             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+             Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
 
@@ -1630,7 +1646,7 @@ public class MyUtility {
     }
     public static String getOtherDetails(String id,Context context){//which ever data is not present that column data is not included
         try(Database db=  Database.getInstance(context);
-            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+            Cursor cursor1 = db.getData("SELECT " +Database.COL_6_AADHAAR_NUMBER +","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+ " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'");
             Cursor cursor2 = db.getData("SELECT " +Database.COL_392_LEAVINGDATE+","+Database.COL_398_RETURNINGDATE+","+Database.COL_397_TOTAL_WORKED_DAYS+","+Database.COL_391_STAR +","+Database.COL_32_R1+","+Database.COL_33_R2+","+Database.COL_34_R3+","+Database.COL_35_R4+","+Database.COL_393_PERSON_REMARKS+" FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             String skills[]=db.getAllSkill(id);
 
@@ -1702,5 +1718,11 @@ public class MyUtility {
     private static boolean checkPermissionForDownload(Context baseContext) {
         return true;//after android 10+ no need of permission to download files in device in download folder
     }
-
+    public static String getImageRelativePath(String getExternalFilesDir,String id){//return null if error
+        if(MyUtility.isFolderExistIfNotExistCreateIt(getExternalFilesDir,File.separator+ GlobalConstants.REGISTERED_IMAGE_FOLDER_NAME.getValue())) {//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
+            return new File(getExternalFilesDir+File.separator+GlobalConstants.REGISTERED_IMAGE_FOLDER_NAME.getValue()+File.separator+MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.REGISTERED_IMAGE_FILE_NAME.getValue()) +".JPEG").getAbsolutePath();//path of image where it is saved in device
+        }else{
+            return null;
+        }
+    }
 }

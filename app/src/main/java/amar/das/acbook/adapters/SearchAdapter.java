@@ -13,12 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.SearchModel;
+import amar.das.acbook.utility.MyUtility;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> implements Filterable {
     Context context;
@@ -45,11 +47,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
        holder.acHolderName.setText(""+context.getString(R.string.skill)+": "+data.getSkill());
 
        if(data.isActive()){
-           holder.inactiveOrActive.setText(GlobalConstants.ACTIVE.name());
+           holder.inactiveOrActive.setText(context.getString(R.string.active));
            holder.inactiveOrActive.setBackgroundResource(R.drawable.green_color_bg);
        }else {
-           holder.inactiveOrActive.setText(GlobalConstants.INACTIVE.name());
-           holder.inactiveOrActive.setBackgroundResource(R.drawable.red_color_background);
+           holder.inactiveOrActive.setText(context.getString(R.string.inactive)+" FOR "+getInactiveDays(data.getLatestDate()));
+           holder.inactiveOrActive.setBackgroundResource(R.drawable.graycolor_bg);
        }
 
        //user may enter only account no or AADHAAR so if else is use separately
@@ -72,13 +74,68 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             holder.phoneNumber.setText("PHONE:    -");
         }
 
-        holder.itemView.setOnClickListener(view -> {
+        holder.phoneNumber.setOnClickListener(view ->{
+            if(data.getPhoneNumber() != null && data.getPhoneNumber().length()>6) {
+                MyUtility.snackBar(view,context.getString(R.string.last_6_digits_phone_number));
+            }
+        });
+        holder.aadhaar.setOnClickListener(view -> {
+            if(data.getAadhaar()!=null && data.getAadhaar().length()>5){
+                MyUtility.snackBar(view, context.getString(R.string.last_5_digits_aadhaar_number));
+            }
+        });
+        holder.account.setOnClickListener(view -> {
+            if(data.getAccount() !=null && data.getAccount().length()>4) {
+                MyUtility.snackBar(view, context.getString(R.string.last_4_digits_back_account_number));
+            }
+        });
+
+        holder.itemView.setOnClickListener(view ->{
             Intent intent=new Intent(context, IndividualPersonDetailActivity.class);
             intent.putExtra("ID",data.getId());
             context.startActivity(intent);
             //((Activity)context).finish();//syntax to destroy activity from adapter
         });
     }
+    private String getInactiveDays(String latestDate){
+        if(latestDate== null) return "";
+
+        String[] dateArray = latestDate.split("-");
+        LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-5-1 to 2022-05-01 it add 0 automatically
+        return convertDaysToPeriod(MyUtility.daysBetweenDate(dbDate,LocalDate.now()));
+    }
+    private String convertDaysToPeriod(int days) {
+        StringBuilder period = new StringBuilder();
+
+        int years = days / 365;
+        days %= 365; // Remaining days after calculating years
+
+        if (years > 0) {
+            period.append(years).append(" ").append(context.getString(R.string.year)).append(years > 1 ? context.getString(R.string.s)+" " : " "); // Add "s" for plural years
+        }
+
+        if (days >= 30) {
+            int months = days / 30;
+            days %= 30; // Remaining days after calculating months
+ //            if (period.length() > 0) {
+//                period.append(", "); //if there is year then Add comma and space if there's already a period
+//            }
+            period.append(months).append(" ").append(context.getString(R.string.month)).append(months > 1 ?  context.getString(R.string.s)+" " : " ");
+        }
+
+        if (days >= 7 && period.length() == 0) { // Only add weeks if no years or months
+            int weeks = days / 7;
+            days %= 7;
+            period.append(weeks).append(" ").append(context.getString(R.string.week)).append(weeks > 1 ?  context.getString(R.string.s)+" " : " ");
+        }
+
+        if (days > 0) {// Handle remaining days (optional)
+            period.append(days).append(" ").append(context.getString(R.string.day)).append(days > 1 ?  context.getString(R.string.s)+" " : "");
+        }
+
+        return period.toString().isEmpty() ? "0 "+context.getString(R.string.day) : period.toString(); // Handle 0 days case
+    }
+
     @Override
     public int getItemCount() {
         return  dataList.size();

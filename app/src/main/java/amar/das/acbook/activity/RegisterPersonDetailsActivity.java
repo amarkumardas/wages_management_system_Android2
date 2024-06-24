@@ -41,7 +41,6 @@ import com.github.drjacky.imagepicker.constant.ImageProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -57,7 +56,7 @@ import kotlin.jvm.internal.Intrinsics;
 public class RegisterPersonDetailsActivity extends AppCompatActivity {
   //if you really want to write files, either make sure you're only writing to your app's designated storage directories, in which case you won't need any permissions at all, or if you really need to write to a directory your app doesn't own get that file manager permission from Google (how to get that permission)
   int [] correctInputArr =new int[10];
-  Button add;
+  Button add, deleteImageBtn;
   EditText name,account, phone2, ifscCode, aadhaarNumber, activephone1, accountHolderName;
   AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
   Database db;
@@ -79,7 +78,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
+        //overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         setContentView(R.layout.activity_insert_data);
 
         db=Database.getInstance(getBaseContext());
@@ -98,7 +97,8 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         laberRadio =findViewById(R.id.laber_skill);//required when updating
         womenRadio=findViewById(R.id.women_laber_skill);//required when updating
         mestreRadio=findViewById(R.id.mestre_skill);//required when updating
-       // laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
+        deleteImageBtn =findViewById(R.id.delete_image);
+        //laberRadio.setChecked(true);//by default laber will be checked other wise person wont be able to find.But this default will not work while updating because manually setting checked radio
         //skill=getResources().getString(R.string.laber);//skill default value otherwise null will be set as default so its important
 
         radioGroup.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
@@ -123,19 +123,20 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(RegisterPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
         location_autoComplete.setAdapter(locationAdapter);
 
+
         imageView = findViewById(R.id.imageview);
 
         cameraPermission = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
        // imageView.setOnClickListener(view -> showImagePicDialog());
         ActivityResultLauncher<Intent> launcher= registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),(ActivityResult result)->{
                 if(result.getResultCode()==RESULT_OK){
                         Uri uri=result.getData().getData();
-                            imageView.setImageURI(uri);
+                            imageView.setImageURI(uri);//set image to imageview
 
-                        File file= ImagePicker.Companion.getFile(getIntent());
-                        if(file!=null && file.exists()) file.delete();//delete the crop image but selected image is not deleted
+//                        File file= ImagePicker.Companion.getFile(getIntent());
+//                        if(file!=null && file.exists()) file.delete();//delete the crop image ie. is saved in device. but selected image is not deleted
+
 //                        String multipleFilesPath = ImagePicker.MULTIPLE_FILES_PATH;
 //                        System.out.println(multipleFilesPath+"--------------");
                //   MyUtility.deleteFolderAllFiles(ImagePicker.Companion.)
@@ -153,6 +154,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                         Toast.makeText(this, "IMAGE ERROR", Toast.LENGTH_LONG).show();
                     }
                 });
+
         imageView.setOnClickListener(view -> {
             if(!checkCameraPermission()){
                 requestCameraPermission();
@@ -163,16 +165,15 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                 return;
             }
             try {
-                ImagePicker.Companion.with(this)
-                        //...
+                ImagePicker.Companion.with(this)// Start building the configuration
                         .provider(ImageProvider.BOTH) //Or bothCameraGallery()
                         .setMultipleAllowed(false) //by default it is false
-                        .crop(12f, 5f)
+                        .crop(10f, 3f)
                         //.cropSquare()
                         .cropFreeStyle()//Let the user to resize crop bounds:
                         .maxResultSize(350, 350, true) //true: Keep Ratio.Set Max Width and Height of final image. When the user picks an image from the gallery or captures a new image using the camera, the library ensures that the resulting image does not exceed the specified resolution. This is useful for scenarios where you want to limit the image size for storage, display, or other purposes.
                         .setOutputFormat(Bitmap.CompressFormat.JPEG)//compress
-                        .createIntentFromDialog((Function1) new Function1() {
+                        .createIntentFromDialog((Function1) new Function1(){
                             public Object invoke(Object var1) {
                                 this.invoke((Intent) var1);
                                 return Unit.INSTANCE;
@@ -182,18 +183,46 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                                 launcher.launch(it);
                             }
                         });
+
             }catch(Exception x){
                 x.printStackTrace();
                 Toast.makeText(this, "Exception occurred Image picker", Toast.LENGTH_LONG).show();
-                //provide alternative way to set image in imageview
+                //provide alternative way to set image in imageview if first approach dont work
             }
-
         });
+        deleteImageBtn.setOnClickListener(view -> {
+            if(!isImageViewNull(imageView)){//checking imageview has image or not
 
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setCancelable(true);//when dialog is visible and user click other part of screen then dialog will disappear when value is true
+                dialog.setTitle(getString(R.string.delete_image));
+                dialog.setMessage(getString(R.string.are_you_sure_questionmark));
+                dialog.setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+
+                    if(fromIntentPersonId != null){//this will execute when updating because while updating fromIntentPersonId would not be null
+                        if(!deleteImageFromDatabaseAndSetImageViewToNull(imageView)){
+                            MyUtility.snackBar(view,getString(R.string.failed_to_delete_image));
+                        }
+                    }else{
+                        imageView.setImageDrawable(null);//Set the imageVIEW to null (removes any currently set image)
+                    }
+
+                    dialogInterface.dismiss();
+                });
+               dialog.setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                   dialogInterface.dismiss();
+               });
+
+                dialog.create().show();
+
+            }else{
+                MyUtility.snackBar(view,getString(R.string.no_image_to_delete));
+            }
+        });
         if(getIntent().hasExtra("ID")){//while updating. after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
 
-            Cursor cursor= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_ACTIVE_PHONE1+"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
+            Cursor cursor= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_MAIN_ACTIVE_PHONE1 +"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
             if(cursor != null && cursor.moveToFirst()){
                 name.setText(cursor.getString(0));
                 account.setText(cursor.getString(1));
@@ -523,6 +552,16 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);//add it to the OnBackPressedDispatcher using getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback).This ensures that your custom back button handling logic is invoked when the back button is pressed.
 
     }
+
+    private boolean deleteImageFromDatabaseAndSetImageViewToNull(ImageView imageView) {
+        Database db=Database.getInstance(getBaseContext());
+        if(db.deleteImage(fromIntentPersonId)){
+            imageView.setImageDrawable(null);//Set the image to null (removes any currently set image)
+            return true;
+        }
+       return false;
+    }
+
     public void insert_click(View view) { //action while clicking insert button
 
         if(!checkCredentials(activephone1,phone2,aadhaarNumber,skill,name,view,ifscCode)) return;
@@ -620,7 +659,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                         if (result.getCount() == 1 && result.moveToFirst()) {//ONLY 1 DATE NO DUPLICATE
 
                             buffer.append("\n" + "NEW PERSON ID: ").append(result.getString(0));
-                            displayResult("CREATED SUCCESSFULLY", buffer.toString());
+                            displayResult("REGISTERED SUCCESSFULLY", buffer.toString());
                         }
 
                         if (result.getCount() > 1) {//this will be true when details are DUPLICATE
@@ -629,11 +668,11 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                                 holdLastId = "" + result.getString(0);//to display new added person ids comes at last when loop
                                 buffer.append("\nPERSON ID: ").append(result.getString(0));
                             }
-                            displayResult("SUCCESSFULLY ADDED NEW PERSON ID: " + holdLastId, buffer.toString());
+                            displayResult("SUCCESSFULLY REGISTERED NEW PERSON ID: " + holdLastId, buffer.toString());
                         }
                         result.close();//closing cursor
                     }else
-                        displayResult("SUCCESSFULLY ADDED NEW PERSON", personName+" BUT QUERY NOT RETURNED ANY DATA OF THAT PERSON");
+                        displayResult("SUCCESSFULLY REGISTERED NEW PERSON", personName+" BUT QUERY NOT RETURNED ANY DATA OF THAT PERSON");
                 }
                 private void displayResult(String title, String message) {
                     AlertDialog.Builder showDataFromDataBase = new AlertDialog.Builder(RegisterPersonDetailsActivity.this);
@@ -885,5 +924,12 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Database.closeDatabase();
+
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles("DCIM",true,getBaseContext())){//this folder created by image picker.delete external file
+            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles("Pictures",true,getBaseContext())){//this folder created by image picker.delete external file
+            Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        }
     }
 }

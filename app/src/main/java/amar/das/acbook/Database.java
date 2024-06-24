@@ -8,15 +8,20 @@ import android.database.sqlite.SQLiteBlobTooBigException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -24,9 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+
 
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
@@ -42,18 +45,18 @@ public class Database extends SQLiteOpenHelper {
     private static Database instance; // Step 1: Private static instance
 
     //table 1---------------------------------------------------------------------------------------
-    public final static String TABLE_NAME1="person_details_table";
+    public final static String PERSON_REGISTERED_TABLE ="person_registered_table";
     public final static String COL_1_ID ="ID";
     public final static String COL_2_NAME ="NAME";
     public final static String COL_3_BANKAC ="BANKACCOUNT";
     public final static String COL_4_IFSCCODE ="IFSCCODE";
     public final static String COL_5_BANKNAME ="BANKNAME";
     public final static String COL_6_AADHAAR_NUMBER ="AADHARCARD";
-    public final static String COL_7_ACTIVE_PHONE1 ="PHONE";
+    public final static String COL_7_MAIN_ACTIVE_PHONE1 ="ACTIVE_PHONE1";
     public final static String COL_8_MAINSKILL1 ="MAINSKILL1";//skill1
-    public final static String COL_9_ACCOUNT_HOLDER_NAME ="FATHERNAME";
+    public final static String COL_9_ACCOUNT_HOLDER_NAME ="ACCOUNT_HOLDER_NAME";
     public final static String COL_10_IMAGE ="IMAGE";
-    public final static String COL_11_ACTIVE_PHONE2 ="ACHOLDER";
+    public final static String COL_11_ACTIVE_PHONE2 ="ACTIVE_PHONE2";
     public final static String COL_12_ACTIVE ="ACTIVE";
     public final static String COL_13_ADVANCE ="ADVANCE";
     public final static String COL_14_BALANCE ="BALANCE";
@@ -70,7 +73,6 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_4_MICPATH_AM ="MICPATH";
     public final static String COL_5_REMARKS_AM ="REMARKS";
     public final static String COL_6_WAGES_AM ="WAGES";
-//    public final static String COL_7_DEPOSIT_AM ="DEPOSIT";
     public final static String COL_8_P1_AM ="P1";
     public final static String COL_9_P2_AM ="P2";
     public final static String COL_10_P3_AM ="P3";
@@ -85,7 +87,6 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_4_MICPATH_ALG ="MICPATH";
     public final static String COL_5_REMARKS_ALG ="REMARKS";
     public final static String COL_6_WAGES_ALG ="WAGES";
-   // public final static String COL_7_DEPOSIT_ALG ="DEPOSIT";
     public final static String COL_8_P1_ALG ="P1";
     public final static String COL_9_P2_ALG ="P2";
     public final static String COL_10_P3_ALG ="P3";
@@ -100,7 +101,6 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_4_MICPATH_IAM ="MICPATH";
     public final static String COL_5_REMARKS_IAM ="REMARKS";
     public final static String COL_6_WAGES_IAM ="WAGES";
-    //public final static String COL_7_DEPOSIT_IAM ="DEPOSIT";
     public final static String COL_8_P1_IAM ="P1";
     public final static String COL_9_P2_IAM ="P2";
     public final static String COL_10_P3_IAM ="P3";
@@ -115,7 +115,6 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_4_MICPATH_IALG ="MICPATH";
     public final static String COL_5_REMARKS_IALG ="REMARKS";
     public final static String COL_6_WAGES_IALG ="WAGES";
-   // public final static String COL_7_DEPOSIT_IALG ="DEPOSIT";
     public final static String COL_8_P1_IALG ="P1";
     public final static String COL_9_P2_IALG ="P2";
     public final static String COL_10_P3_IALG ="P3";
@@ -134,12 +133,12 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_38_SKILL4 ="SKILL4";
     public final static String COL_39_INDICATOR ="INDICATOR";
     public final static String COL_391_STAR ="STAR";
-    public final static String COL_392_LEAVINGDATE ="LEAVINGDATE";
-    public final static String COL_398_RETURNINGDATE ="RETURNDATE";
-    public final static String COL_393_PERSON_REMARKS ="REFFERAL";
+    public final static String COL_392_LEAVINGDATE ="LEAVING_DATE";
+    public final static String COL_398_RETURNINGDATE ="RETURN_DATE";
+    public final static String COL_393_PERSON_REMARKS ="PERSON_REMARKS";
     public final static String COL_394_INVOICE1 ="PDF1";//or invoice
     public final static String COL_395_INVOICE2 ="PDF2";
-    public final static String COL_396_PDFSEQUENCE ="PDFSEQUENCE";//invoice sequence
+    public final static String COL_396_PDFSEQUENCE ="PDF_SEQUENCE";//invoice sequence
     public final static String COL_397_TOTAL_WORKED_DAYS="TOTAL_WORKED_DAYS";
 
     //table 4---------------------------------------------------------------------------------------
@@ -149,6 +148,10 @@ public class Database extends SQLiteOpenHelper {
     //table 5---------------------------------------------------------------------------------------
     public final static String TABLE_NAME_RELIGION="religion_table";
     public final static String COL_51_RELIGION="RELIGION";
+
+    //backup check table
+    public final static String TABLE_NAME_BACKUP_CHECK="backup_check_table";
+    public final static String COL_TOTAL_SUBTRACT_INACTIVE_AND_ACTIVE_ROWS="ROWS_INACTIVE_ACTIVE";
 
     //history table
     public final static String TABLE_HISTORY ="history_table";
@@ -197,7 +200,7 @@ public class Database extends SQLiteOpenHelper {
      try {//if some error occur it will handle
          //sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20)  DEFAULT NULL UNIQUE,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(40) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12)  DEFAULT NULL UNIQUE,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10)  DEFAULT NULL UNIQUE, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(40) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
 
-         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(100) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
+         sqLiteDatabase.execSQL("CREATE TABLE " + PERSON_REGISTERED_TABLE + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+ COL_7_MAIN_ACTIVE_PHONE1 +" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE0_ACTIVE_MESTRE + " ("+ COL_1_ID_AM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_AM+" TEXT NOT NULL,"+COL_2_DATE_AM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_AM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_AM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_AM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_AM +" INTEGER DEFAULT NULL,"+ COL_9_P2_AM +" INTEGER DEFAULT NULL,"+ COL_10_P3_AM +" INTEGER DEFAULT NULL,"+ COL_11_P4_AM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_AM +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE1_ACTIVE_LG + " ("+ COL_1_ID_ALG +" INTEGER ,"+COL_13_SYSTEM_DATETIME_ALG+" TEXT NOT NULL,"+COL_2_DATE_ALG +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_ALG +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_ALG +" TEXT DEFAULT NULL,"+ COL_6_WAGES_ALG +" NUMERIC DEFAULT NULL,"+ COL_8_P1_ALG +" INTEGER DEFAULT NULL,"+ COL_9_P2_ALG +" INTEGER DEFAULT NULL,"+ COL_10_P3_ALG +" INTEGER DEFAULT NULL,"+ COL_11_P4_ALG +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_ALG +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_IN_ACTIVE_MESTRE + " ("+ COL_1_ID_IAM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_IAM+" TEXT NOT NULL,"+ COL_2_DATE_IAM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_IAM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_IAM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_IAM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_IAM +" INTEGER DEFAULT NULL,"+ COL_9_P2_IAM +" INTEGER DEFAULT NULL,"+ COL_10_P3_IAM +" INTEGER DEFAULT NULL,"+ COL_11_P4_IAM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_IAM +" CHAR(1) DEFAULT NULL);");
@@ -209,6 +212,7 @@ public class Database extends SQLiteOpenHelper {
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RATE_SKILL + " ("+COL_31_ID+" INTEGER PRIMARY KEY NOT NULL ,"+COL_32_R1+" INTEGER DEFAULT NULL,"+COL_33_R2+" INTEGER DEFAULT NULL,"+COL_34_R3+" INTEGER DEFAULT NULL,"+COL_35_R4+" INTEGER DEFAULT NULL,"+ COL_36_SKILL2 +" CHAR(1) DEFAULT NULL,"+ COL_37_SKILL3 +" CHAR(1) DEFAULT NULL,"+ COL_38_SKILL4 +" CHAR(1) DEFAULT NULL,"+COL_39_INDICATOR+" CHAR(1) DEFAULT NULL,"+ COL_391_STAR +" CHAR(1) DEFAULT NULL,"+COL_392_LEAVINGDATE+" VARCHAR(10) DEFAULT NULL,"+ COL_393_PERSON_REMARKS +" TEXT DEFAULT NULL,"+COL_394_INVOICE1+" BLOB DEFAULT NULL,"+COL_395_INVOICE2+" BLOB DEFAULT NULL,"+COL_396_PDFSEQUENCE+" INTEGER DEFAULT 0 , "+COL_397_TOTAL_WORKED_DAYS+" INTEGER DEFAULT 0 , "+COL_398_RETURNINGDATE+" TEXT DEFAULT NULL);");//id is primary key because according to id only data is stored in table 3 so no duplicate
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_LOCATION + " ("+COL_41_LOCATION+" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RELIGION + " ("+COL_51_RELIGION+" TEXT DEFAULT NULL);");
+         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_BACKUP_CHECK + " ("+COL_TOTAL_SUBTRACT_INACTIVE_AND_ACTIVE_ROWS+" TEXT DEFAULT NULL);");
      }catch(Exception e){
          e.printStackTrace();
      }
@@ -252,16 +256,16 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_4_IFSCCODE, ifscCode);
             cv.put(COL_5_BANKNAME, bankName);
             cv.put(COL_6_AADHAAR_NUMBER, aadhaarCard);
-            cv.put(COL_7_ACTIVE_PHONE1, phoneNumber);
+            cv.put(COL_7_MAIN_ACTIVE_PHONE1, phoneNumber);
             cv.put(COL_8_MAINSKILL1, skill);
             cv.put(COL_9_ACCOUNT_HOLDER_NAME, accountHolderName);
             cv.put(COL_10_IMAGE, image);
             cv.put(COL_11_ACTIVE_PHONE2, phone2);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
-            cv.put(COL_12_ACTIVE,GlobalConstants.ACTIVE.getValue());//when new user added then it will be active
+            cv.put(COL_12_ACTIVE,GlobalConstants.ACTIVE_PEOPLE.getValue());//when new user added then it will be active
             //newelyCreatedId=(dB.insert(TABLE_NAME1, null, cv) == -1)? false: true;// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
-            newelyCreatedId=String.valueOf(dB.insert(TABLE_NAME1, null, cv));// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
+            newelyCreatedId=String.valueOf(dB.insert(PERSON_REGISTERED_TABLE, null, cv));// -1 is returned if error occurred.The insert() method in SQLite returns the ID of the newly created row, or -1 if there was an error inserting the data.
 
             if(newelyCreatedId!=null && !newelyCreatedId.equals("-1")){//inserting data to rate table
                 cv = new ContentValues();//to enter data at once it is like hash map
@@ -292,7 +296,7 @@ public class Database extends SQLiteOpenHelper {
         return newelyCreatedId;
     }
     public  Cursor getId(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String type, String accountHolderName,String phone2,String location,String religion){
-           String query = "SELECT "+Database.COL_1_ID+" FROM " + TABLE_NAME1 + " WHERE "+Database.COL_2_NAME+ ((name!=null)?"='"+name+"'":" IS NULL") + " AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+((accountHolderName!=null)?"='"+accountHolderName+"'":" IS NULL")+ " AND "+Database.COL_3_BANKAC+((bankAccount!=null)?"='"+bankAccount+"'":" IS NULL") + " AND "+Database.COL_7_ACTIVE_PHONE1+((phoneNumber!=null)?"='"+phoneNumber+"'":" IS NULL") + " AND "+Database.COL_4_IFSCCODE+((ifscCode!=null)?"='"+ifscCode+"'":" IS NULL") + " AND "+Database.COL_6_AADHAAR_NUMBER+((aadhaarCard!=null)?"='"+aadhaarCard+"'":" IS NULL")+ " AND "+Database.COL_8_MAINSKILL1 +((type!=null)?"='"+type+"'":" IS NULL")+ " AND "+Database.COL_5_BANKNAME+((bankName !=null)?"='"+bankName+"'":" IS NULL")+ " AND "+Database.COL_11_ACTIVE_PHONE2+((phone2 !=null)?"='"+phone2+"'":" IS NULL") + " AND "+Database.COL_17_LOCATION+((location !=null)?"='"+location+"'":" IS NULL")+" AND "+Database.COL_18_RELIGION+((religion !=null)?"='"+religion+"'":" IS NULL");
+           String query = "SELECT "+Database.COL_1_ID+" FROM " + PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_2_NAME+ ((name!=null)?"='"+name+"'":" IS NULL") + " AND "+Database.COL_9_ACCOUNT_HOLDER_NAME+((accountHolderName!=null)?"='"+accountHolderName+"'":" IS NULL")+ " AND "+Database.COL_3_BANKAC+((bankAccount!=null)?"='"+bankAccount+"'":" IS NULL") + " AND "+Database.COL_7_MAIN_ACTIVE_PHONE1 +((phoneNumber!=null)?"='"+phoneNumber+"'":" IS NULL") + " AND "+Database.COL_4_IFSCCODE+((ifscCode!=null)?"='"+ifscCode+"'":" IS NULL") + " AND "+Database.COL_6_AADHAAR_NUMBER+((aadhaarCard!=null)?"='"+aadhaarCard+"'":" IS NULL")+ " AND "+Database.COL_8_MAINSKILL1 +((type!=null)?"='"+type+"'":" IS NULL")+ " AND "+Database.COL_5_BANKNAME+((bankName !=null)?"='"+bankName+"'":" IS NULL")+ " AND "+Database.COL_11_ACTIVE_PHONE2+((phone2 !=null)?"='"+phone2+"'":" IS NULL") + " AND "+Database.COL_17_LOCATION+((location !=null)?"='"+location+"'":" IS NULL")+" AND "+Database.COL_18_RELIGION+((religion !=null)?"='"+religion+"'":" IS NULL");
            return getData(query);
      }
     public Cursor getData(String query){//error when closing db or cursor so don't close cursor
@@ -312,14 +316,14 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_4_IFSCCODE, ifscCode);
             cv.put(COL_5_BANKNAME, bankName);
             cv.put(COL_6_AADHAAR_NUMBER, aadhaarCard);
-            cv.put(COL_7_ACTIVE_PHONE1, phoneNumber);
+            cv.put(COL_7_MAIN_ACTIVE_PHONE1, phoneNumber);
             cv.put(COL_8_MAINSKILL1, skill);
             cv.put(COL_9_ACCOUNT_HOLDER_NAME, fatherName);
             cv.put(COL_10_IMAGE, image);
             cv.put(COL_11_ACTIVE_PHONE2, acHolder);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
-            success=(dB.update(TABLE_NAME1, cv, Database.COL_1_ID+"=?", new String[]{id})!=1)? false :true;//if update return 1 then data is updated else not updated.//0 is returned if no record updated and it return number of rows updated
+            success=(dB.update(PERSON_REGISTERED_TABLE, cv, Database.COL_1_ID+"=?", new String[]{id})!=1)? false :true;//if update return 1 then data is updated else not updated.//0 is returned if no record updated and it return number of rows updated
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -413,8 +417,8 @@ public class Database extends SQLiteOpenHelper {
 
             previousActiveOrInactiveAndSkill=getActiveOrInactiveAndSkill(id);//this statement should be here to get previous data like skill
 
-            if(database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
-                success=shiftDataToActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getOnlyMainSkill(id));//getSkill(id) gives updated skill
+            if(database.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
+                success= shiftDataToActiveTableAndMakeActiveAndUpdateLatestDate(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getOnlyMainSkill(id));//getSkill(id) gives updated skill
             }
 
         }catch (Exception e){
@@ -423,7 +427,7 @@ public class Database extends SQLiteOpenHelper {
         }finally{
             //in sqlite database we cant use nested transaction so updating manually using database object because in this method shiftDataToActiveTable() already transaction is implemented
             if(!success){//if success is false the revert changes
-                database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + previousActiveOrInactiveAndSkill[1] +"' WHERE ID='" + id + "'");
+                database.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_8_MAINSKILL1 + "='" + previousActiveOrInactiveAndSkill[1] +"' WHERE ID='" + id + "'");
             }
             database.close();
         }
@@ -438,8 +442,8 @@ public class Database extends SQLiteOpenHelper {
 
             previousActiveOrInactiveAndSkill=getActiveOrInactiveAndSkill(id);//this statement should be here to get previous data like skill
 
-            if(database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
-                success=shiftDataToInActiveTable(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getOnlyMainSkill(id));//getSkill(id) gives updated skill
+            if(database.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_8_MAINSKILL1 + "='" + updatedSkill + "' WHERE ID='" + id + "'")){//if it is updated then only perform shiftData operation
+                success= shiftDataToInActiveTableAndMakeIdInactive(dataFromActiveTableCursor,id,getTableName(getTableNumber(previousActiveOrInactiveAndSkill)),false, getOnlyMainSkill(id));//getSkill(id) gives updated skill
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -447,7 +451,7 @@ public class Database extends SQLiteOpenHelper {
         }finally{
             //in sqlite database we cant use nested transaction so updating manually because in this method shiftDataToActiveTable() already transaction is implemented
             if(!success){//if success is false the revert changes
-                database.updateTable("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_8_MAINSKILL1 + "='" + previousActiveOrInactiveAndSkill[1] +"' WHERE ID='" + id + "'");
+                database.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_8_MAINSKILL1 + "='" + previousActiveOrInactiveAndSkill[1] +"' WHERE ID='" + id + "'");
             }
             database.close();
         }
@@ -1183,7 +1187,6 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
-
     private Integer[] getTotalOfWagesP1P2P3P4Deposit(String id,String columnNameOfP1, String columnNameOfP2, String columnNameOfP3, String columnNameOfP4,String tableName,String idColumnName) {//if error return null,or if no data value would be 0
         Integer[] arr=new Integer[6];
         arr[0]=MyUtility.getTotalWagesAmount(id,context);
@@ -1201,7 +1204,6 @@ public class Database extends SQLiteOpenHelper {
         arr[5]=MyUtility.getTotalDepositAmount(id,context);
         return arr;
     }
-
     public Cursor getWagesForUpdate(String id, String previousSystemDateTime){
         try{
             String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
@@ -1273,7 +1275,7 @@ public class Database extends SQLiteOpenHelper {
          * other method cannot insert or update in active table due to id inactive*/
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
-            if (activeInactiveSkill[0].equals(GlobalConstants.INACTIVE.getValue())){//if person is inactive then insert data from inactive table to active table
+            if (activeInactiveSkill[0].equals(GlobalConstants.INACTIVE_PEOPLE.getValue())){//if person is inactive then insert data from inactive table to active table
                  if(isRedundantDataPresentInOtherTable(id)){
                      Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
                      return false;
@@ -1282,11 +1284,11 @@ public class Database extends SQLiteOpenHelper {
 
                 if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))) {//check for l OR G
 
-                    return shiftDataToActiveTable(dataFromInActiveTableCursor,id,Database.TABLE3_IN_ACTIVE_LG,true,activeInactiveSkill[1]);
+                    return shiftDataToActiveTableAndMakeActiveAndUpdateLatestDate(dataFromInActiveTableCursor,id,Database.TABLE3_IN_ACTIVE_LG,true,activeInactiveSkill[1]);
 
                 }else if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))) {//check for mestre
 
-                    return shiftDataToActiveTable(dataFromInActiveTableCursor,id,Database.TABLE2_IN_ACTIVE_MESTRE,true,activeInactiveSkill[1]);
+                    return shiftDataToActiveTableAndMakeActiveAndUpdateLatestDate(dataFromInActiveTableCursor,id,Database.TABLE2_IN_ACTIVE_MESTRE,true,activeInactiveSkill[1]);
                 }
             }else{//optional
                 Toast.makeText(context, "id is already active no need to do anything ", Toast.LENGTH_LONG).show();
@@ -1301,7 +1303,7 @@ public class Database extends SQLiteOpenHelper {
         /**if table is active then only data is shifted from active to inactive table and make id inactive.latest date is not updated because it will be automatically updated during time*/
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
-            if (activeInactiveSkill[0].equals("1")){//if person is active then insert data from active table to inactive table
+            if (activeInactiveSkill[0].equals(GlobalConstants.ACTIVE_PEOPLE.getValue())){//if person is active then insert data from active table to inactive table
                 if(isRedundantDataPresentInOtherTable(id)){
                     Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
                     return false;
@@ -1310,11 +1312,11 @@ public class Database extends SQLiteOpenHelper {
 
                 if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))) {//check for l OR G
 
-                    return shiftDataToInActiveTable(dataFromActiveTableCursor,id,Database.TABLE1_ACTIVE_LG,true,activeInactiveSkill[1]);
+                    return shiftDataToInActiveTableAndMakeIdInactive(dataFromActiveTableCursor,id,Database.TABLE1_ACTIVE_LG,true,activeInactiveSkill[1]);
 
                 }else if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))) {//check for mestre
 
-                    return shiftDataToInActiveTable(dataFromActiveTableCursor,id,Database.TABLE0_ACTIVE_MESTRE,true,activeInactiveSkill[1]);
+                    return shiftDataToInActiveTableAndMakeIdInactive(dataFromActiveTableCursor,id,Database.TABLE0_ACTIVE_MESTRE,true,activeInactiveSkill[1]);
                 }
             }else{//optional
                 Toast.makeText(context, "id is already inactive no need to do anything ", Toast.LENGTH_LONG).show();
@@ -1365,11 +1367,11 @@ public class Database extends SQLiteOpenHelper {
             String systemCurrentDate24hrTime=MyUtility.systemCurrentDate24hrTime();
 
             if(activeAndSkill[0].equals("1")){//insert remarks in current active table
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,systemCurrentDate24hrTime, activeAndSkill[1], id, MyUtility.getOnlyCurrentDate() , null, remarks, 0, 0, 0, 0, 0,"0")){
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,systemCurrentDate24hrTime, activeAndSkill[1], id, MyUtility.getOnlyCurrentDateForLatestDate() , null, remarks, 0, 0, 0, 0, 0,"0")){
                     return false;
                 }
             }else if (activeAndSkill[0].equals("0")){//insert remarks in current inactive table
-               if(!insertWagesOrDepositToInActiveTableDirectly(dB,systemCurrentDate24hrTime,activeAndSkill[1], id, MyUtility.getOnlyCurrentDate(),   null, remarks, 0, 0, 0, 0, 0,"0")){
+               if(!insertWagesOrDepositToInActiveTableDirectly(dB,systemCurrentDate24hrTime,activeAndSkill[1], id, MyUtility.getOnlyCurrentDateForLatestDate(),   null, remarks, 0, 0, 0, 0, 0,"0")){
                    return false;
                }
             }
@@ -1474,7 +1476,7 @@ public class Database extends SQLiteOpenHelper {
               }
           return table;
     }
-    private boolean shiftDataToActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateLatestDate,String insertAccordingToSkillIntoActiveTable) {//this method should be called only when id is active because data will be inserted directly to active table without checking
+    private boolean shiftDataToActiveTableAndMakeActiveAndUpdateLatestDate(Cursor dataFromTableCursor, String id, String tableNameToDelete, boolean updateLatestDate, String insertAccordingToSkillIntoActiveTable) {//this method should be called only when id is active because data will be inserted directly to active table without checking
         boolean success=false;
         SQLiteDatabase dB =null;
        try {
@@ -1482,7 +1484,7 @@ public class Database extends SQLiteOpenHelper {
             dB.beginTransaction();//transaction start
 
             if(updateLatestDate){
-                dB.execSQL("UPDATE " + Database.TABLE_NAME1+ " SET " + Database.COL_12_ACTIVE + "='" + 1 + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDate() + "' , " + Database.COL_16_TIME + "='" + MyUtility.getOnlyTime() + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it active to shift data in active table
+                dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDateForLatestDate() + "' , " + Database.COL_16_TIME + "='" + MyUtility.getOnlyTime() + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it active to shift data in active table
             }
 
             if (dataFromTableCursor != null) {
@@ -1508,7 +1510,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    private boolean shiftDataToInActiveTable(Cursor dataFromTableCursor, String id,String tableNameToDelete,boolean updateActive,String skill) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
+    private boolean shiftDataToInActiveTableAndMakeIdInactive(Cursor dataFromTableCursor, String id, String tableNameToDelete, boolean updateActive, String skill) {//this method should be called only when id is inactive because data will be inserted directly to inactive table without checking
         if(skill==null) return false;
         boolean success=false;
         SQLiteDatabase dB=null;
@@ -1516,7 +1518,7 @@ public class Database extends SQLiteOpenHelper {
             dB = this.getWritableDatabase();//getting permission it should be here
             dB.beginTransaction();//transaction start
             if(updateActive) {
-                dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_12_ACTIVE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it INactive to shift data in inactive table.latest date is not updated due to automaticallly updated
+                dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.INACTIVE_PEOPLE.getValue() + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it INactive to shift data in inactive table.latest date is not updated due to automaticallly updated
             }
 
             if (dataFromTableCursor != null) {
@@ -1546,7 +1548,7 @@ public class Database extends SQLiteOpenHelper {
         if(id == null || onlyTime == null) return false;
 
         if (isActiveOrInactive(id)) {//if active then update active and latest date
-           return updateTable("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_12_ACTIVE + "='" + 1 + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDate() + "' , " + Database.COL_16_TIME + "= '" + onlyTime + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+           return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDateForLatestDate() + "' , " + Database.COL_16_TIME + "= '" + onlyTime + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
         }else {
              return makeIdActive(id);
         }
@@ -1728,7 +1730,7 @@ public class Database extends SQLiteOpenHelper {
         db = this.getReadableDatabase();
         Cursor cursor=null;
         try {
-            cursor=db.rawQuery("SELECT  "+Database.COL_12_ACTIVE+" ," +Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
+            cursor=db.rawQuery("SELECT  "+Database.COL_12_ACTIVE+" ," +Database.COL_8_MAINSKILL1 +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
             cursor.moveToFirst();
             return new String[]{cursor.getString(0),cursor.getString(1)};
         }catch (Exception x){
@@ -1769,7 +1771,7 @@ public class Database extends SQLiteOpenHelper {
         db = this.getReadableDatabase();
         Cursor cursor=null;
         try {
-            cursor=db.rawQuery("SELECT  "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
+            cursor=db.rawQuery("SELECT  "+Database.COL_8_MAINSKILL1 +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id +"'",null);
             cursor.moveToFirst();
             return cursor.getString(0);
         }catch (Exception x){
@@ -1785,9 +1787,9 @@ public class Database extends SQLiteOpenHelper {
         Database db=Database.getInstance(context);
         Cursor cursor=null;
         try{
-            cursor=db.getData("SELECT  "+Database.COL_12_ACTIVE+" FROM "+ Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id +"'");
+            cursor=db.getData("SELECT  "+Database.COL_12_ACTIVE+" FROM "+ Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id +"'");
             cursor.moveToFirst();
-            return cursor.getString(0).equals("1")? true :false;
+            return cursor.getString(0).equals(GlobalConstants.ACTIVE_PEOPLE.getValue())? true :false;
         }catch (Exception x){
             x.printStackTrace();
             return false;
@@ -1797,31 +1799,7 @@ public class Database extends SQLiteOpenHelper {
                 }
         }
     }
-//    public boolean deleteAllRowsTransaction(String id, String tableName){//delete all rows
-//        boolean success = false;
-//        SQLiteDatabase dB=null;
-//        try {
-//            dB = this.getWritableDatabase();
-//            dB.beginTransaction();
-//
-//            int row = dB.delete(tableName, "ID= '" + id + "'", null);//if the delete method fails to delete rows due to an error or any other reason, it will return -1. A return value of -1 indicates that the delete operation encountered an error or failed to execute for some reason
-//            if (row >= 0){//delete method return number of record deleted.if there is no record then return 0 so = is used
-//                success = true;
-//            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            return false;
-//        }finally{
-//            if (dB != null){
-//                if(success){//if success then only commit
-//                    dB.setTransactionSuccessful();//If you want to commit the transaction there is a method setTransactionSuccessful() which will commit the values in the database.If you want to rollback your transaction then you need to endTransaction() without committing the transaction by setTransactionSuccessful().
-//                }
-//                dB.endTransaction(); //Commit or rollback the transaction
-//                dB.close();
-//            }
-//        }
-//        return success;
-//    }
+
     public boolean deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(String id,int totalDeposit,int totalWages,int p1,int p2,int p3,int p4,int r1,int r2,int r3,int r4,byte indicate,int []innerArray){
     /**should be follow in sequence strictly because to call this method id should be active otherwise data will Be inserted directly to other table
      * 1.Check for redundant data present in other table if present then delete those data and add in recyclerview as remarks so that user would know.Redundant data will be in table when deletion operation delete only half data while making id active or in active but this will not happen due to transaction applied just for 100% confirmation checking
@@ -1897,7 +1875,7 @@ public class Database extends SQLiteOpenHelper {
 //                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
 //            }//toast will not work while doing background task
 
-            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDate(),null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDateForLatestDate(),null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
             success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){
@@ -1931,11 +1909,11 @@ public class Database extends SQLiteOpenHelper {
 
             if(!fetchWorkDetailsCalculationAndWriteToPDF(id,makePdf)) return null;//calculation
 
-            if(!makePdf.createdPageFinish2()) return null;
+            if(!makePdf.createdPageFinish2()){ return null;}
 
             fileAbsolutePath =makePdf.createPdfFileInExternalStorageAndReturnFile(context.getExternalFilesDir(null).toString(),MyUtility.generateUniqueFileName(context,id)).getAbsolutePath();
 
-            if(!makePdf.closeDocumentLastOperation4())return null;
+            if(!makePdf.closeDocumentLastOperation4()){return null;}
 
                 return fileAbsolutePath;//fileNameAbsolutePath will be used to get file from device and convert to byteArray and store in db
 
@@ -1959,7 +1937,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     private boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -2069,7 +2047,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     private boolean makeSummaryAndWriteToPDFBasedOnIndicator(Context context, byte indicator, String id, MakePdf makePdf, int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {
-        try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
+        try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+" ,"+Database.COL_14_BALANCE+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             if(!makePdf.writeSentenceWithoutLines(new String[]{"SUMMARY","",""},new float[]{12f, 50f, 38f},false,(byte)50,(byte)50,true)) return false;
 
             cursor.moveToFirst();//means only one row is returned
@@ -2132,24 +2110,6 @@ public class Database extends SQLiteOpenHelper {
             }
         }else return false;
     }
-//    public static String[] getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator(byte indicator,int[] arrayOfTotalWagesDepositRateAccordingToIndicator) {// when no data and if error errorDetection will be set to true
-//        try{//getTotalOfWagesAndWorkingDaysFromDbBasedOnIndicator should be use after all wages displayed
-//            switch (indicator) {
-//                case 1: return new String[]{"+",MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"" ,context.getResources().getString(R.string.star_total_star)};
-//
-//                case 2: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"" ,context.getResources().getString(R.string.star_total_star)};
-//
-//                case 3: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"" ,context.getResources().getString(R.string.star_total_star)};
-//
-//                case 4: return new String[]{"+", MyUtility.convertToIndianNumberSystem(arrayOfTotalWagesDepositRateAccordingToIndicator[0]), arrayOfTotalWagesDepositRateAccordingToIndicator[1]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[2]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[3]+"",arrayOfTotalWagesDepositRateAccordingToIndicator[4]+"" ,context.getResources().getString(R.string.star_total_star)};
-//            }
-//            return new String[]{"wrong indicator"};//this code will not execute due to return in switch block just using to avoid error
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//           // errorDetection[0]=true;//indicate error has occur
-//            return new String[]{"error occurred"};//to avoid error
-//        }
-//    }
     private boolean addWorkAmountAndDepositBasedOnIndicatorAndWriteToPDF(byte indicator,int[] sumArrayAccordingToIndicator, MakePdf makePdf,String[] skillAccordingToindicator) {
         try{
             switch(indicator){
@@ -2225,18 +2185,18 @@ public class Database extends SQLiteOpenHelper {
                    }
                    if ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) < totalWages) {
                        //updating Advance to db
-                        dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + (totalWages - (totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4)))) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                        dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_13_ADVANCE + "='" + (totalWages - (totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4)))) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
                        //if there is advance then balance  column should be 0
-                        dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                        dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_14_BALANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
                    } else if ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) >= totalWages) {//>= is given because when totalWages and total work is same then this condition will be executed to set balance 0
 
                        //updating balance to db if greater then 0
-                       dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_14_BALANCE + "='" + ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) - totalWages) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                       dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_14_BALANCE + "='" + ((totalDeposit + ((p1work * rate1) + (p2work * rate2) + (p3work * rate3) + (p4work * rate4))) - totalWages) + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
 
                        //if there is balance then update advance column should be 0
-                        dB.execSQL("UPDATE " + Database.TABLE_NAME1 + " SET " + Database.COL_13_ADVANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+                        dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_13_ADVANCE + "='" + 0 + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
                    }
                } else {
                    Toast.makeText(context, "FAILED TO SAVE DUE TO RATE NOT PROVIDED", Toast.LENGTH_LONG).show();
@@ -2271,20 +2231,20 @@ public class Database extends SQLiteOpenHelper {
     }
 
     private boolean addMessageAfterFinalCalculationToRecyclerview(String id,SQLiteDatabase dB,String previousSummary) {//to call this method id should be active otherwise data will ne inserted directly to other table
-        try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
+        try(Cursor cursor=getData("SELECT "+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + id + "'")) {
             cursor.moveToFirst();//means only one row is returned
 
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,"0")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,"0")) return false;
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",cursor.getInt(1),0,0,0,0,"1")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",cursor.getInt(1),0,0,0,0,"1")) return false;
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,"0")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,"0")) return false;
 
             }
             //HISTORY TABLE
@@ -2658,7 +2618,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     public String getName(String id){
-        try(Cursor cursor=getData("SELECT " + Database.COL_2_NAME+ " FROM " + Database.TABLE_NAME1 + " WHERE " +Database.COL_1_ID+" ='"+id+"'")){
+        try(Cursor cursor=getData("SELECT " + Database.COL_2_NAME+ " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " +Database.COL_1_ID+" ='"+id+"'")){
             cursor.moveToFirst();
             return cursor.getString(0);
         }catch(Exception x){
@@ -2754,7 +2714,7 @@ public class Database extends SQLiteOpenHelper {
 //                cursor.close();
 //            }
 
-            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");//no need to check for latest date is null or not we need only active ids
+            cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"'");//no need to check for latest date is null or not we need only active ids
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
@@ -2770,7 +2730,7 @@ public class Database extends SQLiteOpenHelper {
 //                cursor.close();
 //            }
 
-            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE.getValue()+"'");
+            cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE ("+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' OR "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"') AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"'");
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     idList.add(cursor.getInt(0));
@@ -2799,7 +2759,7 @@ public class Database extends SQLiteOpenHelper {
 //                    cursor.close();
 //                }
 
-                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");//no need to check for latest date we need only inactive data
+                cursor =getData("SELECT "+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE_PEOPLE.getValue()+"'");//no need to check for latest date we need only inactive data
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
@@ -2816,7 +2776,7 @@ public class Database extends SQLiteOpenHelper {
 //                    cursor.close();
 //                }
 
-                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE_PEOPLE.getValue()+"'");
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
@@ -2832,7 +2792,7 @@ public class Database extends SQLiteOpenHelper {
 //                    cursor.close();
 //                }
 
-                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE.getValue()+"'");
+                cursor=getData("SELECT "+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+context.getResources().getString(R.string.women_laber)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.INACTIVE_PEOPLE.getValue()+"'");
                 if (cursor != null) {
                     while (cursor.moveToNext()) {
                         idList.add(cursor.getInt(0));
@@ -2853,28 +2813,28 @@ public class Database extends SQLiteOpenHelper {
         Cursor cursor=null;
         try{
             StringBuilder resultBuilder = new StringBuilder();
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND ( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND ( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
              if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                 resultBuilder.append(cursor.getString(0)).append(" , ");
              }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
                 }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
                 }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
@@ -2897,28 +2857,28 @@ public class Database extends SQLiteOpenHelper {
         Cursor cursor=null;
         try{//getting data from two table
             StringBuilder resultBuilder = new StringBuilder();
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE_PEOPLE.getValue():GlobalConstants.INACTIVE_PEOPLE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
                 }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE_PEOPLE.getValue():GlobalConstants.INACTIVE_PEOPLE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
                 }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE_PEOPLE.getValue():GlobalConstants.INACTIVE_PEOPLE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
                 }
             }cursor.close();
 
-            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE.getValue():GlobalConstants.INACTIVE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+            cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+(forActiveTrue?GlobalConstants.ACTIVE_PEOPLE.getValue():GlobalConstants.INACTIVE_PEOPLE.getValue())+"' AND pd."+Database.COL_8_MAINSKILL1+"= '"+skill+"' AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
             if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                 while (cursor.moveToNext()){
                     resultBuilder.append(cursor.getString(0)).append(" , ");
@@ -2942,28 +2902,28 @@ public class Database extends SQLiteOpenHelper {
        Cursor cursor=null;
        try{//getting data from two table
            StringBuilder resultBuilder = new StringBuilder();
-           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+ GlobalConstants.ACTIVE.getValue() +"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+ GlobalConstants.ACTIVE_PEOPLE.getValue() +"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND( r."+Database.COL_39_INDICATOR+" = '"+1+"' OR r."+Database.COL_39_INDICATOR+" IS NULL) AND r."+Database.COL_32_R1+" IS NULL");//initially when new person is created then indicator is set to null when again second skill is added and removed second skill that time indicator is set to 1 so checking 1 or null for indicator
            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                while (cursor.moveToNext()){
                    resultBuilder.append(cursor.getString(0)).append(" , ");
                }
            }cursor.close();
 
-           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+2+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL)");
            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                while (cursor.moveToNext()){
                    resultBuilder.append(cursor.getString(0)).append(" , ");
                }
            }cursor.close();
 
-           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+3+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL)");
            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                while (cursor.moveToNext()){
                    resultBuilder.append(cursor.getString(0)).append(" , ");
                }
            }cursor.close();
 
-           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.TABLE_NAME1+" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
+           cursor=getData("SELECT pd."+Database.COL_1_ID+" FROM "+Database.PERSON_REGISTERED_TABLE +" pd INNER JOIN "+Database.TABLE_NAME_RATE_SKILL+" r ON pd."+Database.COL_1_ID+" = r."+Database.COL_31_ID+" WHERE pd."+Database.COL_12_ACTIVE+" = '"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND (pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.laber)+"' OR pd."+Database.COL_8_MAINSKILL1+"= '"+context.getString(R.string.women_laber)+"') AND r."+Database.COL_39_INDICATOR+" = '"+4+"' AND (r."+Database.COL_32_R1+" IS NULL"+" OR  r."+Database.COL_33_R2+" IS NULL"+" OR  r."+Database.COL_34_R3+" IS NULL OR r."+Database.COL_35_R4+" IS NULL)");
            if(cursor!= null && cursor.getCount() != 0){//if no record found based on primary key then it will give error cursorIndexoutofBound exception but this will not happen.So checking cursor size if size is 0 return null otherwise this cursor.moveToFirst(); will give error as cursorIndexoutofBound exception
                while (cursor.moveToNext()){
                    resultBuilder.append(cursor.getString(0)).append(" , ");
@@ -2983,7 +2943,7 @@ public class Database extends SQLiteOpenHelper {
         if(TextUtils.isEmpty(name)) return false;
         Cursor cursor=null;
         try {
-            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_2_NAME+" = '" + name + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            cursor = getData("SELECT 1 FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_2_NAME+" = '" + name + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
             return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
         } catch (Exception e) {
             e.printStackTrace();
@@ -2999,7 +2959,7 @@ public class Database extends SQLiteOpenHelper {
 
         Cursor cursor=null;
         try {
-            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_7_ACTIVE_PHONE1+" = '" + phoneNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            cursor = getData("SELECT 1 FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_7_MAIN_ACTIVE_PHONE1 +" = '" + phoneNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
             return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
         } catch (Exception e) {
             e.printStackTrace();
@@ -3015,7 +2975,7 @@ public class Database extends SQLiteOpenHelper {
 
         Cursor cursor=null;
         try {
-            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_6_AADHAAR_NUMBER+" = '" + aadhaarNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            cursor = getData("SELECT 1 FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_6_AADHAAR_NUMBER+" = '" + aadhaarNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
             return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
         } catch (Exception e) {
             e.printStackTrace();
@@ -3031,7 +2991,7 @@ public class Database extends SQLiteOpenHelper {
 
         Cursor cursor=null;
         try {
-            cursor = getData("SELECT 1 FROM "+Database.TABLE_NAME1+" WHERE "+Database.COL_3_BANKAC+" = '" + accountNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
+            cursor = getData("SELECT 1 FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_3_BANKAC+" = '" + accountNumber + "' LIMIT 1");//We use LIMIT 1 in the query to fetch only one row, reducing unnecessary processing.
             return cursor.moveToFirst(); // Returns true if cursor is not empty (name exists), false otherwise
         } catch (Exception e) {
             e.printStackTrace();
@@ -3042,45 +3002,9 @@ public class Database extends SQLiteOpenHelper {
             }
         }
     }
-//    public File databaseBackup(String uniqueDatabaseFileName) {
-//        try {
-//            File dataBaseFile = context.getDatabasePath(DATABASE_NAME); // Get the database file path
-//
-//            if(!dataBaseFile.exists()) return null; // Check if database exists
-//
-//            File backupFile=null;
-//            if((backupFile=createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName)) == null) return null;//Create a backup file name
-//
-//            FileInputStream fis = null; // Create streams for copying
-//            try {
-//                fis = new FileInputStream(dataBaseFile);
-//            } catch (FileNotFoundException e) {
-//                throw new RuntimeException(e);
-//            }
-//            FileOutputStream fos = null;
-//            try {
-//                fos = new FileOutputStream(backupFile);
-//            } catch (FileNotFoundException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//            // Transfer bytes from database file to backup file
-//            byte[] buffer = new byte[1024];
-//            int length;
-//            while ((length = fis.read(buffer)) > 0) {
-//                fos.write(buffer, 0, length);
-//            }
-//
-//            // Close streams
-//            fis.close();
-//            fos.close();
-//
-//            return backupFile;
-//        }catch (Exception x) {
-//            x.printStackTrace();
-//            return null;
-//        }
-//    }
+    public boolean deleteImage(String id){
+        return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_10_IMAGE + "= NULL  WHERE " + Database.COL_1_ID + "= '" + id + "'");
+    }
     public File databaseBackup(String uniqueDatabaseFileName){
         File databaseFile = context.getDatabasePath(DATABASE_NAME);
 
@@ -3089,7 +3013,7 @@ public class Database extends SQLiteOpenHelper {
         File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName,".db");//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
         if (backupFile == null) {return null;}
 
-        //this approach is fast so no need to compress file it make it slower while sharing
+        //this approach is very fast so no need to compress file it make it slower while sharing
         try(FileInputStream fis = new FileInputStream(databaseFile); // Use try-with-resources for automatic stream closure
             FileOutputStream fos = new FileOutputStream(backupFile);
             FileChannel sourceChannel=fis.getChannel();//FileChannel can be faster than the one using a loop and byte buffer for large file copies
@@ -3118,7 +3042,6 @@ public class Database extends SQLiteOpenHelper {
 //
 //            return backupFile;
 
-
 //        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backupFile))) { // Use ZipOutputStream for ZIP compression
 //            zos.putNextEntry(new ZipEntry(uniqueDatabaseFileName)); // Define entry name in ZIP file
 //
@@ -3138,6 +3061,123 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
+//    public boolean restoreDatabaseMethod2(Uri uri) {
+//        if(uri == null) {return false;}
+//
+//        InputStream inputStream = null;
+//        FileOutputStream fos = null;
+//
+//        try {
+//            // Try opening InputStream from ContentResolver
+//            inputStream = context.getContentResolver().openInputStream(uri);//Opening Files from the System File Picker: When you launch the system file picker in Android and a user selects a file, the URI returned might be handled by a content provider. You can use openInputStream to access the content of the selected file.
+//
+//            if (inputStream == null) {return false;}
+//
+//            // Assuming internal storage for database
+//            File databaseFile = context.getDatabasePath(DATABASE_NAME);
+//
+//            // Check write permissions (existing code)
+////            if (!databaseFile.canWrite()) {
+////                Toast.makeText(context, "cant write database",Toast.LENGTH_SHORT).show();
+////                return false; // Request permissions or handle error
+////            }
+//
+//            fos = new FileOutputStream(databaseFile);
+//            byte[] buffer = new byte[1024]; // Adjust buffer size as needed
+//            int bytesRead;
+//
+//            while ((bytesRead = inputStream.read(buffer)) != -1) {
+//                fos.write(buffer, 0, bytesRead);
+//            }
+//
+//            return true;
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        } finally {  // Close streams (if not null)
+//            if (inputStream != null){
+//                try {
+//                    inputStream.close();
+//                } catch (IOException e) {
+//                    Log.e("ERROR",e.getMessage());
+//                    return false;
+//                }
+//            }
+//            if(fos != null){
+//                try {
+//                    fos.close();
+//                } catch (IOException e) {
+//                    Log.e("ERROR",e.getMessage());
+//                    return false;
+//                }
+//            }
+//        }
+//    }
+    public boolean restoreDatabaseMethod2(Uri uri) {//simple approach bit slower
+        if (uri == null) {return false;}
+
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+             FileOutputStream fos = new FileOutputStream(context.getDatabasePath(DATABASE_NAME))) {
+
+            if (inputStream == null || fos == null) {
+                return false;
+            }
+
+            byte[] buffer = new byte[1024]; // Adjust buffer size as needed
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean restoreDatabaseMethod1(Uri uri) {//optimise approach
+
+        if (uri == null) {
+            Log.e("ERROR", "uri is null");
+            return false;
+        }
+
+        File databaseFile = context.getDatabasePath(DATABASE_NAME);  // Get the path to the database file on the device
+
+        // Try-with-resources block for automatic resource closing
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+             FileOutputStream fos = new FileOutputStream(databaseFile);
+             FileChannel outChannel = fos.getChannel()) {
+
+            if (inputStream == null) {     // Check if the input stream is null (meaning the URI might be invalid)
+                Log.e("ERROR", "inputStream is null");
+                return false;
+            }
+
+            ReadableByteChannel inChannel = Channels.newChannel(inputStream);// Create a readable byte channel from the input stream
+            // Allocate a byte buffer for efficient data transfer
+            ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 10); // Buffer size of 10 KB
+
+            while (inChannel.read(buffer) != -1) {//When there's no more data to read from the URI, the read() method returns -1.// Loop to read data from the URI and write to the database file
+                buffer.flip(); // Prepare the buffer for reading
+                while (buffer.hasRemaining()) {
+                    outChannel.write(buffer); // Write data from the buffer to the file
+                }
+                buffer.clear(); // Prepare the buffer for the next read operation
+            }
+
+            return true;  // If we reach here, the data has been successfully copied
+
+        }catch (Exception e) {
+            Log.e("ERROR", e.getMessage());
+         //databaseFile.delete();// Reset the database file in case of error (assuming overwrite on open)
+            return false;
+        }
+    }
+
     private File createDbFolderInExternalStorageAndReturnFile(String uniqueFileName,String fileExtension) {//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
             if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)) return null;

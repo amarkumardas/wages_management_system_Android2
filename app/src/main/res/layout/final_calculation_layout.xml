@@ -404,19 +404,19 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="60dp"
         android:layout_marginBottom="10dp"
         android:layout_marginRight="4dp"
         android:orientation="horizontal"
-        android:weightSum="4">
+        android:weightSum="6">
         <Button
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="2dp"
             android:text="@string/cancel"
             android:textSize="15dp"
             android:textColor="#FF0000"
@@ -425,10 +425,10 @@
             android:id="@+id/cancel_btn_final"
             android:foreground="?android:attr/selectableItemBackground"/>
         <Button
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="2dp"
             android:layout_marginRight="10dp"
             android:textColor="@color/white"
             android:text="@string/long_press_to_save_pdf"

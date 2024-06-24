@@ -2,8 +2,8 @@ package amar.das.acbook.globalenum;
 
 
 public enum GlobalConstants {
-     ACTIVE("1"),
-     INACTIVE("0"),
+     ACTIVE_PEOPLE("1"),
+     INACTIVE_PEOPLE("0"),
      DEPOSIT_CODE("1"),//to indicate amount is deposited
      WAGES_CODE("0"),//to indicate amount is wages
      DATABASE_BACKUP_FILE_NAME("DATABASE_BACKUP"),
@@ -28,16 +28,22 @@ public enum GlobalConstants {
 
     //folders
     BACKUP_CALCULATED_INVOICE_TEXT_FOLDER_NAME("Backup_Calculated_Invoice_Text_Folder"),
-    PDF_FOLDER_NAME("Pdf_Folder"),
-    EXCEL_FOLDER_NAME("Excel_Folder"),
     AUDIO_FOLDER_NAME("Audio_Folder"),
-    DATABASE_FOLDER_NAME("Database_Folder"),
+    REGISTERED_IMAGE_FOLDER_NAME("Registered_Image_Folder"),
+    PDF_FOLDER_NAME("Pdf_Folder_Empty"),
+    EXCEL_FOLDER_NAME("Excel_Folder_Empty"),
+    DATABASE_FOLDER_NAME("Database_Folder_Empty"),
 
-    AUDIO_FILE_NAME("audio"),
+    AUDIO_FILE_NAME("AUDIO"),
+    REGISTERED_IMAGE_FILE_NAME("IMAGE"),
     USER_SELECTED_PDF_FORMAT("1"), USER_SELECTED_TEXT_FORMAT("2"), USER_SELECTED_EXCEL_FORMAT("3"),
     RUNNING_INVOICE_FILE_NAME("_RUNNING_INVOICE"),
     CALCULATED_INVOICE_FILE_NAME("_CALCULATED_INVOICE"),
-    DEFAULT_BUSINESS_NAME("CONSTRUCTION WORK");
+    DEFAULT_BUSINESS_NAME("CONSTRUCTION WORK"),
+    //inactive days
+    TWO_WEEKS_DEFAULT("15"),
+    THREE_WEEKS("22"),
+    ONE_MONTH("30");
     private final String value;
     GlobalConstants(String value) {
         this.value = value;

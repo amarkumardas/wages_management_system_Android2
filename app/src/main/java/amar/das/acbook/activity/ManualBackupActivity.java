@@ -33,6 +33,7 @@ import amar.das.acbook.utility.MyUtility;
 
 public class ManualBackupActivity extends AppCompatActivity {
     ActivityManualBackupBinding binding;
+    AlertDialog dialog;//to close when destroy
     String defaultBackupEachFileFormat = GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue();//DEFAULT VALUE
     String defaultSingleBackupFileFormat = GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue();//DEFAULT VALUE
     boolean forShareTrueForDownloadFalse=true;//default value
@@ -81,7 +82,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse =(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse =(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
 
             String userSelectedFileFormat= SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.SINGLE_BACKUP_FILE_USER_SELECTED_FORMAT.name(),defaultBackupEachFileFormat); // default file format will be use if user not selected any radio button
             if(userSelectedFileFormat.equals(GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue())){
@@ -99,7 +100,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse =(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse =(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
 
             String userSelectedFileFormat= SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.BACKUP_EACH_FILE_USER_SELECTED_FORMAT.name(),defaultBackupEachFileFormat); // default file format will be use if user not selected any radio button
             if(userSelectedFileFormat.equals(GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue())){
@@ -118,7 +119,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
 
             String userSelectedFileFormat= SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.BACKUP_EACH_FILE_USER_SELECTED_FORMAT.name(),defaultBackupEachFileFormat); // default file format will be use if user not selected any radio button
             if(userSelectedFileFormat.equals(GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue())){
@@ -136,7 +137,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
 
             String userSelectedFileFormat= SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.BACKUP_EACH_FILE_USER_SELECTED_FORMAT.name(),defaultBackupEachFileFormat); // default file format will be use if user not selected any radio button
             if(userSelectedFileFormat.equals(GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue())){
@@ -154,7 +155,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
 
             String userSelectedFileFormat= SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.BACKUP_EACH_FILE_USER_SELECTED_FORMAT.name(),defaultBackupEachFileFormat); // default file format will be use if user not selected any radio button
             if(userSelectedFileFormat.equals(GlobalConstants.USER_SELECTED_PDF_FORMAT.getValue())){
@@ -169,13 +170,13 @@ public class ManualBackupActivity extends AppCompatActivity {
         });
         
         binding.backupEachFileTv.setOnClickListener(view -> {
-            MyUtility.showDefaultDialog(getString(R.string._3_backup_each_file),getString(R.string.you_can_backup_your_aa_data_into_smaller_files_separately),this,true);//it is activity so we have to pass this
+            MyUtility.showDefaultDialog(getString(R.string._3_backup_each_file)+"?",getString(R.string.you_can_backup_your_aa_data_into_smaller_files_separately)+getString(R.string.newline_newline_this_file_is_useful_to_see_your_data_only),this,true);//it is activity so we have to pass this
         });
         binding.singleFileBackupTv.setOnClickListener(view -> {
-            MyUtility.showDefaultDialog(getString(R.string._2_single_file_backup),getString(R.string.you_can_backup_your_all_data_in_a_single_file),this,true);//it is activity so we have to pass this
+            MyUtility.showDefaultDialog(getString(R.string._2_single_file_backup)+"?",getString(R.string.you_can_backup_your_all_data_in_a_single_file)+getString(R.string.newline_newline_this_file_is_useful_to_see_your_data_only),this,true);//it is activity so we have to pass this
         });
         binding.databaseBackupTv.setOnClickListener(view -> {
-            MyUtility.showDefaultDialog(getString(R.string._1_database_backup),getString(R.string.you_can_backup_your_database),this,true);//it is activity so we have to pass this
+            MyUtility.showDefaultDialog(getString(R.string._1_database_backup)+"?",getString(R.string.you_can_backup_your_database),this,true);//it is activity so we have to pass this
         });
         binding.backupSettingForShareAndDownload.setOnClickListener(view -> {
             AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(this);
@@ -185,26 +186,28 @@ public class ManualBackupActivity extends AppCompatActivity {
             myCustomDialog.setView(myView);//set custom layout to alert dialog
             myCustomDialog.setCancelable(true);//if false user touch to other place then dialog will not be close
 
-            final AlertDialog dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
+            dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
             RadioGroup radioGroups=myView.findViewById(R.id.backup_setting_radiogp);
             Button save=myView.findViewById(R.id.save_btn_backup_setting);
             Button cancel=myView.findViewById(R.id.cancel_btn_backup_setting);
-            boolean trueForShareFalseForDownload[]=new boolean[1];
             setUserSelectedRadioButton(myView);
+
+            boolean trueForShareFalseForDownload[]=new boolean[]{SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),true)};//setting default value if user don't click radio button then default value will be used
+
             radioGroups.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
                 if(checkedIdOfRadioBtn == R.id.share_backup_file){
                     trueForShareFalseForDownload[0]=true;
                 }else if (checkedIdOfRadioBtn == R.id.download_backup_file) {
                     trueForShareFalseForDownload[0]=false;
                 }
-
             });
+
             cancel.setOnClickListener(view12 -> {dialog.dismiss();});
             save.setOnClickListener(view1 -> {
                 if(trueForShareFalseForDownload[0]){
-                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),true);//true value is for sharing
+                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),true);//true value is for sharing
                 }else{
-                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),false);//true value is for download
+                    SharedPreferencesHelper.setBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),false);//true value is for download
                 }
                 dialog.dismiss();//after user click save btn then close the dialog
             });
@@ -217,7 +220,7 @@ public class ManualBackupActivity extends AppCompatActivity {
                 Toast.makeText(this, "Storage not available or read only", Toast.LENGTH_LONG).show();//Log.e(TAG, "Storage not available or read only");
                 return ;
             }
-            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
+            forShareTrueForDownloadFalse=(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse))?true:false;//if user selected share then true else false for download.if user changes from share to download then dynamically value will be updated.so placing this here is important
             dataBaseBackup(progressBar,forShareTrueForDownloadFalse);
         });
         
@@ -233,7 +236,7 @@ public class ManualBackupActivity extends AppCompatActivity {
         RadioButton shareRadio=myView.findViewById(R.id.share_backup_file);
         RadioButton downloadRadio=myView.findViewById(R.id.download_backup_file);
 
-        if(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_SHARE_OR_DOWNLOAD.name(),forShareTrueForDownloadFalse)){//default value true for sharing
+        if(SharedPreferencesHelper.getBoolean(this,SharedPreferencesHelper.Keys.BACKUP_FILE_FOR_SHARE_TRUE_OR_DOWNLOAD_FALSE.name(),forShareTrueForDownloadFalse)){//default value true for sharing
             shareRadio.setChecked(true);
         }else {
             downloadRadio.setChecked(true);
@@ -255,7 +258,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             Database db=Database.getInstance(getBaseContext());//opening new instance
             File dataBaseFile=null;
 
-            if((dataBaseFile=db.databaseBackup(MyUtility.getDateTimeForBackupFile()+GlobalConstants.DATABASE_BACKUP_FILE_NAME.getValue())) !=null){
+            if((dataBaseFile=db.databaseBackup(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.DATABASE_BACKUP_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(dataBaseFile, "application/x-sqlite3",getString(R.string.database_file_backup), this)) {//open intent to share
                         updateUserLastBackForDatabaseBackup();
@@ -291,7 +294,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.singleBackupExcelFile(MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.singleBackupExcelFile(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.SINGLE_BACKUP_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", getString(R.string.single_excel_file_backup), this)) {//open intent to share
                         updateUserLastBackForSingleBackupFile();
@@ -325,7 +328,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.singleBackupTextFile(),MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.singleBackupTextFile(),MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.SINGLE_BACKUP_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -362,7 +365,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.singleBackupPdfFile(MyUtility.getDateTimeForBackupFile()+GlobalConstants.SINGLE_BACKUP_PDF_FILE_NAME.getValue())) !=null){
+            if((pdfFile=dataBackup.singleBackupPdfFile(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.SINGLE_BACKUP_PDF_FILE_NAME.getValue())) !=null){
 
                 if(forShareTrueForDownloadFalse){//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf",getString(R.string.single_pdf_file_backup), this)) {
@@ -483,7 +486,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -521,7 +524,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL G EXCEL FILE", this)) {//open intent to share
                        updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 4);
@@ -556,7 +559,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_G_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_g) + " PDF FILE", this)) {
@@ -594,7 +597,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if(MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL L EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 3);
@@ -628,7 +631,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -665,7 +668,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_L_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_l) + " PDF FILE", this)) {
@@ -703,7 +706,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupInActiveMOrLOrGDataInExcelFormat(skillType,MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP INACTIVE SKILL M EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 2);
@@ -739,7 +742,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             ExcelFormatBackup excelObj=new ExcelFormatBackup(this);
             File excelFile=null;
 
-            if((excelFile=excelObj.backupActiveMLGDataInExcelFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_EXCEL_FILE_NAME.getValue())) !=null){
+            if((excelFile=excelObj.backupActiveMLGDataInExcelFormat(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_EXCEL_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
                     if (MyUtility.shareFileToAnyApp(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "BACKUP ACTIVE SKILL MLG EXCEL FILE", this)) {//open intent to share
                         updateLastBackEachFile(lastBackUpEachFileIndicator, (byte) 1);
@@ -774,7 +777,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_PDF_FILE_NAME.getValue(),skillType)) !=null){
+            if((pdfFile=dataBackup.backupInActiveMOrLOrGDataInPDFFormat(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_PDF_FILE_NAME.getValue(),skillType)) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_inactive_skill_m) + " PDF FILE", this)) {
@@ -811,7 +814,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
             File pdfFile=null;
-            if((pdfFile=dataBackup.backupActiveMLGDataInPDFFormat(MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())) !=null){
+            if((pdfFile=dataBackup.backupActiveMLGDataInPDFFormat(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_PDF_FILE_NAME.getValue())) !=null){
 
                 if(forShareTrueForDownloadFalse) {//share
                     if (MyUtility.shareFileToAnyApp(pdfFile, "application/pdf", getResources().getString(R.string.backup_active_skill_m_l_g) + " PDF FILE", this)) {
@@ -898,7 +901,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupInActiveMOrLOrGDataInTextFormat(skillType),MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_INACTIVE_M_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                 if(forShareTrueForDownloadFalse){
@@ -934,7 +937,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             this.runOnUiThread(() -> progressBar.showProgressBar());
 
             TextAndPdfFormatBackup dataBackup=new TextAndPdfFormatBackup(this);
-            File textFile=convertTextToTextFile(dataBackup.backupActiveMLGDataInTextFormat(),MyUtility.getDateTimeForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_TEXT_FILE_NAME.getValue(),this);
+            File textFile=convertTextToTextFile(dataBackup.backupActiveMLGDataInTextFormat(),MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.BACKUP_ACTIVE_MLG_TEXT_FILE_NAME.getValue(),this);
             if(textFile != null){
 
                if(forShareTrueForDownloadFalse){
@@ -1000,11 +1003,11 @@ public class ManualBackupActivity extends AppCompatActivity {
             binding.singleFileBackupExcelFileRb.setChecked(true);
         }
     }
-    private static boolean isExternalStorageReadOnly() {//Checks if Storage is READ-ONLY
+    public static boolean isExternalStorageReadOnly() {//Checks if Storage is READ-ONLY
         String externalStorageState = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED_READ_ONLY.equals(externalStorageState);
     }
-    private static boolean isExternalStorageAvailable() {//Checks if Storage is Available
+    public static boolean isExternalStorageAvailable() {//Checks if Storage is Available
         String externalStorageState = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED.equals(externalStorageState);
     }
@@ -1019,21 +1022,27 @@ public class ManualBackupActivity extends AppCompatActivity {
             }
             return true;
     }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+    private void performOperationWhenDestroy() {
+        if(dialog != null){
+            dialog.dismiss();
+        }
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!MyUtility.deleteFolderAllFiles(null,false,getBaseContext())){//delete cache file.text file is stored in cache area
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(null,false,getBaseContext())){//delete cache file.text file is stored in cache area
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.EXCEL_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.EXCEL_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.DATABASE_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
+        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.DATABASE_FOLDER_NAME.getValue(),true,getBaseContext())){//delete external file
             Toast.makeText(this, "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
         }
         Database.closeDatabase();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        performOperationWhenDestroy();
     }
 }

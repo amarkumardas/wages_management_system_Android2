@@ -1,19 +1,25 @@
 package amar.das.acbook.ui.ml;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.tabs.TabLayoutMediator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 import amar.das.acbook.Database;
 
 import amar.das.acbook.activity.FindActivity;
@@ -21,17 +27,15 @@ import amar.das.acbook.activity.RegisterPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.ManualBackupActivity;
 import amar.das.acbook.adapters.FragmentAdapter;
-import amar.das.acbook.takebackupdata.TextAndPdfFormatBackup;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
 import amar.das.acbook.globalenum.GlobalConstants;
-import amar.das.acbook.progressdialog.ProgressDialogHelper;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.MyUtility;
 
 public class MLDrawerFragment extends Fragment {
     private  FragmentMlTabBinding binding ;
-
+    AlertDialog dialog;//to close when destroy
     //private String[] titles=new String[]{getContext().getResources().getString(R.string.mestre),getResources().getString(R.string.laber),getResources().getString(R.string.inactive)};//to set on pager Ddont work
    // private String[] titles=new String[]{getString(R.string.mestre),getString(R.string.laber),getString(R.string.inactive)};//dont work
     private final String[] titles=new String[]{"M","L","INACTIVE"};//to set on pager
@@ -67,18 +71,20 @@ public class MLDrawerFragment extends Fragment {
         });
         binding.backupBtn.setOnClickListener(view -> {
             //finish() no need to finish the current activity
-            Intent intent = new Intent(getContext(), ManualBackupActivity.class);
+            Intent intent = new Intent(getContext(),ManualBackupActivity.class);
             startActivity(intent);
         });
 
         binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
-            ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
+//            ProgressDialogHelper progressBar = new ProgressDialogHelper( getContext());
             if(item.getItemId() == R.id.backup_manually){
                 //finish() no need to finish the current activity
                 Intent intent = new Intent(getContext(), ManualBackupActivity.class);
                 startActivity(intent);
+            }else if(item.getItemId() == R.id.inactive_setting) {
+                  openDialogSetting(getContext(),true);
             }
-          //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
+            //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;
         });
 
@@ -117,7 +123,54 @@ public class MLDrawerFragment extends Fragment {
         });
         return root;
     }
+    private void openDialogSetting(Context context,boolean setCancellable) {
+        AlertDialog.Builder myCustomDialog=new AlertDialog.Builder(context);
+        LayoutInflater inflater=LayoutInflater.from(context);
+        View myView=inflater.inflate(R.layout.dialog_inactive_setting,null);//myView contain all layout view ids
 
+        myCustomDialog.setView(myView);//set custom layout to alert dialog
+        myCustomDialog.setCancelable(setCancellable);//if false user touch to other place then dialog will not be close
+
+        dialog=myCustomDialog.create();//myCustomDialog variable cannot be use in inner class so creating another final variable  to use in inner class
+        RadioGroup radioGroups=myView.findViewById(R.id.inactive_setting_radiogp);
+        Button save=myView.findViewById(R.id.save_btn_inactive_setting);
+        Button cancel=myView.findViewById(R.id.cancel_btn_inactive_setting);
+        setUserSelectedInactiveRadioButton(myView);
+        //Multiple threads (parts of your program running concurrently) can access and update the value stored in an AtomicInteger without causing data corruption. This is crucial when dealing with shared resources in multithreaded applications.
+        AtomicInteger days= new AtomicInteger(SharedPreferencesHelper.getInt(context, SharedPreferencesHelper.Keys.INACTIVE_DAYS.name(),Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue())));
+
+        radioGroups.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
+            if(checkedIdOfRadioBtn == R.id.two_weeks_rb){
+                days.set(Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue()));
+            }else if (checkedIdOfRadioBtn == R.id.three_weeks_rb) {
+                days.set(Integer.parseInt(GlobalConstants.THREE_WEEKS.getValue()));
+            }else if(checkedIdOfRadioBtn == R.id.one_month_rb) {
+                days.set(Integer.parseInt(GlobalConstants.ONE_MONTH.getValue()));
+            }
+        });
+
+        cancel.setOnClickListener(view12 -> {dialog.dismiss();});
+        save.setOnClickListener(view1 -> {
+
+            SharedPreferencesHelper.setInt(context,SharedPreferencesHelper.Keys.INACTIVE_DAYS.name(),days.get());
+            dialog.dismiss();//after user click save btn then close the dialog
+
+        });
+        dialog.show();
+    }
+    private void setUserSelectedInactiveRadioButton(View myView){
+        RadioButton twoWeek=myView.findViewById(R.id.two_weeks_rb);
+        RadioButton threeWeek=myView.findViewById(R.id.three_weeks_rb);
+        RadioButton oneMonth=myView.findViewById(R.id.one_month_rb);
+        int days=SharedPreferencesHelper.getInt(myView.getContext(),SharedPreferencesHelper.Keys.INACTIVE_DAYS.name(),Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue()));
+        if(days == Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue())){//default value   for making inactive
+            twoWeek.setChecked(true);
+        }else if(days == Integer.parseInt(GlobalConstants.THREE_WEEKS.getValue())){
+            threeWeek.setChecked(true);
+        }else if(days == Integer.parseInt(GlobalConstants.ONE_MONTH.getValue())){
+            oneMonth.setChecked(true);
+        }
+    }
     private String  getBusinessDetails() {
         StringBuilder text=new StringBuilder();
         if(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),"").equals("")){//if there is no business name
@@ -131,7 +184,6 @@ public class MLDrawerFragment extends Fragment {
                 .append(getResources().getString(R.string.address)+": "+SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.ADDRESS.name(),""));
         return text.toString();
     }
-
     private void initialiseHeader(){
         TextView businessName= binding.navigationDrawer.getHeaderView(0).findViewById(R.id.business_name_tv);
         if(SharedPreferencesHelper.getString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),"").equals("")){
@@ -191,12 +243,15 @@ public class MLDrawerFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(!MyUtility.deleteFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete external file
-            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+        if(dialog != null){
+            dialog.dismiss();
         }
-        if(!MyUtility.deleteFolderAllFiles(null,false,getContext())){//delete cache file
-            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
-        }
+//        if(!MyUtility.deleteFolderAndSubFolderAllFiles(GlobalConstants.PDF_FOLDER_NAME.getValue(),true,getContext())){//delete external file
+//            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+//        }
+//        if(!MyUtility.deleteFolderAndSubFolderAllFiles(null,false,getContext())){//delete cache file
+//            Toast.makeText(getContext(), "FAILED TO DELETE FILE FROM DEVICE", Toast.LENGTH_LONG).show();
+//        }
         binding = null;
         Database.closeDatabase();
     }

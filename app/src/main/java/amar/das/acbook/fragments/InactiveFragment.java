@@ -22,6 +22,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import amar.das.acbook.adapters.InactiveAdapter;
+import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.MestreLaberGModel;
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
@@ -32,7 +33,6 @@ import amar.das.acbook.utility.MyUtility;
 public class InactiveFragment extends Fragment {
     private FragmentInactiveBinding binding;
     ArrayList<MestreLaberGModel> inactiveArraylist;
-
     InactiveAdapter inactiveAdapter;
     Database db;
     boolean isScrolling1 =false,loadOrNot=true;
@@ -95,7 +95,7 @@ public class InactiveFragment extends Fragment {
                         progressBar.setVisibility(View.VISIBLE);//progressbar
 
                         //Toast.makeText(getContext(), getResources().getString(R.string.please_wait_loading), Toast.LENGTH_SHORT).show();
-                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + eachTimeDataToLoad, inactiveArraylist);
+                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + eachTimeDataToLoad, inactiveArraylist);
 
                         totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
                         if (totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when all record loaded then remove scroll listener
@@ -119,7 +119,7 @@ public class InactiveFragment extends Fragment {
         Database db = Database.getInstance(getContext());
         String noRateIds=db.getIdOfSpecificSkillAndReturnNullIfRateIsProvidedOfActiveOrInactiveMLG(skill,false);
         if(noRateIds == null) {
-            Cursor advanceBalanceCursor = db.getData("SELECT SUM(" + Database.COL_13_ADVANCE + "),SUM(" + Database.COL_14_BALANCE + ") FROM " + Database.TABLE_NAME1 + " WHERE +" + Database.COL_8_MAINSKILL1 + "='" + skill + "' AND (" + Database.COL_12_ACTIVE + "='0')");
+            Cursor advanceBalanceCursor = db.getData("SELECT SUM(" + Database.COL_13_ADVANCE + "),SUM(" + Database.COL_14_BALANCE + ") FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE +" + Database.COL_8_MAINSKILL1 + "='" + skill + "' AND (" + Database.COL_12_ACTIVE + "='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"')");
             advanceBalanceCursor.moveToFirst();
             advance.setText(HtmlCompat.fromHtml("ADVANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(0)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
             balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -129,7 +129,7 @@ public class InactiveFragment extends Fragment {
             balance.setText("");
         }
 
-        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
+        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
         arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much
         while(dataCursorMLG.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
@@ -137,6 +137,7 @@ public class InactiveFragment extends Fragment {
             data.setId(dataCursorMLG.getString(1));
             data.setAdvanceAmount(dataCursorMLG.getInt(2));
             data.setBalanceAmount(dataCursorMLG.getInt(3));
+            data.setName(dataCursorMLG.getString(4));
             arraylist.add(data);
         }
         arraylist.trimToSize();//to free space
@@ -154,6 +155,7 @@ public class InactiveFragment extends Fragment {
 
         inactiveAdapter =new InactiveAdapter(getContext(), inactiveArraylist);//this common code should be there otherwise adapter will not be updated
         binding.recycleviewInactive.setAdapter(inactiveAdapter);
+        binding.recycleviewInactive.setHasFixedSize(true);
        //binding.recycleViewInactive.scrollToPosition(0);//not working
         layoutManager =new GridLayoutManager(getContext(),4);//grid layout
         binding.recycleviewInactive.setLayoutManager(layoutManager);
@@ -163,7 +165,7 @@ public class InactiveFragment extends Fragment {
     public int getCountOfSpecificInactiveTotalRecord(String skill) {
         //Database db=new Database(getContext());
         Database db=  Database.getInstance(getContext());
-        Cursor  cursor=db.getData("SELECT COUNT() FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0'");
+        Cursor  cursor=db.getData("SELECT COUNT() FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='0'");
         cursor.moveToFirst();
         int count=cursor.getInt(0);
         cursor.close();
@@ -192,6 +194,7 @@ public class InactiveFragment extends Fragment {
              data.setAdvanceAmount(cursorMestre.getInt(2));
              data.setBalanceAmount(cursorMestre.getInt(3));
              data.setId(cursorMestre.getString(1));
+             data.setName(cursorMestre.getString(4));
              arraylist.add(data);
         }
         inactiveAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() every time the list is updated,or inserted or deleted

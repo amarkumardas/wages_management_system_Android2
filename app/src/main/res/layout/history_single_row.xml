@@ -173,6 +173,13 @@
         android:textSize="15dp"
         android:id="@+id/history_p4_tv"/>
    </LinearLayout>
+        <TextView
+            android:layout_marginTop="3dp"
+            android:id="@+id/history_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:textSize="10sp"/>
     </LinearLayout>
 
     <TextView

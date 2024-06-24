@@ -14,13 +14,10 @@ import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.StatFs;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.format.Formatter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,8 +35,6 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -59,6 +54,7 @@ import amar.das.acbook.databinding.ActivityIndividualPersonDetailBinding;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
+import amar.das.acbook.utility.BackupDataUtility;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 import amar.das.acbook.utility.MyUtility;
 
@@ -73,7 +69,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
     int cYear;
     byte cMonth,cDayOfMonth;
     int [] correctInputArray =new int[7];
-    String active =GlobalConstants.INACTIVE.getValue();
+    String active =GlobalConstants.INACTIVE_PEOPLE.getValue();
     byte redIndicatorToLeave=21;//if person will leave in 50 days so when 21 days 3 weeks left to leave then their name back ground color will change to red which indicate person is about to leave in 21 days so that wages can be given according to that
     ArrayList<WagesDetailsModel> dataList;
     @Override
@@ -95,7 +91,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             fromIntentPersonId = getIntent().getStringExtra("ID");//getting data from intent
 
             //***********setting skill top of layout**********************************************
-            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+            Cursor defaultSkillCursor=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
                defaultSkillCursor.moveToFirst();
                binding.defaultHardcodedTv.setText(defaultSkillCursor.getString(0));
                binding.defaultSkillTextTv.setText(defaultSkillCursor.getString(0) +"  =");//default calculation skill
@@ -372,11 +368,11 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 int indicator=MyUtility.get_indicator(getBaseContext(),fromIntentPersonId);
                 setRateComponentAccordingToId(hardcodedP1Tv,inputP1Et,hardcodedP2Tv,inputP2Et,hardcodedP3Tv,inputP3Et,hardcodedP4Tv,inputP4Et,infoSave,new int[indicator],new int[indicator],indicator,fromIntentPersonId);
                 //--------------------------------------------------------------------------------------------------------------------------
-                Cursor cursor1 = db.getData("SELECT "+Database.COL_12_ACTIVE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+                Cursor cursor1 = db.getData("SELECT "+Database.COL_12_ACTIVE+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
                 cursor1.moveToFirst();
-                if(cursor1.getString(0).equals("1"))
+                if(cursor1.getString(0).equals(GlobalConstants.ACTIVE_PEOPLE.getValue()))
                     activeRadio.setVisibility(View.GONE);//when it is active then don't show to activate
-                else if(cursor1.getString(0).equals("0"))
+                else if(cursor1.getString(0).equals(GlobalConstants.INACTIVE_PEOPLE.getValue()))
                     activeRadio.setChecked(false);
 
                 if(cursor1 != null){
@@ -385,7 +381,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 //this should not be use in other class   other wise it will not be called when user change radio button
                 radioGroup.setOnCheckedChangeListener((radioGroup1, checkedIdOfRadioBtn) -> {
                     if (checkedIdOfRadioBtn == R.id.active_metadata) {
-                        active = GlobalConstants.ACTIVE.getValue();//updating active variable
+                        active = GlobalConstants.ACTIVE_PEOPLE.getValue();//updating active variable
                     }
                 });
                 //-----------------------------------------to remove returning date automatically------returning date remove manually by admin so to call the worker untill they come---------------------------------------------------
@@ -458,7 +454,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     returningDate.setText("");//set nothing empty
                 });
                 //------------------------------------------------------------------------------------
-                try(Cursor locationAndReligionCursor=db.getData("SELECT "+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.TABLE_NAME1 +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'")) {//to close cursor automatically
+                try(Cursor locationAndReligionCursor=db.getData("SELECT "+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'")) {//to close cursor automatically
                     locationAndReligionCursor.moveToFirst();//because we get only 1 row
                     locationAutoComplete.setText((locationAndReligionCursor.getString(0)!=null?locationAndReligionCursor.getString(0):""));//set data
                     religionAutoComplete.setText((locationAndReligionCursor.getString(1)!=null?locationAndReligionCursor.getString(1):""));//set data
@@ -636,7 +632,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }else{//while saving this will execute
                         boolean updateRateSuccess,locationReligionSuccess;
                         String star;
-                        if (active.equals(GlobalConstants.ACTIVE.getValue())) {//if user has pressed radio button then only it will execute
+                        if (active.equals(GlobalConstants.ACTIVE_PEOPLE.getValue())) {//if user has pressed radio button then only it will execute
 
                             if(!db.makeIdActive(fromIntentPersonId)){
                                 Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
@@ -674,7 +670,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
-                        locationReligionSuccess=db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_18_RELIGION+"='" + religionAutoComplete.getText().toString().trim() + "', "+Database.COL_17_LOCATION+"='"+ locationAutoComplete.getText().toString().trim() +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+                        locationReligionSuccess=db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_18_RELIGION+"='" + religionAutoComplete.getText().toString().trim() + "', "+Database.COL_17_LOCATION+"='"+ locationAutoComplete.getText().toString().trim() +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
 
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
@@ -1040,7 +1036,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     longPressToSaveAndCreatePdf.setOnLongClickListener(view14 -> {
                         longPressToSaveAndCreatePdf.setVisibility(View.GONE);//to avoid when user click button multiple times
 
-                        if(!((checkInternalStorageAvailability() * 1000) >= 30)) {//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
+                        if(!((BackupDataUtility.checkDeviceInternalStorageAvailabilityInMB(getBaseContext())) >= 30)) {//(checkInternalStorageAvailability()*1000) converted to MB so if it is greater or equal to 50 MB then true
                          Toast.makeText(IndividualPersonDetailActivity.this, "LESS STORAGE SPACE TO CREATE PDF", Toast.LENGTH_LONG).show();
                          return false;
                         }
@@ -1129,27 +1125,27 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 //                    });
 //                    showDataFromDataBase.create().show();
 //                }
-                private float checkInternalStorageAvailability(){
-                    try {
-                        File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
-                        StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
-                        long blockSize = stat.getBlockSizeLong();//The size, in bytes, of a block on the file system. This corresponds to the Unix statvfs.f_frsize field.
-                        long availableBlocks = stat.getAvailableBlocksLong();//The number of bytes that are free on the file system and available to applications.
-                        String format = Formatter.formatFileSize(IndividualPersonDetailActivity.this, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
-                        format = format.trim();//for safer side
-
-                        StringBuilder stringBuilder = new StringBuilder();
-                        for (int i = 0; i < format.length(); i++) {
-                            if (format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
-                                break;
-                            stringBuilder.append(format.charAt(i));
-                        }
-                        return Float.parseFloat(stringBuilder.toString());
-                    }catch (Exception x){
-                        x.printStackTrace();
-                    }
-                    return 0;
-                }
+//                private float checkInternalStorageAvailabilityInMB(){
+//                    try {
+//                        File path = Environment.getDataDirectory();//Return the user data directory.return type FILE and Environment class Provides access to environment variables.
+//                        StatFs stat = new StatFs(path.getPath());//Construct a new StatFs for looking at the stats of the filesystem at path.
+//                        long blockSize = stat.getBlockSizeLong();//The size, in bytes, of a block on the file system. This corresponds to the Unix statvfs.f_frsize field.
+//                        long availableBlocks = stat.getAvailableBlocksLong();//The number of bytes that are free on the file system and available to applications.
+//                        String format = Formatter.formatFileSize(IndividualPersonDetailActivity.this, availableBlocks * blockSize);//return available internal storage memory like 9.66 GB
+//                        format = format.trim();//for safer side
+//
+//                        StringBuilder stringBuilder = new StringBuilder();
+//                        for (int i = 0; i < format.length(); i++) {
+//                            if (format.charAt(i) == ' ' || Character.isAlphabetic(format.charAt(i)))
+//                                break;
+//                            stringBuilder.append(format.charAt(i));
+//                        }
+//                        return Float.parseFloat(stringBuilder.toString())*1024;//converted to mb
+//                    }catch (Exception x){
+//                        x.printStackTrace();
+//                    }
+//                    return 0;
+//                }
                 private void updateTotalWorkAmountAndAdvanceOrBalanceTv() {
                     if(!MyUtility.isEnterDataIsWrong(innerArray)) {//if data is right then only change fields
                         workTotalAmountTv.setText(" - " + MyUtility.convertToIndianNumberSystem((p1 * r1) + (p2 * r2) + (p3 * r3) + (p4 * r4) + totalDeposit));
@@ -1266,7 +1262,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
     }
     private boolean setNameImageIdPhoneAadhaar() {
-        try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_ACTIVE_PHONE1+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
+        try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_MAIN_ACTIVE_PHONE1 +","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
             if (cursor != null && cursor.moveToFirst()) {
 
                 binding.nameTv.setText(cursor.getString(0));
@@ -1612,7 +1608,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             binding.advanceOrBalanceTv.setText(MyUtility.convertToIndianNumberSystem(totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))));
 
             //updating Advance to db                                                    total wages -   totalDeposit+(R1*SUMP1)+(R2*SUMP2)+(R3*SUMP3)+(R4*SUMP4)
-            if(!(db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){/*Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance column will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
+            if(!(db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_13_ADVANCE+"='" + (totalWages - (totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4))) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){/*Situation when user first enter jama /totalDeposit amount then wages amount which is greater then jama amount then balance column should be updated otherwise advance column will have amount and balance column will also have amount so when there is advance then balance should be 0.*/
                 Toast.makeText(this, "BALANCE AND ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
 //                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
 //                if (bool == false)
@@ -1630,7 +1626,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
             //updating balance to db if greater then or equal to 0
            // bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
-            if(!(db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){ //if there is balance then update advance column should be 0
+            if(!(db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_14_BALANCE+"='" + ((totalDeposit + (totalr1r2r3r4sum1sum2sum3sum4)) -totalWages) + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'") && db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'"))){ //if there is balance then update advance column should be 0
                 Toast.makeText(this, "BALANCE AND ADVANCE AMOUNT NOT UPDATED TO DATABASE", Toast.LENGTH_LONG).show();
 //                bool = db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_13_ADVANCE+"='" + 0 + "'" + "WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
 //                if (bool == false)
@@ -1825,7 +1821,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
         //***********************setting no of days and warning Total advance amount********************************************
         int rateArray[]=MyUtility.getRateArray(fromIntentPersonId,getBaseContext());//it should be here
-        Cursor  advanceAmountCursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" , "+Database.COL_14_BALANCE+" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");
+        Cursor  advanceAmountCursor=db.getData("SELECT "+Database.COL_13_ADVANCE+" , "+Database.COL_14_BALANCE+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");
         advanceAmountCursor.moveToFirst();
         if(advanceAmountCursor.getInt(0) > 0) {//advance
             if(isAllRateSet(rateArray,indicator)){
@@ -1889,7 +1885,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         //**************************************Setting skills*******************************************
         //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
         //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
+        Cursor cursorDefault=db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + fromIntentPersonId +"'");//for sure it will return type or skill
         cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
         hardcodedP1.setText(cursorDefault.getString(0));
         cursorDefault.close();
@@ -1946,13 +1942,12 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             //To get exact time so write code in save button
             String time = MyUtility.getOnlyTime();
 
-            if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
+            if(audioPath != null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
                 correctInputArray[5]=1;//1 means data present
              }else
                 correctInputArray[5]=0;// 0 means data not present
 
-            //if(description.getText().toString().length() >=1){//to prevent null pointer exception
             if(!TextUtils.isEmpty(description.getText().toString().trim())){//to prevent null pointer exception
                 remarks="["+time+getResources().getString(R.string.hyphen_entered)+"\n\n"+description.getText().toString().trim();//time is set automatically to remarks if user enter any remarks
                 correctInputArray[6]=1;//means data present
@@ -1967,10 +1962,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(toGiveWages.getText().toString().trim())) {//to prevent null pointer exception
                     wages = Integer.parseInt(toGiveWages.getText().toString().trim());
                 }
-                //>= if user enter only one digit then >= is important otherwise default value will be set
-//                if(inputP1.getText().toString().trim().length() >=1) {//to prevent null pointer exception
-//                    p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
-//                }
+
                 if(!TextUtils.isEmpty(inputP1.getText().toString().trim())) {//to prevent null pointer exception
                     p1 = Integer.parseInt(inputP1.getText().toString().trim());//converted to float and stored
                 }

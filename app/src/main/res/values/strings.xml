@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Labour</string>
+    <string name="app_name">Labour Wages</string>
     <string name="update">UPDATE</string>
 
     <!--common-->
@@ -12,7 +12,7 @@
     <string name="single_excel_file_backup">SINGLE EXCEL FILE BACKUP</string>
     <string name="backup_your_data">BACKUP YOUR DATA</string>
     <string name="_3_ways_for_backup">3 WAYS FOR BACKUP</string>
-    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Telegram or Any Other Cloud Storage To Restore Your Data Easily.</string>
+    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Any Other Cloud Storage To Restore Your Data Easily.</string>
     <string name="pdf">PDF</string>
     <string name="text">TEXT</string>
     <string name="excel">EXCEL</string>
@@ -23,10 +23,11 @@
     <string name="select_file_type">Select File Type</string>
     <string name="single_file">Single File</string>
 <!-- <string name="database_file_backup">Database File Backup</string>-->
-    <string name="you_can_backup_your_aa_data_into_smaller_files_separately">You Can Backup Your All Data Into Smaller Files Separately.</string>
-    <string name="you_can_backup_your_all_data_in_a_single_file">You Can Backup Your All Data In a Single File.\n\nIt Will Contain\nActive Skill M L G\nInActive Skill M\nInActive Skill L\nInActive Skill G</string>
+    <string name="newline_newline_this_file_is_useful_to_see_your_data_only">\n\nThis File is Useful To See Your Data Only</string>
+    <string name="you_can_backup_your_aa_data_into_smaller_files_separately">You Can Backup Your All Data (Except Image And Audio Data) Into Smaller Files Separately.</string>
+    <string name="you_can_backup_your_all_data_in_a_single_file">You Can Backup Your All Data (Except Image And Audio Data) In a Single File.\n\nIt Will Contain\nActive Skill M L G\nInActive Skill M\nInActive Skill L\nInActive Skill G</string>
 <!--<string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nIt Is Useful To Restore All Data When You Reinstall This App.\n\nMake Sure To Backup Your Database File Before Uninstalling Or Deleting This App.</string>-->
-    <string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nIt Is Useful To Restore All Data When You Reinstall This App.</string>
+    <string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nThis File is Useful To Restore All Data (Except Image And Audio Data) When You Reinstall This App.</string>
     <string name="_3_backup_each_file">3 Backup Each File</string>
     <string name="_2_single_file_backup">2 Single File Backup</string>
     <string name="_1_database_backup">1 DataBase Backup</string>
@@ -36,7 +37,7 @@
     <!--backup setting dialog-->
     <string name="backup_file_setting">BACKUP FILE SETTING</string>
     <string name="would_you_like_to_share_or_download_backup_file">Would You Like To Share or Download Backup File?</string>
-    <string name="share_recommended">SHARE (To Google Drive Recommended)</string>
+    <string name="share_recommended">SHARE (to Google Drive Recommended)</string>
 
     <!--person details-->
     <string name="account_number_already_exists">ACCOUNT NUMBER ALREADY EXISTS. PLEASE ENTER DIFFERENT NUMBER</string>
@@ -129,7 +130,9 @@
     <string name="searching_tips">SEARCHING TIPS</string>
     <string name="invoice">INVOICE</string>
     <string name="searching_tips_info">Bank Account - Enter Last 4 Digits or Full Number.\n\nAadhaar - Enter Last 5 Digits or Full Number.\n\nPhone - Enter Last 6 Digits or Full Number.\n\nName - Enter Correct Name.\n\nID - Enter Any One Letter then ID or Enter ID Then Any One Letter.</string>
-
+    <string name="last_6_digits_phone_number">LAST 6 DIGITS PHONE NUMBER</string>
+    <string name="last_5_digits_aadhaar_number">LAST 5 DIGITS AADHAAR NUMBER</string>
+    <string name="last_4_digits_back_account_number">LAST 4 DIGITS BANK ACCOUNT NUMBER</string>
     <!--InsertDataActivity-->
     <string name="updated_successfully">UPDATED SUCCESSFULLY</string>
     <string name="save">SAVE</string>
@@ -148,6 +151,12 @@
     <string name="updated_payment">UPDATED PAYMENT:</string>
     <string name="updated_amount_received">UPDATED AMOUNT RECEIVED:</string>
     <string name="calculated">CALCULATED</string>
+
+    <!--dialog INactive setting-->
+    <string name="choose_when_a_person_should_become_inactive_automatically_if_not_worked_for">Choose When a Person Should Become Inactive Automatically If Not Worked For</string>
+    <string name="_2_weeks">2 WEEKS</string>
+    <string name="_3_weeks">3 WEEKS</string>
+    <string name="_1_month">1 MONTH</string>
 
     <!--history fragment-->
     <!--<string name="history_not_available">HISTORY NOT AVAILABLE</string>-->
@@ -244,6 +253,7 @@
     <string name="backup_inactive_skill_l">BACKUP INACTIVE SKILL L</string>
     <string name="backup_inactive_skill_g">BACKUP INACTIVE SKILL G</string>
     <string name="backup_manually">Backup manually</string>
+    <string name="inactive_setting">Inactive Setting</string>
     <string name="backup_failed">BACKUP FAILED</string>
     <string name="no_data_present">NO DATA PRESENT</string>
     <string name="open">OPEN</string>
@@ -253,6 +263,13 @@
     <string name="cancel">CANCEL</string>
     <string name="delete">DELETE</string>
     <string name="set_rate">SET RATE</string>
+
+   <!--dialog for image delete-->
+    <string name="no_image_to_delete">NO IMAGE TO DELETE</string>
+    <string name="failed_to_delete_image">FAILED TO DELETE IMAGE</string>
+    <string name="delete_image">DELETE IMAGE</string>
+    <string name="yes">YES</string>
+    <string name="are_you_sure_questionmark">ARE YOU SURE ?</string>
 
     <!--info data or meta data -->
     <string name="add_remove_m_l_g">ADD/REMOVE M L G</string>
@@ -360,7 +377,7 @@
         <item>DEVELOPMENT CREDIT BANK</item>
     </string-array>
 
-    <!--    <string name="title_activity_navigation">NavigationActivity</string>-->
+    <!--<string name="title_activity_navigation">NavigationActivity</string>-->
     <string name="title_ml">M L</string>
     <string name="title_history">History</string>
     <string name="title_notifications">Notifications</string>
@@ -374,12 +391,29 @@
     <string name="women_laber">G</string>
     <string name="g">G (WOMEN)</string>
     <string name="inactive">INACTIVE</string>
-
+    <string name="active">ACTIVE</string>
     <string name="deposit_amount">DEPOSIT AMOUNT</string>
     <string name="total_equal">TOTAL =</string>
     <string name="final_calculation">FINAL CALCULATION</string>
     <string name="long_press_to_save_pdf">LONG PRESS TO SAVE PDF</string>
     <string name="to_deposit">TO DEPOSIT</string>
+
+    <!--   signin activity-->
+    <string name="i_m_a_new_user">I\'M A NEW USER</string>
+    <string name="used_this_app_before">USED THIS APP BEFORE?</string>
+    <string name="yes_then_find_your_google_account_to_restore_backup_data_from_google_drive">Yes, Then Find Your Google Account To Restore Backup Data From Google Drive</string>
+    <string name="find_backup">FIND BACKUP</string>
+    <string name="data_restored_successfully">Data Restored Successfully</string>
+    <string name="data_restore_failed">Data Restore Failed</string>
+
+
+
+    <string name="year">YEAR</string>
+    <string name="month">MONTH</string>
+    <string name="week">WEEK</string>
+    <string name="day">DAY</string>
+    <string name="s">S</string>
+
     <!--    <string name="title_activity_scrolling">ScrollingActivity</string>-->
     <!--    <string name="large_text">-->
     <!--        "Material is the metaphor.\n\n"-->
@@ -473,5 +507,6 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
+
 
 </resources>

@@ -20,7 +20,6 @@
             android:textAlignment="center"
             android:textColor="#FF0000"
             android:textSize="13sp"
-
             android:id="@+id/active_m_advance"
             />
         <TextView
@@ -30,7 +29,6 @@
             android:textAlignment="center"
             android:textColor="@color/green"
             android:textSize="13sp"
-
             android:id="@+id/active_m_balance"
             />
     </LinearLayout>

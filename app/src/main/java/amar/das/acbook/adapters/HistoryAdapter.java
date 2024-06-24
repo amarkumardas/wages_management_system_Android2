@@ -52,6 +52,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         HistoryModel data= dataList.get(position);
         holder.name.setText(data.getName());
         holder.userDate.setText(data.getUserDate());
+        holder.time.setText(MyUtility.getTime12hrFromSystemDateTime(data.getSystemTimeDate()));
 
         if(data.isShared()){
             holder.shareIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
@@ -62,7 +63,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             }else{//if no phone number
                 holder.shareIcon.setBackgroundResource(R.drawable.baseline_phone_disabled_24);
             }
-
         }
 
         if(data.getStatus().equals(HistoryFragment.previousRecordUpdated)){//if user update previous day amount then show the information so make it visible and 3 indicate updated previously
@@ -210,7 +210,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         return dataList.size();
     }
     public class ViewHolder extends RecyclerView.ViewHolder{//this class will hold only references of view
-       TextView name,p1Skill,p2Skill,p3Skill,p4Skill,p1Work,p2Work,p3Work,p4Work, userDate,wagesOrDeposit, shareIcon,subtractedAmount;
+       TextView name,p1Skill,p2Skill,p3Skill,p4Skill,p1Work,p2Work,p3Work,p4Work, userDate,wagesOrDeposit, shareIcon,subtractedAmount,time;
        Spinner spinnerRemarksAudioIcon;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -228,6 +228,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             spinnerRemarksAudioIcon =itemView.findViewById(R.id.history_mic_spinner);
             shareIcon =itemView.findViewById(R.id.history_share_tv);
             subtractedAmount=itemView.findViewById(R.id.history_updated_amount_tv);
+            time=itemView.findViewById(R.id.history_time);
         }
     }
 }

@@ -242,7 +242,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
             //CUSTOMIZATION: initially in person skill or type is M,L or G then according to that layout will be customised
             //hardcodedP1,inputP1 by default visible so no need to mention if(indicator == 1) {
-            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.TABLE_NAME1 + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
+            Cursor cursorDefault = db.getData("SELECT "+Database.COL_8_MAINSKILL1 +" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"= '" + data.getId() + "'");//for sure it will return type or skill
             cursorDefault.moveToFirst();//no need to check  cursorDefault !=null because for sure TYPE data is present
             hardcodedP1.setText(cursorDefault.getString(0));
             previousDataHold[0] = cursorDefault.getString(0) + ": " + (cursorData.getString(4)!= null?cursorData.getString(4):0);//to write previous record in description

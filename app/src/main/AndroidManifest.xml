@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- package="amar.das.acbook"> -->
     <queries> <!-- Specific apps you interact with -->
         <package android:name="com.whatsapp" /> <!-- we have to mention here otherwise it will not show package name from android 11 downwards:this is use to share on whatsapp -->
     </queries> <!-- <uses-permission android:name="android.permission.USE_CREDENTIALS"/> -->
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- **********88Removed android.permission.ACCESS_NETWORK_STATE: Starting with Android 6.0 (API level 23), your app no longer needs to declare ACCESS_NETWORK_STATE permission to use the Connectivity Manager. The system automatically grants this permission at runtime.TO USE connectivity manager this permission required -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- to record audio -->
@@ -14,18 +14,16 @@
 
     <uses-feature
         android:name="android.hardware.telephony"
-        android:required="true" /> <!-- true means camera permission required and false means this permission is optional -->
-    <uses-permission android:name="android.permission.SEND_SMS" /> <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> this permission not required when minsdk is 29 and above -->
+        android:required="true"/> <!-- true means camera permission required and false means this permission is optional -->
+    <uses-permission android:name="android.permission.SEND_SMS"/> <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> this permission not required when minsdk is 29 and above -->
     <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" /> <!-- .if sdkVersion is 32 or below than grant this permission permission to read external storage or else this permission ignore.for accessing camera image from gallery this permission required from below sdkVersion 32 -->
+        android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/> <!-- .if sdkVersion is 32 or below than grant this permission permission to read external storage or else this permission ignore.for accessing camera image from gallery this permission required from below sdkVersion 32 -->
     <!-- <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" android:minSdkVersion="33"/> &lt;!&ndash;if sdkVersion is 33 or above than grant this permission&ndash;&gt; -->
-    <!-- <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" android:minSdkVersion="33"/>&lt;!&ndash;if sdkVersion is 33 or above than grant this permission&ndash;&gt; -->
-    <uses-permission
-        android:name="android.permission.READ_MEDIA_IMAGES"
-        android:minSdkVersion="33" />
+    <!-- <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" android:minSdkVersion="33"/>&lt;!&ndash;if sdkVersion is 33 or above than this permission  required -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" android:minSdkVersion="33"/>
 
     <application
+        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -45,7 +43,7 @@
         <!-- </intent-filter> -->
         <!-- </activity> -->
         <activity
-            android:name=".activity.SignInWithGoogleActivity"
+            android:name=".activity.SignInActivityLandingPage"
             android:exported="true"
             android:screenOrientation="portrait"></activity> <!-- <activity -->
         <!-- android:name=".HistoryActivity" -->
@@ -106,3 +104,30 @@
     </application>
 
 </manifest>
+
+<!--    Also if you are targeting Android 10 or higher. You have to add permissions-->
+
+<!--    &lt;!&ndash; If you are targeting apps above android version 6.0 to 12.0 You need to add this permission in your manifest &ndash;&gt;-->
+<!--<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"-->
+<!--android:maxSdkVersion="32" />-->
+<!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"-->
+<!--android:maxSdkVersion="32" />-->
+
+<!--    &lt;!&ndash; Now if you are targeting app above android version 13.0 then you have to add this permission in your manifest.-->
+<!--     It's upon you which type of files you want to access if you want access Audio, Images and Videos files then you have-->
+<!--     to call all this below permissions &ndash;&gt;-->
+<!--<uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>-->
+<!--<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>-->
+<!--<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>-->
+
+<!--    &lt;!&ndash; Now on android 11 and above if you want to access other file types like csv,doc,pdf etc...-->
+<!--     You have to ask user a special permission that is MANAGE_EXTERNAL_STORAGE. But use this permission-->
+<!--     at your own risk because if you are publishing app on google play-store then you can encounter some-->
+<!--      issues. Use this permission only when your app core functionality is to read/write/delete. See the-->
+<!--      below link for more reference on this permission&ndash;&gt;-->
+<!--    &lt;!&ndash; https://support.google.com/googleplay/android-developer/answer/10467955 &ndash;&gt;-->
+<!--<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>-->
+
+<!--    &lt;!&ndash; If you are targeting your app from android version 4.4 to the latest version of android then-->
+<!--     you have to call all the above permissions as mentioned except MANAGE_EXTERNAL_STORAGE use it only-->
+<!--      when needed.&ndash;&gt;-->

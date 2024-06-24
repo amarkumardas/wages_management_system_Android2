@@ -27,5 +27,8 @@
     <item android:id="@+id/backup_manually"
         android:icon="@drawable/baseline_cloud_upload_24"
         android:title="@string/backup_manually"/>
+    <item android:id="@+id/inactive_setting"
+        android:icon="@drawable/baseline_settings_suggest_24"
+        android:title="@string/inactive_setting"/>
 
 </menu>

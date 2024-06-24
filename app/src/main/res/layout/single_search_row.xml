@@ -29,17 +29,18 @@
                     android:id="@+id/search_id_tv"
                     android:layout_width="130dp"
                     android:paddingStart="2dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="ID: 12345678910"
                     android:textSize="16sp"
                     android:background="@drawable/yellow_background"
                      android:textColor="@color/black"
                     android:textStyle="bold"/>
                 <TextView
-                    android:layout_width="70dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:textColor="@color/black"
                     android:layout_marginStart="4dp"
+                    android:paddingTop="2dp"
                     android:textSize="12dp"
                     android:layout_gravity="center_vertical"
                      android:textAlignment="center"
@@ -79,6 +80,7 @@
 <!--            </RelativeLayout>-->
 
             <TextView
+                android:layout_marginTop="2dp"
                 android:id="@+id/search_name_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -110,7 +112,8 @@
                     android:text="PHONE: 123456"
                     android:textSize="15sp"
                     android:textColor="@color/black"
-                    android:layout_marginLeft="2dp"/>
+                    android:layout_marginLeft="2dp"
+                    android:foreground="?android:attr/selectableItemBackground"/>
                 <TextView
                     android:id="@+id/search_ac_tv"
                     android:layout_weight="4"
@@ -119,7 +122,8 @@
                     android:text="A/C: 1234 "
                     android:textSize="15sp"
                     android:textColor="@color/black"
-                    android:layout_marginLeft="2dp"/>
+                    android:layout_marginLeft="2dp"
+                    android:foreground="?android:attr/selectableItemBackground"/>
                 <TextView
                     android:id="@+id/search_aadhar_tv"
                     android:layout_weight="5"
@@ -127,10 +131,9 @@
                     android:layout_height="wrap_content"
                     android:text="AADHAR: 12345"
                     android:textColor="@color/black"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp"
+                    android:foreground="?android:attr/selectableItemBackground"/>
             </LinearLayout>
-
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>

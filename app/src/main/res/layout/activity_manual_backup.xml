@@ -13,7 +13,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/background">
+        android:background="@color/purple_700">
     <Button
         android:id="@+id/goback_backupActivity"
         android:layout_marginTop="11dp"
@@ -74,7 +74,7 @@
             android:layout_marginStart="10dp"
             android:text="@string/_1_database_backup"
             android:textColor="@color/purple_700"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"
             android:id="@+id/database_backup_tv"/>
@@ -121,7 +121,7 @@
             android:layout_marginStart="10dp"
             android:text="@string/_2_single_file_backup"
             android:textColor="@color/purple_700"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"
             android:id="@+id/single_file_backup_tv"/>
@@ -207,7 +207,7 @@
             android:layout_marginStart="10dp"
             android:text="@string/_3_backup_each_file"
             android:textColor="@color/purple_700"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"
             android:id="@+id/backup_each_file_tv"/>
@@ -328,7 +328,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="40dp">
     <Button
         android:id="@+id/backup_inactive_skill_g"
         android:layout_width="200dp"

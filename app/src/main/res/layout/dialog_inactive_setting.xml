@@ -2,53 +2,59 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
     android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="24dp"
-            android:text="@string/backup_file_setting"
-            android:paddingTop="1dp"
-            android:background="@color/purple_700"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:textSize="15sp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:text="@string/inactive_setting"
+        android:paddingTop="1dp"
+        android:background="@color/purple_700"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="15sp"/>
 
-        <TextView
-            android:padding="5dp"
-            android:layout_marginTop="12dp"
-            android:id="@+id/hardcoded_p1_tv_rate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="@string/would_you_like_to_share_or_download_backup_file"
-            android:textColor="@color/black"
-            android:textSize="15sp"/>
+    <TextView
+        android:layout_marginTop="12dp"
+        android:id="@+id/hardcoded_p1_tv_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:text="@string/choose_when_a_person_should_become_inactive_automatically_if_not_worked_for"
+        android:textColor="@color/black"
+        android:textSize="15sp"/>
 
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:layout_marginStart="25dp"
-        android:id="@+id/backup_setting_radiogp">
+        android:id="@+id/inactive_setting_radiogp">
         <RadioButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/share_recommended"
-            android:id="@+id/share_backup_file"
-
+            android:text="@string/_2_weeks"
+            android:id="@+id/two_weeks_rb"
             android:layout_gravity="center_horizontal"
             android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"/>
         <RadioButton
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/download"
-            android:id="@+id/download_backup_file"
-
+            android:text="@string/_3_weeks"
+            android:id="@+id/three_weeks_rb"
+            android:layout_gravity="center_horizontal"
+            android:textSize="13dp"
+            android:foreground="?android:attr/selectableItemBackground"/>
+        <RadioButton
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/_1_month"
+            android:id="@+id/one_month_rb"
             android:layout_gravity="center_horizontal"
             android:textSize="13dp"
             android:foreground="?android:attr/selectableItemBackground"/>
@@ -73,7 +79,7 @@
             android:textColor="#FF0000"
             android:textAlignment="center"
             android:background="@drawable/graycolor_bg"
-            android:id="@+id/cancel_btn_backup_setting"
+            android:id="@+id/cancel_btn_inactive_setting"
             android:foreground="?android:attr/selectableItemBackground"/>
         <Button
             android:layout_weight="3"
@@ -85,7 +91,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:background="@drawable/green_color_bg"
-            android:id="@+id/save_btn_backup_setting"
+            android:id="@+id/save_btn_inactive_setting"
             android:foreground="?android:attr/selectableItemBackground"/>
     </LinearLayout>
 

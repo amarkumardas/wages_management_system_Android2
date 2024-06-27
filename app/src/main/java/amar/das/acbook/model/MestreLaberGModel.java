@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
 
 public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGModel>  {
     private static final long serialVersionUID = 42L;
@@ -46,7 +45,7 @@ public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGMo
     }
 
     private String latestDate;
-    private byte[] person_img;
+    private String imagePath;
 
     public String getName() {
         return name;
@@ -63,11 +62,11 @@ public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGMo
     }
                 //default constructed is created here
 
-    public byte[] getPerson_img() {
-        return person_img;
+    public String getImagePath() {
+        return imagePath;
     }
-    public void setPerson_img(byte[] person_img) {
-        this.person_img = person_img;
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     @Override

@@ -53,12 +53,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
     ActivityPdfViewerBinding binding;
     byte whichPdfIndicatorChangesDynamically;
     String fromIntentPersonId;
-   // public static String pdfFolderName="acBookPDF";
-   // String runningInvoiceFileName ="running_invoice";
-
-   // String calculatedInvoiceFileName ="calculated_invoice";
-    //ActivityResultLauncher<Intent> sharePdfLauncher;
-    //String[] absolutePathArrayToDelete=new String[4];//index 0 may contain path of pdf1 or 2 and index 1 may contain path of pdf3 , and both string array index may contain pdf1orpdf2 and pdf3.INDEX 2 contain  the path of image.index 3 is for text file to delete
 
     /*pdf1 and pdf2 are view by take directly bytes from db we don't create file in device to view where as current invoiceorpdf are view by creating file in device then viewing
     * and for sharing pdf1 and pdf2 files is created in device then share also for invoiceorpdf file is created in device then share */
@@ -70,16 +64,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         ProgressDialogHelper progressBar = new ProgressDialogHelper( this);
-
-//        sharePdfLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),activityResult ->{//ActivityResultCallback it will execute when return from other intent
-//            for (String path:absolutePathArrayToDelete){
-//                if(path!=null){
-//                   if(!MyUtility.deletePdfOrRecordingUsingPathFromDevice(path)){
-//                       Log.d(this.getClass().getSimpleName(),"failed to delete file from device");
-//                   }
-//                }
-//            }
-//        });
 
         whichPdfIndicatorChangesDynamically = getIntent().getByteExtra("pdf1_or_2_or_3_for_blank_4",(byte) 4);//4 is default value to display blank pdf
         fromIntentPersonId = getIntent().getStringExtra("ID");
@@ -348,38 +332,6 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
             return false;
         }
     }
-//    private boolean downloadPdfUsingByteInDownloadFolder(String filename, byte[] pdfContent) {//this method to save it to the download folder.
-//        if(filename==null || pdfContent==null){
-//            return false;
-//        }
-//        try {
-//          if(checkPermissionForDownload(getBaseContext())){
-//               File downloadsFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//               File pdfFile = new File(downloadsFolder, filename);
-//
-//               FileOutputStream outputStream = new FileOutputStream(pdfFile);
-//               outputStream.write(pdfContent);
-//               outputStream.close();
-//            return true;
-//        }else{
-//            Toast.makeText(PdfViewerOperationActivity.this, "EXTERNAL STORAGE PERMISSION REQUIRED", Toast.LENGTH_LONG).show();
-//              //to read and write own app specific directory from minsdk 29 to 33+ we don't require READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE due to scope storage after android 10
-//              //ActivityCompat.requestPermissions(PdfViewerOperationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
-//            return false;
-//            }
-//        }catch (IOException e) {
-//            e.printStackTrace();
-//             return false;
-//        }catch (Exception x){
-//            x.printStackTrace();
-//            return false;
-//        }
-//    }
-//
-//    private boolean checkPermissionForDownload(Context baseContext) {
-//        return true;//after android 10+ no need of permission to download files in device in download folder
-//    }
-
     private boolean shareAllDataAsTextFile(String id) {
         StringBuilder sb=new StringBuilder();
         try{
@@ -409,62 +361,33 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
         }
     }
     private boolean shareImageAndMessageToAnyApp(String message, String id) {
-        //if(message==null|| id==null || sharePdfLauncher ==null){
         if(message==null|| id==null){
             return false;
         }
         try(Database db=Database.getInstance(getBaseContext());
-            Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
-
-//            if(cursor != null ){
-//                cursor.moveToFirst();
-//            }else return false;
+            Cursor cursor = db.getData("SELECT " +Database.COL_10_IMAGE_PATH + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
 
             if(cursor != null && !cursor.moveToFirst()) return false;
 
-            byte[] image=cursor.getBlob(0);
-            if (image!=null) {
+            String imagePath=cursor.getString(0);
+            if (imagePath!=null) {
                 if(MyUtility.checkPermissionForReadAndWriteToExternalStorage(getBaseContext())) {
-                    //this code will be used when launcher is used
-//                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length); //for resizing image -Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//image size
-//                   //Why do we need to Save the image to external storage? When sharing an image with other apps in Android, you need to provide a file URI that points to the location of the image on the device's storage. If you don't save the image to external storage, you won't be able to share it with other apps.In addition, apps are not allowed to share files directly from their internal storage with other apps. This is a security measure implemented by Android to prevent apps from accessing each other's data without explicit user permission.
-//                    File file = new File(getExternalCacheDir(), "image.jpg");//creating file in cache directory file name cache path.image.jpg.getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
-//                    FileOutputStream outputStream = new FileOutputStream(file);
-//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);//image quality
-//                    outputStream.flush();
-//                    outputStream.close();
-//                    //In Android 12, you cannot use Uri.fromFile() to get the URI for a file. Instead, you should use FileProvider.getUriForFile() to get the URI for the file.
-//                    Uri fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
-//
-//                    Intent shareIntent = new Intent(Intent.ACTION_SEND);//sharing
-//                    shareIntent.setType("image/*");//No, there is no need to add flags to the intent. The intent created is simply used to share the text file, and the file is deleted after sharing. Adding flags to the intent would not have any impact on sharing the file.
-//                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);//EXTRA_STREAM FOR SHARE LARGE DATA like image ,text
-//                    shareIntent.putExtra(Intent.EXTRA_TEXT,message);
-//                    sharePdfLauncher.launch(Intent.createChooser(shareIntent, getResources().getString(R.string.share_image_using)));//Intent.createChooser creates dialog to choose app to share data and after shared pdf launcher will execute to delete the image
-//                    absolutePathArrayToDelete[2] = file.getAbsolutePath();//storing absolute path to delete the image
 
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length); //for resizing image -Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//image size
-                    //Why do we need to Save the image to external storage? When sharing an image with other apps in Android, you need to provide a file URI that points to the location of the image on the device's storage. If you don't save the image to external storage, you won't be able to share it with other apps.In addition, apps are not allowed to share files directly from their internal storage with other apps. This is a security measure implemented by Android to prevent apps from accessing each other's data without explicit user permission.
-                    File file = new File(getExternalCacheDir(), "image.jpg");//creating file in cache directory file name cache path.image.jpg.getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an image, you can save the image to this directory before sharing it with other apps.
+                    //Bitmap bitmap = BitmapFactory.decodeByteArray(imagePath, 0, imagePath.length); //for resizing imagePath -Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//imagePath size
+                    Bitmap bitmap =MyUtility.getBitmapFromPath(imagePath);
+                    if(bitmap==null) return false;//when failed to decode image path
+                    //Why do we need to Save the imagePath to external storage? When sharing an imagePath with other apps in Android, you need to provide a file URI that points to the location of the imagePath on the device's storage. If you don't save the imagePath to external storage, you won't be able to share it with other apps.In addition, apps are not allowed to share files directly from their internal storage with other apps. This is a security measure implemented by Android to prevent apps from accessing each other's data without explicit user permission.
+                    File file = new File(getExternalCacheDir(), "image.jpg");//creating file in cache directory file name cache path.imagePath.jpg.getExternalCacheDir() is a method in Android's Context class that returns a File object representing the external storage directory specific to your app for storing cache files. This directory is automatically created for your app and is private to your app, meaning that other apps cannot access its contents.Cache files are temporary files that are used to improve the performance of your app. By storing files that your app frequently uses in the cache directory, you can avoid repeatedly reading or downloading those files from a remote source, which can slow down your app's performance.The getExternalCacheDir() method returns a File object that represents the path to your app's external cache directory, which you can use to save cache files or other temporary files that your app needs to access quickly. For example, when sharing an imagePath, you can save the imagePath to this directory before sharing it with other apps.
                     FileOutputStream outputStream = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);//image quality
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);//imagePath quality
                     outputStream.flush();
                     outputStream.close();
                     //In Android 12, you cannot use Uri.fromFile() to get the URI for a file. Instead, you should use FileProvider.getUriForFile() to get the URI for the file.This method is used to share a file with another app using a content URI
                     Uri fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);//**to access file uri FileProvider.getUriForFile() is compulsory from if your target sdk version is 24 or greater otherwise cannot access
 
-//                    Intent shareIntent = new Intent(Intent.ACTION_SEND);//sharing
-//                    shareIntent.setType("image/*");//No, there is no need to add flags to the intent. The intent created is simply used to share the text file, and the file is deleted after sharing. Adding flags to the intent would not have any impact on sharing the file.
-//                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);//EXTRA_STREAM FOR SHARE LARGE DATA like image ,text
-//                    shareIntent.putExtra(Intent.EXTRA_TEXT,message);
-//
-//                    Intent chooser=Intent.createChooser(shareIntent, getResources().getString(R.string.share_image_using));//Intent.createChooser creates dialog to choose app to share data
-//                    chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(chooser);//start chooser dialog
-
                     Intent intent = new ShareCompat.IntentBuilder(this)
-                            .setType("image/*") // Set the MIME type to image
-                            .setStream(fileUri) // Add the URI of the image file
+                            .setType("image/*") // Set the MIME type to imagePath
+                            .setStream(fileUri) // Add the URI of the imagePath file
                             .getIntent() // Get the underlying Intent
                             .setAction(Intent.ACTION_SEND) // Set the action to send
                             .putExtra(Intent.EXTRA_TEXT,message)//for message
@@ -481,8 +404,8 @@ public class PdfViewerOperationActivity extends AppCompatActivity {
                     return false;
                 }
             }else{
-                Toast.makeText(PdfViewerOperationActivity.this, "NO IMAGE", Toast.LENGTH_LONG).show();
-                return false;
+                Toast.makeText(PdfViewerOperationActivity.this, getString(R.string.no_image), Toast.LENGTH_LONG).show();
+                return true;
             }
            return true;
         }catch (Exception x){

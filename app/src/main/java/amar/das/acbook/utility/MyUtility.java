@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
@@ -171,12 +173,12 @@ public class MyUtility {
         return (int) ChronoUnit.DAYS.between(lowerDate,forwardDate);//ChronoUnit.DAYS it give total months.here lowerDate is first and lowerDate will always be lower then today date even if we miss to open app for long days
         //ChronoUnit.MONTHS.between(lowerDate,forwardDate)
     }
-    public static String generateUniqueFileNameByTakingDateTime(String id,String fileName) {//file name will always be unique
+    public static String generateUniqueFileNameByTakingDateTime(String id,String fileName){//file name will always be unique
         try {
             final Calendar current = Calendar.getInstance();//to get current date and time
             Date d = Calendar.getInstance().getTime();//To get time
             SimpleDateFormat sdf = new SimpleDateFormat("hhmmssa");//a stands for is AM or PM.example which make file unique 091659am which is unique
-            return "ID" + id + "_DATE_" + current.get(Calendar.DAY_OF_MONTH) + "_" + (current.get(Calendar.MONTH) + 1) + "_" + current.get(Calendar.YEAR)+fileName+ "_At" + sdf.format(d);
+            return "ID" + id + "_DATE_" + current.get(Calendar.DAY_OF_MONTH) + "_" + (current.get(Calendar.MONTH) + 1) + "_" + current.get(Calendar.YEAR)+fileName+ "_AT" + sdf.format(d);
         }catch (Exception x){
             x.printStackTrace();
             return "error";
@@ -224,8 +226,7 @@ public class MyUtility {
     }
     public static String[] getReligionFromDb(Context context) {
         String [] religion;
-        try(//Database db=new Database(context);
-            Database db=Database.getInstance(context);
+        try(Database db=Database.getInstance(context);
             Cursor religionCursor=db.getData("SELECT "+Database.COL_51_RELIGION+" FROM "+Database.TABLE_NAME_RELIGION)){
             religion=new String[religionCursor.getCount()];
             int i=0;
@@ -254,10 +255,9 @@ public class MyUtility {
             return  new String[]{"error"};
         }
     }
-    public static boolean updateLocationReligionToTableIf(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
+    public static boolean updateLocationReligionToTableIfValueIsUnique(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
         /*The isEmpty() method checks whether a String is empty, meaning it has a length of 0, and returns true if it is empty. It does not consider whitespace characters as part of the string content.On the other hand, the isBlank() method was introduced in Java 11. It checks whether a String is empty or contains only whitespace characters, and returns true in such cases*/
-
-        try(Database db=new Database(context))
+        try(Database db= Database.getInstance(context))
         {
             if ( !TextUtils.isEmpty(location) && locationHashSet.add(location)) {//if false that means data is duplicate
                 if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_LOCATION +" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
@@ -896,7 +896,7 @@ public class MyUtility {
     public static String[] fetchPersonDetailOfPDF(String id, Context context){
         Database db=Database.getInstance(context);
           try(
-                  Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'");
+                  Cursor cursor1 = db.getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE_PATH + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'");
                   Cursor cursor2 = db.getData("SELECT " + Database.COL_396_PDFSEQUENCE + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE "+Database.COL_31_ID+"= '" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
@@ -1718,11 +1718,25 @@ public class MyUtility {
     private static boolean checkPermissionForDownload(Context baseContext) {
         return true;//after android 10+ no need of permission to download files in device in download folder
     }
-    public static String getImageRelativePath(String getExternalFilesDir,String id){//return null if error
+    public static File getImageUniqueFile(String getExternalFilesDir){//return null if error
         if(MyUtility.isFolderExistIfNotExistCreateIt(getExternalFilesDir,File.separator+ GlobalConstants.REGISTERED_IMAGE_FOLDER_NAME.getValue())) {//getExternalFilesDir(null) is a method in Android Studio that returns the path of the directory holding application files on external storage
-            return new File(getExternalFilesDir+File.separator+GlobalConstants.REGISTERED_IMAGE_FOLDER_NAME.getValue()+File.separator+MyUtility.generateUniqueFileNameByTakingDateTime(id,GlobalConstants.REGISTERED_IMAGE_FILE_NAME.getValue()) +".JPEG").getAbsolutePath();//path of image where it is saved in device
+            return new File(getExternalFilesDir+File.separator+GlobalConstants.REGISTERED_IMAGE_FOLDER_NAME.getValue()+File.separator+MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.REGISTERED_IMAGE_FILE_NAME.getValue()+".JPEG");//path of image where it is saved in device
         }else{
             return null;
         }
+    }
+    public static Bitmap getBitmapFromPath(String imagePath){//if error return null
+        if (imagePath == null || imagePath.isEmpty()) {return null;} // Handle empty or null path
+        try {
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);//get bitmap from bytearray
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;  //// Consider downscaling for large images to improve performance Example: Reduce image size by half
+            return BitmapFactory.decodeFile(imagePath, options);//if failed to decode file it will return null. else return bitmap
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+        // this code provides a convenient way to load an image from a file path into a Bitmap object, with an optional downscaling configuration for performance optimization.
     }
 }

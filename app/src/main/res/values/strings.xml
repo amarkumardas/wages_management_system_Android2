@@ -405,6 +405,8 @@
     <string name="find_backup">FIND BACKUP</string>
     <string name="data_restored_successfully">Data Restored Successfully</string>
     <string name="data_restore_failed">Data Restore Failed</string>
+    <string name="half_data_restored">Half Data Restored</string>
+    <string name="try_again">Try Again</string>
 
 
 
@@ -507,6 +509,6 @@
     <string name="action_delete">DELETE</string>
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
-
+    <string name="no_image">NO IMAGE</string>
 
 </resources>

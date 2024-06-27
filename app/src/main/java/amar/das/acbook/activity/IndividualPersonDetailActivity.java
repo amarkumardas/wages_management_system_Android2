@@ -9,7 +9,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -78,13 +77,6 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         overridePendingTransition(0, 0); //we have used overridePendingTransition(), it is used to remove activity create animation while re-creating activity.
         binding = ActivityIndividualPersonDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-//        try {
-//            DriveQuickstart.mains();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        } catch (GeneralSecurityException e) {
-//            throw new RuntimeException(e);
-//        }
 
         if (getIntent().hasExtra("ID")) {//every operation will be perform based on id
              db=Database.getInstance(this);
@@ -667,7 +659,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator,false);
 
-                        if(!MyUtility.updateLocationReligionToTableIf(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
+                        if(!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
                         locationReligionSuccess=db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_18_RELIGION+"='" + religionAutoComplete.getText().toString().trim() + "', "+Database.COL_17_LOCATION+"='"+ locationAutoComplete.getText().toString().trim() +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
@@ -1262,7 +1254,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         });
     }
     private boolean setNameImageIdPhoneAadhaar() {
-        try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_MAIN_ACTIVE_PHONE1 +","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
+        try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_MAIN_ACTIVE_PHONE1 +","+Database.COL_10_IMAGE_PATH +","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
             if (cursor != null && cursor.moveToFirst()) {
 
                 binding.nameTv.setText(cursor.getString(0));
@@ -1274,12 +1266,23 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     binding.callTv.setBackgroundResource(R.drawable.ic_outline_call_24);
                 }
 
-                byte[] image = cursor.getBlob(4);//getting image from db as blob
-                if (image != null) {
-                    //getting bytearray image from DB and converting  to bitmap to set in imageview
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                    binding.imageImg.setImageBitmap(bitmap);
-                }
+//                byte[] image = cursor.getBlob(4);//getting image from db as blob
+//                if (image != null) {
+//                    //getting bytearray image from DB and converting  to bitmap to set in imageview
+//                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+//                    binding.imageImg.setImageBitmap(bitmap);
+//                }
+
+                String imagePath=cursor.getString(4);//getting image path from db
+                if(imagePath!=null){
+                    Bitmap bitmap = MyUtility.getBitmapFromPath(imagePath);//converting image path to bitmap
+                    if(bitmap != null){
+                        binding.imageImg.setImageBitmap(bitmap);
+                    }//default image will be shown
+//                    else{//default image will be shown
+//                        Toast.makeText(this, getString(R.string.no_image), Toast.LENGTH_LONG).show();
+//                    }
+                }//else default image will be shown
 
                 binding.activePhone2Tv.setText(HtmlCompat.fromHtml("PHONE2: " + "<b>" + (cursor.getString(5) != null ? cursor.getString(5) : "") + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
                 binding.idTv.setText("ID " + cursor.getString(6));

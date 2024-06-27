@@ -55,14 +55,27 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {//to fill data on every view filed
         MestreLaberGModel data=arrayList.get(position);
-        byte[] image=data.getPerson_img();//getting image from db
-        if(image!=null) {
-            //getting bytearray image from DB and converting  to bitmap to set in imageview
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            holder.profileImg.setImageBitmap(bitmap);
-        }else{
+//        byte[] image=data.getImagePath();//getting image from db
+//        if(image!=null) {
+//            //getting bytearray image from DB and converting  to bitmap to set in imageview
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+//            holder.profileImg.setImageBitmap(bitmap);
+//        }else{
+//            holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
+//        }
+
+        String imagePath=data.getImagePath();//getting image from db
+        if(imagePath!=null){
+            Bitmap bitmap = MyUtility.getBitmapFromPath(imagePath);//converting image path to bitmap
+            if(bitmap != null){
+                holder.profileImg.setImageBitmap(bitmap);
+            }else{//default image will be shown
+                holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
+            }
+        }else{//else default image will be shown
             holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
         }
+
 
         holder.name.setText(data.getName());
         if(data.getAdvanceAmount() > 0 ){//no need to give >= because wastage of time
@@ -100,7 +113,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
                     db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_12_ACTIVE+"='" + GlobalConstants.ACTIVE_PEOPLE.getValue() +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
                  }else{
                     //for testing make if condition false and next if comment it
-//                    db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
+//                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
 //                    }

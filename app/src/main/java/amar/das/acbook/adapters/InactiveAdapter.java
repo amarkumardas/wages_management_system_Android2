@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.model.MestreLaberGModel;
+import amar.das.acbook.utility.MyUtility;
 
 
 public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHolder> {
@@ -40,12 +41,24 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
 
         holder.name.setText(data.getName());
 
-        byte[] image=data.getPerson_img();//getting image from db
-        if(image!=null) {
-            //getting bytearray image from DB and converting  to bitmap to set in imageview
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-            holder.profileImg.setImageBitmap(bitmap);
-        }else{
+//        byte[] image=data.getImagePath();//getting image from db
+//        if(image!=null) {
+//            //getting bytearray image from DB and converting  to bitmap to set in imageview
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+//            holder.profileImg.setImageBitmap(bitmap);
+//        }else{
+//            holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
+//        }
+
+        String imagePath=data.getImagePath();//getting image from db
+        if(imagePath!=null){
+            Bitmap bitmap = MyUtility.getBitmapFromPath(imagePath);//converting image path to bitmap
+            if(bitmap != null){
+                holder.profileImg.setImageBitmap(bitmap);
+            }else{//default image will be shown
+                holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
+            }
+        }else{//else default image will be shown
             holder.profileImg.setImageResource(R.drawable.defaultprofileimage);
         }
 

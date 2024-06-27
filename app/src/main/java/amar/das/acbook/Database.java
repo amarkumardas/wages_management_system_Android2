@@ -13,6 +13,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -26,13 +28,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.pdfgenerator.MakePdf;
+import amar.das.acbook.sharedpreferences.KeyValueTable;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.ui.history.HistoryFragment;
@@ -41,6 +46,7 @@ public class Database extends SQLiteOpenHelper {
     public final static int Database_Version=1;//5to update db version just increase the value by 1.when this value is increase then constructor is called
     SQLiteDatabase db;
     Context context;
+    String backupDatabaseExension=".db";
     public final static String DATABASE_NAME="person_db";
     private static Database instance; // Step 1: Private static instance
 
@@ -55,7 +61,7 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_7_MAIN_ACTIVE_PHONE1 ="ACTIVE_PHONE1";
     public final static String COL_8_MAINSKILL1 ="MAINSKILL1";//skill1
     public final static String COL_9_ACCOUNT_HOLDER_NAME ="ACCOUNT_HOLDER_NAME";
-    public final static String COL_10_IMAGE ="IMAGE";
+    public final static String COL_10_IMAGE_PATH ="IMAGE";
     public final static String COL_11_ACTIVE_PHONE2 ="ACTIVE_PHONE2";
     public final static String COL_12_ACTIVE ="ACTIVE";
     public final static String COL_13_ADVANCE ="ADVANCE";
@@ -150,8 +156,9 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_51_RELIGION="RELIGION";
 
     //backup check table
-    public final static String TABLE_NAME_BACKUP_CHECK="backup_check_table";
-    public final static String COL_TOTAL_SUBTRACT_INACTIVE_AND_ACTIVE_ROWS="ROWS_INACTIVE_ACTIVE";
+    public final static String TABLE_KEY_VALUE ="key_value_table";
+    public final static String COL_1_KEY ="KEYS";
+    public final static String COL_2_VALUE="DATA";//IT WILL store total rows after subtracting total inactive and active rows
 
     //history table
     public final static String TABLE_HISTORY ="history_table";
@@ -200,7 +207,7 @@ public class Database extends SQLiteOpenHelper {
      try {//if some error occur it will handle
          //sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20)  DEFAULT NULL UNIQUE,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(40) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12)  DEFAULT NULL UNIQUE,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10)  DEFAULT NULL UNIQUE, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(40) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
 
-         sqLiteDatabase.execSQL("CREATE TABLE " + PERSON_REGISTERED_TABLE + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+ COL_7_MAIN_ACTIVE_PHONE1 +" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" TEXT DEFAULT NULL);");
+         sqLiteDatabase.execSQL("CREATE TABLE " + PERSON_REGISTERED_TABLE + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+ COL_7_MAIN_ACTIVE_PHONE1 +" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+ COL_10_IMAGE_PATH +" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE0_ACTIVE_MESTRE + " ("+ COL_1_ID_AM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_AM+" TEXT NOT NULL,"+COL_2_DATE_AM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_AM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_AM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_AM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_AM +" INTEGER DEFAULT NULL,"+ COL_9_P2_AM +" INTEGER DEFAULT NULL,"+ COL_10_P3_AM +" INTEGER DEFAULT NULL,"+ COL_11_P4_AM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_AM +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE1_ACTIVE_LG + " ("+ COL_1_ID_ALG +" INTEGER ,"+COL_13_SYSTEM_DATETIME_ALG+" TEXT NOT NULL,"+COL_2_DATE_ALG +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_ALG +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_ALG +" TEXT DEFAULT NULL,"+ COL_6_WAGES_ALG +" NUMERIC DEFAULT NULL,"+ COL_8_P1_ALG +" INTEGER DEFAULT NULL,"+ COL_9_P2_ALG +" INTEGER DEFAULT NULL,"+ COL_10_P3_ALG +" INTEGER DEFAULT NULL,"+ COL_11_P4_ALG +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_ALG +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_IN_ACTIVE_MESTRE + " ("+ COL_1_ID_IAM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_IAM+" TEXT NOT NULL,"+ COL_2_DATE_IAM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_IAM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_IAM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_IAM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_IAM +" INTEGER DEFAULT NULL,"+ COL_9_P2_IAM +" INTEGER DEFAULT NULL,"+ COL_10_P3_IAM +" INTEGER DEFAULT NULL,"+ COL_11_P4_IAM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_IAM +" CHAR(1) DEFAULT NULL);");
@@ -212,11 +219,54 @@ public class Database extends SQLiteOpenHelper {
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RATE_SKILL + " ("+COL_31_ID+" INTEGER PRIMARY KEY NOT NULL ,"+COL_32_R1+" INTEGER DEFAULT NULL,"+COL_33_R2+" INTEGER DEFAULT NULL,"+COL_34_R3+" INTEGER DEFAULT NULL,"+COL_35_R4+" INTEGER DEFAULT NULL,"+ COL_36_SKILL2 +" CHAR(1) DEFAULT NULL,"+ COL_37_SKILL3 +" CHAR(1) DEFAULT NULL,"+ COL_38_SKILL4 +" CHAR(1) DEFAULT NULL,"+COL_39_INDICATOR+" CHAR(1) DEFAULT NULL,"+ COL_391_STAR +" CHAR(1) DEFAULT NULL,"+COL_392_LEAVINGDATE+" VARCHAR(10) DEFAULT NULL,"+ COL_393_PERSON_REMARKS +" TEXT DEFAULT NULL,"+COL_394_INVOICE1+" BLOB DEFAULT NULL,"+COL_395_INVOICE2+" BLOB DEFAULT NULL,"+COL_396_PDFSEQUENCE+" INTEGER DEFAULT 0 , "+COL_397_TOTAL_WORKED_DAYS+" INTEGER DEFAULT 0 , "+COL_398_RETURNINGDATE+" TEXT DEFAULT NULL);");//id is primary key because according to id only data is stored in table 3 so no duplicate
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_LOCATION + " ("+COL_41_LOCATION+" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_RELIGION + " ("+COL_51_RELIGION+" TEXT DEFAULT NULL);");
-         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME_BACKUP_CHECK + " ("+COL_TOTAL_SUBTRACT_INACTIVE_AND_ACTIVE_ROWS+" TEXT DEFAULT NULL);");
+         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_KEY_VALUE + " ("+COL_1_KEY+" TEXT PRIMARY KEY NOT NULL,"+COL_2_VALUE+" TEXT DEFAULT NULL);");
+
      }catch(Exception e){
          e.printStackTrace();
      }
         //onUpgrade(sqLiteDatabase,0,Database_Version);//IT is needed when we update database
+    }
+    public boolean updateOrInsertKeysOfKeyValueTable(@NonNull String key, String value){//first taking all keys from table and storing in hashset now if hashset return true that means this key is not present in table so insert else update
+        if(key==null) return false;
+
+        HashSet<String> keysSet= getAllKeysFromKeyValueTable(context);//getting all keys from table
+        if(keysSet==null) return false;
+
+            if(keysSet.add(key)){//if true means new key so insert key and value in table
+                if(!updateTable("INSERT INTO "+Database.TABLE_KEY_VALUE+" ("+Database.COL_1_KEY+","+Database.COL_2_VALUE+") VALUES ('"+key+"','"+ value+"');")){
+                    return false;//means error
+                }
+            }else{//if false that means data is duplicate so update value in table
+                if(!updateTable("UPDATE " + Database.TABLE_KEY_VALUE + " SET " + Database.COL_2_VALUE + "='" + value +"' WHERE " + Database.COL_1_KEY + "='" + key + "'")){
+                    return false;//means error
+                }
+            }
+            return true;
+    }
+    public String getValueFromKeyValueTable(@NonNull String key){//if error return null or valuestring value may be null
+        try (Cursor cursor = getData("SELECT " + Database.COL_2_VALUE + " FROM " + Database.TABLE_KEY_VALUE + " WHERE " + Database.COL_1_KEY + "= '" + key + "'")){
+            if (cursor.moveToFirst()) {
+                return cursor.getString(0);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public HashSet<String> getAllKeysFromKeyValueTable(Context context) {
+        String [] keys=null;
+        try(Cursor keyCursor=getData("SELECT "+Database.COL_1_KEY+" FROM "+Database.TABLE_KEY_VALUE)){
+            keys=new String[keyCursor.getCount()];
+            int i=0;
+            while(keyCursor.moveToNext()){
+                keys[i++]=keyCursor.getString(0);
+            }
+           return new HashSet<>(Arrays.asList(keys));//if no keys return empty h
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
     }
     @Override    //i is old version and i1 is new version.When we change version then this method is called
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
@@ -242,7 +292,7 @@ public class Database extends SQLiteOpenHelper {
      // Log.d("DATABASE","ON UPGRADE DROP 3 TABLES");
       //onCreate(sqLiteDatabase);
     }
-    public String insertDataToDetailsAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, byte[] image, String phone2, String location, String religion) {//if error return null
+    public String insertDataToDetailsAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, String imagePath, String phone2, String location, String religion) {//if error return null
        if(skill==null || name==null) return null;
         String newelyCreatedId=null;
         boolean success=false;
@@ -259,7 +309,7 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_7_MAIN_ACTIVE_PHONE1, phoneNumber);
             cv.put(COL_8_MAINSKILL1, skill);
             cv.put(COL_9_ACCOUNT_HOLDER_NAME, accountHolderName);
-            cv.put(COL_10_IMAGE, image);
+            cv.put(COL_10_IMAGE_PATH, imagePath);
             cv.put(COL_11_ACTIVE_PHONE2, phone2);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
@@ -303,7 +353,7 @@ public class Database extends SQLiteOpenHelper {
             db = this.getReadableDatabase();
              return db.rawQuery(query, null);
     }
-    public boolean updateAllPersonDetails(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, byte[] image, String acHolder, String id, String location, String religion ) {
+    public boolean updateAllPersonDetails(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String fatherName, String imagePath, String acHolder, String id, String location, String religion ) {
        if(skill==null || id==null || name==null) return false;
         boolean success=false;
         SQLiteDatabase dB=null;
@@ -319,7 +369,7 @@ public class Database extends SQLiteOpenHelper {
             cv.put(COL_7_MAIN_ACTIVE_PHONE1, phoneNumber);
             cv.put(COL_8_MAINSKILL1, skill);
             cv.put(COL_9_ACCOUNT_HOLDER_NAME, fatherName);
-            cv.put(COL_10_IMAGE, image);
+            cv.put(COL_10_IMAGE_PATH, imagePath);
             cv.put(COL_11_ACTIVE_PHONE2, acHolder);
             cv.put(COL_17_LOCATION, location);
             cv.put(COL_18_RELIGION, religion);
@@ -1937,7 +1987,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     private boolean fetchPersonDetailAndWriteToPDF(String id, MakePdf makePdf) {
-        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
+        try (Cursor cursor1 = getData("SELECT " + Database.COL_2_NAME + " , " + Database.COL_3_BANKAC + " , " + Database.COL_6_AADHAAR_NUMBER + " , " + Database.COL_10_IMAGE_PATH + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + id + "'")){
             if (cursor1 != null){
                 cursor1.moveToFirst();
                 String bankAccount, aadhaar;
@@ -1974,7 +2024,7 @@ public class Database extends SQLiteOpenHelper {
                 }else{
                     activePhoneNumber="";
                 }
-                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getBlob(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
+                makePdf.makePersonImageDetails(cursor1.getString(0), id, bankAccount, aadhaar, cursor1.getString(3), String.valueOf(pdfSequenceNo),activePhoneNumber, false);
             }else{
                 Toast.makeText(context, "NO DATA IN CURSOR", Toast.LENGTH_LONG).show();
                 makePdf.makePersonImageDetails("[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", "[NULL NO DATA IN CURSOR]", null, "[NULL]","[NULL NO DATA IN CURSOR]",false);
@@ -3002,15 +3052,28 @@ public class Database extends SQLiteOpenHelper {
             }
         }
     }
-    public boolean deleteImage(String id){
-        return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_10_IMAGE + "= NULL  WHERE " + Database.COL_1_ID + "= '" + id + "'");
+    public boolean setImageColumnToNull(String id){
+        return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_10_IMAGE_PATH + "= NULL  WHERE " + Database.COL_1_ID + "= '" + id + "'");
     }
-    public File databaseBackup(String uniqueDatabaseFileName){
+    public String getImagePath(String id) {//if error return null
+        try (Cursor cursor = getData("SELECT " + Database.COL_10_IMAGE_PATH + " FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " + Database.COL_1_ID + "= '" + id + "'")) {
+            if (cursor.moveToFirst()) {
+                return cursor.getString(0);
+            }
+                return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public File databaseBackup(String uniqueDatabaseFileName){//duplicating the db
+        if(!updateTotalNumberOfRowsToKeyValueTable()) return null;//before data backup update total no. of active and inactive rows to column so that we can check this value when restore database is fully restore or not
+
         File databaseFile = context.getDatabasePath(DATABASE_NAME);
 
         if (!databaseFile.exists()) {return null;} // Check if database exists and return null if not
 
-        File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName,".db");//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
+        File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName,backupDatabaseExension);//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
         if (backupFile == null) {return null;}
 
         //this approach is very fast so no need to compress file it make it slower while sharing
@@ -3061,59 +3124,26 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
-//    public boolean restoreDatabaseMethod2(Uri uri) {
-//        if(uri == null) {return false;}
-//
-//        InputStream inputStream = null;
-//        FileOutputStream fos = null;
-//
-//        try {
-//            // Try opening InputStream from ContentResolver
-//            inputStream = context.getContentResolver().openInputStream(uri);//Opening Files from the System File Picker: When you launch the system file picker in Android and a user selects a file, the URI returned might be handled by a content provider. You can use openInputStream to access the content of the selected file.
-//
-//            if (inputStream == null) {return false;}
-//
-//            // Assuming internal storage for database
-//            File databaseFile = context.getDatabasePath(DATABASE_NAME);
-//
-//            // Check write permissions (existing code)
-////            if (!databaseFile.canWrite()) {
-////                Toast.makeText(context, "cant write database",Toast.LENGTH_SHORT).show();
-////                return false; // Request permissions or handle error
-////            }
-//
-//            fos = new FileOutputStream(databaseFile);
-//            byte[] buffer = new byte[1024]; // Adjust buffer size as needed
-//            int bytesRead;
-//
-//            while ((bytesRead = inputStream.read(buffer)) != -1) {
-//                fos.write(buffer, 0, bytesRead);
-//            }
-//
-//            return true;
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        } finally {  // Close streams (if not null)
-//            if (inputStream != null){
-//                try {
-//                    inputStream.close();
-//                } catch (IOException e) {
-//                    Log.e("ERROR",e.getMessage());
-//                    return false;
-//                }
-//            }
-//            if(fos != null){
-//                try {
-//                    fos.close();
-//                } catch (IOException e) {
-//                    Log.e("ERROR",e.getMessage());
-//                    return false;
-//                }
-//            }
-//        }
-//    }
+    private boolean updateTotalNumberOfRowsToKeyValueTable() {
+       String rows= getTotalNumberOf4TablesRowsAfterSubtraction();
+
+       if(rows==null) return false;
+
+      return updateOrInsertKeysOfKeyValueTable(KeyValueTable.TOTAL_CHECK_ROWS.name(),rows);
+    }
+    public String getTotalNumberOf4TablesRowsAfterSubtraction() {//if error return null
+        try(Cursor cursor1 = getData("SELECT COUNT(*) FROM " + Database.TABLE2_IN_ACTIVE_MESTRE);
+            Cursor cursor2 = getData("SELECT COUNT(*) FROM " + Database.TABLE3_IN_ACTIVE_LG);
+            Cursor cursor3 = getData("SELECT COUNT(*) FROM " + Database.TABLE0_ACTIVE_MESTRE);
+            Cursor cursor4 = getData("SELECT COUNT(*) FROM " + Database.TABLE1_ACTIVE_LG)){
+           if(!(cursor1.moveToFirst() && cursor2.moveToFirst() && cursor3.moveToFirst() && cursor4.moveToFirst())) return null;
+
+            return String.valueOf((cursor1.getLong(0)+cursor2.getLong(0)) - (cursor3.getLong(0)+cursor4.getLong(0)));//getting total no. of inactive rows and subtracting total no. of active rows
+        }catch(Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
     public boolean restoreDatabaseMethod2(Uri uri) {//simple approach bit slower
         if (uri == null) {return false;}
 
@@ -3139,7 +3169,6 @@ public class Database extends SQLiteOpenHelper {
         }
     }
     public boolean restoreDatabaseMethod1(Uri uri) {//optimise approach
-
         if (uri == null) {
             Log.e("ERROR", "uri is null");
             return false;
@@ -3177,7 +3206,6 @@ public class Database extends SQLiteOpenHelper {
             return false;
         }
     }
-
     private File createDbFolderInExternalStorageAndReturnFile(String uniqueFileName,String fileExtension) {//return null when exception
         try {//externalFileDir is passed as string because this class is not extended with AppCompatActivity
             if(!MyUtility.checkPermissionForReadAndWriteToExternalStorage(context)) return null;

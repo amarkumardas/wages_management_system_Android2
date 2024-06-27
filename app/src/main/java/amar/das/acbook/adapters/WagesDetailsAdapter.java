@@ -908,7 +908,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView date,wages,p1,p2,p3,p4;
        public Spinner spinnerRemarksAudioIcon;
-       // LinearLayout singleRecordLayout;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             date=itemView.findViewById(R.id.date_in_recycler_tv);
@@ -918,7 +918,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
             p3=itemView.findViewById(R.id.p3_in_recycler_tv);
             p4=itemView.findViewById(R.id.p4_in_recycler_tv);
             spinnerRemarksAudioIcon =itemView.findViewById(R.id.spinner_in_recycler_tv);
-            //singleRecordLayout=itemView.findViewById(R.id.single_record_layout);
+
         }
     }
     public String getPreviousDateFromCurrentDate(byte days){//if error return null

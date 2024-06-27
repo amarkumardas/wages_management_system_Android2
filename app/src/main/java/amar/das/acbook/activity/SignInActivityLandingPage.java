@@ -25,6 +25,7 @@ import amar.das.acbook.Database;
 import amar.das.acbook.R;
 import amar.das.acbook.databinding.ActivitySigninWithGoogleBinding;
 import amar.das.acbook.progressdialog.ProgressDialogHelper;
+import amar.das.acbook.sharedpreferences.KeyValueTable;
 import amar.das.acbook.sharedpreferences.SharedPreferencesHelper;
 import amar.das.acbook.utility.BackupDataUtility;
 import amar.das.acbook.utility.MyUtility;
@@ -102,14 +103,29 @@ public class SignInActivityLandingPage extends AppCompatActivity {
 
             Database database = Database.getInstance(getBaseContext());
             if (database.restoreDatabaseMethod1(uri)){
-                this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
-                SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);
-                finishAndGoToNavigationActivity();
-            }else {
-                if (database.restoreDatabaseMethod2(uri)){//try once more to restore with different method
+
+                if(checkAllDataRestoredSuccessfully()){
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
                     SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);
                     finishAndGoToNavigationActivity();
+                }else{
+                    this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.half_data_restored), Toast.LENGTH_LONG).show());
+                    this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
+                }
+
+            }else {//try once more to restore with different method
+
+                if (database.restoreDatabaseMethod2(uri)){
+
+                    if(checkAllDataRestoredSuccessfully()){
+                        this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
+                        SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);
+                        finishAndGoToNavigationActivity();
+                    }else{
+                        this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.half_data_restored), Toast.LENGTH_LONG).show());
+                        this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
+                    }
+
                 }else{
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restore_failed), Toast.LENGTH_LONG).show());
                 }
@@ -117,6 +133,14 @@ public class SignInActivityLandingPage extends AppCompatActivity {
 
             this.runOnUiThread(() -> progressBar.hideProgressBar());
         });backgroundTask.shutdown();//when all task completed then only shutdown
+    }
+
+    private boolean checkAllDataRestoredSuccessfully() {
+        Database db=Database.getInstance(getBaseContext());
+       String keywordValue=db.getValueFromKeyValueTable(KeyValueTable.TOTAL_CHECK_ROWS.name());//this keyword TOTAL_CHECK_ROWS contain total rows after subtracting
+        if(keywordValue==null) return false;//means there was some error and this keyword TOTAL_CHECK_ROWS cannot contain null it will contain minus value or 0 or positive number
+       String countOfTotalRowsFrom4TableAfterSubtraction=db.getTotalNumberOf4TablesRowsAfterSubtraction();//counting total no. of rows from 4 tables
+       return  keywordValue.equals(countOfTotalRowsFrom4TableAfterSubtraction);//if true that means all data is fully backed up
     }
 
     private boolean isSpaceAvailableInDeviceToRestoreBackupFile(Uri uri) {//if device space is greater return true

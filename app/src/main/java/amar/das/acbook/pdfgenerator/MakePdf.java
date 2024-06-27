@@ -91,7 +91,7 @@ public class MakePdf{
             return false;
         }
     }
-    public boolean makePersonImageDetails(String name, String id, String accountNo, String aadhaarNo, byte [] image, String invoiceNo ,String activePhoneNumber, boolean forAttachTrue){
+    public boolean makePersonImageDetails(String name, String id, String accountNo, String aadhaarNo, String imagePath, String invoiceNo ,String activePhoneNumber, boolean forAttachTrue){
         try {
             if(name==null || name.isEmpty()){
                 name="";
@@ -152,10 +152,11 @@ public class MakePdf{
             myPaint.setTextSize(8.0f);
             canvas.drawText("INVOICE No. "+invoiceNo,  myPageInfo.getPageWidth()-7,  top+56 , myPaint);
 
-            if(image !=null) {//if image is not null then only draw image
+            Bitmap bitmap=null;
+            if(imagePath !=null &&  (bitmap =MyUtility.getBitmapFromPath(imagePath)) != null){//if imagePath and bitmap is not null then only draw imagePath
                 myPaint.setTextAlign(Paint.Align.LEFT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//image size
+                //Bitmap bitmap = BitmapFactory.decodeByteArray(imagePath, 0, imagePath.length);//to convert bytearray to bitmap
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 65, 62, false);//imagePath size
                 canvas.drawBitmap(scaledBitmap, 5, top + 1, myPaint);
             }
 

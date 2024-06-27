@@ -85,11 +85,11 @@ public class ActiveMFragment extends Fragment {
         Cursor cursorMestre;
         mestreActiveArrayList =new ArrayList<>(80);//insuring initial capacity to (10+initialDataToLoad)  10 is extra for  if new person present
         //**if latest date is null then first it will be top of arraylist that's why two WHILE LOOP is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
-            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setImagePath(cursorMestre.getString(0));
             data.setId(cursorMestre.getString(1));
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
@@ -98,11 +98,11 @@ public class ActiveMFragment extends Fragment {
             mestreActiveArrayList.add(data);
         }
        // cursorMestre=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE TYPE='M' AND ACTIVE='1' AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC LIMIT "+ initialLoadDataFotActiveMAndL);
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
         while(cursorMestre.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
-            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setImagePath(cursorMestre.getString(0));
             data.setId(cursorMestre.getString(1));
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
@@ -197,11 +197,11 @@ public class ActiveMFragment extends Fragment {
         arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
 
         //**if latest date is null then first it will be top of arraylist that's why two while Loop is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
-            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setImagePath(cursorMestre.getString(0));
             data.setId(cursorMestre.getString(1));
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
@@ -216,7 +216,7 @@ public class ActiveMFragment extends Fragment {
         while (cursorMestre.moveToNext()) {
             MestreLaberGModel data = new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
-            data.setPerson_img(cursorMestre.getBlob(0));
+            data.setImagePath(cursorMestre.getString(0));
             data.setId(cursorMestre.getString(1));
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));

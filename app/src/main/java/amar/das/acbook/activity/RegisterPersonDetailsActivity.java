@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -40,8 +39,8 @@ import com.github.drjacky.imagepicker.constant.ImageProvider;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -200,7 +199,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                 dialog.setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
 
                     if(fromIntentPersonId != null){//this will execute when updating because while updating fromIntentPersonId would not be null
-                        if(!deleteImageFromDatabaseAndSetImageViewToNull(imageView)){
+                        if(!deleteImageFromDatabaseAndDeviceAndSetImageViewToNull(imageView,fromIntentPersonId)){
                             MyUtility.snackBar(view,getString(R.string.failed_to_delete_image));
                         }
                     }else{
@@ -215,14 +214,14 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
 
                 dialog.create().show();
 
-            }else{
+            }else{//if no image
                 MyUtility.snackBar(view,getString(R.string.no_image_to_delete));
             }
         });
         if(getIntent().hasExtra("ID")){//while updating. after getting all the ids setting all data according to id
             fromIntentPersonId=getIntent().getStringExtra("ID");//getting id from intent
 
-            Cursor cursor= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_MAIN_ACTIVE_PHONE1 +"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE+","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
+            Cursor cursor= db.getData("SELECT "+Database.COL_2_NAME+" , "+Database.COL_3_BANKAC+" , "+Database.COL_4_IFSCCODE+"" + " , "+Database.COL_5_BANKNAME+" , "+Database.COL_6_AADHAAR_NUMBER+" , "+Database.COL_7_MAIN_ACTIVE_PHONE1 +"," + ""+Database.COL_8_MAINSKILL1 +","+Database.COL_9_ACCOUNT_HOLDER_NAME+","+Database.COL_10_IMAGE_PATH +","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_17_LOCATION+","+Database.COL_18_RELIGION+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_1_ID+"='"+fromIntentPersonId+"'");
             if(cursor != null && cursor.moveToFirst()){
                 name.setText(cursor.getString(0));
                 account.setText(cursor.getString(1));
@@ -238,13 +237,27 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                      mestreRadio.setChecked(true);
                  else//skill.equals("G")
                      womenRadio.setChecked(true);
-                byte[] image=cursor.getBlob(8);//getting image from db as blob and storing in byte type Blop is large type
+//                byte[] image=cursor.getBlob(8);//getting image from db as blob and storing in byte type Blop is large type
+//
+//                if(image!=null){
+//                    //getting bytearray image from DB and converting  to bitmap to set in imageview
+//                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+//                    imageView.setImageBitmap(bitmap);
+//                }//else default image will be shown
 
-                if(image!=null){
-                    //getting bytearray image from DB and converting  to bitmap to set in imageview
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                String imagePath=cursor.getString(8);//getting image from db
+
+                if(imagePath!=null){
+                    Bitmap bitmap = MyUtility.getBitmapFromPath(imagePath);//converting image path to bitmap
+                    if(bitmap != null){
                     imageView.setImageBitmap(bitmap);
+                    }//else default image will be shown
+
+//                    else{//default image will be shown
+//                        Toast.makeText(this, getString(R.string.no_image), Toast.LENGTH_LONG).show();
+//                    }
                 }//else default image will be shown
+
                 phone2.setText(cursor.getString(9));
                 location_autoComplete.setText(cursor.getString(10));
                 religion_autoComplete.setText(cursor.getString(11));
@@ -253,6 +266,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             }else
                 Toast.makeText(this, "cursor is null", Toast.LENGTH_SHORT).show();
         }
+
         name.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -542,7 +556,6 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) { }
         });
-
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() { // Code to execute when back button is pressed
@@ -550,15 +563,19 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);//add it to the OnBackPressedDispatcher using getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback).This ensures that your custom back button handling logic is invoked when the back button is pressed.
-
     }
 
-    private boolean deleteImageFromDatabaseAndSetImageViewToNull(ImageView imageView) {
+    private boolean deleteImageFromDatabaseAndDeviceAndSetImageViewToNull(ImageView imageView, String id) {
+        if(imageView==null || id==null) return false;
         Database db=Database.getInstance(getBaseContext());
-        if(db.deleteImage(fromIntentPersonId)){
-            imageView.setImageDrawable(null);//Set the image to null (removes any currently set image)
-            return true;
+
+        if(MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(db.getImagePath(id))){//first delete that image from device
+            if(db.setImageColumnToNull(id)){//than from database
+                imageView.setImageDrawable(null);//Set the image to null (removes any currently set image)
+                return true;
+            }
         }
+
        return false;
     }
 
@@ -578,7 +595,9 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         String personBankName = TextUtils.isEmpty(bankName_autoComplete.getText().toString().trim()) ? null : bankName_autoComplete.getText().toString().toUpperCase().trim();
         String location = TextUtils.isEmpty(location_autoComplete.getText().toString().trim()) ? null : location_autoComplete.getText().toString().toUpperCase().trim();
         String religion = TextUtils.isEmpty(religion_autoComplete.getText().toString().trim()) ? null : religion_autoComplete.getText().toString().toUpperCase().trim();
-        byte[] imageStore=!isImageViewNull(imageView)?convertBitmapToByteArray(imageView):null;//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+
+        //byte[] imageStore=!isImageViewNull(imageView)?convertBitmapToByteArray(imageView):null;//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
+        String imagePath=getImageAbsolutePathAndIfFailedDeletePath(imageView);
 
             AlertDialog.Builder detailsReview = new AlertDialog.Builder(this);
             detailsReview.setCancelable(false);
@@ -606,20 +625,15 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
 
                     if(getIntent().hasExtra("ID")){//will execute only when updating
                         boolean success = false;
-                        if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
+                        if (!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(RegisterPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
                             return;
                         }
                         if (db.updatePersonSkillAndShiftData(personSkill, fromIntentPersonId)) {//if skill get updated then only all data will be updated its important
-                            success = db.updateAllPersonDetails(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, fromIntentPersonId, location, religion);
+                            success = db.updateAllPersonDetails(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, fromIntentPersonId, location, religion);
                         }
                         if(success){//if it is updated then show successfully message
                              Toast.makeText(RegisterPersonDetailsActivity.this, "ID: " + fromIntentPersonId + " " + getResources().getString(R.string.updated_successfully), Toast.LENGTH_SHORT).show();
-
-                            //whenever user update its name,bank account,etc theN IF that account is inactive then that account will become active that is its latest date is updated to current date
-//                            final Calendar current=Calendar.getInstance();//to get current date
-//                            String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
-//                            personDb.updateTable("UPDATE " + personDb.TABLE_NAME1 + " SET  LATESTDATE='" + currentDate + "'" +" WHERE ID='" + fromIntentPersonId + "'");
 
                             //after success then go to previous activity automatically and destroy current activity so that when pressing back user should not get same activity this is done by finish();
                             Intent intent = new Intent(getBaseContext(), IndividualPersonDetailActivity.class);//completed then go back
@@ -632,11 +646,11 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                       //this will execute only when adding new person
                       //  for (int k = 1; k <= 50; k++) {
                         String newelyCreatedId=null;
-                        if (!MyUtility.updateLocationReligionToTableIf(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
+                        if (!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(RegisterPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                             return;
                         }
-                        if((newelyCreatedId= db.insertDataToDetailsAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imageStore, personPhoneNumber2, location, religion))==null){//if null means error
+                        if((newelyCreatedId= db.insertDataToDetailsAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, location, religion))==null){//if null means error
                             displayResult("FAILED", "TO ADD");
                             return;
                         }
@@ -705,6 +719,17 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             });
             detailsReview.create().show();
     }
+
+    private String getImageAbsolutePathAndIfFailedDeletePath(ImageView imageView){//error return null
+        File file=MyUtility.getImageUniqueFile(getExternalFilesDir(null).toString());//create file in device
+
+        String imagePath=!isImageViewNull(imageView)?saveImageInDeviceAndReturnAbsolutePath(imageView,file):null;
+        if(imagePath==null){//delete the created file from device due to error occur or no image in imageview.imagePath would be null in two case 1.when imageView has no image and 2.this method saveImageInDeviceAndReturnAbsolutePath may give null when error occur
+            MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(file.getAbsolutePath());
+        }
+         return imagePath;
+    }
+
     private boolean checkCredentials(EditText activePhone1, EditText phone2, EditText aadhaarNumber,String skill, EditText personName,View view,EditText ifscCode) {
         boolean isValid = true;
 
@@ -743,36 +768,25 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
            return false;
         }
     }
-    private byte[] convertBitmapToByteArray(ImageView imageView) {//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
-        if(imageView==null) return null;
-        byte[] image=null;
-        ByteArrayOutputStream byteArrayOutputStream=null;
-        try {
+    private String saveImageInDeviceAndReturnAbsolutePath(ImageView imageView, File file) {
+        if(imageView==null || file == null) return null;
+
+        try(FileOutputStream out=new FileOutputStream(file)) {
             BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
             Bitmap fullSizeBitmapImage = drawable.getBitmap();
 
             // Resize the bitmap efficiently
             Bitmap reducedSizeBitmap = ImageResizer.reduceBitmapSize(fullSizeBitmapImage, 46000);
 
-            // Compress the resized bitmap into a byte array
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            reducedSizeBitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+            reducedSizeBitmap.compress(Bitmap.CompressFormat.JPEG, 50,out);//writing to device file
+            return file.getAbsolutePath();
 
-            // Return the byte array
-            image = byteArrayOutputStream.toByteArray();
-
-            try {
-                byteArrayOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
         }catch (Exception x){
             x.printStackTrace();
-            Toast.makeText(this, "image processing error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed To Save Image", Toast.LENGTH_LONG).show();
             return null;
         }
-        return image;
+
     }
     public void go_back_btn(View view){//when user press back arrow
         refreshIndividualPersonDetailActivity(fromIntentPersonId);

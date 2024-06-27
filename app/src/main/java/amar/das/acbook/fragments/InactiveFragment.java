@@ -95,7 +95,7 @@ public class InactiveFragment extends Fragment {
                         progressBar.setVisibility(View.VISIBLE);//progressbar
 
                         //Toast.makeText(getContext(), getResources().getString(R.string.please_wait_loading), Toast.LENGTH_SHORT).show();
-                        fetchData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + eachTimeDataToLoad, inactiveArraylist);
+                        fetchData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_8_MAINSKILL1 +"='"+skillIndicator+"' AND "+Database.COL_12_ACTIVE+"='0' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT " + totalNumberOfLoadedData + "," + eachTimeDataToLoad, inactiveArraylist);
 
                         totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
                         if (totalNumberOfLoadedData >= totalSpecificInactiveRecord) {//when all record loaded then remove scroll listener
@@ -129,11 +129,11 @@ public class InactiveFragment extends Fragment {
             balance.setText("");
         }
 
-        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE+","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
+        Cursor dataCursorMLG=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_2_NAME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+skill+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.INACTIVE_PEOPLE.getValue()+"' ORDER BY "+Database.COL_13_ADVANCE+" DESC LIMIT "+limit);
         arraylist =new ArrayList<>(150);//capacity is 150 because when arraylist size become greater then 100 then arraylist will be cleared.extra 50 is kept because we don't know arraylist size become greater then 100 is exactly how much
         while(dataCursorMLG.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
-            data.setPerson_img(dataCursorMLG.getBlob(0));
+            data.setImagePath(dataCursorMLG.getString(0));
             data.setId(dataCursorMLG.getString(1));
             data.setAdvanceAmount(dataCursorMLG.getInt(2));
             data.setBalanceAmount(dataCursorMLG.getInt(3));
@@ -190,7 +190,7 @@ public class InactiveFragment extends Fragment {
         }
         while (cursorMestre.moveToNext()) {
             MestreLaberGModel data = new MestreLaberGModel();
-             data.setPerson_img(cursorMestre.getBlob(0));
+             data.setImagePath(cursorMestre.getString(0));
              data.setAdvanceAmount(cursorMestre.getInt(2));
              data.setBalanceAmount(cursorMestre.getInt(3));
              data.setId(cursorMestre.getString(1));

@@ -56,7 +56,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
   //if you really want to write files, either make sure you're only writing to your app's designated storage directories, in which case you won't need any permissions at all, or if you really need to write to a directory your app doesn't own get that file manager permission from Google (how to get that permission)
   int [] correctInputArr =new int[10];
   Button add, deleteImageBtn;
-  EditText name,account, phone2, ifscCode, aadhaarNumber, activephone1, accountHolderName;
+  EditText name,account,phone2,ifscCode,aadhaarNumber,activePhone1,accountHolderName;
   AutoCompleteTextView bankName_autoComplete, location_autoComplete, religion_autoComplete;
   Database db;
   RadioGroup radioGroup;
@@ -64,16 +64,8 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
   String skill,fromIntentPersonId;
   String[] indianBank;//to store array
   HashSet<String> religionHashSet,locationHashSet;
-    //********************for camera and galary***********************
-    private static final int GalleryPick = 1;
-    private static final int CAMERA_REQUEST = 100;
-    private static final int STORAGE_REQUEST = 200;
-    private static final int IMAGEPICK_GALLERY_REQUEST = 300;
-    private static final int IMAGE_PICKCAMERA_REQUEST = 400;
-    String cameraPermission[];
-    String storagePermission[];
-    ImageView imageView;
-    //****************************************************************
+  ImageView imageView;
+  boolean isNewImageSet;//this variable will indicate image picker has picked new image or not
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +82,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         location_autoComplete=findViewById(R.id.location_autoComplete_tv);
         religion_autoComplete=findViewById(R.id.religion_autoComplete_tv);
         aadhaarNumber =findViewById(R.id.aadharcard_et);
-        activephone1 =findViewById(R.id.phonenumber_et);
+        activePhone1 =findViewById(R.id.phonenumber_et);
         accountHolderName =findViewById(R.id.fathername_et);
         radioGroup=findViewById(R.id.skill_radiogp);
         laberRadio =findViewById(R.id.laber_skill);//required when updating
@@ -122,17 +114,13 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         ArrayAdapter<String> locationAdapter=new ArrayAdapter<>(RegisterPersonDetailsActivity.this, android.R.layout.simple_list_item_1, locationHashSet.toArray(new String[locationHashSet.size()]));
         location_autoComplete.setAdapter(locationAdapter);
 
-
         imageView = findViewById(R.id.imageview);
 
-        cameraPermission = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-       // imageView.setOnClickListener(view -> showImagePicDialog());
         ActivityResultLauncher<Intent> launcher= registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),(ActivityResult result)->{
                 if(result.getResultCode()==RESULT_OK){
                         Uri uri=result.getData().getData();
                             imageView.setImageURI(uri);//set image to imageview
-
+                            isNewImageSet=true;
 //                        File file= ImagePicker.Companion.getFile(getIntent());
 //                        if(file!=null && file.exists()) file.delete();//delete the crop image ie. is saved in device. but selected image is not deleted
 
@@ -228,7 +216,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                 ifscCode.setText(cursor.getString(2));
                 bankName_autoComplete.setText(cursor.getString(3));
                 aadhaarNumber.setText(cursor.getString(4));
-                activephone1.setText(cursor.getString(5));
+                activePhone1.setText(cursor.getString(5));
                 skill=cursor.getString(6);//skill is variable
                 accountHolderName.setText(cursor.getString(7));
                  if(skill.equals(getResources().getString(R.string.laber))) //radio button should be checked according to data
@@ -297,13 +285,13 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) { }
         });
-        activephone1.addTextChangedListener(new TextWatcher() {
+        activePhone1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String userInput= activephone1.getText().toString().trim();
-                activephone1.setTextColor(Color.BLACK);
+                String userInput= activePhone1.getText().toString().trim();
+                activePhone1.setTextColor(Color.BLACK);
                 correctInputArr[1]=1;//means data is inserted.This line should be here because when user enter wrong data and again enter right data then it should update array to 1 which indicate write data
 
                 //this will check if other data is right or wrong
@@ -313,11 +301,11 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                     add.setEnabled(true);
                 }
                 boolean isMatching=false;
-                if((userInput.length()==10) && (isMatching=db.isActivePhoneNumberMatching(userInput))) activephone1.setError(getString(R.string.phone_number_already_exists));
+                if((userInput.length()==10) && (isMatching=db.isActivePhoneNumberMatching(userInput))) activePhone1.setError(getString(R.string.phone_number_already_exists));
 
                 if(isMatching || !(userInput.matches("[0-9]+") || userInput.isEmpty())){//only digits
                     if(!isMatching) {
-                        activephone1.setTextColor(Color.RED);
+                        activePhone1.setTextColor(Color.RED);
                         add.setText(getString(R.string.wrong_input));
                         add.setBackgroundResource(R.drawable.red_color_background);
                     }
@@ -581,7 +569,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
 
     public void insert_click(View view) { //action while clicking insert button
 
-        if(!checkCredentials(activephone1,phone2,aadhaarNumber,skill,name,view,ifscCode)) return;
+        if(!checkCredentials(activePhone1,phone2,aadhaarNumber,skill,name,view,ifscCode)) return;
 
         add.setEnabled(false);//so that user do not enter again add button while data is  inserting in database because if user do again then it will overload
         String personName = TextUtils.isEmpty(name.getText().toString().trim()) ? null : name.getText().toString().toUpperCase().trim();
@@ -589,7 +577,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         String personPhoneNumber2 = TextUtils.isEmpty(phone2.getText().toString().trim()) ? null : phone2.getText().toString().trim();
         String personIfscCode = TextUtils.isEmpty(ifscCode.getText().toString().trim()) ? null : ifscCode.getText().toString().toUpperCase().trim();
         String personAadhaar = TextUtils.isEmpty(aadhaarNumber.getText().toString().trim()) ? null : aadhaarNumber.getText().toString().trim();
-        String personActivePhoneNo2 = TextUtils.isEmpty(activephone1.getText().toString().trim()) ? null : activephone1.getText().toString().trim();
+        String personActivePhoneNo2 = TextUtils.isEmpty(activePhone1.getText().toString().trim()) ? null : activePhone1.getText().toString().trim();
         String personAccountHolderName = TextUtils.isEmpty(accountHolderName.getText().toString().trim()) ? null : accountHolderName.getText().toString().toUpperCase().trim();
         String personSkill=TextUtils.isEmpty(skill)?null:skill;//checked before
         String personBankName = TextUtils.isEmpty(bankName_autoComplete.getText().toString().trim()) ? null : bankName_autoComplete.getText().toString().toUpperCase().trim();
@@ -597,7 +585,8 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
         String religion = TextUtils.isEmpty(religion_autoComplete.getText().toString().trim()) ? null : religion_autoComplete.getText().toString().toUpperCase().trim();
 
         //byte[] imageStore=!isImageViewNull(imageView)?convertBitmapToByteArray(imageView):null;//convertImageViewToByteArray(reduceSize); reduceSize contain image so sending to convert to byte array to store in database
-        String imagePath=getImageAbsolutePathAndIfFailedDeletePath(imageView);
+
+        String imagePath=getCompressImagePath(fromIntentPersonId);//while inserting fromIntentPersonId would be null else non null
 
             AlertDialog.Builder detailsReview = new AlertDialog.Builder(this);
             detailsReview.setCancelable(false);
@@ -625,7 +614,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
 
                     if(getIntent().hasExtra("ID")){//will execute only when updating
                         boolean success = false;
-                        if (!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
+                        if (!MyUtility.updateLocationAndReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(RegisterPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -646,12 +635,12 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                       //this will execute only when adding new person
                       //  for (int k = 1; k <= 50; k++) {
                         String newelyCreatedId=null;
-                        if (!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
+                        if (!MyUtility.updateLocationAndReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(RegisterPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                             return;
                         }
-                        if((newelyCreatedId= db.insertDataToDetailsAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, location, religion))==null){//if null means error
-                            displayResult("FAILED", "TO ADD");
+                        if((newelyCreatedId= db.insertDataToPersonRegisteredAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, location, religion))==null){//if null means error
+                            displayResult("FAILED", "TO REGISTER");
                             return;
                         }
                        if(newelyCreatedId !=null){//never be null because above code would return
@@ -706,7 +695,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                         ifscCode.setText("");
                         bankName_autoComplete.setText("");
                         aadhaarNumber.setText("");
-                        activephone1.setText("");
+                        activePhone1.setText("");
                         accountHolderName.setText("");
                         imageView.setImageDrawable(null);//to reset imageview
                         radioGroup.clearCheck();//clear all check
@@ -720,10 +709,28 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             detailsReview.create().show();
     }
 
-    private String getImageAbsolutePathAndIfFailedDeletePath(ImageView imageView){//error return null
+    private String getCompressImagePath(String id) {
+        String imagePath=null;
+        if (id == null) {//if id is null means inserting so compress image and return file path to store in db
+            imagePath= getCompressImageAbsolutePathAndIfFailedDeletePath(imageView);
+
+        }else if(id != null){//if id is not null means user updating so if new image is set then delete previous image from device and compress new image
+            Database db = Database.getInstance(getBaseContext());
+
+            if(isNewImageSet) {//if new image is set then delete previous image from device
+                MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(db.getImagePath(id));//first delete that image from device
+                imagePath= getCompressImageAbsolutePathAndIfFailedDeletePath(imageView);//compress new image to store in db
+            }else{
+                imagePath=db.getImagePath(id);//if no new image is set then get previous image path from db
+            }
+        }
+        return imagePath;
+    }
+
+    private String getCompressImageAbsolutePathAndIfFailedDeletePath(ImageView imageView){//error return null
         File file=MyUtility.getImageUniqueFile(getExternalFilesDir(null).toString());//create file in device
 
-        String imagePath=!isImageViewNull(imageView)?saveImageInDeviceAndReturnAbsolutePath(imageView,file):null;
+        String imagePath=!isImageViewNull(imageView)? saveCompressImageInDeviceAndReturnAbsolutePath(imageView,file):null;
         if(imagePath==null){//delete the created file from device due to error occur or no image in imageview.imagePath would be null in two case 1.when imageView has no image and 2.this method saveImageInDeviceAndReturnAbsolutePath may give null when error occur
             MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(file.getAbsolutePath());
         }
@@ -768,7 +775,7 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
            return false;
         }
     }
-    private String saveImageInDeviceAndReturnAbsolutePath(ImageView imageView, File file) {
+    private String saveCompressImageInDeviceAndReturnAbsolutePath(ImageView imageView, File file) {
         if(imageView==null || file == null) return null;
 
         try(FileOutputStream out=new FileOutputStream(file)) {
@@ -786,7 +793,6 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
             Toast.makeText(this, "Failed To Save Image", Toast.LENGTH_LONG).show();
             return null;
         }
-
     }
     public void go_back_btn(View view){//when user press back arrow
         refreshIndividualPersonDetailActivity(fromIntentPersonId);

@@ -32,7 +32,7 @@ import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.utility.MyUtility;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
-public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
+public class DepositAmountActivity extends AppCompatActivity {
     ActivityCustomizeLayoutOrDepositAmountBinding  binding;
     Database db;
     private  String fromIntentPersonId;
@@ -107,22 +107,22 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     if(voiceRecorder.startRecording()){
                         binding.customChronometer.setBase(SystemClock.elapsedRealtime());//In Android, Chronometer is a class that implements a simple timer. Chronometer is a subclass of TextView. This class helps us to add a timer in our app.
                         binding.customChronometer.start();
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.recording_started), Toast.LENGTH_LONG).show();
+                        Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.recording_started), Toast.LENGTH_LONG).show();
                         audioPath=voiceRecorder.getAudioAbsolutePath();//updating audioPath for further use otherwise it will be null
                         mediaRecorder=voiceRecorder.getMediaRecorder();//updating mediaRecorder for further use  otherwise it will be null
                     }else{
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_start_recording), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.failed_to_start_recording), Toast.LENGTH_SHORT).show();
                     }
-                    CustomizeLayoutOrDepositAmount.this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //while the user is recording screen should be on. it should not close
+                    DepositAmountActivity.this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //while the user is recording screen should be on. it should not close
 
                 }else{//if recording is not started then stop
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.again_tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.again_tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
                 }
                 toggleToStartRecording = !toggleToStartRecording;//so that user should click 2 times to start recording
 
             }else {//request for permission
-                Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.enable_audio_permission), Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(CustomizeLayoutOrDepositAmount.this, new String[]{Manifest.permission.RECORD_AUDIO}, 21);
+                Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.enable_audio_permission), Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(DepositAmountActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, 21);
             }
         });
 
@@ -140,7 +140,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 binding.customSaveAudioIconTv.setEnabled(false);//even this button user should not click again
                 binding.customChronometer.setEnabled(true);//when audio is save then user will be able to play
             }else {
-                Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
+                Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -150,7 +150,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
           cDayOfMonth= (byte) current.get(Calendar.DAY_OF_MONTH);
         binding.customDateTv.setOnClickListener(view -> {//to automatically set date to textView
             //To show calendar dialog
-            DatePickerDialog datePickerDialog=new DatePickerDialog(CustomizeLayoutOrDepositAmount.this, (datePicker, year, month, dayOfMonth) -> {
+            DatePickerDialog datePickerDialog=new DatePickerDialog(DepositAmountActivity.this, (datePicker, year, month, dayOfMonth) -> {
                 binding.customDateTv.setText(dayOfMonth+"-"+(month+1)+"-"+year);//month start from 0 so 1 is added to get right month like 12
                 cYear=year;
                 cMonth= (byte) month;
@@ -173,7 +173,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 String remarks;
                 String micPath=null;
 
-                String onlyTime = MyUtility.getOnlyTime();
+                String onlyTime = MyUtility.getOnly12hrsTime();
                 //binding.customTimeTv.setText(onlyTime);//setting time to take time and store in db
 
                // db.updateTable("UPDATE " + Database.TABLE_NAME1 + " SET  "+Database.COL_15_LATESTDATE+"='" + MyUtility.getOnlyCurrentDate() + "' , "+Database.COL_16_TIME+"= '"+ onlyTime  +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//when ever user insert its  deposit then latest date AND TIME  will be updated to current date AND TIME not user entered date
@@ -203,26 +203,26 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                     if(!TextUtils.isEmpty(binding.customDepositEt.getText().toString().trim())) {
                         depositAmount = Integer.parseInt(binding.customDepositEt.getText().toString().trim());
                     }
-                    success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),binding.customDateTv.getText().toString(),onlyTime,micPath,remarks,depositAmount,0,0,0,0,GlobalConstants.DEPOSIT_CODE.getValue());
+                    success=db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.getTodaySystemDateTime24hr(),binding.customDateTv.getText().toString(),micPath,remarks,depositAmount,0,0,0,0,GlobalConstants.DEPOSIT_CODE.getValue());
                     if(!success){
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
+                        Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                     }
                     goBackToIndividualPersonActivity(fromIntentPersonId);
 
                 }else
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
+                    Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
 
                 audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
             });
             binding.customChronometer.setOnClickListener(view -> {
                 if(audioPath != null){//checking for null pointer Exception
                     if(VoiceRecorder.audioPlayer(audioPath)){
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this,getResources().getString(R.string.audio_playing),Toast.LENGTH_LONG).show();
+                        Toast.makeText(DepositAmountActivity.this,getResources().getString(R.string.audio_playing),Toast.LENGTH_LONG).show();
                     }else{
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this,getResources().getString(R.string.failed_to_play_audio),Toast.LENGTH_LONG).show();
+                        Toast.makeText(DepositAmountActivity.this,getResources().getString(R.string.failed_to_play_audio),Toast.LENGTH_LONG).show();
                     }
                 }else {
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.tab_on_mic_to_start_recording), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -233,7 +233,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
             binding.customSaveBtn.setText(getResources().getString(R.string.long_press_to_update));
 
            // db = new Database(CustomizeLayoutOrDepositAmount.this);//we can take any field context
-            db = Database.getInstance(CustomizeLayoutOrDepositAmount.this);//we can take any field context
+            db = Database.getInstance(DepositAmountActivity.this);//we can take any field context
             Cursor cursorData = db.getDepositForUpdate(getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
             cursorData.moveToFirst();//this cursor is not closed
             String cDescription,cDeposit,cMicPath;
@@ -295,7 +295,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                 String remarks;
 
                 //To get exact onlyTime so write code in save button
-                String onlyTime=MyUtility.getOnlyTime();
+                String onlyTime=MyUtility.getOnly12hrsTime();
                 String userDate=binding.customDateTv.getText().toString();
 
                 if(audioPath !=null){//if file is not null then only it execute otherwise nothing will be inserted
@@ -323,17 +323,17 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
                       //  success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='" + micPath + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                        // success=db.update_Deposit_TABLE_NAME2(date,onlyTime,micPath,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
                        // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,micPath,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,micPath,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
 
                     } else {//if micPath == null then we are not updating because null in text will be set to mic-path and give wrong result like it will indicate that audio is present but actually audio is not present
                        // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',DEPOSIT='" + depositAmount + "' WHERE ID= '" + getIntent().getStringExtra("ID") + "'" + " AND DATE= '" + getIntent().getStringExtra("DATE") + "'" + " AND TIME='" + getIntent().getStringExtra("TIME") + "'");
                         //success=db.update_Deposit_TABLE_NAME2(date,onlyTime,null,remarks,depositAmount,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
                        // success=db.updateWagesOrDepositOnlyToActiveTable(userDate,onlyTime,remarks,null,0,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("DATE"),getIntent().getStringExtra("TIME"));
-                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
+                        success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,null,depositAmount,0,0,0,0,getIntent().getStringExtra("ID"),getIntent().getStringExtra("SYSTEM_DATETIME"));
 
                     }
                     if(!success){
-                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
+                        Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
                     }
                     goBackToIndividualPersonActivity(fromIntentPersonId);
 //                    if (success) {
@@ -342,7 +342,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //                        Toast.makeText(CustomizeLayoutOrDepositAmount.this, "FAILED TO UPDATE", Toast.LENGTH_LONG).show();
 
                 }else {
-                    Toast.makeText(CustomizeLayoutOrDepositAmount.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
+                    Toast.makeText(DepositAmountActivity.this, getResources().getString(R.string.correct_the_data_or_cancel_and_enter_again), Toast.LENGTH_LONG).show();
                 }
 
                 audioPath =null;//since audio is saved then make this variable null otherwise audio will be deleted ON CANCEL OR ON DESTROY only if user don't enter save button
@@ -368,7 +368,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
 //    }
     private void goBackToIndividualPersonActivity(String id){
         finish();//destroy current activity
-        Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+        Intent intent=new Intent(DepositAmountActivity.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",id);
         startActivity(intent);//while cancelling we will go back to previous Activity with updated activity so passing id to get particular person detail
     }
@@ -377,7 +377,7 @@ public class CustomizeLayoutOrDepositAmount extends AppCompatActivity {
         super.onBackPressed();
         MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//delete Audio If Not user Saved
         finish();//destroy current activity
-        Intent intent=new Intent(CustomizeLayoutOrDepositAmount.this,IndividualPersonDetailActivity.class);
+        Intent intent=new Intent(DepositAmountActivity.this,IndividualPersonDetailActivity.class);
         intent.putExtra("ID",fromIntentPersonId);
         startActivity(intent);
     }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.io.File;
@@ -88,8 +89,21 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                     return false;
                 }
             });
+
             binding.textfileCalculatedHint.setOnClickListener(view -> {
-                MyUtility.showDefaultDialog(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext(),false);
+                PopupMenu popup=new PopupMenu(this,binding.textfileCalculatedHint);
+                popup.inflate(R.menu.calculated_invoice_menu);
+
+                popup.setOnMenuItemClickListener(item -> {
+
+                    if(item.getItemId() == R.id.calculated_invoice_means){
+                        MyUtility.showDefaultDialog(getResources().getString(R.string.what_is_calculated_invoice_question_mark),getResources().getString(R.string.calculate_invoice_means),view.getContext(),false);
+                    }else if(item.getItemId() == R.id.calculated_invoice_free_Space) {
+                        MyUtility.showDefaultDialog(getResources().getString(R.string.backup_and_freeup_space_tips),getResources().getString(R.string.calculated_invoice_backup_hint),view.getContext(),false);
+                    }
+                    return true;
+                });
+                popup.show();
             });
 
             if(allFilePathFromDevice.size() >= toDeleteOldInvoiceIndicator){

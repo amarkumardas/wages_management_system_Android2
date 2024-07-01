@@ -145,7 +145,7 @@ public class HistoryModel {
         return isDeposit;
     }
 
-    public void setIsDeposit(Boolean deposit) {
+    public void setIsDeposit(Boolean deposit) {//don't change datatype from Boolean to boolean
         isDeposit = deposit;
     }
 

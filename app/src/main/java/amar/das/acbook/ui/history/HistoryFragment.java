@@ -244,8 +244,7 @@ public class HistoryFragment extends Fragment {
                         isScrolling1 = false;
                        // progressDialogHelper.showProgressBar();
 
-                     fetchDataAccordingToIndicator(historyArraylist,totalNumberOfLoadedData,eachTimeDataToLoad);//dont send cursor to this function otherwise it will give error connection closed.because this function will create new thread and in new thread we have to create new connection
-
+                     fetchDataAccordingToIndicator(historyArraylist,totalNumberOfLoadedData,eachTimeDataToLoad);//don't send cursor to this function otherwise it will give error connection closed.because this function will create new thread and in new thread we have to create new connection
 
                         totalNumberOfLoadedData = totalNumberOfLoadedData + eachTimeDataToLoad;//eachTimeDataToLoad eg. value is 40 then data will be loaded and this variable represents total data already loaded
                         if (totalNumberOfLoadedData >= totalRecord) {//when all record loaded then remove scroll listener
@@ -365,7 +364,7 @@ public class HistoryFragment extends Fragment {
 
          if(cursor == null) {return arraylist;}//cursor may be null if error occur when fetching data from db so return empty arraylist
 
-            while (cursor.moveToNext()) {
+            while (cursor.moveToNext()){
                 HistoryModel model = new HistoryModel();
                 model.setId(cursor.getString(0));
                 model.setUserDate(cursor.getString(1));
@@ -375,7 +374,7 @@ public class HistoryFragment extends Fragment {
                 model.setP2Work(cursor.getShort(5));
                 model.setP3Work(cursor.getShort(6));
                 model.setP4Work(cursor.getShort(7));
-                model.setIsDeposit(cursor.getString(8).equals("1"));
+                model.setIsDeposit(cursor.getString(8).equals(GlobalConstants.DEPOSIT_CODE.getValue()));
                 model.setSystemTimeDate(cursor.getString(9));
                 model.setP1Skill(cursor.getString(10));
                 model.setP2Skill(cursor.getString(11));
@@ -721,7 +720,7 @@ public class HistoryFragment extends Fragment {
         new Handler().postDelayed(() -> {
             dataLoad(arraylist,skip,fetch);
             //progressDialogHelper.hideProgressBar();//after data loading progressbar disabled
-        }, 1000);//wait for 3 seconds
+        }, 1000);//wait for 1 second
     }
     private void dataLoad(ArrayList<HistoryModel> arraylist,int skip,int fetch){//dynamically
        //it is running another thread that y connection pool closed errro showing so get here new db connection pool

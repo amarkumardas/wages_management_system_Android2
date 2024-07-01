@@ -169,7 +169,7 @@ public class BusinessInfoBottomSheetFragment extends BottomSheetDialogFragment {
 
         binding.businessInfoSaveButton.setOnClickListener(view1 -> {
 
-            if(!checkCredentials(binding.whatsappNumberEt,binding.phoneNumberEt)) return ;
+            if(!checkCredentials(binding.whatsappNumberEt,binding.phoneNumberEt)) {return ;}
 
                SharedPreferencesHelper.setString(getContext(),SharedPreferencesHelper.Keys.BUSINESS_NAME.name(),binding.businessNameEt.getText().toString().toUpperCase().trim());
 

@@ -33,7 +33,7 @@ import amar.das.acbook.utility.MyUtility;
 public class ActiveMFragment extends Fragment {
 
     private FragmentActiveMBinding binding;
-    ArrayList<MestreLaberGModel> mestreActiveArrayList;
+    ArrayList<MestreLaberGModel> mestreActiveListInAscOrder;
     RecyclerView mestreRecyclerView;
     MestreLaberGAdapter mestreLaberGAdapter;
     TextView advance,balance;
@@ -73,7 +73,7 @@ public class ActiveMFragment extends Fragment {
             balance.setText(HtmlCompat.fromHtml("BALANCE: " + "<b>" + MyUtility.convertToIndianNumberSystem(advanceBalanceCursor.getLong(1)) + "</b>", HtmlCompat.FROM_HTML_MODE_LEGACY));
             advanceBalanceCursor.close();
         }else{
-            advance.setText("SET RATE TO ID:"+noRateIds);
+            advance.setText(getString(R.string.set_rate_to_id_colon)+noRateIds);
             balance.setText("");
         }
 
@@ -83,9 +83,9 @@ public class ActiveMFragment extends Fragment {
        // int totalRecord=getCountOfTotalRecordFromDb();//this will execute when refreshed ie.when new person is added and it will be help full to know exactly how much the record is there to load
 
         Cursor cursorMestre;
-        mestreActiveArrayList =new ArrayList<>(80);//insuring initial capacity to (10+initialDataToLoad)  10 is extra for  if new person present
+        mestreActiveListInAscOrder =new ArrayList<>(80);//insuring initial capacity to (10+initialDataToLoad)  10 is extra for  if new person present
         //**if latest date is null then first it will be top of arraylist that's why two WHILE LOOP is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
@@ -94,11 +94,11 @@ public class ActiveMFragment extends Fragment {
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
             data.setLatestDate(cursorMestre.getString(5));
-            data.setTime(cursorMestre.getString(6));
-            mestreActiveArrayList.add(data);
+
+            mestreActiveListInAscOrder.add(data);
         }
        // cursorMestre=db.getData("SELECT IMAGE,ID,NAME,ADVANCE,BALANCE,LATESTDATE,TIME FROM "+db.TABLE_NAME1 +" WHERE TYPE='M' AND ACTIVE='1' AND LATESTDATE IS NOT NULL ORDER BY LATESTDATE DESC LIMIT "+ initialLoadDataFotActiveMAndL);
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" DESC");
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+ GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NOT NULL ORDER BY "+Database.COL_15_LATESTDATE+" ASC");
         while(cursorMestre.moveToNext()){
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
@@ -107,16 +107,15 @@ public class ActiveMFragment extends Fragment {
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
             data.setLatestDate(cursorMestre.getString(5));
-            data.setTime(cursorMestre.getString(6));
-            mestreActiveArrayList.add(data);
+            mestreActiveListInAscOrder.add(data);
         }
 
-        mestreActiveArrayList.trimToSize();//to release free space
-        MyUtility.sortArrayList(mestreActiveArrayList);//if list latest date is null then at index 0 ,1..should contain null object then non null object that y two while loop is taken
+        mestreActiveListInAscOrder.trimToSize();//to release free space
+        MyUtility.sortArrayList(mestreActiveListInAscOrder);//if list latest date is null then at index 0 ,1..should contain null object then non null object that y two while loop is taken
+
         cursorMestre.close();//closing cursor after finish
-        //db.close();//closing database to prevent data leak
         Database.closeDatabase();
-        mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), mestreActiveArrayList);
+        mestreLaberGAdapter =new MestreLaberGAdapter(getContext(), mestreActiveListInAscOrder);
         mestreRecyclerView.setAdapter(mestreLaberGAdapter);
         mestreRecyclerView.setHasFixedSize(true);//telling to recycler view that don't calculate item size every time when added and remove from recyclerview
         layoutManager=new GridLayoutManager(getContext(),4);//span-count is number of rows
@@ -165,7 +164,6 @@ public class ActiveMFragment extends Fragment {
 
     public int getCountOfTotalRecordFromDb() {
         int count;
-        // Database db=new Database(getContext());
         try(Database db = Database.getInstance(getContext())){
         Cursor cursor;
         cursor = db.getData("SELECT COUNT() FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE " + Database.COL_8_MAINSKILL1 + "='" + getResources().getString(R.string.mestre) + "' AND " + Database.COL_12_ACTIVE + "='"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND " + Database.COL_15_LATESTDATE + " IS NULL");
@@ -175,14 +173,11 @@ public class ActiveMFragment extends Fragment {
         cursor.moveToFirst();
         count = count + cursor.getInt(0);
         return count;
-        //db.close();
         }catch (Exception x){
             x.printStackTrace();
             return  0;
         }
-
     }
-
     private void fetchData(String query, ArrayList<MestreLaberGModel> arraylist) {
         new Handler().postDelayed(() -> {
             loadData(query,arraylist);
@@ -190,14 +185,14 @@ public class ActiveMFragment extends Fragment {
          }, 1000);
     }
 
-    private void loadData(String querys, ArrayList<MestreLaberGModel> arraylist) {
+    private void loadData(String querys, ArrayList<MestreLaberGModel> mList) {
         db=Database.getInstance(getContext());//this should be first statement to load data from db
         Cursor cursorMestre;
-        arraylist.clear();//clearing the previous object which is there
-        arraylist.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact arraylist storage to store exact record
+        mList.clear();//clearing the previous object which is there
+        mList.ensureCapacity(getCountOfTotalRecordFromDb());//to get exact mList storage to store exact record
 
-        //**if latest date is null then first it will be top of arraylist that's why two while Loop is used
-        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+","+Database.COL_16_TIME+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='1' AND "+Database.COL_15_LATESTDATE+" IS NULL");
+        //**if latest date is null then first it will be top of mList that's why two while Loop is used
+        cursorMestre=db.getData("SELECT "+Database.COL_10_IMAGE_PATH +","+Database.COL_1_ID+","+Database.COL_2_NAME+","+Database.COL_13_ADVANCE+","+Database.COL_14_BALANCE+","+Database.COL_15_LATESTDATE+" FROM "+Database.PERSON_REGISTERED_TABLE +" WHERE "+Database.COL_8_MAINSKILL1 +"='"+getResources().getString(R.string.mestre)+"' AND "+Database.COL_12_ACTIVE+"='"+GlobalConstants.ACTIVE_PEOPLE.getValue()+"' AND "+Database.COL_15_LATESTDATE+" IS NULL");
         while(cursorMestre.moveToNext()){//if cursor has 0 record then cursorMestre.moveToNext() return false
             MestreLaberGModel data=new MestreLaberGModel();
             data.setName(cursorMestre.getString(2));
@@ -206,11 +201,10 @@ public class ActiveMFragment extends Fragment {
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
             data.setLatestDate(cursorMestre.getString(5));
-            data.setTime(cursorMestre.getString(6));
-            arraylist.add(data);//adding data to mestre arraylist
+            //data.setReservedProperties(cursorMestre.getString(6));
+            mList.add(data);//adding data to mestre mList
         }
        // mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() when the list is updated,or inserted or deleted
-
 
         cursorMestre = db.getData(querys);//getting data from db
         while (cursorMestre.moveToNext()) {
@@ -221,15 +215,14 @@ public class ActiveMFragment extends Fragment {
             data.setAdvanceAmount(cursorMestre.getInt(3));
             data.setBalanceAmount(cursorMestre.getInt(4));
             data.setLatestDate(cursorMestre.getString(5));
-            data.setTime(cursorMestre.getString(6));
-            arraylist.add(data);
+            //data.setReservedProperties(cursorMestre.getString(6));
+            mList.add(data);
         }
         mestreLaberGAdapter.notifyDataSetChanged();//Use the notifyDataSetChanged() when the list is updated,or inserted or deleted
 
-        arraylist.trimToSize();//to release free space
-        MyUtility.sortArrayList(arraylist);
+        mList.trimToSize();//to release free space
+        MyUtility.sortArrayList(mList);
         cursorMestre.close();
-        //db.close();//closing database
         Database.closeDatabase();
     }
 

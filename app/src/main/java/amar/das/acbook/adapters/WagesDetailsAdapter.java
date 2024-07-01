@@ -37,7 +37,7 @@ import java.util.ArrayList;
 
 import amar.das.acbook.Database;
 import amar.das.acbook.R;
-import amar.das.acbook.activity.CustomizeLayoutOrDepositAmount;
+import amar.das.acbook.activity.DepositAmountActivity;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.model.WagesDetailsModel;
 import amar.das.acbook.utility.MyUtility;
@@ -334,7 +334,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
 
                 String micPath=data.getMicPath();//default value if we don't fetch previous data then null will be inserted and previous voice will be deleted when we try to update only wages so it is important
 
-                String onlyTime =MyUtility.getOnlyTime();
+                String onlyTime =MyUtility.getOnly12hrsTime();
 
                 //if user don't enter remarks or description then it is sure that previous data will be entered so no need to check null pointer exception
                // String remarks = "[" + onlyTime +view.getContext().getString(R.string.hyphen_edited)+"\n\n"+description.getText().toString().trim()+"\n\n"+view12.getContext().getString(R.string.previous_details_were_hyphen)+"\n" + previousDataHold[5] + "  " + previousDataHold[6] + "\n" + previousDataHold[0] + " " + previousDataHold[1] + " " + previousDataHold[2] + " " + previousDataHold[3] + "\n" + previousDataHold[4] + "\n" + previousDataHold[7];//onlyTime is set automatically to remarks if user enter any remarks;
@@ -369,11 +369,11 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                          if(micPath != null){//if it is not null then update micPath
                              // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                              //success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,data.getId(),data.getDate(),data.getTime());
-                             success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,micPath,wages,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + " WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             // success=db.update_1_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,data.getId(),data.getDate(),data.getTime());
-                             success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
+                             success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,null,wages,p1,0,0,0,data.getId(),data.getSystemDateAndTime());
 
                          }
                          if(!success){
@@ -401,12 +401,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',MICPATH='"+micPath+"',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,micPath,wages,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'  WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_2_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,null,wages,p1,p2,0,0,data.getId(),data.getSystemDateAndTime());
                         }
                         if(!success){
                             Toast.makeText(context, context.getResources().getString(R.string.failed_to_update), Toast.LENGTH_LONG).show();
@@ -434,12 +434,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,micPath,wages,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                             //success=db.update_3_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,null,wages,p1,p2,p3,0,data.getId(),data.getSystemDateAndTime());
                         }
 
                         if(!success){
@@ -472,12 +472,12 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                         if(micPath != null){//if it is not null then update micPath
                            // success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks +"',MICPATH='"+micPath+ "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,micPath,wages,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
 
                         }else {//if micPath == null then we are not updating because null in text will be set to micPath and give wrong result like it will indicate that audio is present but actually audio is not present
                             //success = db.updateTable("UPDATE " + db.TABLE_NAME2 + " SET DATE='" + date + "',TIME='" + onlyTime + "',DESCRIPTION='" + remarks + "',WAGES='" + wages + "',P1='" + p1 + "'" + ",P2='" + p2 + "'" + ",P3='" + p3 + "',P4='" + p4 + "' WHERE ID= '" + data.getId() + "'" + " AND DATE= '" + data.getDate() + "'" + " AND TIME='" + data.getTime() + "'");
                            // success=db.update_4_TABLE_NAME2(date,onlyTime,remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getDate(),data.getTime());
-                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.systemCurrentDate24hrTime(),onlyTime,remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
+                            success=db.updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(userDate,MyUtility.getTodaySystemDateTime24hr(),remarks,null,wages,p1,p2,p3,p4,data.getId(),data.getSystemDateAndTime());
                         }
 
                         if(!success){
@@ -869,7 +869,7 @@ public class WagesDetailsAdapter extends RecyclerView.Adapter<WagesDetailsAdapte
                //  deposit_btn_tv.setText(view.getContext().getString(R.string.to_update));
                 //not opening directly because user sometime click on wages instead of deposit so to let user think he has click on right filed then only he can update
                // deposit_btn_tv.setOnClickListener(view14 -> {//sending date,time and id to update deposit
-                    Intent intent=new Intent(context,CustomizeLayoutOrDepositAmount.class);
+                    Intent intent=new Intent(context, DepositAmountActivity.class);
                     intent.putExtra("ID",data.getId());
                     intent.putExtra("SYSTEM_DATETIME",data.getSystemDateAndTime());
 //                    intent.putExtra("DATE",data.getUserGivenDate());

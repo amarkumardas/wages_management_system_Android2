@@ -46,7 +46,7 @@ public class Database extends SQLiteOpenHelper {
     public final static int Database_Version=1;//5to update db version just increase the value by 1.when this value is increase then constructor is called
     SQLiteDatabase db;
     Context context;
-    String backupDatabaseExension=".db";
+    String backupDatabaseExtension =".db";
     public final static String DATABASE_NAME="person_db";
     private static Database instance; // Step 1: Private static instance
 
@@ -66,8 +66,8 @@ public class Database extends SQLiteOpenHelper {
     public final static String COL_12_ACTIVE ="ACTIVE";
     public final static String COL_13_ADVANCE ="ADVANCE";
     public final static String COL_14_BALANCE ="BALANCE";
-    public final static String COL_15_LATESTDATE ="LATESTDATE";
-    public final static String COL_16_TIME ="TIME";//To arrange today's enter data to show on top
+    public final static String COL_15_LATESTDATE ="LATEST_ACTIVE_DATE";//this date will decide when person become active or inactive
+    public final static String COL_16_RESERVED_COLUMN ="RESERVED_COLUMN";//To arrange today's enter data to show on top
     public final static String COL_17_LOCATION ="LOCATION";
     public final static String COL_18_RELIGION="RELIGION";
 
@@ -207,7 +207,7 @@ public class Database extends SQLiteOpenHelper {
      try {//if some error occur it will handle
          //sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME1 + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20)  DEFAULT NULL UNIQUE,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(40) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12)  DEFAULT NULL UNIQUE,"+COL_7_ACTIVE_PHONE1+" VARCHAR(10)  DEFAULT NULL UNIQUE, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(40) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+COL_10_IMAGE+" BLOB DEFAULT NULL);");
 
-         sqLiteDatabase.execSQL("CREATE TABLE " + PERSON_REGISTERED_TABLE + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+ COL_7_MAIN_ACTIVE_PHONE1 +" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,TIME TEXT DEFAULT '0' , "+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+ COL_10_IMAGE_PATH +" TEXT DEFAULT NULL);");
+         sqLiteDatabase.execSQL("CREATE TABLE " + PERSON_REGISTERED_TABLE + " ("+COL_1_ID+" INTEGER PRIMARY KEY AUTOINCREMENT , "+COL_2_NAME+" VARCHAR(100) DEFAULT NULL,"+COL_3_BANKAC+" VARCHAR(20) DEFAULT NULL,"+COL_4_IFSCCODE+" VARCHAR(11) DEFAULT NULL,"+COL_5_BANKNAME+" VARCHAR(38) DEFAULT NULL,"+COL_6_AADHAAR_NUMBER+" VARCHAR(12) DEFAULT NULL,"+ COL_7_MAIN_ACTIVE_PHONE1 +" VARCHAR(10) DEFAULT NULL, "+ COL_8_MAINSKILL1 +" CHAR(1) DEFAULT NULL,"+COL_9_ACCOUNT_HOLDER_NAME+" VARCHAR(100) DEFAULT NULL, "+COL_11_ACTIVE_PHONE2+" VARCHAR(10) DEFAULT NULL,"+COL_12_ACTIVE+" CHAR(1) DEFAULT 1,"+COL_13_ADVANCE+" NUMERIC DEFAULT NULL,"+COL_14_BALANCE+" NUMERIC DEFAULT NULL,"+COL_15_LATESTDATE+" TEXT DEFAULT NULL,"+COL_16_RESERVED_COLUMN+" TEXT DEFAULT NULL,"+COL_17_LOCATION+" VARCHAR(30) DEFAULT NULL, "+COL_18_RELIGION+" VARCHAR(20) DEFAULT NULL, "+ COL_10_IMAGE_PATH +" TEXT DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE0_ACTIVE_MESTRE + " ("+ COL_1_ID_AM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_AM+" TEXT NOT NULL,"+COL_2_DATE_AM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_AM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_AM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_AM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_AM +" INTEGER DEFAULT NULL,"+ COL_9_P2_AM +" INTEGER DEFAULT NULL,"+ COL_10_P3_AM +" INTEGER DEFAULT NULL,"+ COL_11_P4_AM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_AM +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE1_ACTIVE_LG + " ("+ COL_1_ID_ALG +" INTEGER ,"+COL_13_SYSTEM_DATETIME_ALG+" TEXT NOT NULL,"+COL_2_DATE_ALG +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_ALG +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_ALG +" TEXT DEFAULT NULL,"+ COL_6_WAGES_ALG +" NUMERIC DEFAULT NULL,"+ COL_8_P1_ALG +" INTEGER DEFAULT NULL,"+ COL_9_P2_ALG +" INTEGER DEFAULT NULL,"+ COL_10_P3_ALG +" INTEGER DEFAULT NULL,"+ COL_11_P4_ALG +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_ALG +" CHAR(1) DEFAULT NULL);");
          sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_IN_ACTIVE_MESTRE + " ("+ COL_1_ID_IAM +" INTEGER ,"+COL_13_SYSTEM_DATETIME_IAM+" TEXT NOT NULL,"+ COL_2_DATE_IAM +" TEXT DEFAULT NULL,"+ COL_4_MICPATH_IAM +" TEXT DEFAULT NULL,"+ COL_5_REMARKS_IAM +" TEXT DEFAULT NULL,"+ COL_6_WAGES_IAM +" NUMERIC DEFAULT NULL,"+ COL_8_P1_IAM +" INTEGER DEFAULT NULL,"+ COL_9_P2_IAM +" INTEGER DEFAULT NULL,"+ COL_10_P3_IAM +" INTEGER DEFAULT NULL,"+ COL_11_P4_IAM +" INTEGER DEFAULT NULL,"+ COL_12_ISDEPOSITED_IAM +" CHAR(1) DEFAULT NULL);");
@@ -229,8 +229,8 @@ public class Database extends SQLiteOpenHelper {
     public boolean updateOrInsertKeysOfKeyValueTable(@NonNull String key, String value){//first taking all keys from table and storing in hashset now if hashset return true that means this key is not present in table so insert else update
         if(key==null) return false;
 
-        HashSet<String> keysSet= getAllKeysFromKeyValueTable(context);//getting all keys from table
-        if(keysSet==null) return false;
+        HashSet<String> keysSet= getAllKeysFromKeyValueTable();//getting all keys from table
+        if(keysSet==null){ return false;}
 
             if(keysSet.add(key)){//if true means new key so insert key and value in table
                 if(!updateTable("INSERT INTO "+Database.TABLE_KEY_VALUE+" ("+Database.COL_1_KEY+","+Database.COL_2_VALUE+") VALUES ('"+key+"','"+ value+"');")){
@@ -254,7 +254,7 @@ public class Database extends SQLiteOpenHelper {
             return null;
         }
     }
-    public HashSet<String> getAllKeysFromKeyValueTable(Context context) {
+    public HashSet<String> getAllKeysFromKeyValueTable() {
         String [] keys=null;
         try(Cursor keyCursor=getData("SELECT "+Database.COL_1_KEY+" FROM "+Database.TABLE_KEY_VALUE)){
             keys=new String[keyCursor.getCount()];
@@ -292,7 +292,7 @@ public class Database extends SQLiteOpenHelper {
      // Log.d("DATABASE","ON UPGRADE DROP 3 TABLES");
       //onCreate(sqLiteDatabase);
     }
-    public String insertDataToDetailsAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, String imagePath, String phone2, String location, String religion) {//if error return null
+    public String insertDataToPersonRegisteredAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, String imagePath, String phone2, String location, String religion) {//if error return null
        if(skill==null || name==null) return null;
         String newelyCreatedId=null;
         boolean success=false;
@@ -544,7 +544,7 @@ public class Database extends SQLiteOpenHelper {
                         cv.put(COL_13_SYSTEM_DATETIME_ALG, systemDateTime);
                     }else return false;
 
-                    if (isDeposited != null && (isDeposited.equals("0") || isDeposited.equals("1"))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
+                    if (isDeposited != null && (isDeposited.equals(GlobalConstants.WAGES_CODE.getValue()) || isDeposited.equals(GlobalConstants.DEPOSIT_CODE.getValue()))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
                         cv.put(COL_12_ISDEPOSITED_ALG, isDeposited);
                     }else return false;
 
@@ -566,9 +566,6 @@ public class Database extends SQLiteOpenHelper {
                     if (wages != 0) {
                         cv.put(COL_6_WAGES_AM, wages);
                     }
-//                    if (deposit != 0) {
-//                        cv.put(COL_7_DEPOSIT_AM, deposit);
-//                    }
                     if (p1 != 0) {
                         cv.put(COL_8_P1_AM, p1);
                     }
@@ -585,7 +582,7 @@ public class Database extends SQLiteOpenHelper {
                         cv.put(COL_13_SYSTEM_DATETIME_AM, systemDateTime);
                     }else return false;
 
-                    if (isDeposited != null && (isDeposited.equals("0") || isDeposited.equals("1"))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
+                    if (isDeposited != null && (isDeposited.equals(GlobalConstants.WAGES_CODE.getValue()) || isDeposited.equals(GlobalConstants.DEPOSIT_CODE.getValue()))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
                         cv.put(COL_12_ISDEPOSITED_AM, isDeposited);
                     }else return false;
                     return (db.insert(TABLE0_ACTIVE_MESTRE, null,cv) == -1)? false :true;//(rowId == -1) means data not inserted
@@ -611,9 +608,6 @@ public class Database extends SQLiteOpenHelper {
             if (wages != 0) {
                 cv.put(COL_6_WAGES_ALG, wages);
             }
-//            if (deposit != 0) {
-//                cv.put(COL_7_DEPOSIT_ALG, deposit);
-//            }
             if (p1 != 0) {
                 cv.put(COL_8_P1_ALG, p1);
             }
@@ -631,7 +625,7 @@ public class Database extends SQLiteOpenHelper {
                 cv.put(COL_13_SYSTEM_DATETIME_ALG, systemDateTime);
             }else return false;
 
-            if (isDeposited != null && (isDeposited.equals("0") || isDeposited.equals("1"))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
+            if (isDeposited != null && (isDeposited.equals(GlobalConstants.WAGES_CODE.getValue()) || isDeposited.equals(GlobalConstants.DEPOSIT_CODE.getValue()))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
                 cv.put(COL_12_ISDEPOSITED_ALG, isDeposited);
             }else return false;
 
@@ -652,9 +646,6 @@ public class Database extends SQLiteOpenHelper {
             if (wages != 0) {
                 cv.put(COL_6_WAGES_AM, wages);
             }
-//            if (deposit != 0) {
-//                cv.put(COL_7_DEPOSIT_AM, deposit);
-//            }
             if (p1 != 0) {
                 cv.put(COL_8_P1_AM, p1);
             }
@@ -672,19 +663,19 @@ public class Database extends SQLiteOpenHelper {
                 cv.put(COL_13_SYSTEM_DATETIME_AM, systemDateTime);
             }else return false;
 
-            if (isDeposited != null && (isDeposited.equals("0") || isDeposited.equals("1"))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
+            if (isDeposited != null && (isDeposited.equals(GlobalConstants.WAGES_CODE.getValue()) || isDeposited.equals(GlobalConstants.DEPOSIT_CODE.getValue()))) {//its very important to have value user have to pass either 0 for not deposit or 1 for deposit because when editing this value is used to decide TO edit.But here validation not required because this method will receive data directly from table
                 cv.put(COL_12_ISDEPOSITED_AM, isDeposited);
             }else return false;
             return (db.insert(TABLE2_IN_ACTIVE_MESTRE, null,cv) == -1)? false :true;//(rowId == -1) means data not inserted
         }
         return false;
     }
-    public boolean insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String id, String systemCurrentDate24hrTime, String date, String time, String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
+    public boolean insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String id, String systemCurrentDate24hrTime, String date,String micPath, String remarks, int wages, int p1, int p2, int p3, int p4,String isDeposited) {
       /**Before inserting first 1. make id active because only(INSERTION,UPDATION,AND PRESSING ACTIVE RADIO BUTTON) would make id active so since it is insertion method so make it active
        * 2. check for duplicate data then
        * 3.insert into active table*/
 
-        if(!activateIdWithLatestDate(id,time)){
+        if(!activateIdWithLatestDateTime(id)){
             Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -840,11 +831,11 @@ public class Database extends SQLiteOpenHelper {
             }
         }
     }
-    public boolean updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String date, String newSystemTimeDate, String time, String remarks, String micPath, int wages, int p1 , int p2, int p3, int p4, String id , String previousSystemTimeDate){
+    public boolean updateWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(String date, String newSystemTimeDate,String remarks, String micPath, int wages, int p1 , int p2, int p3, int p4, String id , String previousSystemTimeDate){
         /**Before updating first make id active because only(INSERTION,UPDATION,AND PRESSING ACTIVE RADIO BUTTON) would make id active so since it is updation method so make it active
          *  second check for duplicate data then update into active table*/
 
-        if(!activateIdWithLatestDate(id,time)){
+        if(!activateIdWithLatestDateTime(id)){
             Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
             return false;
         }
@@ -867,7 +858,7 @@ public class Database extends SQLiteOpenHelper {
             dB.beginTransaction();//transaction start
             ContentValues cv = new ContentValues();//to enter data at once it is like hash map
 
-            if(activeInactiveSkill[0].equals("1")){//if person is active at 0th position and 1st position is person skill
+            if(activeInactiveSkill[0].equals(GlobalConstants.ACTIVE_PEOPLE.getValue())){//if person is active at 0th position and 1st position is person skill
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for M OR lG
                     if (date != null) {
@@ -1036,7 +1027,7 @@ public class Database extends SQLiteOpenHelper {
 
         Integer prevSubAdOrBal=(prevSubtractAdvanceOrBalance !=null)?Integer.valueOf(prevSubtractAdvanceOrBalance):0;
 
-                   if(isDeposited.equals("0")){//if no deposit means when wages
+                   if(isDeposited.equals(GlobalConstants.WAGES_CODE.getValue())){//if no deposit means when wages
 
                        Integer prevWages=(prevWagesAndDeposit[0]!=null)?prevWagesAndDeposit[0]:0;
                        Integer newWages=(newUpdatedWages!=null)?Integer.valueOf(newUpdatedWages):0;
@@ -1050,7 +1041,7 @@ public class Database extends SQLiteOpenHelper {
  //                              null         null        null
 //                              4000          4000        null
 
-                   }else if(isDeposited.equals("1")){//if deposit means
+                   }else if(isDeposited.equals(GlobalConstants.DEPOSIT_CODE.getValue())){//if deposit means
 
                        Integer prevDeposit=(prevWagesAndDeposit[1]!=null)?prevWagesAndDeposit[1]:0;
                        Integer newDeposit=(newUpdatedDeposit!=null)?Integer.valueOf(newUpdatedDeposit):0;
@@ -1414,7 +1405,7 @@ public class Database extends SQLiteOpenHelper {
             Cursor otherTableDataCursor= getDataFromOtherTable(duplicateDataPresentTableNumber,id);
             //StringBuilder remarks=new StringBuilder(formatCursorDataToText(otherTableDataCursor)).append("\n\nALL "+otherTableDataCursor.getCount()+" ENTRIES TOTAL SUM").append(MyUtility.getMessageOnlyTotalWagesAndDeposit(id,context));
             String  remarks= formatCursorDataToText(otherTableDataCursor);
-            String systemCurrentDate24hrTime=MyUtility.systemCurrentDate24hrTime();
+            String systemCurrentDate24hrTime=MyUtility.getTodaySystemDateTime24hr();
 
             if(activeAndSkill[0].equals("1")){//insert remarks in current active table
                 if(!insertWagesOrDepositToActiveTableDirectly(dB,systemCurrentDate24hrTime, activeAndSkill[1], id, MyUtility.getOnlyCurrentDateForLatestDate() , null, remarks, 0, 0, 0, 0, 0,"0")){
@@ -1454,7 +1445,7 @@ public class Database extends SQLiteOpenHelper {
         StringBuilder wagesSb=new StringBuilder();
         StringBuilder depositSb=new StringBuilder();
 
-        depositSb.append("["+MyUtility.getOnlyTime()+context.getResources().getString(R.string.hyphen_entered))
+        depositSb.append("["+MyUtility.getOnly12hrsTime()+context.getResources().getString(R.string.hyphen_entered))
 //                .append("\n\nDATA FOUND IN OTHER TABLE. ")
 //                .append("\nDATA DELETED FROM OTHER TABLE. ")
 //                .append("\nTOTAL NUMBER OF DELETED DATA: ").append(otherTableDataCursor.getCount());
@@ -1534,7 +1525,8 @@ public class Database extends SQLiteOpenHelper {
             dB.beginTransaction();//transaction start
 
             if(updateLatestDate){
-                dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDateForLatestDate() + "' , " + Database.COL_16_TIME + "='" + MyUtility.getOnlyTime() + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it active to shift data in active table
+//                dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getTodaySystemDateTime24hr() + "' , " + Database.COL_16_TIME + "='" + MyUtility.getOnly12hrsTime() + "' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it active to shift data in active table
+                dB.execSQL("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getTodaySystemDateTime24hr() +"' WHERE " + Database.COL_1_ID + "='" + id + "'");//Making it active to shift data in active table
             }
 
             if (dataFromTableCursor != null) {
@@ -1594,11 +1586,11 @@ public class Database extends SQLiteOpenHelper {
         }
         return success;
     }
-    private boolean activateIdWithLatestDate(String id, String onlyTime) {
-        if(id == null || onlyTime == null) return false;
+    private boolean activateIdWithLatestDateTime(String id) {
+        if(id == null){ return false;}
 
         if (isActiveOrInactive(id)) {//if active then update active and latest date
-           return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getOnlyCurrentDateForLatestDate() + "' , " + Database.COL_16_TIME + "= '" + onlyTime + "' WHERE " + Database.COL_1_ID + "='" + id + "'");
+           return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getTodaySystemDateTime24hr() +"' WHERE " + Database.COL_1_ID + "='" + id + "'");
         }else {
              return makeIdActive(id);
         }
@@ -1871,7 +1863,7 @@ public class Database extends SQLiteOpenHelper {
     }
      /**2.check id is active or not.if not active then make active.Its Important otherwise data will be inserted in other table*/
       boolean success=false;//value should be false
-      if(!activateIdWithLatestDate(id,MyUtility.getOnlyTime())){
+      if(!activateIdWithLatestDateTime(id)){
          // Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();//cant use during background task
           return false;
       }
@@ -1925,7 +1917,7 @@ public class Database extends SQLiteOpenHelper {
 //                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
 //            }//toast will not work while doing background task
 
-            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDateForLatestDate(),null, "["+ MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDateForLatestDate(),null, "["+ MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
             success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){
@@ -2286,19 +2278,19 @@ public class Database extends SQLiteOpenHelper {
 
             if (cursor.getInt(0) != 0 && cursor.getInt(1) == 0) {//if advance there
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,"0")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation advance Rs. " + cursor.getInt(0)+" ]",cursor.getInt(0),0,0,0,0,"0")) return false;
 
             }else if (cursor.getInt(0) == 0 && cursor.getInt(1) != 0) {//if balance there
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" +MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",cursor.getInt(1),0,0,0,0,"1")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" +MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation balance Rs. " + cursor.getInt(1)+" ]",cursor.getInt(1),0,0,0,0,"1")) return false;
 
             }else if(cursor.getInt(0) == 0 && cursor.getInt(1) == 0){//if no advance and balance
 
-                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.systemCurrentDate24hrTime(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnlyTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,"0")) return false;
+                if(!insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id,MyUtility.getOnlyCurrentDateForLatestDate(),null, "[" + MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n"+context.getResources().getString(R.string.summary_of_previous_invoice_number_dot)+MyUtility.getPdfSequence(id,context)+previousSummary+"\n\n" + "[After calculation no dues  Rs. 0 ]",0,0,0,0,0,"0")) return false;
 
             }
             //HISTORY TABLE
-            if(!insertWagesOrDepositToHistoryTable(dB,id,MyUtility.systemCurrentDate24hrTime(),HistoryFragment.automaticInserted)) return false;//after inserting add to history table using primary key
+            if(!insertWagesOrDepositToHistoryTable(dB,id,MyUtility.getTodaySystemDateTime24hr(),HistoryFragment.automaticInserted)) return false;//after inserting add to history table using primary key
 
             return true;
         }catch (Exception ex){
@@ -2465,13 +2457,10 @@ public class Database extends SQLiteOpenHelper {
         cv.put(COL_5_REMARKS_H,cursor.getString(1));
 
         //AT A TIME cursor.getString(2) and cursor.getString(3) will contain value
-        if(cursor.getString(2)!=null)
-            cv.put(COL_6_WAGES_H,cursor.getString(2));
+        if(cursor.getString(2)!=null) {
+            cv.put(COL_6_WAGES_H, cursor.getString(2));
 
-//        else if(cursor.getString(3)!=null)
-//            cv.put(COL_6_WAGES_H,cursor.getString(3));
-//
-        else{
+        }else{
             cv.put(COL_6_WAGES_H,0);
         }
 
@@ -3073,7 +3062,7 @@ public class Database extends SQLiteOpenHelper {
 
         if (!databaseFile.exists()) {return null;} // Check if database exists and return null if not
 
-        File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName,backupDatabaseExension);//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
+        File backupFile = createDbFolderInExternalStorageAndReturnFile(uniqueDatabaseFileName, backupDatabaseExtension);//The .db file extension typically indicates a database file.  This means the file stores information in a structured format that allows for efficient retrieval and manipulation.
         if (backupFile == null) {return null;}
 
         //this approach is very fast so no need to compress file it make it slower while sharing

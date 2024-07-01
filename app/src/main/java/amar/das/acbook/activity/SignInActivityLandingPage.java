@@ -106,10 +106,12 @@ public class SignInActivityLandingPage extends AppCompatActivity {
 
                 if(checkAllDataRestoredSuccessfully()){
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
-                    SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);
+                    SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);//user will move to navigation activity
+                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                     finishAndGoToNavigationActivity();
                 }else{
-                    this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.half_data_restored), Toast.LENGTH_LONG).show());
+                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                    this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.your_data_was_not_fully_restored), Toast.LENGTH_LONG).show());
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
                 }
 
@@ -119,10 +121,12 @@ public class SignInActivityLandingPage extends AppCompatActivity {
 
                     if(checkAllDataRestoredSuccessfully()){
                         this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
-                        SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);
+                        SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);//user will move to navigation activity
+                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                         finishAndGoToNavigationActivity();
                     }else{
-                        this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.half_data_restored), Toast.LENGTH_LONG).show());
+                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                        this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.your_data_was_not_fully_restored), Toast.LENGTH_LONG).show());
                         this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
                     }
 

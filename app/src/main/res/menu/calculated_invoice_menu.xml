@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+     <item android:id="@+id/calculated_invoice_means"
+         android:title="@string/what_is_calculated_invoice_question_mark"/>
+    <item android:id="@+id/calculated_invoice_free_Space"
+        android:title="@string/backup_and_freeup_space_tips"/>
+</menu>

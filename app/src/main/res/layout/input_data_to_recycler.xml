@@ -401,7 +401,7 @@
                 android:layout_marginRight="10dp"
 
                 android:text="@string/cancel"
-                android:textSize="15dp"
+
                 android:textColor="#FF0000"
                 android:textAlignment="center"
                 android:background="@drawable/graycolor_bg"
@@ -415,7 +415,7 @@
                 android:layout_marginRight="10dp"
                 android:text="@string/save_wages"
                 android:textColor="@color/white"
-                android:textStyle="bold"
+
                 android:background="@drawable/green_color_bg"
                 android:id="@+id/save_btn"
                 android:foreground="?android:attr/selectableItemBackground"/>

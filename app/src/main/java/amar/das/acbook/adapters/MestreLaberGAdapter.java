@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +32,12 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
     ArrayList<MestreLaberGModel> arrayList;//because more operation is retrieving
     //final Calendar current=Calendar.getInstance();//to get current date
     // String currentDate =current.get(Calendar.DAY_OF_MONTH)+"-"+(current.get(Calendar.MONTH)+1)+"-"+current.get(Calendar.YEAR);
-    String []dateArray;
+    //String []dateArray;
     byte daysToBecomeInactive= Byte.parseByte(GlobalConstants.TWO_WEEKS_DEFAULT.getValue());//default value if days inactive then make id inactive
-    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01 added 0 automatically//for performance this variable is declare here
-    String currentDateDBPattern =todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022 remove 0.//for performance this variable is declare here
+//    LocalDate dbDate, todayDate = LocalDate.now();//current date; return 2022-05-01 added 0 automatically//for performance this variable is declare here
+    LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01 added 0 automatically//for performance this variable is declare here
+
+    //String currentDateDBPattern =todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022 remove 0.//for performance this variable is declare here
     Database db;
 
     public MestreLaberGAdapter(Context context, ArrayList<MestreLaberGModel> arrayList){
@@ -91,18 +92,19 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 
         if(data.getLatestDate() !=null) {//for null pointer exception//https://www.youtube.com/watch?v=VmhcvoenUl0
 
-            if (data.getLatestDate().equals(currentDateDBPattern)) //if profile color is yellow that means on current day some data is entered
+             if (MyUtility.getDateFromSystemDateTime(data.getLatestDate()).equals(todayDate.toString())) {//if profile color is yellow that means on current day some data is entered
                 holder.yellowBg.setBackgroundColor(context.getColor(R.color.yellow));
-             else
+            }else {
                 holder.yellowBg.setBackgroundColor(Color.WHITE);
+            }
 
             //if user is not active for 1 month then it will become inactive based on latest date
-            dateArray = data.getLatestDate().split("-");
-            dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-05-01 it add 0 automatically
+//            dateArray = MyUtility.getDateFromSystemDateTime(data.getLatestDate()).split("-");//return 2022-05-01
+//            dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert to 2022-05-01 it add 0 automatically
             // making it active or inactive using latest date (2022-05-01,2022-05-01) 0 is added to date
 
-
-            if(MyUtility.daysBetweenDate(dbDate,todayDate) >= daysToBecomeInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+           // if(MyUtility.daysBetweenDate(dbDate,todayDate) >= daysToBecomeInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
+            if(MyUtility.daysBetweenDate(LocalDate.parse(MyUtility.getDateFromSystemDateTime(data.getLatestDate())),todayDate) >= daysToBecomeInactive){//LocalDate.parse method, which takes a date string in the format "yyyy-MM-dd" (year-month-day) and parses it into a LocalDate object.
 
                 if(!db.makeIdInActive(data.getId())){//if latest date is one month old
                     Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_inactive), Toast.LENGTH_LONG).show();
@@ -110,10 +112,10 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 
             }else{
                 if(db.isActiveOrInactive(data.getId())){//to make id inactive change to false if(!db.isActiveOrInactive(data.getId())){
-                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_12_ACTIVE+"='" + GlobalConstants.ACTIVE_PEOPLE.getValue() +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
+                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_12_ACTIVE+"='" + GlobalConstants.ACTIVE_PEOPLE.getValue() +"' WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it is updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation and profile would never be inactive
                  }else{
                     //for testing make if condition false and next if comment it
-//                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_15_LATESTDATE+"='1-5-2023'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
+//                    db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_15_LATESTDATE+"='2024-05-10 22:04:42'" + " WHERE "+Database.COL_1_ID+"='" + data.getId() + "'");//here latest date is not updated because already it it updated during insertion and if we update latest date here manually then wrong output because everytime adapter will update latest date.latest date is updated only during insertion or updation
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
 //                    }

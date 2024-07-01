@@ -29,15 +29,14 @@ public class SeparateAllMLGRecordAdapter extends RecyclerView.Adapter<SeparateAl
     Context context;
     ArrayList<MLGAllRecordModel> arrayList;//because more operation is retrieving
     //for date***********************
-    String []dateArray;
+    //String []dateArray;
    // int d,m,y;
-    LocalDate dbLatestDate, todayDate =LocalDate.now();
+    LocalDate todayDate =LocalDate.now();
     Database db;
    //array lis has data name id and active
     public SeparateAllMLGRecordAdapter(Context context, ArrayList<MLGAllRecordModel> data){
         this.arrayList=data;
         this.context=context;
-//        db=new Database(context);//we cant give this at class level
         db=Database.getInstance(context);//we cant give this at class level
     }
 
@@ -57,17 +56,16 @@ public class SeparateAllMLGRecordAdapter extends RecyclerView.Adapter<SeparateAl
            // holder.name.setTextColor(Color.RED);
            //if they are not active then only it will show months
             if(data.getLatestDate() !=null) {//https://www.youtube.com/watch?v=VmhcvoenUl0
-                dateArray = data.getLatestDate().split("-");
+               // dateArray = data.getLatestDate().split("-");
 //                d = Integer.parseInt(dateArray[0]);
 //                m = Integer.parseInt(dateArray[1]);
 //                y = Integer.parseInt(dateArray[2]);
-                dbLatestDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 01.05.2022 it add 0 automatically
-                holder.inactiveDuration.setText(""+ChronoUnit.MONTHS.between(dbLatestDate, todayDate)+" MONTHS");
+                //dbLatestDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 01.05.2022 it add 0 automatically
+                holder.inactiveDuration.setText(ChronoUnit.MONTHS.between(LocalDate.parse(MyUtility.getDateFromSystemDateTime(data.getLatestDate())), todayDate)+" MONTHS");
             }
             holder.inactiveDuration.setTextColor(Color.RED);
         }else {
             holder.inactiveDuration.setTextColor(Color.BLACK);
-          // holder.name.setTextColor(Color.BLACK);
         }
 
         holder.layout.setOnClickListener(view -> {//WE have to send id

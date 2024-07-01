@@ -1,11 +1,11 @@
 package amar.das.acbook.model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
-public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGModel>  {
+
+//public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGModel>  {
+public class MestreLaberGModel implements Serializable   {
+
     private static final long serialVersionUID = 42L;
     public int getAdvanceAmount() {
         return advanceAmount;
@@ -27,15 +27,15 @@ public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGMo
     private String name;
     private String id;
 
-    public String getTime() {
-        return time;
-    }
+//    public String getReservedProperties() {
+//        return reservedProperties;
+//    }
+//
+//    public void setReservedProperties(String reservedProperties) {
+//        this.reservedProperties = reservedProperties;
+//    }
 
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    private String time;
+    private String reservedProperties;
     public String getLatestDate() {
         return latestDate;
     }
@@ -69,44 +69,15 @@ public class MestreLaberGModel implements Serializable,Comparable<MestreLaberGMo
         this.imagePath = imagePath;
     }
 
-    @Override
-    public int compareTo(MestreLaberGModel obj1) {//natural sorting latest date desc
-        DateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-        try {
-            return f.parse(obj1.getLatestDate()).compareTo(f.parse(this.getLatestDate()));//will return 0 if two date is same
-        }catch (ParseException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }//sort data by taking latest date in desc order.so that search would be easy.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   // @Override
+//    public int compareTo(MestreLaberGModel obj1) {//natural sorting latest date desc
+//        DateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+//        try {
+//            return f.parse(obj1.getLatestDate()).compareTo(f.parse(this.getLatestDate()));//will return 0 if two date is same
+//        }catch (ParseException e) {
+//            throw new IllegalArgumentException(e);
+//        }
+//    }//sort data by taking latest date in desc order.so that search would be easy.
 
 //    public static Comparator<MestreLaberGModel> s =new Comparator<MestreLaberGModel>() {
 //        @Override

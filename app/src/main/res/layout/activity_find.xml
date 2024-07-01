@@ -77,7 +77,7 @@ expanded automatically
             android:text="@string/mestre"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17sp"
+
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -93,7 +93,7 @@ expanded automatically
             android:text="@string/laber"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17sp"
+
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -109,7 +109,7 @@ expanded automatically
             android:text="@string/women_laber"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17sp"
+
             android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -125,7 +125,7 @@ expanded automatically
             android:text="@string/invoice"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="17sp"
+            android:textStyle="bold"
             android:foreground="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>

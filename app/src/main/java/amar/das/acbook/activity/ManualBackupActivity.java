@@ -49,6 +49,12 @@ public class ManualBackupActivity extends AppCompatActivity {
 //            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
 //            return insets;
 //        });
+        if(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null) != null){
+            binding.restorationInformation.setText(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null));
+        }else{
+            binding.restorationInformation.setVisibility(View.GONE);
+        }
+
         ProgressDialogHelper progressBar = new ProgressDialogHelper(this);
 
         setBackupEachFileUserSelectedFileFormat();//backup each file

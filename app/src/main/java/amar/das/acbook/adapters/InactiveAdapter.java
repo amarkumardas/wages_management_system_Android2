@@ -90,10 +90,6 @@ public class InactiveAdapter extends RecyclerView.Adapter<InactiveAdapter.ViewHo
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-//            profileImg =itemView.findViewById(R.id.profile_img_inactive);
-//            amountAdvance =itemView.findViewById(R.id.advance_amount_tv_inactive);
-//            name=itemView.findViewById(R.id.inactive_names_tv);
-
             profileImg =itemView.findViewById(R.id.profile_img);
             amountAdvance =itemView.findViewById(R.id.advance_amount_tv);
             name=itemView.findViewById(R.id.names_tv);

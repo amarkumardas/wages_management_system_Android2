@@ -62,8 +62,9 @@
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
     <string name="bank_name">BANK NAME</string>
     <string name="ifsc_code">IFSC CODE</string>
-    <string name="menu_insert_new_">NEW PERSON</string>
-    <string name="menu_backup_invoices">BACKUP INVOICE</string>
+<!--    <string name="menu_insert_new_">NEW PERSON</string>-->
+<!--    <string name="menu_insert_new_">NEW PERSON</string>-->
+    <string name="what_is_calculated_invoice_question_mark">WHAT IS CALCULATED INVOICES?</string>
     <string name="insert_data">ADD</string>
     <string name="account_holder_name">A/C HOLDER NAME</string>
 
@@ -83,8 +84,9 @@
     <string name="backup_calculated_invoice_and_delete_invoice_to_free_up_space">BACKUP CALCULATED INVOICE AND DELETE INVOICE TO FREE UP SPACE"</string>
     <string name="no_calculated_invoice_available">NO CALCULATED INVOICE AVAILABLE</string>
     <string name="calculated_invoice">CALCULATED INVOICE</string>
-    <string name="backup_and_freeup_space_tips">BACKUP AND FREEUP SPACE TIPS</string>
+    <string name="backup_and_freeup_space_tips">BACKUP AND FREE UP SPACE TIPS</string>
     <string name="calculated_invoice_backup_hint">How To Back Up Calculated Invoice?\n\n1. Long-press On Any File.\n\n2. Select All The Files You Want To Back Up, Then Share Them To Google Drive Or Any Other Storage Location.\n\nHow To Free Up Space?\n\nAfter Taking Back Up, Delete All The Selected Files By Clicking The Delete Icon.</string>
+    <string name="calculate_invoice_means">Calculated Invoice File Contain All Details Of Wages , Deposit , Work Days.\n\nIt Is Same As PDF Invoice File Which You See After Doing Calculation Of a Person.</string>
 
     <!-- PdfViewerOperation Activity-->
     <string name="last_invoice2">LAST INVOICE2</string>
@@ -404,8 +406,9 @@
     <string name="yes_then_find_your_google_account_to_restore_backup_data_from_google_drive">Yes, Then Find Your Google Account To Restore Backup Data From Google Drive</string>
     <string name="find_backup">FIND BACKUP</string>
     <string name="data_restored_successfully">Data Restored Successfully</string>
+    <string name="you_restored_data_successfully">You Restored Data Successfully</string>
     <string name="data_restore_failed">Data Restore Failed</string>
-    <string name="half_data_restored">Half Data Restored</string>
+    <string name="your_data_was_not_fully_restored">Your Data Was Not Fully Restored</string>
     <string name="try_again">Try Again</string>
 
 
@@ -510,5 +513,7 @@
     <string name="action_share">SHARE</string>
     <string name="action_select_all">SELECT ALL</string>
     <string name="no_image">NO IMAGE</string>
+    <string name="info">INFO</string>
+
 
 </resources>

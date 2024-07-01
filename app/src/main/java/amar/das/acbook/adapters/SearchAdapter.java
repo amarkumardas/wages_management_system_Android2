@@ -50,7 +50,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
            holder.inactiveOrActive.setText(context.getString(R.string.active));
            holder.inactiveOrActive.setBackgroundResource(R.drawable.green_color_bg);
        }else {
-           holder.inactiveOrActive.setText(context.getString(R.string.inactive)+" FOR "+getInactiveDays(data.getLatestDate()));
+           holder.inactiveOrActive.setText(context.getString(R.string.inactive)+" FOR "+getInactiveDays(MyUtility.getDateFromSystemDateTime(data.getLatestDate())));
            holder.inactiveOrActive.setBackgroundResource(R.drawable.graycolor_bg);
        }
 
@@ -100,9 +100,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     private String getInactiveDays(String latestDate){
         if(latestDate== null) return "";
 
-        String[] dateArray = latestDate.split("-");
-        LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-5-1 to 2022-05-01 it add 0 automatically
-        return convertDaysToPeriod(MyUtility.daysBetweenDate(dbDate,LocalDate.now()));
+//        String[] dateArray = latestDate.split("-");
+//        LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-5-1 to 2022-05-01 it add 0 automatically
+        return convertDaysToPeriod(MyUtility.daysBetweenDate(LocalDate.parse(latestDate),LocalDate.now()));
     }
     private String convertDaysToPeriod(int days) {
         StringBuilder period = new StringBuilder();

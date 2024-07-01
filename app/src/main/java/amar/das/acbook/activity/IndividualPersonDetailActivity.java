@@ -243,7 +243,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                       model.setP3(allDataCursor.getShort(6));
                       model.setP4(allDataCursor.getShort(7));
                       model.setId(allDataCursor.getString(8));
-                      model.setIsdeposited((allDataCursor.getString(9).equals("1")));
+                      model.setIsdeposited((allDataCursor.getString(9).equals(GlobalConstants.DEPOSIT_CODE.getValue())));
                       model.setSystemDateAndTime(allDataCursor.getString(10));
                       dataList.add(model);
                   }
@@ -659,10 +659,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
                         updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator,false);
 
-                        if(!MyUtility.updateLocationReligionToTableIfValueIsUnique(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
+                        if(!MyUtility.updateLocationAndReligionToTableIfValueIsUnique(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
                         }
-                        locationReligionSuccess=db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_18_RELIGION+"='" + religionAutoComplete.getText().toString().trim() + "', "+Database.COL_17_LOCATION+"='"+ locationAutoComplete.getText().toString().trim() +"' WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");
+
+                        String religion=TextUtils.isEmpty(religionAutoComplete.getText().toString().trim())? null : religionAutoComplete.getText().toString().trim();
+                        String location=TextUtils.isEmpty(locationAutoComplete.getText().toString().trim())? null :locationAutoComplete.getText().toString().trim();
+                        locationReligionSuccess=db.updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET "+Database.COL_18_RELIGION+"=" + ((religion!=null)? ("'"+religion+"'"): "NULL ")+ ", "+Database.COL_17_LOCATION+"="+  ((location!=null)? ("'"+location+"'"): "NULL ") +" WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'");//to set null its difficult.if you place null in like 'null' then value NULL is written in db so this approach avoid this error
 
                         dialog.dismiss();//dismiss current dialog because new dialog will be open when display result()
 
@@ -1853,7 +1856,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
 
         deposit_btn_tv.setOnClickListener(view -> {
             MyUtility.deletePdfOrRecordingUsingPathFromAppStorage(audioPath);//before going to other activity .delete Audio If Not user Saved
-            Intent intent=new Intent(IndividualPersonDetailActivity.this,CustomizeLayoutOrDepositAmount.class);
+            Intent intent=new Intent(IndividualPersonDetailActivity.this, DepositAmountActivity.class);
             intent.putExtra("ID",fromIntentPersonId);
             customDialog.dismiss();//while going to other activity dismiss dialog otherwise window leak
             finish();//while going to other activity so destroy  this current activity so that while coming back we will see refresh activity
@@ -1943,7 +1946,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             String date=inputDate.getText().toString();//date will be inserted automatically
 
             //To get exact time so write code in save button
-            String time = MyUtility.getOnlyTime();
+            String time = MyUtility.getOnly12hrsTime();
 
             if(audioPath != null){//if file is not null then only it execute otherwise nothing will be inserted
                 micPath=audioPath;
@@ -1974,7 +1977,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
              if(indicator==1){
                 if (isDataPresent == true && isWrongData == false) {//it is important means if data is present then check is it right data or not.if condition is false then this message will be displayed "Correct the Data or Cancel and Enter again"
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, 0, 0, 0,GlobalConstants.WAGES_CODE.getValue())) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.getTodaySystemDateTime24hr(),date,micPath, remarks, wages, p1, 0, 0, 0,GlobalConstants.WAGES_CODE.getValue())) {
                            Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -1995,7 +1998,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p2 = Integer.parseInt(inputP2.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(), date, time, micPath, remarks, wages, p1, p2, 0, 0,  GlobalConstants.WAGES_CODE.getValue())) {
+                     if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.getTodaySystemDateTime24hr(), date, micPath, remarks, wages, p1, p2, 0, 0,  GlobalConstants.WAGES_CODE.getValue())) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                        }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2017,7 +2020,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p3 = Integer.parseInt(inputP3.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, 0,GlobalConstants.WAGES_CODE.getValue())) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.getTodaySystemDateTime24hr(),date, micPath, remarks, wages, p1, p2, p3, 0,GlobalConstants.WAGES_CODE.getValue())) {
                             Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);
@@ -2042,7 +2045,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         p4 = Integer.parseInt(inputP4.getText().toString().trim());//converted to float and stored
                     }
                     //insert to database
-                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.systemCurrentDate24hrTime(),date, time, micPath, remarks, wages, p1, p2, p3, p4,GlobalConstants.WAGES_CODE.getValue())) {
+                    if(!db.insertWagesOrDepositOnlyToActiveTableAndHistoryTableTransaction(fromIntentPersonId,MyUtility.getTodaySystemDateTime24hr(),date, micPath, remarks, wages, p1, p2, p3, p4,GlobalConstants.WAGES_CODE.getValue())) {
                         Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_insert), Toast.LENGTH_LONG).show();
                      }
                     refreshCurrentActivity(fromIntentPersonId);

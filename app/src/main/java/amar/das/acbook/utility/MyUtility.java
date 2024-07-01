@@ -33,8 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -59,12 +58,9 @@ import amar.das.acbook.textfilegenerator.TextFile;
 import amar.das.acbook.voicerecording.VoiceRecorder;
 
 public class MyUtility {
-    private static String systemCurrentDateTime24hrPattern ="yyyy-MM-dd HH:mm:ss";
-    public static String systemCurrentDate24hrTime(){//example output 2023-10-23 10:08:08
+    private static final String systemCurrentDateTime24hrPattern ="yyyy-MM-dd HH:mm:ss";
+    public static String getTodaySystemDateTime24hr(){//example output 2023-10-23 10:08:08
         return new SimpleDateFormat(systemCurrentDateTime24hrPattern).format(new Date());
-    }
-    public static String getDateTime12hrForBackupFile(){
-       return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
     public static String getTime12hrFromSystemDateTime(String systemDateTime) {//if error return null
         SimpleDateFormat formatter = new SimpleDateFormat(systemCurrentDateTime24hrPattern);
@@ -78,6 +74,8 @@ public class MyUtility {
         }
     }
     public static String getDateFromSystemDateTime(String systemDateTime) {//if error return null
+        if(systemDateTime==null){ return null;}
+
         SimpleDateFormat formatter = new SimpleDateFormat(systemCurrentDateTime24hrPattern);
         try {
             Date date = formatter.parse(systemDateTime);
@@ -87,6 +85,9 @@ public class MyUtility {
             x.printStackTrace();
             return null;
         }
+    }
+    public static String getDateTime12hrForBackupFile(){
+       return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy_'at'_h_mm_ss_a_"));
     }
     public static int get24hrCurrentTimeRemoveColon() {//unique time
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");//capital HH stands for 24hr time format
@@ -116,7 +117,7 @@ public class MyUtility {
             return null;
         }
     }
-    public static String getOnlyTime(){
+    public static String getOnly12hrsTime(){
         try{
 //            Date d=Calendar.getInstance().getTime();
 //            SimpleDateFormat sdf=new SimpleDateFormat("hh:mm:ss a");//a stands for AM or PM
@@ -160,7 +161,9 @@ public class MyUtility {
                 LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[0]));//it convert 2022-05-01it add 0 automatically
                 //between (2022-05-01,2022-05-01) like
                 if(daysBetweenDate(dbDate,todayDate) >= 0){//if days between leaving date and today date is 0 then leaving date will set null automatically
-                   return db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
+                   //return db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_392_LEAVINGDATE + "=" + null + " WHERE " + Database.COL_31_ID + "='" + id + "'");
+                  return db.updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_392_LEAVINGDATE + "= NULL  WHERE " + Database.COL_31_ID + "='" + id + "'");
+
                 }
             }
             return true;
@@ -255,10 +258,11 @@ public class MyUtility {
             return  new String[]{"error"};
         }
     }
-    public static boolean updateLocationReligionToTableIfValueIsUnique(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
+    public static boolean updateLocationAndReligionToTableIfValueIsUnique(HashSet<String> locationHashSet, String location, HashSet<String> religionHashSet, String religion, Context context) {
         /*The isEmpty() method checks whether a String is empty, meaning it has a length of 0, and returns true if it is empty. It does not consider whitespace characters as part of the string content.On the other hand, the isBlank() method was introduced in Java 11. It checks whether a String is empty or contains only whitespace characters, and returns true in such cases*/
         try(Database db= Database.getInstance(context))
         {
+            boolean x=TextUtils.isEmpty(location);
             if ( !TextUtils.isEmpty(location) && locationHashSet.add(location)) {//if false that means data is duplicate
                 if(!db.updateTable("INSERT INTO "+Database.TABLE_NAME_LOCATION +" ( "+Database.COL_41_LOCATION+" ) VALUES ( '"+location+"' );")){
                    return false;//means error
@@ -1095,54 +1099,78 @@ public class MyUtility {
         }
         return result.toString();
     }
-    public static void sortArrayList(ArrayList<MestreLaberGModel> arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull) {
-        /*
-         *This function will sort Arraylist in such a way that all LatestDate which is null will be at top.
-         * and based on that it will sort the remaining record*/
+//    public static void sortArrayList(ArrayList<MestreLaberGModel> arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull) {
+//        /*
+//         *This function will sort Arraylist in such a way that all LatestDate which is null will be at top.
+//         * and based on that it will sort the remaining record*/
+//
+//        int[] nullAndTodayDateCount = countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull);//it will return null count and latest date count and swap all latest date which is null and bring at top of arrayList
+//
+//        if(nullAndTodayDateCount[0]== 0 && nullAndTodayDateCount[1] == 0){//if today Latest date is not there and new person not there then execute this.means if array list has no null value than sort from index 0 to last index
+//            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(0, arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()));//natural sorting based on latest date desc comparator implemented in model class
+//
+//         }else {//sorting to original array in asc order by taking latest date
+//            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(nullAndTodayDateCount[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), new Comparator<>() {//sorting by leaving null index in asc order
+//                DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+//                @Override
+//                public int compare(MestreLaberGModel obj1, MestreLaberGModel obj2) {
+//                    try {
+//                        return sdf.parse(obj1.getLatestDate()).compareTo(sdf.parse(obj2.getLatestDate()));//will return o when two dates is same
+//                    } catch (ParseException e) {
+//                        throw new IllegalArgumentException(e);
+//                    }catch (Exception x){
+//                        x.printStackTrace();
+//                        return 0;//means equal string
+//                    }
+//                }
+//            });
+//            //arraylist Manipulation
+//            if (nullAndTodayDateCount[1] != 0) { //if there is today latestDate then sort last part using time desc order.To show dec time people
+//                Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size() - nullAndTodayDateCount[1], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), (obj1, obj2) -> {
+//                    Date obj1Date = null, obj2Date = null;
+//                    SimpleDateFormat format24hrs = new SimpleDateFormat("HH:mm:ss aa");//24 hrs format
+//                    SimpleDateFormat format12hrs = new SimpleDateFormat("hh:mm:ss aa");//12 hrs format
+//                    try{
+//                        obj1Date = format12hrs.parse(obj1.getTime());
+//                        obj2Date = format12hrs.parse(obj2.getTime());
+//                    }catch (ParseException e) {
+//                        e.printStackTrace();
+//                    }catch (Exception x){
+//                        x.printStackTrace();
+//                    }
+////                    String obj1StringDate=format24hrs.format(obj1Date);
+////                    String obj2StringDate=format24hrs.format(obj2Date);
+//                    return Integer.parseInt(format24hrs.format(obj2Date).replaceAll("[:]", "").substring(0, 6)) - Integer.parseInt(format24hrs.format(obj1Date).replaceAll("[:]", "").substring(0, 6));
+//                });//first making "00:59:30 PM" to 5930 .removing start 0 and :,AM,PM.PARSING TO INTEGER so that start 0 will remove.//sort   time in desc order.index start from 0 n-1.this will keep today's time on top so that search would be easy.arraylist is already sorted so we are sorting only last half obj which has today's time
+//            }
+//            //since array list already sorted in asc order so just reversing to get desc order
+//            reverseArrayListUsingIndex(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull,nullAndTodayDateCount[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size() - nullAndTodayDateCount[1]);
+//        }//else
+//    }
+   public static void sortArrayList(ArrayList<MestreLaberGModel> listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder) {
+    /*
+     *This function will sort Arraylist in such a way that all LatestDate which is null will be at top.
+     * and based on that it will sort the remaining record*/
 
-        int[] nullCountInArraylist = countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull);//it will return null count and latest date count and swap all latest date which is null and bring at top of arrayList
+    int[] nullAndTodayDateCount = countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder);//it will return null count and latest date count and swap all latest date which is null and bring at top of arrayList
 
-        if(nullCountInArraylist[0]== 0 && nullCountInArraylist[1] == 0){//if today Latest date is not there and new person not there then execute this
-            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(0, arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()));//natural sorting based on latest date desc comparator implemented
+    if(nullAndTodayDateCount[0]== 0 && nullAndTodayDateCount[1] == 0){//if today Latest date is not there and new person not there then execute this.means if array list has no null value than sort from index 0 to last index
 
-         }else {//sorting to original array in asc order by taking latest date
-            Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(nullCountInArraylist[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), new Comparator<>() {
-                DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-                @Override
-                public int compare(MestreLaberGModel obj1, MestreLaberGModel obj2) {
-                    try {
-                        return sdf.parse(obj1.getLatestDate()).compareTo(sdf.parse(obj2.getLatestDate()));//will return o when two dates is same
-                    } catch (ParseException e) {
-                        throw new IllegalArgumentException(e);
-                    }catch (Exception x){
-                        x.printStackTrace();
-                        return 0;//means equal string
-                    }
-                }
-            });
-            //arraylist Manipulation
-            if (nullCountInArraylist[1] != 0) { //if there is today latestDate then sort last part using time desc order
-                Collections.sort(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.subList(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size() - nullCountInArraylist[1], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size()), (obj1, obj2) -> {
-                    Date obj1Date = null, obj2Date = null;
-                    SimpleDateFormat format24hrs = new SimpleDateFormat("HH:mm:ss aa");//24 hrs format
-                    SimpleDateFormat format12hrs = new SimpleDateFormat("hh:mm:ss aa");//12 hrs format
-                    try{
-                        obj1Date = format12hrs.parse(obj1.getTime());
-                        obj2Date = format12hrs.parse(obj2.getTime());
-                    }catch (ParseException e) {
-                        e.printStackTrace();
-                    }catch (Exception x){
-                        x.printStackTrace();
-                    }
-//                    String obj1StringDate=format24hrs.format(obj1Date);
-//                    String obj2StringDate=format24hrs.format(obj2Date);
-                    return Integer.parseInt(format24hrs.format(obj2Date).replaceAll("[:]", "").substring(0, 6)) - Integer.parseInt(format24hrs.format(obj1Date).replaceAll("[:]", "").substring(0, 6));
-                });//first making "00:59:30 PM" to 5930 .removing start 0 and :,AM,PM.PARSING TO INTEGER so that start 0 will remove.//sort   time in desc order.index start from 0 n-1.this will keep today's time on top so that search would be easy.arraylist is already sorted so we are sorting only last half obj which has today's time
-            }
-            //since array list already sorted in asc order so just reversing to get desc order
-            reverseArrayListUsingIndex(arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull,nullCountInArraylist[0], arrayListShouldMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNull.size() - nullCountInArraylist[1]);
-        }//else
+         Collections.sort(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder,(p1, p2) -> p2.getLatestDate().compareTo(p1.getLatestDate()));//since arraylist is in asc order. so sorting in DESC order so that latest active people will be at top and inactive people will be at down
+
+    }else {//execute when latestDate is null or not null
+        //since arraylist is already in asc order so we don't need this line
+        //sorting to original array in asc order by taking latest date
+       // Collections.sort(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.subList(nullAndTodayDateCount[0], listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.size()),(p1, p2) -> p1.getLatestDate().compareTo(p2.getLatestDate()));//sort in asc order to bring latest active people at top by reversing
+
+        if (nullAndTodayDateCount[1] != 0) { //if there is latestDate than sort in desc order.To show latest active by time people at top.If this execute then reverse method will reverse middle part objects
+
+            Collections.sort(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.subList(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.size() - nullAndTodayDateCount[1], listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.size()),(p1, p2) -> p2.getLatestDate().compareTo(p1.getLatestDate()));//if there is latestDate then sort last part desc order because latest date is present at last because ARRAYLIST IS sort in asc order
+        }
+        //since array list is sorted in asc order so just reversing to get desc order to get middle active people at top or latest active people at top
+        reverseArrayListUsingIndex(listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder,nullAndTodayDateCount[0], listMayOrMayNotContainNullAtFirstHalfAndSecondHalfNotNullInAscOrder.size() - nullAndTodayDateCount[1]);//reversing middle part or full list by leaving null value to get active people at top
     }
+  }
     public static void snackBar(View view,String message){
         try {
             Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
@@ -1153,20 +1181,39 @@ public class MyUtility {
     public static int[] countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(ArrayList<MestreLaberGModel> al) {
         int[] arr =new int[2];
         int nullIndex=0;
-        // LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01
-        // String currentDateDBPattern =""+ todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
+        String todayDate = LocalDate.now().toString();//current date; return 2022-05-01
+       // String todayDateDBPattern =todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
         for (int i = 0; i < al.size(); i++) {
-            if(al.get(i).getLatestDate()== null){
+            if(al.get(i).getLatestDate() == null){
                 swapAndBringNullObjAtTopOfArrayList(al,nullIndex,i);
                 nullIndex++;
                 arr[0]++;//nullCount
-            }                                                    //today date
-            else if(al.get(i).getLatestDate().equals(""+ LocalDate.now().getDayOfMonth()+"-"+ LocalDate.now().getMonthValue()+"-"+ LocalDate.now().getYear())){
+            }
+            //else if(al.get(i).getLatestDate().equals(""+ LocalDate.now().getDayOfMonth()+"-"+ LocalDate.now().getMonthValue()+"-"+ LocalDate.now().getYear())){//equal to 1-5-2022  0 is not included
+            else if(getDateFromSystemDateTime(al.get(i).getLatestDate()).equals(todayDate)){//equal to 10-05-2022  0 is included
                 arr[1]++;//todayLatestDateCount
             }
         }
         return arr;
     }
+//    public static int[] countNullAndTodayLatestDateAndBringAllLatestDateWhichIsNullAtTop(ArrayList<MestreLaberGModel> al) {
+//        int[] arr =new int[2];
+//        int nullIndex=0;
+//         LocalDate todayDate = LocalDate.now();//current date; return 2022-05-01
+//         String todayDateDBPattern =todayDate.getDayOfMonth()+"-"+ todayDate.getMonthValue()+"-"+ todayDate.getYear();//converted to 1-5-2022
+//        for (int i = 0; i < al.size(); i++) {
+//            if(al.get(i).getLatestDate()== null){
+//                swapAndBringNullObjAtTopOfArrayList(al,nullIndex,i);
+//                nullIndex++;
+//                arr[0]++;//nullCount
+//            }                                                    //today date
+//            //else if(al.get(i).getLatestDate().equals(""+ LocalDate.now().getDayOfMonth()+"-"+ LocalDate.now().getMonthValue()+"-"+ LocalDate.now().getYear())){//equal to 1-5-2022  0 is not included
+//            else if(al.get(i).getLatestDate().equals(todayDateDBPattern)){//equal to 1-5-2022  0 is not included
+//                arr[1]++;//todayLatestDateCount
+//            }
+//        }
+//        return arr;
+//    }
     public static void swapAndBringNullObjAtTopOfArrayList(ArrayList<MestreLaberGModel> al, int nullIndex, int i) {
         MestreLaberGModel nullObj=al.get(i);
         MestreLaberGModel nonNullObj=al.get(nullIndex);

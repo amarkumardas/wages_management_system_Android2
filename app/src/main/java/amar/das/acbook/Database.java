@@ -14,7 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -226,48 +225,6 @@ public class Database extends SQLiteOpenHelper {
      }
         //onUpgrade(sqLiteDatabase,0,Database_Version);//IT is needed when we update database
     }
-    public boolean updateOrInsertKeysOfKeyValueTable(@NonNull String key, String value){//first taking all keys from table and storing in hashset now if hashset return true that means this key is not present in table so insert else update
-        if(key==null) return false;
-
-        HashSet<String> keysSet= getAllKeysFromKeyValueTable();//getting all keys from table
-        if(keysSet==null){ return false;}
-
-            if(keysSet.add(key)){//if true means new key so insert key and value in table
-                if(!updateTable("INSERT INTO "+Database.TABLE_KEY_VALUE+" ("+Database.COL_1_KEY+","+Database.COL_2_VALUE+") VALUES ('"+key+"','"+ value+"');")){
-                    return false;//means error
-                }
-            }else{//if false that means data is duplicate so update value in table
-                if(!updateTable("UPDATE " + Database.TABLE_KEY_VALUE + " SET " + Database.COL_2_VALUE + "='" + value +"' WHERE " + Database.COL_1_KEY + "='" + key + "'")){
-                    return false;//means error
-                }
-            }
-            return true;
-    }
-    public String getValueFromKeyValueTable(@NonNull String key){//if error return null or valuestring value may be null
-        try (Cursor cursor = getData("SELECT " + Database.COL_2_VALUE + " FROM " + Database.TABLE_KEY_VALUE + " WHERE " + Database.COL_1_KEY + "= '" + key + "'")){
-            if (cursor.moveToFirst()) {
-                return cursor.getString(0);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    public HashSet<String> getAllKeysFromKeyValueTable() {
-        String [] keys=null;
-        try(Cursor keyCursor=getData("SELECT "+Database.COL_1_KEY+" FROM "+Database.TABLE_KEY_VALUE)){
-            keys=new String[keyCursor.getCount()];
-            int i=0;
-            while(keyCursor.moveToNext()){
-                keys[i++]=keyCursor.getString(0);
-            }
-           return new HashSet<>(Arrays.asList(keys));//if no keys return empty h
-        }catch (Exception x){
-            x.printStackTrace();
-            return null;
-        }
-    }
     @Override    //i is old version and i1 is new version.When we change version then this method is called
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         System.out.println("on upgrade*******************************************");
@@ -292,7 +249,60 @@ public class Database extends SQLiteOpenHelper {
      // Log.d("DATABASE","ON UPGRADE DROP 3 TABLES");
       //onCreate(sqLiteDatabase);
     }
-    public String insertDataToPersonRegisteredAndRateTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, String imagePath, String phone2, String location, String religion) {//if error return null
+    public boolean updatePersonRemarks(String id,String remarks){
+        try (Cursor cursor = getData("SELECT " + Database.COL_393_PERSON_REMARKS + " FROM " + Database.TABLE_NAME_RATE_SKILL + " WHERE " + Database.COL_31_ID + "= '" + id + "'")){
+            if (cursor.moveToFirst()){
+                return updateTable("UPDATE " + Database.TABLE_NAME_RATE_SKILL + " SET " + Database.COL_393_PERSON_REMARKS + "='" +((cursor.getString(0) != null)?(cursor.getString(0)+"\n"):"")+remarks+"' WHERE " + Database.COL_31_ID + "='" + id + "'");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+    public boolean updateOrInsertKeysOfKeyValueTable(@NonNull String key, String value){//first taking all keys from table and storing in hashset now if hashset return true that means this key is not present in table so insert else update
+        if(key==null) return false;
+
+        HashSet<String> keysSet= getAllKeysFromKeyValueTable();//getting all keys from table
+        if(keysSet==null){ return false;}
+
+        if(keysSet.add(key)){//if true means new key so insert key and value in table
+            if(!updateTable("INSERT INTO "+Database.TABLE_KEY_VALUE+" ("+Database.COL_1_KEY+","+Database.COL_2_VALUE+") VALUES ('"+key+"','"+ value+"');")){
+                return false;//means error
+            }
+        }else{//if false that means data is duplicate so update value in table
+            if(!updateTable("UPDATE " + Database.TABLE_KEY_VALUE + " SET " + Database.COL_2_VALUE + "='" + value +"' WHERE " + Database.COL_1_KEY + "='" + key + "'")){
+                return false;//means error
+            }
+        }
+        return true;
+    }
+    public String getValueFromKeyValueTable(@NonNull String key){//if error return null or value string value may be null
+        try (Cursor cursor = getData("SELECT " + Database.COL_2_VALUE + " FROM " + Database.TABLE_KEY_VALUE + " WHERE " + Database.COL_1_KEY + "= '" + key + "'")){
+            if (cursor.moveToFirst()) {
+                return cursor.getString(0);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public HashSet<String> getAllKeysFromKeyValueTable() {
+        String [] keys=null;
+        try(Cursor keyCursor=getData("SELECT "+Database.COL_1_KEY+" FROM "+Database.TABLE_KEY_VALUE)){
+            keys=new String[keyCursor.getCount()];
+            int i=0;
+            while(keyCursor.moveToNext()){
+                keys[i++]=keyCursor.getString(0);
+            }
+            return new HashSet<>(Arrays.asList(keys));//if no keys return empty h
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+    }
+    public String insertDataToPersonRegisteredAndRateSkillTable(String name, String bankAccount, String ifscCode, String bankName, String aadhaarCard, String phoneNumber, String skill, String accountHolderName, String imagePath, String phone2, String location, String religion) {//if error return null
        if(skill==null || name==null) return null;
         String newelyCreatedId=null;
         boolean success=false;
@@ -1166,7 +1176,7 @@ public class Database extends SQLiteOpenHelper {
         try{
             String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
 
-            if(activeInactiveSkill[0].equals("1")){//if person is active
+            if(activeInactiveSkill[0].equals(GlobalConstants.ACTIVE_PEOPLE.getValue())){//if person is active
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
 
@@ -1177,7 +1187,7 @@ public class Database extends SQLiteOpenHelper {
                     return  getData("SELECT "+Database.COL_2_DATE_AM +","+Database.COL_4_MICPATH_AM +","+Database.COL_5_REMARKS_AM +","+Database.COL_6_WAGES_AM +","+Database.COL_8_P1_AM +","+Database.COL_9_P2_AM +","+Database.COL_10_P3_AM +","+Database.COL_11_P4_AM +","+Database.COL_1_ID_AM +","+Database.COL_12_ISDEPOSITED_AM +","+Database.COL_13_SYSTEM_DATETIME_AM+" FROM "+Database.TABLE0_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_AM +"='"+id+"'");
 
                 }
-            }else if(activeInactiveSkill[0].equals("0")){//if person is inactive
+            }else if(activeInactiveSkill[0].equals(GlobalConstants.INACTIVE_PEOPLE.getValue())){//if person is inactive
 
                 if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
 
@@ -1192,6 +1202,80 @@ public class Database extends SQLiteOpenHelper {
         }catch (Exception x){
             x.printStackTrace();
            return null;
+        }
+        return null;
+    }
+    public String getOnlySystemDateTimeOfLastRowOfWages(String id){//if error return null or if no data return null
+        try{
+            Cursor cursor=null;
+            String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
+
+            if(activeInactiveSkill[0].equals(GlobalConstants.ACTIVE_PEOPLE.getValue())){//if person is active
+
+                if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_ALG+" FROM "+Database.TABLE1_ACTIVE_LG +" WHERE "+Database.COL_1_ID_ALG +"='"+id+"' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_ALG+" DESC LIMIT 1");//Adding LIMIT 1 at the end instructs the database to return only the 1 row
+
+                }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_AM+" FROM "+Database.TABLE0_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_AM +"='"+id+"' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_AM+" DESC LIMIT 1");
+
+                }
+            }else if(activeInactiveSkill[0].equals(GlobalConstants.INACTIVE_PEOPLE.getValue())){//if person is inactive
+
+                if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_IALG+" FROM "+Database.TABLE3_IN_ACTIVE_LG +" WHERE "+Database.COL_1_ID_IALG +"='"+id+"' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_IALG+" DESC LIMIT 1");
+
+                }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_IAM+" FROM "+Database.TABLE2_IN_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_IAM +"='"+id+"' ORDER BY "+Database.COL_13_SYSTEM_DATETIME_IAM+" DESC LIMIT 1");
+
+                }
+            }
+            if(cursor!=null && cursor.moveToFirst() && cursor.getCount()==1){
+                return cursor.getString(0);
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+    public String getOnlySystemDateTimeOfFirstRowOfWages(String id){//if error return null or if not data return null
+        try{
+            Cursor cursor=null;
+            String activeInactiveSkill[]=getActiveOrInactiveAndSkill(id);
+
+            if(activeInactiveSkill[0].equals(GlobalConstants.ACTIVE_PEOPLE.getValue())){//if person is active
+
+                if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l OR G
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_ALG+" FROM "+Database.TABLE1_ACTIVE_LG +" WHERE "+Database.COL_1_ID_ALG +"='"+id+"' LIMIT 1");//Adding LIMIT 1 at the end instructs the database to return only the first row fetched based on the preceding conditions.
+
+                }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_AM+" FROM "+Database.TABLE0_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_AM +"='"+id+"' LIMIT 1");
+
+                }
+            }else if(activeInactiveSkill[0].equals(GlobalConstants.INACTIVE_PEOPLE.getValue())){//if person is inactive
+
+                if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))){//check for l or G
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_IALG+" FROM "+Database.TABLE3_IN_ACTIVE_LG +" WHERE "+Database.COL_1_ID_IALG +"='"+id+"' LIMIT 1");
+
+                }else if(activeInactiveSkill[1].equals(context.getResources().getString(R.string.mestre))){//check for mestre
+
+                    cursor=getData("SELECT "+Database.COL_13_SYSTEM_DATETIME_IAM+" FROM "+Database.TABLE2_IN_ACTIVE_MESTRE +" WHERE "+Database.COL_1_ID_IAM +"='"+id+"' LIMIT 1");
+
+                }
+            }
+            if(cursor!=null && cursor.moveToFirst() && cursor.getCount()==1){
+                return cursor.getString(0);
+            }
+        }catch (Exception x){
+            x.printStackTrace();
+            return null;
         }
         return null;
     }
@@ -1311,16 +1395,28 @@ public class Database extends SQLiteOpenHelper {
         }
         return null;
     }
-    public boolean makeIdActive(String id) {//to make it active updating latestDate is compulsory
+    public boolean makeIdActiveAndUpdateRemarks(String id,boolean updateRemarksColumnTrue) {//to make it active updating latestDate is compulsory
         /**if table is inactive then only data is shifted from inactive to active table and make id active.If this method return false then
          * other method cannot insert or update in active table due to id inactive*/
+
+        if(makeIdActive(id)){//if successfully
+
+            if(updateRemarksColumnTrue){
+                 updatePersonRemarks(id,MyUtility.getRemarksWhenIdBecomeActive(MyUtility.getDateFromSystemDateTime(getOnlySystemDateTimeOfLastRowOfWages(id)),context));//its not necessary if updating remarks failed.//Toast.makeText(this,getResources().getString(R.string.failed_to_update_remarks), Toast.LENGTH_LONG).show();
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
+    private boolean makeIdActive(String id) {
         try {
             String activeInactiveSkill[] = getActiveOrInactiveAndSkill(id);
             if (activeInactiveSkill[0].equals(GlobalConstants.INACTIVE_PEOPLE.getValue())){//if person is inactive then insert data from inactive table to active table
-                 if(isRedundantDataPresentInOtherTable(id)){
-                     Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
-                     return false;
-                 }
+                if(isRedundantDataPresentInOtherTable(id)){
+                    Toast.makeText(context,context.getResources().getString(R.string.check_last_remarks), Toast.LENGTH_LONG).show();
+                    return false;
+                }
                 Cursor dataFromInActiveTableCursor = getWagesDepositDataForRecyclerView(id);
 
                 if (activeInactiveSkill[1].equals(context.getResources().getString(R.string.laber)) || activeInactiveSkill[1].equals(context.getResources().getString(R.string.women_laber))) {//check for l OR G
@@ -1332,7 +1428,7 @@ public class Database extends SQLiteOpenHelper {
                     return shiftDataToActiveTableAndMakeActiveAndUpdateLatestDate(dataFromInActiveTableCursor,id,Database.TABLE2_IN_ACTIVE_MESTRE,true,activeInactiveSkill[1]);
                 }
             }else{//optional
-                Toast.makeText(context, "id is already active no need to do anything ", Toast.LENGTH_LONG).show();
+                Log.e("ERROR","id is already active no need to do anything");
             }
         }catch(Exception x) {
             x.printStackTrace();
@@ -1340,6 +1436,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return false;
     }
+
     public boolean makeIdInActive(String id) {//to make it active updating latestDate is compulsory
         /**if table is active then only data is shifted from active to inactive table and make id inactive.latest date is not updated because it will be automatically updated during time*/
         try {
@@ -1592,7 +1689,7 @@ public class Database extends SQLiteOpenHelper {
         if (isActiveOrInactive(id)) {//if active then update active and latest date
            return updateTable("UPDATE " + Database.PERSON_REGISTERED_TABLE + " SET " + Database.COL_12_ACTIVE + "='" + GlobalConstants.ACTIVE_PEOPLE.getValue() + "' , "+ Database.COL_15_LATESTDATE + "='" + MyUtility.getTodaySystemDateTime24hr() +"' WHERE " + Database.COL_1_ID + "='" + id + "'");
         }else {
-             return makeIdActive(id);
+             return makeIdActiveAndUpdateRemarks(id,true);
         }
     }
     public boolean updateTable(String query){
@@ -1917,7 +2014,7 @@ public class Database extends SQLiteOpenHelper {
 //                Toast.makeText(context, "OPTIONAL TO DO\nDELETE ALL AUDIO WITH ID: " + id + "\nFROM YOUR DEVICE MANUALLY", Toast.LENGTH_LONG).show();
 //            }//toast will not work while doing background task
 
-            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDateForLatestDate(),null, "["+ MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0, "0");//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
+            insertWagesOrDepositToActiveTableDirectly(dB,MyUtility.getTodaySystemDateTime24hr(), getOnlyMainSkill(id),id, MyUtility.getOnlyCurrentDateForLatestDate(),null, "["+ MyUtility.getOnly12hrsTime() +context.getResources().getString(R.string.hyphen_entered)+"\n\n[FAILED TO DELETE ALL AUDIO FROM YOUR DEVICE.\nPLEASE DELETE ALL AUDIO WITH ID:" + id +" YOURSELF.\nIF NOT DELETED, IT WILL REMAIN IN DEVICE STORAGE WHICH IS NO USE]", 0, 0, 0, 0, 0,GlobalConstants.WAGES_CODE.getValue());//this insertion should be perform only when id is active.if this method insertWagesOrDepositToActiveTableDirectly() fails then to delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
             success=true;//making true to commit all above important operation.If above operation fail then no problem.Only delete audio manually message will not be inserted in db or recycler view and user would not see message to delete audio but it will happen very rear
         }
     }catch (Exception x){

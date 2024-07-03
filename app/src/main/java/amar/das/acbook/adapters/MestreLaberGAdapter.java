@@ -106,7 +106,11 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
            // if(MyUtility.daysBetweenDate(dbDate,todayDate) >= daysToBecomeInactive){//ChronoUnit.MONTHS it give total months.here dbDate is first and dbDate will always be lower then today date even if we miss to open app for long days
             if(MyUtility.daysBetweenDate(LocalDate.parse(MyUtility.getDateFromSystemDateTime(data.getLatestDate())),todayDate) >= daysToBecomeInactive){//LocalDate.parse method, which takes a date string in the format "yyyy-MM-dd" (year-month-day) and parses it into a LocalDate object.
 
-                if(!db.makeIdInActive(data.getId())){//if latest date is one month old
+                if(db.makeIdInActive(data.getId())){//if latest date is one month old
+                    if(!db.updatePersonRemarks(data.getId(),getRemarksWhenIdBecomeInActive(MyUtility.getDateFromSystemDateTime(db.getOnlySystemDateTimeOfLastRowOfWages(data.getId()))))){
+                        Toast.makeText(context, context.getResources().getString(R.string.failed_to_update_remarks), Toast.LENGTH_LONG).show();
+                    }
+                }else{
                     Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_inactive), Toast.LENGTH_LONG).show();
                 }
 
@@ -119,7 +123,7 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
 //                    if(!db.makeIdInActive(data.getId())){
 //                        Toast.makeText(context, "FAILED TO MAKE ID INACTIVE", Toast.LENGTH_LONG).show();
 //                    }
-                    if(!db.makeIdActive(data.getId())){
+                    if(!db.makeIdActiveAndUpdateRemarks(data.getId(),true)){
                         Toast.makeText(context, context.getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
                     }
                 }
@@ -140,6 +144,16 @@ public class MestreLaberGAdapter extends RecyclerView.Adapter<MestreLaberGAdapte
             intent.putExtra("FromMesterLaberGAdapter", 1);
             context.startActivity(intent);
         });
+    }
+    private String getRemarksWhenIdBecomeInActive(String dateFromSystemDateTime) {//by taking last row of wages
+        if(dateFromSystemDateTime == null) return null;
+
+        LocalDate date=LocalDate.parse(dateFromSystemDateTime);//parsing date of last row
+        StringBuilder sb=new StringBuilder();
+        sb.append(context.getString(R.string.became_inactive_colon))
+          .append(date.getDayOfMonth()+"-"+date.getMonthValue()+"-"+date.getYear());
+
+        return sb.toString();//INACTIVE: 3-7-2024 (take last row DATE)
     }
     @Override
     public int getItemCount() {

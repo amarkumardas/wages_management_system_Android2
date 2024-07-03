@@ -172,7 +172,7 @@ public class MyUtility {
             return false;
         }
     }
-    public static int daysBetweenDate(LocalDate lowerDate, LocalDate forwardDate) {//if date is same return it 0
+    public static int daysBetweenDate(LocalDate lowerDate, LocalDate forwardDate) {//if date is same return it 0.total no. of days today day is not added
         return (int) ChronoUnit.DAYS.between(lowerDate,forwardDate);//ChronoUnit.DAYS it give total months.here lowerDate is first and lowerDate will always be lower then today date even if we miss to open app for long days
         //ChronoUnit.MONTHS.between(lowerDate,forwardDate)
     }
@@ -1785,5 +1785,13 @@ public class MyUtility {
             return null;
         }
         // this code provides a convenient way to load an image from a file path into a Bitmap object, with an optional downscaling configuration for performance optimization.
+    }
+    public static String getRemarksWhenIdBecomeActive(String lastRowDateFromSystemDateTime,Context context) {//by taking last row date and current date
+        if(lastRowDateFromSystemDateTime == null) return null;
+         StringBuilder sb=new StringBuilder();
+         sb.append(context.getResources().getString(R.string.became_active_colon)+LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear()).append(" ")
+                 .append(context.getString(R.string.after)).append(" ")
+                 .append(BackupDataUtility.convertDaysToPeriod(MyUtility.daysBetweenDate(LocalDate.parse(lastRowDateFromSystemDateTime),LocalDate.now()),context));
+        return sb.toString();//return  BECAME ACTIVE:20-7-2024 AFTER 1 YEAR 1 MONTHS 24 DAYS.it is 20-7-2024 current date and this AFTER 1 YEAR 1 MONTHS 24 DAYS is formed by taking inactive date and current date.inactive date is date of last row
     }
 }

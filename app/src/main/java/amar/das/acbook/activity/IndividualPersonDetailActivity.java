@@ -604,6 +604,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 });
                 //****************************************************DONE setting adapter for addOrRemoveMLG spinner*****************************************
                 infoSave.setOnClickListener(view1 ->{
+                    boolean isIdMadeActive=false;
                     if(editOrNot[0] ==false) {//while editing this will execute
                         radioGroup.getChildAt(0).setEnabled(true);
                         inputP1Et.setEnabled(true);
@@ -626,8 +627,10 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                         String star;
                         if (active.equals(GlobalConstants.ACTIVE_PEOPLE.getValue())) {//if user has pressed radio button then only it will execute
 
-                            if(!db.makeIdActive(fromIntentPersonId)){
-                                Toast.makeText(IndividualPersonDetailActivity.this, "FAILED TO MAKE ID ACTIVE", Toast.LENGTH_LONG).show();
+                            if(db.makeIdActiveAndUpdateRemarks(fromIntentPersonId,false)){
+                                isIdMadeActive=true;//if id is made active then set true so that remarks column would be updated
+                            }else{
+                                Toast.makeText(IndividualPersonDetailActivity.this, getResources().getString(R.string.failed_to_make_id_active), Toast.LENGTH_LONG).show();
                             }
                         }
                         if (starSpinner.getSelectedItem().toString().equals("SELECT"))//if user BY mistake click on SELECT then by default start set to 1
@@ -657,7 +660,13 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                             p4Rate= Integer.parseInt(inputP4Et.getText().toString().trim());
                         }
 
-                        updateRateSuccess =db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator,false);
+                        updateRateSuccess=db.update_Rating_TABLE_NAME3(star,(TextUtils.isEmpty(remarksMetaData.getText().toString().trim())? null : remarksMetaData.getText().toString().trim()),leaveDate,returnDate,(p1Rate!=0?String.valueOf(p1Rate):null),(p2Rate!=0?String.valueOf(p2Rate):null),(p3Rate!=0?String.valueOf(p3Rate):null),(p4Rate!=0?String.valueOf(p4Rate):null),fromIntentPersonId,indicator,false);
+
+                        if(isIdMadeActive){//this code should be after update_Rating_TABLE_NAME3() method other wise null will be set always and remarks column would not be upodated.
+                            if(!db.updatePersonRemarks(fromIntentPersonId, MyUtility.getRemarksWhenIdBecomeActive(MyUtility.getDateFromSystemDateTime(db.getOnlySystemDateTimeOfLastRowOfWages(fromIntentPersonId)),IndividualPersonDetailActivity.this))){
+                                Toast.makeText(this,getResources().getString(R.string.failed_to_update_remarks), Toast.LENGTH_LONG).show();
+                            }
+                        }
 
                         if(!MyUtility.updateLocationAndReligionToTableIfValueIsUnique(locationHashSet,locationAutoComplete.getText().toString().trim(),religionHashSet,religionAutoComplete.getText().toString().trim(),getBaseContext())){//UPDATING location and religion TO table
                             Toast.makeText(IndividualPersonDetailActivity.this, "NOT UPDATED", Toast.LENGTH_LONG).show();
@@ -1081,9 +1090,15 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 private boolean dataBaseDeleteAndCreatePdfOperation() {
                     try {
                         Database dB = Database.getInstance(getBaseContext());
+                        String firstRowSystemDateTime=dB.getOnlySystemDateTimeOfFirstRowOfWages(fromIntentPersonId);//first get system date other wise row will be deleted
                         if (!dB.deleteAudioFirstThenWagesAndDepositThenAddFinalMessageThenUpdatePdfSequence(fromIntentPersonId, totalDeposit, totalWages, p1, p2, p3, p4, r1, r2, r3, r4, indicate, innerArray)) {
                             return false;
                         }
+
+                        if(firstRowSystemDateTime != null){ //if everything execute fine then update person remarks.If above code don't execute then this code will not execute due to return statement in above code
+                            dB.updatePersonRemarks(fromIntentPersonId,getRemarksAfterCalculation(MyUtility.getDateFromSystemDateTime(firstRowSystemDateTime),p1,r1));
+                        }
+
                     }catch (Exception ex) {
                         ex.printStackTrace();
                         return false;
@@ -1256,6 +1271,19 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
             insertDataToRecyclerView_AlertDialogBox(MyUtility.get_indicator(getBaseContext(),fromIntentPersonId));
         });
     }
+
+    private String getRemarksAfterCalculation(String firstRowOnlySystemDate,int totalMainSkillWork,int rate) {//by taking first row and current date
+         if(firstRowOnlySystemDate == null) return null;
+        StringBuilder sb=new StringBuilder();
+        sb.append(getString(R.string.calculation_done_colon))
+                .append(LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear())
+                .append(" ").append(getString(R.string.after)).append(" ")
+                .append(BackupDataUtility.convertDaysToPeriod(MyUtility.daysBetweenDate(LocalDate.parse(firstRowOnlySystemDate),LocalDate.now()),getBaseContext()))
+                .append(" ").append(getString(R.string.by_workin_colon)).append(totalMainSkillWork).append(" ").append(getString(R.string.days)).append(" ")
+                .append(getString(R.string.at_rate_colon)).append(rate);
+       return sb.toString();//return CALCULATION DONE: 2-7-2024 AFTER 1 YEAR 1 MONTHS 24 BY WORKING:50 DAYS AT RATE 500.2-7-2024 it is current date,and it is AFTER 1 YEAR 1 MONTHS 24 formed by taking first row date and current day date
+    }
+
     private boolean setNameImageIdPhoneAadhaar() {
         try(Cursor cursor = db.getData("SELECT "+Database.COL_2_NAME+","+Database.COL_3_BANKAC+","+Database.COL_6_AADHAAR_NUMBER+","+Database.COL_7_MAIN_ACTIVE_PHONE1 +","+Database.COL_10_IMAGE_PATH +","+Database.COL_11_ACTIVE_PHONE2+","+Database.COL_1_ID+" FROM " + Database.PERSON_REGISTERED_TABLE + " WHERE "+Database.COL_1_ID+"='" + fromIntentPersonId + "'")) {
             if (cursor != null && cursor.moveToFirst()) {
@@ -1329,29 +1357,23 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
         }
         return true;
     }
-
-    //    public  String generateMessageAccordingToIndicator(String star,String leavingDate,String returningDate,String locationAutoComplete,String religionAutoComplete,String remarksMetaData,int indicator,String skill1,int p1Rate,String skill2,int p2Rate,String skill3,int p3Rate,String skill4,int p4Rate){
+//    public  String getRateAndSkillAccordingToIndicator(int indicator,String[] skill,int[] rate){
+//        if(skill==null) return null;
 //        StringBuilder sb=new StringBuilder();
 //        switch (indicator){
 //            case 1:{
-//                sb.append(skill1).append(" : "+p1Rate);
+//                sb.append(skill[0]).append(": "+rate[0]);
 //            }break;
 //            case 2:{
-//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate);
+//                sb.append(skill[0]).append(": "+rate[0]).append("  "+skill[1]).append(": "+rate[1]);
 //            }break;
 //            case 3:{
-//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate);
+//                sb.append(skill[0]).append(": "+rate[0]).append("  "+skill[1]).append(": "+rate[1]).append("  "+skill[2]).append(": "+rate[2]);
 //            }break;
 //            case 4:{
-//                sb.append(skill1).append(" : "+p1Rate).append("  "+skill2).append(" : "+p2Rate).append("  "+skill3).append(" : "+p3Rate).append("  "+skill4).append(" : "+p4Rate);
+//                sb.append(skill[0]).append(": "+rate[0]).append("  "+skill[1]).append(": "+rate[1]).append("  "+skill[2]).append(": "+rate[2]).append("  "+skill[3]).append(": "+rate[3]);
 //            }break;
 //        }
-//        sb.append("\n\nSTAR:  " + star)
-//                .append("\nLEAVING :     "+leavingDate)
-//                .append("\nRETURNING : "+returningDate)
-//                .append("\nLOCATION:  "+locationAutoComplete)
-//                .append("\nRELIGION:    "+religionAutoComplete)
-//                .append( "\n\nREMARKS: "+remarksMetaData);
 //        return sb.toString();
 //    }
     private void setRateComponentAccordingToId(TextView hardcodedP1Tv, EditText inputP1Rate, TextView hardcodedP2Tv, EditText inputP2Rate, TextView hardcodedP3Tv, EditText inputP3Rate, TextView hardcodedP4Tv, EditText inputP4Rate, Button saveButton, int checkCorrectionArray[], int userInputRateArray[], int indicator, String id) {

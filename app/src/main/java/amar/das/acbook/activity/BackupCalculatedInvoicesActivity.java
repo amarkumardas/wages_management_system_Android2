@@ -95,7 +95,6 @@ public class BackupCalculatedInvoicesActivity extends AppCompatActivity {
                 popup.inflate(R.menu.calculated_invoice_menu);
 
                 popup.setOnMenuItemClickListener(item -> {
-
                     if(item.getItemId() == R.id.calculated_invoice_means){
                         MyUtility.showDefaultDialog(getResources().getString(R.string.what_is_calculated_invoice_question_mark),getResources().getString(R.string.calculate_invoice_means),view.getContext(),false);
                     }else if(item.getItemId() == R.id.calculated_invoice_free_Space) {

@@ -20,6 +20,7 @@ import amar.das.acbook.R;
 import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.globalenum.GlobalConstants;
 import amar.das.acbook.model.SearchModel;
+import amar.das.acbook.utility.BackupDataUtility;
 import amar.das.acbook.utility.MyUtility;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> implements Filterable {
@@ -102,38 +103,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
 //        String[] dateArray = latestDate.split("-");
 //        LocalDate dbDate = LocalDate.of(Integer.parseInt(dateArray[2]),Integer.parseInt(dateArray[1]),Integer.parseInt(dateArray[0]));//it convert 2022-5-1 to 2022-05-01 it add 0 automatically
-        return convertDaysToPeriod(MyUtility.daysBetweenDate(LocalDate.parse(latestDate),LocalDate.now()));
-    }
-    private String convertDaysToPeriod(int days) {
-        StringBuilder period = new StringBuilder();
-
-        int years = days / 365;
-        days %= 365; // Remaining days after calculating years
-
-        if (years > 0) {
-            period.append(years).append(" ").append(context.getString(R.string.year)).append(years > 1 ? context.getString(R.string.s)+" " : " "); // Add "s" for plural years
-        }
-
-        if (days >= 30) {
-            int months = days / 30;
-            days %= 30; // Remaining days after calculating months
- //            if (period.length() > 0) {
-//                period.append(", "); //if there is year then Add comma and space if there's already a period
-//            }
-            period.append(months).append(" ").append(context.getString(R.string.month)).append(months > 1 ?  context.getString(R.string.s)+" " : " ");
-        }
-
-        if (days >= 7 && period.length() == 0) { // Only add weeks if no years or months
-            int weeks = days / 7;
-            days %= 7;
-            period.append(weeks).append(" ").append(context.getString(R.string.week)).append(weeks > 1 ?  context.getString(R.string.s)+" " : " ");
-        }
-
-        if (days > 0) {// Handle remaining days (optional)
-            period.append(days).append(" ").append(context.getString(R.string.day)).append(days > 1 ?  context.getString(R.string.s)+" " : "");
-        }
-
-        return period.toString().isEmpty() ? "0 "+context.getString(R.string.day) : period.toString(); // Handle 0 days case
+        return BackupDataUtility.convertDaysToPeriod(MyUtility.daysBetweenDate(LocalDate.parse(latestDate),LocalDate.now()),context);
     }
 
     @Override

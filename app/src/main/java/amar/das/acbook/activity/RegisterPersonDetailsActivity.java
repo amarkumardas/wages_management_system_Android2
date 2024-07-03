@@ -41,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -631,18 +632,23 @@ public class RegisterPersonDetailsActivity extends AppCompatActivity {
                             finish();//destroy current activity
                         }else
                             Toast.makeText(RegisterPersonDetailsActivity.this, "DATA NOT UPDATED", Toast.LENGTH_LONG).show();
-                    }else{
-                      //this will execute only when adding new person
+                    }else{//this will execute only when adding new person
+
                       //  for (int k = 1; k <= 50; k++) {
                         String newelyCreatedId=null;
                         if (!MyUtility.updateLocationAndReligionToTableIfValueIsUnique(locationHashSet, location, religionHashSet, religion, getBaseContext())) {//UPDATING location and religion table
                             Toast.makeText(RegisterPersonDetailsActivity.this, "NOT INSERTED", Toast.LENGTH_LONG).show();
                             return;
                         }
-                        if((newelyCreatedId= db.insertDataToPersonRegisteredAndRateTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, location, religion))==null){//if null means error
+                        if((newelyCreatedId= db.insertDataToPersonRegisteredAndRateSkillTable(personName, personAccount, personIfscCode, personBankName, personAadhaar, personActivePhoneNo2, personSkill, personAccountHolderName, imagePath, personPhoneNumber2, location, religion))==null){//if null means error
                             displayResult("FAILED", "TO REGISTER");
                             return;
                         }
+
+                        if(!db.updatePersonRemarks(newelyCreatedId,getString(R.string.name_registered_colon)+LocalDate.now().getDayOfMonth()+"-"+LocalDate.now().getMonthValue()+"-"+LocalDate.now().getYear())) {//converted to 1-5-2022 remove 0.adding person remarks this line should be after aclling this method insertDataToPersonRegisteredAndRateSkillTable()
+                            Toast.makeText(RegisterPersonDetailsActivity.this, "FAILED TO ADD REMARKS", Toast.LENGTH_LONG).show();
+                        }
+
                        if(newelyCreatedId !=null){//never be null because above code would return
                             checkForDuplicate();//checking for duplicate
                          }

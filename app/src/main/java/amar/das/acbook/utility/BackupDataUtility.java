@@ -171,4 +171,35 @@ public class BackupDataUtility {
         }
         return 0;
     }
+    public static String convertDaysToPeriod(int days,Context context) { //return 2 YEARS 12 MONTHS 20 DAYS
+        StringBuilder period = new StringBuilder();
+
+        int years = days / 365;
+        days %= 365; // Remaining days after calculating years
+
+        if (years > 0) {
+            period.append(years).append(" ").append(context.getString(R.string.year)).append(years > 1 ? context.getString(R.string.s)+" " : " "); // Add "s" for plural years
+        }
+
+        if (days >= 30) {
+            int months = days / 30;
+            days %= 30; // Remaining days after calculating months
+            //            if (period.length() > 0) {
+//                period.append(", "); //if there is year then Add comma and space if there's already a period
+//            }
+            period.append(months).append(" ").append(context.getString(R.string.month)).append(months > 1 ?  context.getString(R.string.s)+" " : " ");
+        }
+
+        if (days >= 7 && period.length() == 0) { // Only add weeks if no years or months
+            int weeks = days / 7;
+            days %= 7;
+            period.append(weeks).append(" ").append(context.getString(R.string.week)).append(weeks > 1 ?  context.getString(R.string.s)+" " : " ");
+        }
+
+        if (days > 0) {// Handle remaining days (optional)
+            period.append(days).append(" ").append(context.getString(R.string.day)).append(days > 1 ?  context.getString(R.string.s)+" " : "");
+        }
+
+        return period.toString().isEmpty() ? "0 "+context.getString(R.string.day) : period.toString(); // Handle 0 days case
+    }
 }

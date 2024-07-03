@@ -243,6 +243,8 @@
     <string name="check_last_remarks">CHECK LAST REMARKS</string>
     <string name="failed_to_make_id_active">FAILED TO MAKE ID ACTIVE</string>
     <string name="failed_to_make_id_inactive">FAILED TO MAKE ID INACTIVE</string>
+    <string name="failed_to_update_remarks">FAILED TO UPDATE REMARKS</string>
+    <string name="became_active_colon">Became ACTIVE:</string>
     <string name="summary_of_previous_invoice_number_dot">SUMMARY OF PREVIOUS INVOICE NO.</string>
     <string name="star_total_width_star">****TOTAL DEPOSIT****</string>
     <string name="advance_due">ADVANCE DUE</string>
@@ -514,6 +516,11 @@
     <string name="action_select_all">SELECT ALL</string>
     <string name="no_image">NO IMAGE</string>
     <string name="info">INFO</string>
-
+    <string name="name_registered_colon">Name Registered:</string>
+    <string name="calculation_done_colon">CALCULATION Done:</string>
+    <string name="became_inactive_colon">Became INACTIVE:</string>
+    <string name="after">After</string>
+    <string name="by_workin_colon">By Working:</string>
+    <string name="at_rate_colon">At Rate:</string>
 
 </resources>

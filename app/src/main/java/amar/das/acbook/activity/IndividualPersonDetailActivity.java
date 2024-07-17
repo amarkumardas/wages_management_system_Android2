@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -1263,7 +1264,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 finish();
                   //super.onBackPressed();// This calls finish() on this activity and pops the back stack.
                     });
-        } else
+        }else
             Toast.makeText(this, "NO ID FROM OTHER INTENT", Toast.LENGTH_LONG).show();
         //to insert data in recyclerview
          binding.fab.setOnClickListener(view -> {
@@ -1606,7 +1607,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                     }
                 }catch(Exception e){
                     e.printStackTrace();
-                   // Log.d(this.getClass().getSimpleName(), "method afterTextChanged: wrong input");
+                    Log.e("ERROR", "method afterTextChanged: wrong input");
                 }
             }
         });

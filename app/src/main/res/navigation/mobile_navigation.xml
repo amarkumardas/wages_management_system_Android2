@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="amar.das.acbook.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications_tab"/>
+        android:name="amar.das.acbook.ui.help.HelpFragment"
+        android:label="@string/title_help"
+        tools:layout="@layout/fragment_help_tab"/>
     <fragment
         android:id="@+id/navigation_ml"
         android:name="amar.das.acbook.ui.ml.MLDrawerFragment"

@@ -1,9 +1,12 @@
 <resources>
-    <string name="app_name">Labour Wages</string>
+    <string name="app_name">Labour Mistri</string>
     <string name="update">UPDATE</string>
 
     <!--common-->
     <string name="set_rate_to_id_colon">SET RATE TO ID:</string>
+    <string name="please_turn_on_your_internet">Please Turn On Your Internet</string>
+    <string name="choose_gmail_app">Choose Gmail App</string>
+    <string name="please_help">Please Help</string>
 
     <!--ManualBackupActivity-->
     <string name="database_file_backup">Database File Backup</string>
@@ -22,11 +25,11 @@
     <string name="inactive_skill_g">InActive Skill G</string>
     <string name="select_file_type">Select File Type</string>
     <string name="single_file">Single File</string>
-<!-- <string name="database_file_backup">Database File Backup</string>-->
+    <!-- <string name="database_file_backup">Database File Backup</string>-->
     <string name="newline_newline_this_file_is_useful_to_see_your_data_only">\n\nThis File is Useful To See Your Data Only</string>
     <string name="you_can_backup_your_aa_data_into_smaller_files_separately">You Can Backup Your All Data (Except Image And Audio Data) Into Smaller Files Separately.</string>
     <string name="you_can_backup_your_all_data_in_a_single_file">You Can Backup Your All Data (Except Image And Audio Data) In a Single File.\n\nIt Will Contain\nActive Skill M L G\nInActive Skill M\nInActive Skill L\nInActive Skill G</string>
-<!--<string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nIt Is Useful To Restore All Data When You Reinstall This App.\n\nMake Sure To Backup Your Database File Before Uninstalling Or Deleting This App.</string>-->
+    <!--<string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nIt Is Useful To Restore All Data When You Reinstall This App.\n\nMake Sure To Backup Your Database File Before Uninstalling Or Deleting This App.</string>-->
     <string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nThis File is Useful To Restore All Data (Except Image And Audio Data) When You Reinstall This App.</string>
     <string name="_3_backup_each_file">3 Backup Each File</string>
     <string name="_2_single_file_backup">2 Single File Backup</string>
@@ -62,8 +65,8 @@
     <string name="remarks_only_500_letters">REMARKS Only 250 letters</string>
     <string name="bank_name">BANK NAME</string>
     <string name="ifsc_code">IFSC CODE</string>
-<!--    <string name="menu_insert_new_">NEW PERSON</string>-->
-<!--    <string name="menu_insert_new_">NEW PERSON</string>-->
+    <!--    <string name="menu_insert_new_">NEW PERSON</string>-->
+    <!--    <string name="menu_insert_new_">NEW PERSON</string>-->
     <string name="what_is_calculated_invoice_question_mark">WHAT IS CALCULATED INVOICES?</string>
     <string name="insert_data">ADD</string>
     <string name="account_holder_name">A/C HOLDER NAME</string>
@@ -256,8 +259,10 @@
     <string name="backup_inactive_skill_m">BACKUP INACTIVE SKILL M</string>
     <string name="backup_inactive_skill_l">BACKUP INACTIVE SKILL L</string>
     <string name="backup_inactive_skill_g">BACKUP INACTIVE SKILL G</string>
-    <string name="backup_manually">Backup manually</string>
+    <string name="backup_manually">Backup Manually</string>
     <string name="inactive_setting">Inactive Setting</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_and_condition">Terms And Condition</string>
     <string name="backup_failed">BACKUP FAILED</string>
     <string name="no_data_present">NO DATA PRESENT</string>
     <string name="open">OPEN</string>
@@ -268,7 +273,7 @@
     <string name="delete">DELETE</string>
     <string name="set_rate">SET RATE</string>
 
-   <!--dialog for image delete-->
+    <!--dialog for image delete-->
     <string name="no_image_to_delete">NO IMAGE TO DELETE</string>
     <string name="failed_to_delete_image">FAILED TO DELETE IMAGE</string>
     <string name="delete_image">DELETE IMAGE</string>
@@ -384,9 +389,9 @@
     <!--<string name="title_activity_navigation">NavigationActivity</string>-->
     <string name="title_ml">M L</string>
     <string name="title_history">History</string>
-    <string name="title_notifications">Notifications</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_help">Help</string>
+
+    <string name="try_other_way_to_contact">Try Other Way To Contact</string>
 
     <string name="mestre">M</string>
     <string name="m">M (MASON)</string>
@@ -412,7 +417,6 @@
     <string name="data_restore_failed">Data Restore Failed</string>
     <string name="your_data_was_not_fully_restored">Your Data Was Not Fully Restored</string>
     <string name="try_again">Try Again</string>
-
 
 
     <string name="year">YEAR</string>
@@ -522,5 +526,6 @@
     <string name="after">After</string>
     <string name="by_workin_colon">By Working:</string>
     <string name="at_rate_colon">At Rate:</string>
+    <string name="contact_us">Contact Us</string>
 
 </resources>

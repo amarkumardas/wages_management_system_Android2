@@ -23,9 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import amar.das.acbook.Database;
 
 import amar.das.acbook.activity.FindActivity;
+import amar.das.acbook.activity.IndividualPersonDetailActivity;
 import amar.das.acbook.activity.RegisterPersonDetailsActivity;
 import amar.das.acbook.R;
 import amar.das.acbook.activity.ManualBackupActivity;
+import amar.das.acbook.activity.WebViewActivity;
 import amar.das.acbook.adapters.FragmentAdapter;
 import amar.das.acbook.databinding.FragmentMlTabBinding;
 import amar.das.acbook.fragments.BusinessInfoBottomSheetFragment;
@@ -83,7 +85,17 @@ public class MLDrawerFragment extends Fragment {
                 startActivity(intent);
             }else if(item.getItemId() == R.id.inactive_setting) {
                   openDialogSetting(getContext(),true);
+            }else if (item.getItemId() == R.id.privacy_policy) {
+                Intent intent = new Intent(getContext(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.PRIVACY_POLICY,WebViewActivity.PRIVACY_POLICY);
+                startActivity(intent);
+            }else if (item.getItemId() == R.id.terms_and_condition) {
+                Intent intent = new Intent(getContext(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.TERMS_AND_CONDITIONS,WebViewActivity.TERMS_AND_CONDITIONS);
+                startActivity(intent);
             }
+
+
             //  binding.drawerLayout.closeDrawer(GravityCompat.START);//to close drawer
             return true;
         });
@@ -158,12 +170,12 @@ public class MLDrawerFragment extends Fragment {
         });
         dialog.show();
     }
-    private void setUserSelectedInactiveRadioButton(View myView){
+    private void setUserSelectedInactiveRadioButton(View myView){//If we change TWO_WEEKS_DEFAULT value than at radio button would not be selected by default than user have to select radio button manually
         RadioButton twoWeek=myView.findViewById(R.id.two_weeks_rb);
         RadioButton threeWeek=myView.findViewById(R.id.three_weeks_rb);
         RadioButton oneMonth=myView.findViewById(R.id.one_month_rb);
         int days=SharedPreferencesHelper.getInt(myView.getContext(),SharedPreferencesHelper.Keys.INACTIVE_DAYS.name(),Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue()));
-        if(days == Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue())){//default value   for making inactive
+        if(days == Integer.parseInt(GlobalConstants.TWO_WEEKS_DEFAULT.getValue())){//default value for making inactive
             twoWeek.setChecked(true);
         }else if(days == Integer.parseInt(GlobalConstants.THREE_WEEKS.getValue())){
             threeWeek.setChecked(true);

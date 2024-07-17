@@ -2,6 +2,9 @@ package amar.das.acbook.globalenum;
 
 
 public enum GlobalConstants {
+     WHATSAPP_CONTACT("7005422684"),
+     EMAIL_CONTACT("labourmistrihelp@gmail.com"),
+     INSTA_CONTACT("labourmistri"),//username
      ACTIVE_PEOPLE("1"),
      INACTIVE_PEOPLE("0"),
      DEPOSIT_CODE("1"),//to indicate amount is deposited

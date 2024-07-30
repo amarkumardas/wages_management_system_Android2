@@ -16,6 +16,17 @@
             android:textStyle="bold"
             android:textSize="15sp"/>
 
+    <TextView
+        android:layout_marginTop="12dp"
+        android:id="@+id/indicator_of_default_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       android:padding="10dp"
+        android:textAlignment="center"
+        android:text="@string/save_time_by_setting_default_rate"
+        android:textColor="@color/black"
+        android:textSize="14dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +34,7 @@
         android:layout_marginTop="15dp"
         android:weightSum="8"
         android:padding="2dp"
-        android:background="#D6DADF"
+        android:background="@color/background"
         android:id="@+id/hardcode_meta_layout">
 
         <TextView
@@ -82,7 +93,7 @@
         android:id="@+id/input_layout_meta"
         android:weightSum="8"
         android:padding="2dp"
-        android:background="#D6DADF">
+        android:background="@color/background">
 
         <EditText
             android:layout_weight="2"

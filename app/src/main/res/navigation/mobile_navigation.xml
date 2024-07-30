@@ -7,18 +7,18 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="amar.das.acbook.ui.help.HelpFragment"
+        android:name="amar.das.labourmistri.ui.help.HelpFragment"
         android:label="@string/title_help"
         tools:layout="@layout/fragment_help_tab"/>
     <fragment
         android:id="@+id/navigation_ml"
-        android:name="amar.das.acbook.ui.ml.MLDrawerFragment"
+        android:name="amar.das.labourmistri.ui.ml.MLDrawerFragment"
         android:label="@string/title_ml"
-        tools:layout="@layout/fragment_ml_tab" /><!--MLFragment is class name-->
+        tools:layout="@layout/fragment_ml_tab" />
 
     <fragment
     android:id="@+id/navigation_history"
-    android:name="amar.das.acbook.ui.history.HistoryFragment"
+    android:name="amar.das.labourmistri.ui.history.HistoryFragment"
     android:label="@string/title_history"
     tools:layout="@layout/fragment_history_tab"/>
 

@@ -3,10 +3,10 @@ plugins {
 }
 
 android {
-    namespace 'amar.das.acbook'//This defines the unique namespace for your application's package. This helps prevent naming conflicts with other applications.
+    namespace 'amar.das.labourmistri'//This defines the unique namespace for your application's package. This helps prevent naming conflicts with other applications.
     compileSdk 34
     defaultConfig {//This section defines various default configurations for your app:
-        applicationId "amar.das.acbook"
+        applicationId "amar.das.labourmistri"
         minSdk 29 //android 10
         targetSdk 34 //android 13 api 33 and android 14 api 34
         versionCode 1
@@ -14,9 +14,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+//    lintOptions {//it is a configuration option that disables Android Lint checks for release builds. It should be used cautiously and only as a last resort after addressing any underlying Lint errors.
+//        checkReleaseBuilds false
+//    }
+
     buildTypes {//This section allows you to configure different build variants of your app, such as a release and debug version. Here, a single release build type is defined:
         release {
-            minifyEnabled false// This disables code shrinking and obfuscation techniques to improve app size and potentially make it harder to reverse engineer. This might be useful for development builds where you want easier debugging.
+            minifyEnabled true// if false than This disables code shrinking and obfuscation techniques to improve app size and potentially make it harder to reverse engineer. This might be useful for development builds where you want easier debugging.
+            shrinkResources true//
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' // This configures ProGuard, a tool that can shrink, obfuscate, and optimize your code during the release build process. The first file (proguard-android-optimize.txt) is a default configuration from Android, and the second file (proguard-rules.pro) allows you to define custom ProGuard rules for your project.
         }
     }

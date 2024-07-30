@@ -11,10 +11,10 @@
         android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="24dp"
+            android:layout_height="25dp"
             android:text="@string/generate_history_pdf"
             android:textAlignment="center"
-            android:paddingTop="2dp"
+            android:paddingTop="3dp"
             android:background="@color/purple_700"
             android:textSize="14dp"
             android:textStyle="bold"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:weightSum="2"
             android:background="#D6DADF">
             <TextView
@@ -34,7 +34,7 @@
                 android:textColor="@color/black"
                 android:layout_marginLeft="8dp"
                 android:text="@string/start_date"
-                android:textSize="10dp"/>
+                android:textSize="12dp"/>
 
             <TextView
                 android:layout_weight="1"
@@ -42,9 +42,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:text="@string/end_date"
-                android:textSize="10dp"
-                android:layout_marginRight="2dp"
-                />
+                android:textSize="12dp"
+                android:layout_marginRight="2dp"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -88,8 +87,8 @@
             android:textColor="@color/black"
             android:layout_marginLeft="8dp"
             android:text="HISTORY PDF DATE RANGE IS MAXIMUM 21 DAYS"
-            android:textSize="10dp"
-            android:layout_marginTop="4dp"
+            android:textSize="12dp"
+            android:layout_marginTop="5dp"
             android:id="@+id/history_keeping_date"/>
 
          <LinearLayout

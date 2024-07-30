@@ -41,7 +41,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="30dp"
-                android:text="@string/to_deposit"
+                android:text="@string/deposit"
                 android:textAlignment="center"
                 android:paddingTop="5dp"
                 android:textColor="@color/white"
@@ -297,7 +297,7 @@
                 android:maxLength="9"
                 android:textColor="@color/black"
                 android:textSize="20dp"
-                android:inputType="numberDecimal"
+                android:inputType="number"
                 android:id="@+id/wages_et"
                 android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
@@ -381,8 +381,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:id="@+id/enter_description_et"
-            android:foreground="?android:attr/selectableItemBackground"
-            />
+            android:foreground="?android:attr/selectableItemBackground"/>
 
         <LinearLayout
             android:layout_width="match_parent"

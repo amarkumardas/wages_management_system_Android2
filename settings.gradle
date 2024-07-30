@@ -19,5 +19,5 @@ dependencyResolutionManagement {
 //            url "https://maven.google.com" }  //Make sure to add this in your project for uCrop - an internal library
 //    }
 //}
-rootProject.name = "AC Book"
+rootProject.name = "Labour Mistri"
 include ':app'//include line tells Gradle which subdirectories are considered subprojects within your larger project. Here, it includes the subproject named :app.

@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="@string/backup_your_data"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_marginStart="50dp"
             android:textSize="20sp"/>
         <TextView
@@ -45,23 +45,39 @@
             android:layout_marginEnd="20dp"
             android:layout_gravity="center_vertical"/>
     </RelativeLayout>
-    <TextView
-        android:id="@+id/restoration_information"
+    <LinearLayout
+        android:background="@drawable/light_gray_color_bg"
+        android:id="@+id/restoration_or_backup_layout"
+        android:padding="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textSize="14sp"
-        android:textColor="@color/purple_700"
-        android:layout_marginTop="10dp"/>
-    <TextView
+        android:orientation="horizontal">
+
+        <TextView
+            android:background="@drawable/baseline_warning_24"
+            android:id="@+id/restoration_or_backup_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
+     <TextView
+        android:layout_gravity="center_vertical"
+        android:paddingStart="5dp"
+        android:id="@+id/restoration_or_backup_date_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:text="@string/backup_your_data_suggestion"
-        android:textColor="@color/black"
         android:textSize="13sp"
-        android:layout_marginTop="10dp"
-        android:textAlignment="center"/>
+         android:text="@string/you_haven_t_backup_your_data_today_we_recommend_you_to_take_database_file_backup_everyday_and_store_to_google_drive_so_that_if_your_phone_is_lost_or_uninstall_the_app_then_you_can_easily_restore_your_data"
+        android:textColor="@color/purple_700"/>
+    </LinearLayout>
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:padding="5dp"-->
+<!--        android:text="@string/backup_your_data_suggestion"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:textSize="13sp"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:textAlignment="center"/>-->
     <TextView
         android:layout_marginStart="10dp"
         android:layout_width="match_parent"
@@ -98,16 +114,18 @@
     <LinearLayout
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
         <Button
-            android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
+
             android:id="@+id/database_backup_file"
             android:layout_width="200dp"
-            android:layout_height="45dp"
+            android:layout_height="40dp"
             android:textSize="13dp"
             android:text="@string/database_file_backup"
+            android:background="@drawable/graycolor_bg"
             android:textAllCaps="false"
             android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
@@ -182,18 +200,20 @@
             android:foreground="?android:attr/selectableItemBackground"/>
     </RadioGroup>
     <LinearLayout
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
         <Button
-            android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
+
             android:id="@+id/single_file_backup_file"
             android:layout_width="200dp"
-            android:layout_height="45dp"
+            android:layout_height="40dp"
             android:textSize="13dp"
             android:text="@string/single_file"
+            android:background="@drawable/graycolor_bg"
             android:textAllCaps="false"
             android:foreground="?android:attr/selectableItemBackground"/>
         <TextView
@@ -271,14 +291,16 @@
     <LinearLayout
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
     <Button
+        android:layout_gravity="center_vertical"
         android:id="@+id/backup_active_skill_mlg"
         android:layout_width="200dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
         android:textSize="13dp"
+        android:background="@drawable/graycolor_bg"
         android:text="@string/active_skill_m_l_g"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
@@ -292,14 +314,16 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
     <Button
+        android:layout_gravity="center_vertical"
         android:id="@+id/backup_inactive_skill_m"
         android:layout_width="200dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
         android:textSize="13dp"
+        android:background="@drawable/graycolor_bg"
         android:text="@string/inactive_skill_m"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>
@@ -313,13 +337,15 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal">
     <Button
+        android:layout_gravity="center_vertical"
         android:id="@+id/backup_inactive_skill_l"
         android:layout_width="200dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
+        android:background="@drawable/graycolor_bg"
         android:text="@string/inactive_skill_l"
         android:textSize="13dp"
         android:textAllCaps="false"
@@ -334,15 +360,17 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="10dp"
         android:orientation="horizontal"
         android:layout_marginBottom="40dp">
     <Button
+        android:layout_gravity="center_vertical"
         android:id="@+id/backup_inactive_skill_g"
         android:layout_width="200dp"
-        android:layout_height="45dp"
+        android:layout_height="40dp"
         android:textSize="13dp"
+        android:background="@drawable/graycolor_bg"
         android:text="@string/inactive_skill_g"
         android:textAllCaps="false"
         android:foreground="?android:attr/selectableItemBackground"/>

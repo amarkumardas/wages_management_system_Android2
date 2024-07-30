@@ -15,7 +15,8 @@
     <string name="single_excel_file_backup">SINGLE EXCEL FILE BACKUP</string>
     <string name="backup_your_data">BACKUP YOUR DATA</string>
     <string name="_3_ways_for_backup">3 WAYS FOR BACKUP</string>
-    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Any Other Cloud Storage To Restore Your Data Easily.</string>
+<!--    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Any Other Cloud Storage To Restore Back Your Data.</string>-->
+    <string name="you_haven_t_backup_your_data_today_we_recommend_you_to_take_database_file_backup_everyday_and_store_to_google_drive_so_that_if_your_phone_is_lost_or_uninstall_the_app_then_you_can_easily_restore_your_data">You Haven\'t Backup Your Data Today. We Recommend You To Take Database File Backup Everyday And Store To Google Drive. So That If Your Phone Is Lost or Uninstall The App Then You Can Easily Restore Your Data.</string>
     <string name="pdf">PDF</string>
     <string name="text">TEXT</string>
     <string name="excel">EXCEL</string>
@@ -25,12 +26,12 @@
     <string name="inactive_skill_g">InActive Skill G</string>
     <string name="select_file_type">Select File Type</string>
     <string name="single_file">Single File</string>
-    <!-- <string name="database_file_backup">Database File Backup</string>-->
+    <!--<string name="database_file_backup">Database File Backup</string>-->
     <string name="newline_newline_this_file_is_useful_to_see_your_data_only">\n\nThis File is Useful To See Your Data Only</string>
     <string name="you_can_backup_your_aa_data_into_smaller_files_separately">You Can Backup Your All Data (Except Image And Audio Data) Into Smaller Files Separately.</string>
     <string name="you_can_backup_your_all_data_in_a_single_file">You Can Backup Your All Data (Except Image And Audio Data) In a Single File.\n\nIt Will Contain\nActive Skill M L G\nInActive Skill M\nInActive Skill L\nInActive Skill G</string>
     <!--<string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nIt Is Useful To Restore All Data When You Reinstall This App.\n\nMake Sure To Backup Your Database File Before Uninstalling Or Deleting This App.</string>-->
-    <string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nThis File is Useful To Restore All Data (Except Image And Audio Data) When You Reinstall This App.</string>
+    <string name="you_can_backup_your_database">You Can Backup Your Database File.\n\nThis File is Useful To Restore All Data (Except Image And Audio Data) When You Lose Your Mobile or Uninstall This App.</string>
     <string name="_3_backup_each_file">3 Backup Each File</string>
     <string name="_2_single_file_backup">2 Single File Backup</string>
     <string name="_1_database_backup">1 DataBase Backup</string>
@@ -53,7 +54,8 @@
     <string name="wrong_input">WRONG INPUT</string>
     <string name="please_select_skill">PLEASE SELECT SKILL</string>
     <string name="please_enter_name">"PLEASE ENTER NAME"</string>
-    <string name="enter_details">ENTER DETAILS</string>
+<!--    <string name="name_details">ENTER DETAILS</string>-->
+    <string name="name_registration">NAME REGISTRATION</string>
     <string name="enter_name_star">NAME *</string>
     <string name="skill_star">SKILL *</string>
     <string name="skill">SKILL</string>
@@ -105,7 +107,7 @@
     <string name="send_summary_to_contact">SEND SUMMARY TO CONTACT</string>
     <string name="total_no_of_deposit_entries">*TOTAL N0. OF DEPOSIT ENTRIES:</string>
     <string name="total_no_of_wages_entries">*TOTAL N0. OF WAGES ENTRIES:</string>
-    <string name="message">MESSAGE</string>
+<!--    <string name="message">MESSAGE</string>-->
     <string name="summary">SUMMARY</string>
     <string name="share_message_using">SHARE MESSAGE USING</string>
     <string name="please_wait_a_few_seconds">PLEASE WAIT A FEW SECONDS</string>
@@ -157,7 +159,7 @@
     <string name="updated_amount_received">UPDATED AMOUNT RECEIVED:</string>
     <string name="calculated">CALCULATED</string>
 
-    <!--dialog INactive setting-->
+    <!--dialog Inactive setting-->
     <string name="choose_when_a_person_should_become_inactive_automatically_if_not_worked_for">Choose When a Person Should Become Inactive Automatically If Not Worked For</string>
     <string name="_2_weeks">2 WEEKS</string>
     <string name="_3_weeks">3 WEEKS</string>
@@ -260,7 +262,8 @@
     <string name="backup_inactive_skill_l">BACKUP INACTIVE SKILL L</string>
     <string name="backup_inactive_skill_g">BACKUP INACTIVE SKILL G</string>
     <string name="backup_manually">Backup Manually</string>
-    <string name="inactive_setting">Inactive Setting</string>
+    <string name="inactive_setting">InActive Setting</string>
+
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_and_condition">Terms And Condition</string>
     <string name="backup_failed">BACKUP FAILED</string>
@@ -318,12 +321,12 @@
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="sharingOptions">
-        <item>TEXT</item>
-        <item>A/C</item>
+        <item>GET</item>
+        <item>A/C NUMBER</item>
         <item>PHONE NUMBER</item>
         <item>RUNNING INVOICE</item>
         <item>IMAGE</item>
-        <item>SHARE ALL</item>
+        <item>ALL DETAILS</item>
     </string-array>
     <!--in spinner don't change value of array it will effect logic of spinner in java file .if you make change here also make change in java code logic -->
     <string-array name="star">
@@ -393,24 +396,28 @@
 
     <string name="try_other_way_to_contact">Try Other Way To Contact</string>
 
-    <string name="mestre">M</string>
-    <string name="m">M (MASON)</string>
-    <string name="laber">L</string>
-    <string name="l">L (LABER)</string>
-    <string name="women_laber">G</string>
-    <string name="g">G (WOMEN)</string>
+<!--    <string name="mestre">M</string>-->
+<!--    <string name="laber">L</string>-->
+<!--    <string name="women_laber">G</string>-->
+
+    <string name="m_mason">M (MASON)</string>
+    <string name="l_labour">L (LABOUR)</string>
+    <string name="g_women">G (WOMEN)</string>
     <string name="inactive">INACTIVE</string>
     <string name="active">ACTIVE</string>
     <string name="deposit_amount">DEPOSIT AMOUNT</string>
     <string name="total_equal">TOTAL =</string>
     <string name="final_calculation">FINAL CALCULATION</string>
     <string name="long_press_to_save_pdf">LONG PRESS TO SAVE PDF</string>
-    <string name="to_deposit">TO DEPOSIT</string>
-
-    <!--   signin activity-->
+    <string name="deposit">DEPOSIT</string>FOR HALF DAY or OVER TIME CLICK DEPOSIT BUTTON
+    <string name="for_halfday_or_overtime_click_deposit_button">FOR HALF DAY or OVER TIME CLICK DEPOSIT BUTTON</string>
+    <!--signin activity-->
     <string name="i_m_a_new_user">I\'M A NEW USER</string>
-    <string name="used_this_app_before">USED THIS APP BEFORE?</string>
-    <string name="yes_then_find_your_google_account_to_restore_backup_data_from_google_drive">Yes, Then Find Your Google Account To Restore Backup Data From Google Drive</string>
+<!--    <string name="used_this_app_before">USED THIS APP BEFORE?</string>-->
+    <string name="have_you_backed_up_data_before">Have You Backed up Data Before?</string>
+    <!--<string name="yes_then_find_your_google_account_to_restore_backup_data_from_google_drive">Yes, Then Find Your Google Account To Restore Backup Data From Google Drive</string>-->
+    <string name="yes_then_find_your_backup_file_to_restore">Yes, Then Find Your Backup File To Restore</string>
+
     <string name="find_backup">FIND BACKUP</string>
     <string name="data_restored_successfully">Data Restored Successfully</string>
     <string name="you_restored_data_successfully">You Restored Data Successfully</string>
@@ -527,5 +534,17 @@
     <string name="by_workin_colon">By Working:</string>
     <string name="at_rate_colon">At Rate:</string>
     <string name="contact_us">Contact Us</string>
-
+    <string name="m">M</string>
+    <string name="l">L</string>
+    <string name="g">G</string>
+    <string name="set_default_rate">SET DEFAULT RATE</string>
+    <string name="default_rate_is_set_automatically_when_you_register_new_person_later_you_can_change">Default Rate Is Set Automatically When You Register New Person. Later You Can Change.</string>
+    <string name="invalid_rate_only_number_allowed">INVALID RATE ONLY NUMBER ALLOWED</string>
+    <string name="default_rate_setting">Default Rate Setting</string>
+    <string name="backup_needed">You Haven\'t Backup Your Data Today. Backup Now To Keep Save Even If Your Phone Is Lost or Uninstall The App.</string>
+    <string name="save_time_by_setting_default_rate">Save Time By Setting Default Rate. No Need To Enter Every Time. Go To Drawer Menu Under \"Default Rate Setting\".</string>
+    <string name="sms_permission_required">SMS PERMISSION REQUIRED</string>
+    <string name="enter_deposit_amount">ENTER DEPOSIT AMOUNT =</string>
+    <string name="half_day_amount_deposit">HALF DAY AMOUNT DEPOSIT</string>
+    <string name="over_time_amount_deposit">OVER TIME AMOUNT DEPOSIT</string>
 </resources>

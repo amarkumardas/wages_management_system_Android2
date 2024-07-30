@@ -6,9 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="15dp"
+    android:background="@color/white"
     tools:context=".activity.SignInActivityLandingPage">
     <LinearLayout
-        android:layout_marginTop="20dp"
+         android:layout_gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -36,10 +37,9 @@
         android:foreground="?android:attr/selectableItemBackground"/>
 
     <TextView
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/used_this_app_before"
+        android:text="@string/have_you_backed_up_data_before"
         android:textSize="24sp"
         android:textColor="@color/black"
         android:layout_marginBottom="16dp"/>
@@ -47,7 +47,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/yes_then_find_your_google_account_to_restore_backup_data_from_google_drive"
+        android:text="@string/yes_then_find_your_backup_file_to_restore"
         android:textSize="16sp"
         android:textAlignment="center"
         android:textColor="@color/black"

@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/last_invoice2"
-                android:textSize="12sp"
+                android:textSize="13sp"
 
                 android:background="@drawable/white_detailsbg"
                 android:foreground="?android:attr/selectableItemBackground"/>
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/last_invoice1"
-                android:textSize="12sp"
+                android:textSize="13sp"
 
                 android:background="@drawable/white_detailsbg"
                 android:layout_marginStart="8dp"
@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/running_invoice"
-                android:textSize="12sp"
+                android:textSize="13sp"
 
                 android:background="@drawable/white_detailsbg"
                 android:foreground="?android:attr/selectableItemBackground"/>
@@ -92,7 +92,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/green_color_bg"
                 android:text="@string/download"
-                android:textSize="12sp"
+                android:textSize="13sp"
 
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
@@ -106,7 +106,7 @@
                 android:background="@drawable/green_color_bg"
                 android:text="@string/share_invoice"
 
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:foreground="?android:attr/selectableItemBackground"/>
         </LinearLayout>
 

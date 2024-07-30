@@ -35,7 +35,7 @@
         android:foreground="?android:attr/selectableItemBackground"
         android:id="@+id/whatsapp_contact"
         android:layout_marginTop="20dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
@@ -48,7 +48,6 @@
             android:layout_marginStart="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:textSize="20sp"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
@@ -56,14 +55,14 @@
         android:foreground="?android:attr/selectableItemBackground"
         android:id="@+id/email_contact"
         android:layout_marginTop="30dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
             android:layout_marginStart="30dp"
             android:layout_width="40dp"
             android:layout_height="35dp"
-            android:background="@drawable/email"/>
+            android:background="@drawable/baseline_email_24"/>
         <TextView
             android:id="@+id/email_tv"
             android:layout_marginStart="10dp"
@@ -77,7 +76,7 @@
         android:foreground="?android:attr/selectableItemBackground"
         android:id="@+id/instagram_contact"
         android:layout_marginTop="30dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
@@ -94,5 +93,4 @@
             android:textSize="20sp"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
-
 </LinearLayout>

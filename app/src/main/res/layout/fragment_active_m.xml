@@ -18,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="18dp"
             android:textAlignment="center"
-            android:textColor="#FF0000"
+            android:textColor="@color/red"
             android:textSize="13sp"
             android:id="@+id/active_m_advance"
             />

@@ -14,7 +14,7 @@
         <!--rounded corner bottom sheet-->
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
     </style>
-<!--&lt;!&ndash;bottom sheet style&ndash;&gt;-->
+    <!--&lt;!&ndash;bottom sheet style&ndash;&gt;-->
 
     <!--bottom sheet style-->
     <style name="AppBottomSheetDialogTheme"

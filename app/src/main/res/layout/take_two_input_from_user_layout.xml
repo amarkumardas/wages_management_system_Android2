@@ -10,13 +10,14 @@
     android:background="#D6DADF"
     android:orientation="vertical">
     <TextView
+        android:id="@+id/dialog_title_top_text"
         android:layout_width="match_parent"
-        android:layout_height="22dp"
-        android:text="@string/message"
+        android:layout_height="25dp"
         android:textAlignment="center"
         android:background="@color/purple_700"
-        android:textSize="14dp"
+        android:textSize="14sp"
         android:textStyle="bold"
+        android:paddingTop="3dp"
         android:textColor="@color/white"/>
 
     <TextView
@@ -64,13 +65,12 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="WRITE REMARKS"
+        android:hint="@string/write_remarks"
         android:layout_marginTop="20dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:id="@+id/remarks_dialog"
-        android:foreground="?android:attr/selectableItemBackground"
-        />
+        android:foreground="?android:attr/selectableItemBackground"/>
 <!--    android:background="@color/white" if we add this line then edit textview will not expand-->
     <LinearLayout
         android:layout_width="match_parent"

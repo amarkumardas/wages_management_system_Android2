@@ -27,17 +27,25 @@
     <item android:id="@+id/backup_manually"
         android:icon="@drawable/baseline_cloud_upload_24"
         android:title="@string/backup_manually"/>
-
+    <!--        android:icon="@drawable/baseline_settings_suggest_24"-->
     <item android:id="@+id/inactive_setting"
-        android:icon="@drawable/baseline_settings_suggest_24"
-        android:title="@string/inactive_setting"/>
+        android:icon="@drawable/ic_sharp_supervisor_account_24"
+         android:title="@string/inactive_setting"/>
+
+    <item android:id="@+id/default_rate_setting"
+        android:icon="@drawable/baseline_rup"
+        android:title="@string/default_rate_setting"/>
+
+    <item android:id="@+id/language"
+        android:icon="@drawable/baseline_translate_24"
+        android:title="Language"/>
 
     <item android:id="@+id/privacy_policy"
-
+        android:icon="@drawable/baseline_lock_24"
         android:title="@string/privacy_policy"/>
 
     <item android:id="@+id/terms_and_condition"
-
+        android:icon="@drawable/baseline_library_books_24"
         android:title="@string/terms_and_condition"/>
 
 </menu>

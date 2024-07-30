@@ -74,7 +74,7 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="mestreButton"
-            android:text="@string/mestre"
+            android:text="@string/m"
             android:textAlignment="center"
             android:textColor="@color/black"
 
@@ -90,7 +90,7 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="maleLaberButton"
-            android:text="@string/laber"
+            android:text="@string/l"
             android:textAlignment="center"
             android:textColor="@color/black"
 
@@ -106,7 +106,7 @@ expanded automatically
             android:layout_weight="1"
             android:background="@drawable/white_detailsbg"
             android:onClick="womenLaberButton"
-            android:text="@string/women_laber"
+            android:text="@string/g"
             android:textAlignment="center"
             android:textColor="@color/black"
 

@@ -9,7 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context=".activity.DepositAmountActivity"
-    android:background="#D6DADF"
+    android:background="@color/background"
     android:orientation="vertical">
 
     <TextView
@@ -148,7 +148,7 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/half_day_amount_deposit"
+            android:text="@string/for_half_day_work"
             android:layout_weight="1"
             android:id="@+id/halfday_amount"
             android:textSize="12sp"
@@ -156,7 +156,7 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/over_time_amount_deposit"
+            android:text="@string/for_over_time_work"
             android:layout_weight="1"
             android:id="@+id/over_time_amount"
             android:textSize="12sp"

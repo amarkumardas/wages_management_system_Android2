@@ -14,6 +14,7 @@ import amar.das.labourmistri.utility.MyUtility;
 public class WebViewActivity extends AppCompatActivity {
     public static final String PRIVACY_POLICY="1";
     public static final String TERMS_AND_CONDITIONS="2";
+    public static final String ABOUT_US="3";
     ActivityWebViewBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +33,15 @@ public class WebViewActivity extends AppCompatActivity {
             }else{
                 Toast.makeText(this, getString(R.string.please_turn_on_your_internet), Toast.LENGTH_LONG).show();
             }
-
-        }else if (getIntent().hasExtra(TERMS_AND_CONDITIONS)) {
+        }else if (getIntent().hasExtra(TERMS_AND_CONDITIONS)){
             if(MyUtility.isInternetConnected(this)){
                binding.webView.loadUrl("https://sites.google.com/view/labourmistritermsandconditions");
+            }else{
+                Toast.makeText(this, getString(R.string.please_turn_on_your_internet), Toast.LENGTH_LONG).show();
+            }
+        }else if (getIntent().hasExtra(ABOUT_US)){
+            if(MyUtility.isInternetConnected(this)){
+                binding.webView.loadUrl("https://sites.google.com/view/labourmistriaboutus");
             }else{
                 Toast.makeText(this, getString(R.string.please_turn_on_your_internet), Toast.LENGTH_LONG).show();
             }

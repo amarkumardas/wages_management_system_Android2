@@ -162,9 +162,9 @@ public class DepositAmountActivity extends AppCompatActivity {
 
         binding.halfdayDepositRadiogp.setOnCheckedChangeListener((radioGroup, checkedIdOfRadioBtn) -> {
             if(checkedIdOfRadioBtn == R.id.halfday_amount){//updating remarks field
-                binding.depositRemarks.setText(binding.depositRemarks.getText().toString().trim()+" "+getString(R.string.half_day_amount_deposit));//whatever text in remarks filed will concat
+                binding.depositRemarks.setText(binding.depositRemarks.getText().toString().trim()+" "+getString(R.string.for_half_day_work));//whatever text in remarks filed will concat
             } else if (checkedIdOfRadioBtn == R.id.over_time_amount) {
-                binding.depositRemarks.setText(binding.depositRemarks.getText().toString().trim()+" "+getString(R.string.over_time_amount_deposit));
+                binding.depositRemarks.setText(binding.depositRemarks.getText().toString().trim()+" "+getString(R.string.for_over_time_work));
             }
         });
 

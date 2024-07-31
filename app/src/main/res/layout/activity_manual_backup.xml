@@ -66,7 +66,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="13sp"
-         android:text="@string/you_haven_t_backup_your_data_today_we_recommend_you_to_take_database_file_backup_everyday_and_store_to_google_drive_so_that_if_your_phone_is_lost_or_uninstall_the_app_then_you_can_easily_restore_your_data"
+        android:text="@string/backup_now_suggestion"
         android:textColor="@color/purple_700"/>
     </LinearLayout>
 <!--    <TextView-->

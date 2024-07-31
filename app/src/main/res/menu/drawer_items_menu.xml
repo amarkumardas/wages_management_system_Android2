@@ -47,5 +47,7 @@
     <item android:id="@+id/terms_and_condition"
         android:icon="@drawable/baseline_library_books_24"
         android:title="@string/terms_and_condition"/>
+    <item android:id="@+id/about_us"
+        android:title="About Us"/>
 
 </menu>

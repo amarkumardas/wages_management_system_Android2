@@ -125,6 +125,10 @@ public class MLDrawerFragment extends Fragment {
                 Intent intent = new Intent(getContext(), WebViewActivity.class);
                 intent.putExtra(WebViewActivity.TERMS_AND_CONDITIONS,WebViewActivity.TERMS_AND_CONDITIONS);
                 startActivity(intent);
+            }else if(item.getItemId() == R.id.about_us){
+                Intent intent = new Intent(getContext(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.ABOUT_US,WebViewActivity.ABOUT_US);
+                startActivity(intent);
             }
 
 

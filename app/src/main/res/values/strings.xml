@@ -16,7 +16,7 @@
     <string name="backup_your_data">BACKUP YOUR DATA</string>
     <string name="_3_ways_for_backup">3 WAYS FOR BACKUP</string>
 <!--    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Any Other Cloud Storage To Restore Back Your Data.</string>-->
-    <string name="you_haven_t_backup_your_data_today_we_recommend_you_to_take_database_file_backup_everyday_and_store_to_google_drive_so_that_if_your_phone_is_lost_or_uninstall_the_app_then_you_can_easily_restore_your_data">You Haven\'t Backup Your Data Today. We Recommend You To Take Database File Backup Everyday And Store To Google Drive. So That If Your Phone Is Lost or Uninstall The App Then You Can Easily Restore Your Data.</string>
+    <string name="backup_now_suggestion">You Haven\'t Backup Your Data Today. We Recommend You To Take Database File Backup Everyday And Store To Google Drive. So That If Your Phone Is Lost or Uninstall The App Then You Can Easily Restore Your Data.</string>
     <string name="pdf">PDF</string>
     <string name="text">TEXT</string>
     <string name="excel">EXCEL</string>
@@ -545,6 +545,6 @@
     <string name="save_time_by_setting_default_rate">Save Time By Setting Default Rate. No Need To Enter Every Time. Go To Drawer Menu Under \"Default Rate Setting\".</string>
     <string name="sms_permission_required">SMS PERMISSION REQUIRED</string>
     <string name="enter_deposit_amount">ENTER DEPOSIT AMOUNT =</string>
-    <string name="half_day_amount_deposit">HALF DAY AMOUNT DEPOSIT</string>
-    <string name="over_time_amount_deposit">OVER TIME AMOUNT DEPOSIT</string>
+    <string name="for_half_day_work">FOR HALF DAY WORK</string>
+    <string name="for_over_time_work">FOR OVER TIME WORK</string>
 </resources>

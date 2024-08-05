@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:padding="10dp"
-        android:text="@string/default_rate_is_set_automatically_when_you_register_new_person_later_you_can_change"
+        android:text="@string/default_rate_is_set_automatically_when_you_register_new_labour_or_mistri_later_you_can_change"
         android:textColor="@color/black"
         android:textSize="15sp"/>
     <TextView

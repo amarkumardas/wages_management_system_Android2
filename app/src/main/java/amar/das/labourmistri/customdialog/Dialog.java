@@ -123,6 +123,10 @@ public class Dialog {
             defaultRateIndicator.setVisibility(View.VISIBLE);
         }
 
+        defaultRateIndicator.setOnClickListener(view -> {
+            dialog.dismiss();//close current dialog
+            openDialogToSetDefaultRate(true);
+        });
 
         Button infoSave=myView.findViewById(R.id.save_btn_rate);
         Button  cancel=myView.findViewById(R.id.cancel_btn_rate);

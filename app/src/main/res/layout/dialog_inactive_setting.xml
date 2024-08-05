@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:padding="5dp"
-        android:text="@string/choose_when_a_person_should_become_inactive_automatically_if_not_worked_for"
+        android:text="@string/choose_when_a_labour_or_mistri_should_become_inactive_automatically_if_not_worked_for"
         android:textColor="@color/black"
         android:textSize="15sp"/>
 

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
+    android:background="@color/white"
     android:orientation="vertical">
 
            <TextView
@@ -17,24 +17,24 @@
             android:textSize="15sp"/>
 
     <TextView
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:id="@+id/indicator_of_default_rate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
        android:padding="10dp"
         android:textAlignment="center"
         android:text="@string/save_time_by_setting_default_rate"
-        android:textColor="@color/black"
-        android:textSize="14dp"/>
+        android:textColor="@color/purple_700"
+        android:textSize="13sp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:weightSum="8"
         android:padding="2dp"
-        android:background="@color/background"
+        android:background="@color/white"
         android:id="@+id/hardcode_meta_layout">
 
         <TextView
@@ -89,18 +89,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="4dp"
         android:id="@+id/input_layout_meta"
         android:weightSum="8"
         android:padding="2dp"
-        android:background="@color/background">
+        android:background="@color/white">
 
         <EditText
             android:layout_weight="2"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_marginTop="1dp"
-            android:background="@drawable/white_detailsbg"
+            android:background="@drawable/light_gray_color_bg"
             android:textStyle="bold"
             android:hint="@string/rate"
             android:layout_marginRight="2dp"
@@ -110,7 +109,7 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:id="@+id/input_p1_et_rate"
             android:foreground="?android:attr/selectableItemBackground">
         </EditText>
@@ -119,7 +118,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_marginTop="1dp"
-            android:background="@drawable/white_detailsbg"
+            android:background="@drawable/light_gray_color_bg"
             android:textStyle="bold"
             android:maxLength="5"
             android:hint="@string/rate"
@@ -129,7 +128,7 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:id="@+id/input_p2_et_rate"
             android:foreground="?android:attr/selectableItemBackground"/>
         <EditText
@@ -137,7 +136,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_marginTop="1dp"
-            android:background="@drawable/white_detailsbg"
+            android:background="@drawable/light_gray_color_bg"
             android:textStyle="bold"
             android:maxLength="5"
             android:hint="@string/rate"
@@ -147,14 +146,14 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:id="@+id/input_p3_et_rate"/>
         <EditText
             android:layout_weight="2"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_marginTop="1dp"
-            android:background="@drawable/white_detailsbg"
+            android:background="@drawable/light_gray_color_bg"
             android:textStyle="bold"
             android:hint="@string/rate"
             android:maxLength="5"
@@ -164,7 +163,7 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20dp"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:id="@+id/input_p4_et_rate"
             android:foreground="?android:attr/selectableItemBackground"
             />

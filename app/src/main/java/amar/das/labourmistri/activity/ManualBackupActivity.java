@@ -251,7 +251,7 @@ public class ManualBackupActivity extends AppCompatActivity {
             if(!BackupDataUtility.didUserBackupDataToday(this,true)){//high priority
 //                binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
                 binding.restorationOrBackupIcon.setBackgroundResource(R.drawable.baseline_warning_24);
-                binding.restorationOrBackupDateTv.setText(getString(R.string.backup_needed));
+                binding.restorationOrBackupDateTv.setText(getString(R.string.backup_now_suggestion));
             }else{
                 if(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null) != null){
 //                    binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
@@ -291,7 +291,7 @@ public class ManualBackupActivity extends AppCompatActivity {
 
             if((dataBaseFile=db.databaseBackup(MyUtility.getDateTime12hrForBackupFile()+GlobalConstants.DATABASE_BACKUP_FILE_NAME.getValue())) !=null){
                 if(forShareTrueForDownloadFalse){
-                    if (MyUtility.shareFileToAnyApp(dataBaseFile, "application/x-sqlite3",getString(R.string.database_file_backup), this)) {//open intent to share
+                    if (MyUtility.shareFileToAnyApp(dataBaseFile, "application/x-sqlite3",getString(R.string.database_file)+" "+getString(R.string.backup), this)) {//open intent to share
                         updateUserLastBackForDatabaseBackup();
                     }else {
                         this.runOnUiThread(() -> Toast.makeText(this, "CANNOT SHARE FILE", Toast.LENGTH_LONG).show());

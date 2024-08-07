@@ -19,7 +19,9 @@
     <!--    <string name="backup_needed">You Haven\'t Backup Your Data Today. Backup Now To Keep Save Even If Your Phone Is Lost or Uninstall The App.</string>-->
     <!--    <string name="backup_your_data_suggestion">If You Lose Your Mobile or Uninstall This App, Then Your Data Might Be Lost. So We Recommend You To Take Database File Backup Regularly and Store Your Backup File To Google Drive or Any Other Cloud Storage To Restore Back Your Data.</string>-->
 <!--    <string name="backup_now_suggestion">You Haven\'t Backup Your Data Today. We Recommend You To Take Database File Backup Everyday And Store To Google Drive. So That If Your Phone Is Lost or Uninstall The App Then You Can Easily Restore Your Data.</string>-->
-    <string name="backup_now_suggestion">You Haven\'t Backed Up Your Data Today. We Recommend Backing Up Your Database File And Store It On Google Drive Every Day. So That, If Your Phone Is Lost Or App Is Uninstalled, You Can Easily Restore Your Data.</string>
+
+    <string name="you_havent_backedup_your_data_today">You Haven\'t Backed Up Your Data Today.</string>
+    <string name="backup_now_suggestion">We Recommend Backing Up Your Database File And Store It On Google Drive Every Day. So That, If Your Phone Is Lost Or App Is Uninstalled, You Can Easily Restore Your Data.</string>
     <string name="pdf">PDF</string>
     <string name="text">TEXT</string>
     <string name="excel">EXCEL</string>

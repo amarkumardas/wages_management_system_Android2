@@ -4,18 +4,19 @@
     <queries> <!-- Specific apps you interact with -->
         <package android:name="com.whatsapp" /> <!-- we have to mention here otherwise it will not show package name from android 11 downwards:this is use to share on whatsapp -->
     </queries> <!-- <uses-permission android:name="android.permission.USE_CREDENTIALS"/> -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- **********88Removed android.permission.ACCESS_NETWORK_STATE: Starting with Android 6.0 (API level 23), your app no longer needs to declare ACCESS_NETWORK_STATE permission to use the Connectivity Manager. The system automatically grants this permission at runtime.TO USE connectivity manager this permission required -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- to record audio -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> <!-- **********88Removed android.permission.ACCESS_NETWORK_STATE: Starting with Android 6.0 (API level 23), your app no longer needs to declare ACCESS_NETWORK_STATE permission to use the Connectivity Manager. The system automatically grants this permission at runtime.TO USE connectivity manager this permission required -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/> <!-- to record audio -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" /> <!-- true means camera permission required and false means this permission is optional -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-feature
         android:name="android.hardware.telephony"
-        android:required="true" /> <!-- true means camera permission required and false means this permission is optional -->
-    <uses-permission android:name="android.permission.SEND_SMS" /> <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> this permission not required when minsdk is 29 and above -->
+        android:required="false" /> <!-- true means camera permission required and false means this permission is optional -->
+    <uses-permission android:name="android.permission.SEND_SMS"/> <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> this permission not required when minsdk is 29 and above -->
+    <!--We also have calling feature but we don't require permission because We are using Intent.ACTION_DIAL to open the phone app for dialing instead of directly making calls. This approach doesn't require the CALL_PHONE permission -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" /> <!-- .if sdkVersion is 32 or below than grant this permission permission to read external storage or else this permission ignore.for accessing camera image from gallery this permission required from below sdkVersion 32 -->
@@ -23,7 +24,7 @@
     <!-- <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" android:minSdkVersion="33"/>&lt;!&ndash;if sdkVersion is 33 or above than this permission  required -->
     <uses-permission
         android:name="android.permission.READ_MEDIA_IMAGES"
-        android:minSdkVersion="33" />
+        android:minSdkVersion="33"/>
 
     <application
         android:allowBackup="true"

@@ -7,8 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/yellow_for_input">
-<!--android:id="@+id/insert_detailsof_l_m_g"> error scroll view cant host id-->
-<LinearLayout
+ <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -28,7 +27,6 @@
             android:layout_marginTop="5dp"
             android:layout_gravity="center_vertical"
             android:background="@drawable/baseline_arrow_goback"
-            android:layout_marginLeft="5dp"
             android:onClick="go_back_btn"
             android:foreground="?android:attr/selectableItemBackground"/>
 
@@ -40,7 +38,7 @@
             android:layout_gravity="center_vertical"
             android:textSize="17sp"
             android:textStyle="bold"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             />
     </LinearLayout>
     <LinearLayout
@@ -76,7 +74,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/enter_name_star"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:layout_marginLeft="20dp"
         android:textColor="@color/black"
         android:layout_marginTop="1dp"
@@ -109,7 +107,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/enter_phone_number"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="4dp"
             android:textColor="@color/black"
@@ -119,7 +117,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/phone_number_2"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="20dp"
             android:textColor="@color/black"
@@ -185,7 +183,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/location"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="4dp"
             android:textColor="@color/black"
@@ -195,7 +193,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/religion"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="20dp"
             android:textColor="@color/black"
@@ -225,8 +223,7 @@
             android:id="@+id/location_autoComplete_tv"
             android:completionThreshold="1"
             android:dropDownWidth="300dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            />
+            android:foreground="?android:attr/selectableItemBackground"/>
 
         <AutoCompleteTextView
             android:layout_weight="1"
@@ -252,7 +249,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/enter_aadhaar_card_number"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:layout_marginLeft="20dp"
         android:textColor="@color/black"
         android:layout_marginTop="15dp" />
@@ -277,7 +274,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/bank_name"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:layout_marginLeft="20dp"
         android:textColor="@color/black"
         android:layout_marginTop="15dp" />
@@ -312,7 +309,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/ac_number"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="4dp"
             android:textColor="@color/black"
@@ -322,7 +319,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/ifsc_code"
-            android:textSize="12dp"
+            android:textSize="12sp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="20dp"
             android:textColor="@color/black"
@@ -380,7 +377,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/account_holder_name"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:layout_marginLeft="20dp"
         android:textColor="@color/black"
         android:layout_marginTop="15dp" />
@@ -405,7 +402,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/skill_star"
-        android:textSize="12dp"
+        android:textSize="12sp"
         android:layout_marginLeft="20dp"
         android:textColor="@color/black"
         android:layout_marginTop="15dp" />

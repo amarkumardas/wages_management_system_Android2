@@ -8,9 +8,9 @@ android {
     defaultConfig {//This section defines various default configurations for your app:
         applicationId "amar.das.labourmistri"
         minSdk 29 //android 10
-        targetSdk 34 //android 13 api 33 and android 14 api 34
-        versionCode 1
-        versionName "1.0"
+        targetSdk 34 //android 13 api 33 and android 14 api 34.
+        versionCode 3//whenever version name is changed version code is increased by 1.to create new build file we have to change both version code and version name
+        versionName "1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -23,6 +23,7 @@ android {
             minifyEnabled true// if false than This disables code shrinking and obfuscation techniques to improve app size and potentially make it harder to reverse engineer. This might be useful for development builds where you want easier debugging.
             shrinkResources true//
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' // This configures ProGuard, a tool that can shrink, obfuscate, and optimize your code during the release build process. The first file (proguard-android-optimize.txt) is a default configuration from Android, and the second file (proguard-rules.pro) allows you to define custom ProGuard rules for your project.
+            ndk.debugSymbolLevel = "FULL"
         }
     }
 
@@ -33,6 +34,7 @@ android {
     buildFeatures {// This block enables specific features for your project:
         viewBinding true //This enables View Binding, a feature that simplifies the process of finding views in your layouts.
     }
+    ndkVersion '27.0.12077973'
 }
 
 dependencies {//this block defines the external libraries your project relies on

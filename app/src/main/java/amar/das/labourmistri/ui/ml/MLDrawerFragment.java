@@ -173,12 +173,12 @@ public class MLDrawerFragment extends Fragment {
     }
 
     private void setBackupIconBasedOnUserBackUpDataOrNot() {//if user backup their data today then set icon cloud as green else set warring sign
-        if(BackupDataUtility.didUserBackupDataToday(getContext(),false)){//once user backup its data than this line will never execute
+        if(BackupDataUtility.didUserBackupDataTodayOrNeverBackedUp(getContext(),false)){//once user backup its data than this line will never execute
             binding.cloudBackupBtn.setBackgroundResource(R.drawable.baseline_cloud_upload_24);
             return;
         }
 
-        if(BackupDataUtility.didUserBackupDataToday(getContext(),true)){
+        if(BackupDataUtility.didUserBackupDataTodayOrNeverBackedUp(getContext(),true)){
             binding.cloudBackupBtn.setBackgroundResource(R.drawable.baseline_cloud_upload_24);
         }else{
             binding.cloudBackupBtn.setBackgroundResource(R.drawable.baseline_warning_24);

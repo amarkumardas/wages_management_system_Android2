@@ -107,10 +107,10 @@ public class SignInActivityLandingPage extends AppCompatActivity {
                 if(checkAllDataRestoredSuccessfully()){
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
                     SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);//user will move to navigation activity
-                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                     finishAndGoToNavigationActivity();
                 }else{
-                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                    SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.your_data_was_not_fully_restored), Toast.LENGTH_LONG).show());
                     this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
                 }
@@ -122,10 +122,10 @@ public class SignInActivityLandingPage extends AppCompatActivity {
                     if(checkAllDataRestoredSuccessfully()){
                         this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.data_restored_successfully), Toast.LENGTH_LONG).show());
                         SharedPreferencesHelper.setBoolean(this, SharedPreferencesHelper.Keys.SIGNIN_SKIP_TRUE.name(), true);//user will move to navigation activity
-                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),getString(R.string.you_restored_data_successfully)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                         finishAndGoToNavigationActivity();
                     }else{
-                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),"*"+getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
+                        SharedPreferencesHelper.setString(this, SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),getString(R.string.your_data_was_not_fully_restored)+" on "+MyUtility.get12hrCurrentTimeAndDateForLastBackup());
                         this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.your_data_was_not_fully_restored), Toast.LENGTH_LONG).show());
                         this.runOnUiThread(() -> Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_LONG).show());
                     }
@@ -143,7 +143,7 @@ public class SignInActivityLandingPage extends AppCompatActivity {
         Database db=Database.getInstance(getBaseContext());
        String keywordValue=db.getValueFromKeyValueTable(KeyValueTable.TOTAL_CHECK_ROWS.name());//this keyword TOTAL_CHECK_ROWS contain total rows after subtracting
         if(keywordValue==null) return false;//means there was some error and this keyword TOTAL_CHECK_ROWS cannot contain null it will contain minus value or 0 or positive number
-       String countOfTotalRowsFrom4TableAfterSubtraction=db.getTotalNumberOf4TablesRowsAfterSubtraction();//counting total no. of rows from 4 tables
+       String countOfTotalRowsFrom4TableAfterSubtraction=db.getTotalNumberOf4TablesRowsAfterSubtraction();//counting total no. of rows from 4 tables which recently restored
        return  keywordValue.equals(countOfTotalRowsFrom4TableAfterSubtraction);//if true that means all data is fully backed up
     }
 

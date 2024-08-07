@@ -203,7 +203,7 @@ public class BackupDataUtility {
 
         return period.toString().isEmpty() ? "0 "+context.getString(R.string.day) : period.toString(); // Handle 0 days case
     }
-    public static boolean didUserBackupDataToday(Context context,boolean forCheckingUserBackupDataTodayTrueAndForUserNeverBackupItsDataFalse) {// Check if any backup date is today's date
+    public static boolean didUserBackupDataTodayOrNeverBackedUp(Context context, boolean forCheckingUserBackupDataTodayTrueAndForUserNeverBackupItsDataFalse) {// Check if any backup date is today's date
         String dateDatabaseBackup= SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.DATE_DATABASE_BACKUP.name(),null);//these are the variables which get updated when user backup data
         String dateBackupEachFile=SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.DATE_BACKUP_EACH_FILE.name(),null);
         String dateSingleBackupFile=SharedPreferencesHelper.getString(context,SharedPreferencesHelper.Keys.DATE_SINGLE_BACKUP_FILE.name(),null);

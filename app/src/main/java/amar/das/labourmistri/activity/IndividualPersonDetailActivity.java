@@ -1306,7 +1306,7 @@ public class IndividualPersonDetailActivity extends AppCompatActivity {
                 }
 
 //                byte[] image = cursor.getBlob(4);//getting image from db as blob
-//                if (image != null) {
+//                if (image != null){
 //                    //getting bytearray image from DB and converting  to bitmap to set in imageview
 //                    Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
 //                    binding.imageImg.setImageBitmap(bitmap);

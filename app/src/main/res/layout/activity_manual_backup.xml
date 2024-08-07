@@ -48,7 +48,10 @@
     <LinearLayout
         android:background="@drawable/light_gray_color_bg"
         android:id="@+id/restoration_or_backup_layout"
-        android:padding="10dp"
+        android:padding="8dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -58,17 +61,32 @@
             android:id="@+id/restoration_or_backup_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
-     <TextView
+            android:layout_marginEnd="2dp"
+            android:layout_gravity="center_vertical"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:id="@+id/didnt_backedup_data_today_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:text="@string/you_havent_backedup_your_data_today"
+                android:textColor="@color/black"/>
+       <TextView
         android:layout_gravity="center_vertical"
         android:layout_marginStart="5dp"
-         android:layout_marginEnd="5dp"
         android:id="@+id/restoration_or_backup_date_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="13sp"
         android:text="@string/backup_now_suggestion"
         android:textColor="@color/purple_700"/>
+        </LinearLayout>
     </LinearLayout>
 <!--    <TextView-->
 <!--        android:layout_width="match_parent"-->

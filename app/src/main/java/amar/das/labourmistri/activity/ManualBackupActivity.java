@@ -236,11 +236,12 @@ public class ManualBackupActivity extends AppCompatActivity {
     }
     private void showBackupOrRestorationInfoToActivity(){//this will show user haven't backup its data today info if user has not
         binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
-        if(BackupDataUtility.didUserBackupDataToday(this,false)){//once user backup its data than this line will never execute.if three variable is null means user has initially download app so check for user has restored its data or not.if restored then show information else invisible and return
+        if(BackupDataUtility.didUserBackupDataTodayOrNeverBackedUp(this,false)){//once user backup its data than this line will never execute.if three variable is null means user has initially download app so check for user has restored its data or not.if restored then show information else invisible and return
 
             if(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null) != null){
 //                binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
                 binding.restorationOrBackupIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
+                binding.didntBackedupDataTodayTv.setVisibility(View.GONE);//dont need this text
                 binding.restorationOrBackupDateTv.setText(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null));
             }else{
                 binding.restorationOrBackupLayout.setVisibility(View.GONE);
@@ -248,14 +249,16 @@ public class ManualBackupActivity extends AppCompatActivity {
 
         }else{//if user has restored data and also user haven't backup its data today then backup needed information should be shown not restored information
 
-            if(!BackupDataUtility.didUserBackupDataToday(this,true)){//high priority
+            if(!BackupDataUtility.didUserBackupDataTodayOrNeverBackedUp(this,true)){//high priority
 //                binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
                 binding.restorationOrBackupIcon.setBackgroundResource(R.drawable.baseline_warning_24);
+                binding.didntBackedupDataTodayTv.setVisibility(View.VISIBLE);//need this text
                 binding.restorationOrBackupDateTv.setText(getString(R.string.backup_now_suggestion));
             }else{
                 if(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null) != null){
 //                    binding.restorationOrBackupLayout.setVisibility(View.VISIBLE);
                     binding.restorationOrBackupIcon.setBackgroundResource(R.drawable.ic_green_sharp_done_sharp_tick_20);
+                    binding.didntBackedupDataTodayTv.setVisibility(View.GONE);//dont need this text
                     binding.restorationOrBackupDateTv.setText(SharedPreferencesHelper.getString(this,SharedPreferencesHelper.Keys.DATA_RESTORE_INFO.name(),null));
                 }else{
                     binding.restorationOrBackupLayout.setVisibility(View.GONE);
